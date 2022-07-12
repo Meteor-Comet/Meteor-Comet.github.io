@@ -1,4 +1,4 @@
-## Welcome to GitHub Pages/Comet Pages
+## Welcome to Comet Pages
 测试阶段
 You can use the [editor on GitHub](https://github.com/Meteor-Comet/Meteor-Comet.github.io/edit/main/README.md) to maintain and preview the content for your website in Markdown files.
 

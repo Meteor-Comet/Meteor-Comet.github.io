@@ -14,9 +14,9 @@ future: true
 # SNS settings
 RSS: false
 # weibo_username: 
-zhihu_username: Uranus
+zhihu_username: assassin-64-87
 github_username: Meteor-Comet
-twitter_username: Comet
+twitter_username: z1nrLvL8PTosZYH
 #facebook_username:  huxpro
 #linkedin_username:  firstname-lastname-idxxxx
 
@@ -59,7 +59,7 @@ kramdown:
       start_line: 1
 
 # Disqus settings
-disqus_username: hux
+disqus_username: cometmeteor
 
 # Netease settings
 netease_comment: false

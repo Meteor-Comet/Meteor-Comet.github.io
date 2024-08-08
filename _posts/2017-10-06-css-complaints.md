@@ -13,7 +13,7 @@ tags:
   - 知乎
 ---
 
-> 这篇文章转载自[我在知乎上的回答](https://www.zhihu.com/question/66167982/answer/240434582)
+> 这篇文章转载自[Hux在知乎上的回答](https://www.zhihu.com/question/66167982/answer/240434582)
 
 对我来说，CSS 难学以及烦人是因为它**「出乎我意料之外的复杂」**且让我觉得**「定位矛盾」**。
 

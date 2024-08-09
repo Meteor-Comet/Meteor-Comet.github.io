@@ -24,7 +24,7 @@ tags:
 虽然我始终用手机拍摄，显得有些不专业，但当图片呈现出来后，设备的差异似乎并不那么重要了。
 拍摄过程其实很简单，我使用了延时拍摄技术，让设备在一段时间内连续拍摄，将大量图片合成一小段视频。至于星轨图的处理，我借助了PS中的堆栈法，参考了<a href="http://wjd.name/starstail/" target="_blank">小白星轨后期教程：叠加堆栈法</a>
 
-幸运的是，尽管拍摄时并未特别注意北极星的位置，仅凭感觉选了一个开阔的地方开始拍摄，最终的效果却意外地精准而壮观。
+幸运的是，尽管拍摄时并未特别注意北极星的位置，仅凭感觉选了一个开阔的地方开始拍摄，最终的效果却意外的差强人意。
 ![img2](/img/in-post/post_starry_night/post_starry_night3.jpg)
 <video src="/img/in-post/post_starry_night/post_starry_night.mp4" width="700" controls>
 </video>

@@ -7,8 +7,7 @@ author:     "Comet"
 header-img: "img/in-post/post_starry_night/post_starry_night1.jpg"
 tags:
     - 星空
-    - 记录
-    - 教程
+    - 生活记录
 ---
 
 

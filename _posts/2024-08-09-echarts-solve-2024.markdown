@@ -1,14 +1,15 @@
 ---
 layout:     post
 title:      "pyecharts图形在jupyter中不显示的解决办法"
-subtitle:   "pyecharts"
 date:       2024-8-9 18:30:00
 author:     "Comet"
+header-style: text
 tags:
-    - 笔记
-    - 问题记录
+    - python
     - pyecharts
+    - 问题记录
 ---
+
 
 问题环境：在学习pycharts库时，遇到在Jupyter Lab中运行bar.render_notebook()没有画图
 ```python

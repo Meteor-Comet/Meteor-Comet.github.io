@@ -27,8 +27,7 @@ tags:
 
 幸运的是，尽管拍摄时并未特别注意北极星的位置，仅凭感觉选了一个开阔的地方开始拍摄，最终的效果却意外地精准而壮观。
 ![img2](/img/in-post/post_starry_night/post_starry_night3.jpg)
-<video src="img/in-post/post_starry_night/post_starry_night.mp4" width="600" controls>
-</video>
+<a href="/img/in-post/post_starry_night/post_starry_night.mp4" target="_blank">拍摄三十分钟的延时摄影，最后是大概六秒</a>
 
 ## Future
 未来或许没有太多时间去继续拍摄夜景，毕竟这只是一个兴趣爱好，而光污染5级的环境下也确实难以捕捉到太多理想的画面。然而，等到毕业后，如果时间允许，我一定会踏上追逐星空的旅途，专门去记录那片无垠的苍穹，捕捉属于我的夜空之梦。

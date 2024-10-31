@@ -10,7 +10,7 @@ tags:
     - 华为
 ---
 
-**由于鸿蒙生态还处于初期，官方提供的hdc命令还在不断修改中，这篇文档更新不及时，请以[github](https://github.com/codematrixer/awesome-hdc)\和[官方文档](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides-V3/ide-command-line-hdc-0000001237908229-V3#section1756645732914/)为准**
+**由于鸿蒙生态还处于初期，官方提供的hdc命令还在不断修改中，这篇文档更新不及时，请以[github](https://github.com/codematrixer/awesome-hdc)和[官方文档](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides-V3/ide-command-line-hdc-0000001237908229-V3#section1756645732914/)为准**
 
 HDC（OpenHarmony Device Connector） 是为鸿蒙开发/测试人员提供的用于设备调试的命令行工具，类似Android端的ADB工具。
 

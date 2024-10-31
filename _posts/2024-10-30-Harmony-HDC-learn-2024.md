@@ -18,8 +18,7 @@ HDC主要有三部分组成
 
 1. `hdc client`：运行于电脑上的客户端，用户可以在电脑命令终端（windows cmd/linux shell）下请求执行相应的hdc命令。
 2. `hdc server`：作为后台进程也运行于电脑上，server管理client和设备端daemon之间通信包括连接的复用、数据通信包的收发，以及个别本地命令的直接处理。
-3. `hdc daemon`：daemon部署于OpenHarmony设备端作为守护进程按需运行，负责处理来自client端请求。\
-   ![在这里插入图片描述](https://i-blog.csdnimg.cn/blog_migrate/0e73c7746fce80c4b615f9b8a5d3ad42.png#pic_center)
+3. `hdc daemon`：daemon部署于OpenHarmony设备端作为守护进程按需运行，负责处理来自client端请求。
 
 ## HDC安装
 

@@ -1,9 +1,13 @@
 ---
-title: "新电脑必做事项清单"
-date: 2023-12-23
-categories: [生活, 效率]
-tags: [新电脑, 系统设置, 提效]
-author: Comet
+layout:     post
+title:      "电脑必做事项清单"
+subtitle:   "电脑系统设置与效率提升全攻略"
+date:       2023-12-23
+author:     "Comet"
+tags:
+    - 新电脑
+    - 系统设置
+    - 提效
 ---
 
 ## 新电脑必做事项

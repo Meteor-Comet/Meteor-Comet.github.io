@@ -1,9 +1,13 @@
 ---
-title: "大数据初探"
-date: 2025-01-08
-categories: [技术, 大数据]
-tags: [大数据, 数据分析, 技术趋势]
-author: Comet
+layout:     post
+title:      "大数据初探"
+subtitle:   "大数据的基本概念、应用场景与发展趋势"
+date:       2025-01-08 17:00
+author:     "Comet"
+tags:
+    - 大数据
+    - 数据分析
+    - 技术趋势
 ---
 
 ## 大数据简介

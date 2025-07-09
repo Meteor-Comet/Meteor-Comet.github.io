@@ -1,6 +1,6 @@
 ---
-title: "大数据学习日志"
-date: 2025-07-08
+title: "大数据初探"
+date: 2025-01-08
 categories: [技术, 大数据]
 tags: [大数据, 数据分析, 技术趋势]
 author: Comet

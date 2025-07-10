@@ -117,4 +117,362 @@ tags:
   用于switch语句的默认分支，或接口的默认方法实现。
 
 
-后续将持续更新每一阶段的学习内容与心得体会。 
+## Java中的字面量分类
+
+Java中的字面量（Literal）是指在代码中直接表示固定值的数据。常见字面量分类如下：
+
+- **整数型字面量**
+  - 十进制：如 123
+  - 八进制：以0开头，如 0123
+  - 十六进制：以0x或0X开头，如 0x7B
+  - 二进制：以0b或0B开头，如 0b1010
+
+- **浮点型字面量**
+  - 如 3.14、2.0e-3、1.5F、6.022E23D
+
+- **字符型字面量**
+  - 单引号括起来的单个字符，如 'A'、'中'、'\n'
+
+- **字符串字面量**
+  - 双引号括起来的字符序列，如 "Hello, Java!"
+
+- **布尔型字面量**
+  - 只有 true 和 false
+
+- **null字面量**
+  - 表示空引用，如 null
+
+字面量是Java程序中最基本的数据表示方式，直接参与表达式和赋值。 
+
+## Java变量定义的格式
+
+Java中变量的定义格式如下：
+
+```
+数据类型 变量名 = 初始值;
+```
+
+- **数据类型**：如 int、double、char、String、boolean 等。
+- **变量名**：自定义的标识符，需遵循命名规范。
+- **初始值**：可选，变量声明时赋的初始值。
+
+### 示例
+```java
+int age = 25;
+double price = 19.99;
+char gender = 'M';
+String name = "Tom";
+boolean isActive = true;
+```
+
+也可以先声明后赋值：
+```java
+int score;
+score = 100;
+```
+
+变量名建议使用有意义的英文单词，遵循小驼峰命名法（如 studentName）。 
+
+## Java中的键盘录入
+
+在Java中，常用`Scanner`类实现从键盘读取用户输入。`Scanner`类位于`java.util`包中。
+
+### 基本用法
+1. 导入包：
+```java
+import java.util.Scanner;
+```
+2. 创建Scanner对象：
+```java
+Scanner sc = new Scanner(System.in);
+```
+3. 读取输入：
+- 读取字符串：`String str = sc.nextLine();`
+- 读取整数：`int num = sc.nextInt();`
+- 读取浮点数：`double d = sc.nextDouble();`
+
+### 示例代码
+```java
+import java.util.Scanner;
+
+public class InputDemo {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("请输入姓名：");
+        String name = sc.nextLine();
+        System.out.print("请输入年龄：");
+        int age = sc.nextInt();
+        System.out.println("姓名：" + name + ", 年龄：" + age);
+    }
+}
+```
+
+> 提示：使用完Scanner后建议调用`sc.close();`关闭资源。 
+
+## IDEA中Java项目的结构介绍
+
+在IntelliJ IDEA中创建的标准Java项目通常包含如下目录结构：
+
+```
+project-name/
+├── .idea/                # IDEA项目配置文件夹
+├── src/                  # 源代码目录
+│   └── main/             # 主代码目录（Maven/Gradle项目）
+│       ├── java/         # Java源代码
+│       └── resources/    # 资源文件（配置、图片等）
+│   └── test/             # 测试代码目录
+│       ├── java/         # 测试用Java代码
+│       └── resources/    # 测试资源文件
+├── out/                  # 编译输出目录（普通项目）
+├── target/               # 构建输出目录（Maven项目）
+├── build/                # 构建输出目录（Gradle项目）
+├── pom.xml               # Maven项目配置文件
+├── build.gradle          # Gradle项目配置文件
+└── ...                   # 其他文件
+```
+
+### 主要部分说明
+- **src/main/java/**：存放项目的主Java源代码。
+- **src/main/resources/**：存放配置文件、图片等资源。
+- **src/test/java/**：存放测试用的Java代码。
+- **src/test/resources/**：存放测试相关的资源文件。
+- **pom.xml**：Maven项目的依赖和构建配置文件。
+- **build.gradle**：Gradle项目的依赖和构建配置文件。
+- **out/**、**target/**、**build/**：编译或打包后生成的输出目录。
+
+> 普通Java项目只有src和out，Maven/Gradle项目结构更规范，推荐使用。 
+
+### 项目、模块、类的概念与关系
+
+- **项目（Project）**
+  - 在IDEA中，项目是开发的整体工程，包含所有代码、资源、配置和依赖管理。一个项目可以包含一个或多个模块。
+
+- **模块（Module）**
+  - 模块是项目中的功能单元，可以独立编译、运行和测试。每个模块有自己的源码、资源和依赖配置。大型项目通常会按功能或层次拆分为多个模块（如web、service、dao等）。
+
+- **类（Class）**
+  - 类是Java程序的基本代码结构，用于描述对象的属性和行为。类文件（.java）位于模块的src目录下，是实现具体功能的最小单元。
+
+#### 三者关系
+- 一个**项目**可以包含多个**模块**。
+- 一个**模块**可以包含多个**类**。
+- **类**是代码实现的最小单元，**模块**是功能或层次的划分，**项目**是整体工程的集合。
+
+> 简单理解：项目 > 模块 > 类，三者层层包含，便于大型系统的分工、协作和维护。 
+
+## Java运算符及其运算规则
+
+### 1. 算术运算符
+| 运算符 | 说明         | 示例         | 结果说明           |
+|--------|--------------|--------------|--------------------|
+| +      | 加法         | a + b        | 两数相加           |
+| -      | 减法         | a - b        | 两数相减           |
+| *      | 乘法         | a * b        | 两数相乘           |
+| /      | 除法         | a / b        | 两数相除（整除/浮点）|
+| %      | 取余         | a % b        | 取模，余数         |
+| ++     | 自增         | a++ / ++a    | 变量加1（前/后缀） |
+| --     | 自减         | a-- / --a    | 变量减1（前/后缀） |
+
+**示例：**
+```java
+int a = 10, b = 3;
+System.out.println(a + b); // 13
+System.out.println(a - b); // 7
+System.out.println(a * b); // 30
+System.out.println(a / b); // 3
+System.out.println(a % b); // 1
+System.out.println(++a);   // 11
+System.out.println(b--);   // 3（b变为2）
+```
+
+### 2. 赋值运算符
+| 运算符 | 说明         | 示例         |
+|--------|--------------|--------------|
+| =      | 赋值         | a = b        |
+| +=     | 加后赋值     | a += b 等价于 a = a + b |
+| -=     | 减后赋值     | a -= b       |
+| *=     | 乘后赋值     | a *= b       |
+| /=     | 除后赋值     | a /= b       |
+| %=     | 取余后赋值   | a %= b       |
+
+**示例：**
+```java
+int a = 5;
+a += 3; // a = 8
+a -= 2; // a = 6
+a *= 4; // a = 24
+a /= 6; // a = 4
+a %= 3; // a = 1
+```
+
+### 3. 比较（关系）运算符
+| 运算符 | 说明         | 示例         | 结果类型 |
+|--------|--------------|--------------|----------|
+| ==     | 等于         | a == b       | boolean  |
+| !=     | 不等于       | a != b       | boolean  |
+| >      | 大于         | a > b        | boolean  |
+| <      | 小于         | a < b        | boolean  |
+| >=     | 大于等于     | a >= b       | boolean  |
+| <=     | 小于等于     | a <= b       | boolean  |
+
+**示例：**
+```java
+int a = 5, b = 8;
+System.out.println(a == b); // false
+System.out.println(a != b); // true
+System.out.println(a > b);  // false
+System.out.println(a < b);  // true
+System.out.println(a >= 5); // true
+System.out.println(b <= 8); // true
+```
+
+### 4. 逻辑运算符
+| 运算符 | 说明         | 示例         | 结果类型 |
+|--------|--------------|--------------|----------|
+| &&     | 逻辑与       | a && b       | boolean  |
+| ||     | 逻辑或       | a || b       | boolean  |
+| !      | 逻辑非       | !a           | boolean  |
+
+**示例：**
+```java
+boolean x = true, y = false;
+System.out.println(x && y); // false
+System.out.println(x || y); // true
+System.out.println(!x);     // false
+```
+
+### 5. 位运算符
+| 运算符 | 说明         | 示例         |
+|--------|--------------|--------------|
+| &      | 按位与       | a & b        |
+| |      | 按位或       | a | b        |
+| ^      | 按位异或     | a ^ b        |
+| ~      | 按位取反     | ~a           |
+| <<     | 左移         | a << n       |
+| >>     | 右移         | a >> n       |
+| >>>    | 无符号右移   | a >>> n      |
+
+**示例：**
+```java
+int a = 6, b = 3; // 6: 110, 3: 011
+System.out.println(a & b);  // 2  (010)
+System.out.println(a | b);  // 7  (111)
+System.out.println(a ^ b);  // 5  (101)
+System.out.println(~a);     // -7
+System.out.println(a << 1); // 12
+System.out.println(a >> 1); // 3
+System.out.println(a >>> 1);// 3
+```
+
+### 6. 条件（三元）运算符
+| 运算符 | 说明         | 示例         | 结果说明           |
+|--------|--------------|--------------|--------------------|
+| ?:     | 条件运算     | a > b ? x : y| 条件成立取x，否则y |
+
+**示例：**
+```java
+int a = 10, b = 20;
+int max = (a > b) ? a : b; // max = 20
+System.out.println(max);
+```
+
+### 7. 字符串连接运算符
+| 运算符 | 说明         | 示例         |
+|--------|--------------|--------------|
+| +      | 字符串拼接   | "Hello" + name |
+
+**示例：**
+```java
+String name = "Java";
+System.out.println("Hello, " + name); // Hello, Java
+System.out.println("结果：" + 1 + 2); // 结果：12
+System.out.println(1 + 2 + "结果"); // 3结果
+```
+
+### 8. instanceof 运算符
+| 运算符      | 说明         | 示例             | 结果类型 |
+|-------------|--------------|------------------|----------|
+| instanceof  | 类型判断     | obj instanceof String | boolean  |
+
+**示例：**
+```java
+Object obj = "abc";
+System.out.println(obj instanceof String); // true
+System.out.println(obj instanceof Integer); // false
+```
+
+> 如需详细举例或对某类运算符深入讲解，可随时补充！ 
+
+## Java字符串运算规则
+
+- **字符串拼接**
+  - 使用 + 运算符可以将两个字符串拼接为一个新字符串。
+  - 只要有一个操作数是字符串，+ 运算符就会把另一个操作数转换为字符串后再拼接。
+  - 示例：
+    ```java
+    String s1 = "Hello" + "World"; // 结果：HelloWorld
+    String s2 = "Java" + 2025;      // 结果：Java2025
+    String s3 = 1 + 2 + "abc";      // 结果：3abc（先算1+2，再拼接）
+    String s4 = "abc" + 1 + 2;      // 结果：abc12（从左到右依次拼接）
+    ```
+
+- **与其他类型的运算**
+  - 字符串与数字、字符、布尔等类型用 + 运算时，非字符串类型会自动转换为字符串。
+  - 示例：
+    ```java
+    String s = "结果：" + true; // 结果：结果：true
+    ```
+
+- **不可变性**
+  - 字符串在Java中是不可变对象，每次拼接都会生成新的字符串对象。
+  - 多次拼接建议使用StringBuilder/StringBuffer提高效率。
+
+- **常见注意事项**
+  - 字符串比较内容要用 equals() 方法，不能用 ==。
+  - 字符串拼接优先级低于算术运算，表达式中注意括号使用。
+
+> 字符串运算是Java开发中最常见的操作之一，理解其规则有助于避免常见错误和提升性能。 
+
+## 原码、反码与补码
+
+在Java等计算机系统中，整数的底层存储采用二进制，负数的表示依赖于补码。理解原码、反码、补码有助于掌握位运算、溢出等底层原理。
+
+### 1. 原码
+- 原码是最直接的二进制表示，最高位为符号位（0正1负），其余为数值部分。
+- 例如：
+  - +7 的原码：0000 0111
+  - -7 的原码：1000 0111
+
+### 2. 反码
+- 正数的反码与原码相同。
+- 负数的反码：符号位不变，数值部分按位取反（0变1，1变0）。
+- 例如：
+  - +7 的反码：0000 0111
+  - -7 的反码：1111 1000
+
+### 3. 补码
+- 正数的补码与原码相同。
+- 负数的补码：反码加1。
+- 例如：
+  - +7 的补码：0000 0111
+  - -7 的补码：1111 1001
+
+### 4. 转换规则总结
+- 正数：原码 = 反码 = 补码
+- 负数：补码 = 反码 + 1
+- 反码 = 补码 - 1
+
+### 5. Java中的意义
+- Java中的int、byte等整数类型，底层存储和运算都采用补码。
+- 补码的好处：加减法统一、便于硬件实现、只有一个零。
+- 位运算、溢出、负数右移等现象都与补码密切相关。
+
+### 6. 示例
+```java
+int a = 7;      // 二进制：0000 0111
+int b = -7;     // 二进制（补码）：1111 1001
+System.out.println(Integer.toBinaryString(a)); // 111
+System.out.println(Integer.toBinaryString(b)); // 11111111111111111111111111111001
+```
+
+> 理解补码机制有助于深入掌握Java底层运算和调试技巧。 

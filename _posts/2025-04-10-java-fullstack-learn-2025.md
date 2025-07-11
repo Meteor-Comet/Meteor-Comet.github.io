@@ -460,3 +460,80 @@ System.out.println(Integer.toBinaryString(b)); // 111111111111111111111111111110
 ```
 
 > 理解补码机制有助于深入掌握Java底层运算和调试技巧。 
+
+## Java三大程序结构
+
+### 1. 顺序结构
+- 程序从上到下依次执行每一条语句，中间没有任何判断和跳转。
+- 是最简单、最常见的结构。
+
+**示例：**
+```java
+int a = 10;
+int b = 20;
+int sum = a + b;
+System.out.println("和为：" + sum);
+```
+
+### 2. 分支结构（选择结构）
+- 根据条件判断，决定执行哪一部分代码。
+- 常用的分支语句有：if、if-else、if-else if-else、switch。
+
+**if语句示例：**
+```java
+int score = 85;
+if (score >= 60) {
+    System.out.println("及格");
+} else {
+    System.out.println("不及格");
+}
+```
+
+**switch语句示例：**
+```java
+int day = 3;
+switch (day) {
+    case 1:
+        System.out.println("星期一");
+        break;
+    case 2:
+        System.out.println("星期二");
+        break;
+    case 3:
+        System.out.println("星期三");
+        break;
+    default:
+        System.out.println("其他");
+}
+```
+
+### 3. 循环结构
+- 根据条件反复执行某段代码。
+- 常用的循环语句有：for、while、do-while。
+
+**for循环示例：**
+```java
+for (int i = 1; i <= 5; i++) {
+    System.out.println("第" + i + "次循环");
+}
+```
+
+**while循环示例：**
+```java
+int i = 1;
+while (i <= 5) {
+    System.out.println("第" + i + "次循环");
+    i++;
+}
+```
+
+**do-while循环示例：**
+```java
+int i = 1;
+do {
+    System.out.println("第" + i + "次循环");
+    i++;
+} while (i <= 5);
+```
+
+> 顺序、分支、循环结构是所有程序的基础，合理组合可实现各种复杂逻辑。 

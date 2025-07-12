@@ -501,11 +501,59 @@ switch (day) {
         break;
     case 3:
         System.out.println("星期三");
-        break;
+        // break;
     default:
         System.out.println("其他");
 }
 ```
+
+**case穿透（fall through）说明：**
+- 如果某个case分支没有写break，程序会继续执行后续case或default中的代码，直到遇到break或switch结束。
+- 这称为“case穿透”或“fall through”。
+
+**穿透示例：**
+```java
+int num = 2;
+switch (num) {
+    case 1:
+        System.out.println("A");
+    case 2:
+        System.out.println("B");
+    case 3:
+        System.out.println("C");
+    default:
+        System.out.println("D");
+}
+// 输出：B
+//      C
+//      D
+```
+> 建议每个case后都加break，除非有意为之。
+
+**case -> 新写法（Java 14+）：**
+- 从Java 14开始，switch语句支持“case ->”箭头写法，简化代码且不允许穿透。
+- 每个case只能执行对应的代码块，自动break，无需手动添加。
+
+**示例：**
+```java
+int day = 2;
+switch (day) {
+    case 1 -> System.out.println("星期一");
+    case 2 -> System.out.println("星期二");
+    case 3, 4, 5 -> System.out.println("工作日");
+    default -> System.out.println("周末或非法");
+}
+```
+- 也可以用于赋值：
+```java
+String result = switch (day) {
+    case 1 -> "星期一";
+    case 2 -> "星期二";
+    default -> "其他";
+};
+System.out.println(result);
+```
+> 箭头写法更简洁、安全，推荐在支持的JDK版本中使用。
 
 ### 3. 循环结构
 - 根据条件反复执行某段代码。

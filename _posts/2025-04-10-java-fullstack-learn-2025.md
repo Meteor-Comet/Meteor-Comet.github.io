@@ -566,6 +566,10 @@ for (int i = 1; i <= 5; i++) {
 }
 ```
 
+**for循环运用场景：**
+- 适用于已知循环次数的场景，如遍历数组、批量处理、计数循环等。
+- 例如：遍历数组、打印1~100、批量初始化对象等。
+
 **while循环示例：**
 ```java
 int i = 1;
@@ -574,6 +578,12 @@ while (i <= 5) {
     i++;
 }
 ```
+
+**while循环运用场景：**
+- 适用于循环次数不确定、依赖条件判断的场景，如用户输入、等待某个条件达成、读取文件等。
+- 例如：用户输入密码直到正确、读取文件直到结尾、网络连接重试等。
+
+> 总结：for循环更适合计数型、范围型循环，while循环更适合条件型、事件驱动型循环。合理选择可提升代码可读性和健壮性。
 
 **do-while循环示例：**
 ```java
@@ -585,3 +595,256 @@ do {
 ```
 
 > 顺序、分支、循环结构是所有程序的基础，合理组合可实现各种复杂逻辑。 
+
+## Java中的Random库
+
+在Java中，`Random`类用于生成伪随机数，位于`java.util`包。
+
+### 基本用法
+1. 导入包：
+```java
+import java.util.Random;
+```
+2. 创建Random对象：
+```java
+Random rand = new Random();
+```
+
+### 常用方法
+- `nextInt()`：生成一个int范围内的随机整数。
+- `nextInt(n)`：生成[0, n)范围内的随机整数。
+- `nextDouble()`：生成[0.0, 1.0)范围内的随机小数。
+- `nextBoolean()`：生成一个随机布尔值。
+- `nextLong()`：生成一个随机long值。
+
+### 示例代码
+```java
+import java.util.Random;
+
+public class RandomDemo {
+    public static void main(String[] args) {
+        Random rand = new Random();
+        int num = rand.nextInt(100); // 0~99的随机整数
+        double d = rand.nextDouble(); // 0.0~1.0的随机小数
+        boolean b = rand.nextBoolean(); // 随机布尔值
+        System.out.println("随机整数：" + num);
+        System.out.println("随机小数：" + d);
+        System.out.println("随机布尔：" + b);
+    }
+}
+```
+
+> Random生成的随机数是伪随机数，种子相同则序列相同。Java 1.7+还可用`ThreadLocalRandom`和`SecureRandom`。 
+
+## Java中的next命名规范详细解释
+
+在Java标准库和第三方库中，许多方法以`next`开头，这是一种广泛采用的命名规范，体现了“获取序列中的下一个元素”或“生成下一个值”的设计思想。
+
+### 1. 设计思想
+- `next`强调“顺序获取”，通常用于遍历、生成、读取等需要依次处理数据的场景。
+- 以`nextXxx()`命名的方法，往往每调用一次就返回序列中的下一个元素或值。
+- 这种命名方式让API的用途一目了然，易于理解和记忆。
+
+### 2. 常见场景
+- **迭代器（Iterator）**：
+  - `hasNext()`判断是否还有下一个元素，`next()`获取下一个元素。
+  - 典型用法：
+    ```java
+    Iterator<String> it = list.iterator();
+    while (it.hasNext()) {
+        String s = it.next();
+        // 处理s
+    }
+    ```
+- **输入读取（Scanner）**：
+  - `next()`读取下一个以空白分隔的字符串。
+  - `nextInt()`、`nextDouble()`等读取下一个指定类型的输入。
+  - 典型用法：
+    ```java
+    Scanner sc = new Scanner(System.in);
+    int num = sc.nextInt();
+    String word = sc.next();
+    ```
+- **随机数生成（Random）**：
+  - `nextInt()`、`nextDouble()`等每次生成一个新的随机值。
+- **枚举、流、生成器等**：
+  - 只要是“顺序获取”或“生成下一个”，都常用next命名。
+
+### 3. 与hasNext的配合
+- 在迭代器、流等场景，通常有`hasNext()`方法判断是否还有下一个元素，配合`next()`安全遍历。
+- 这样可以避免越界异常（如NoSuchElementException）。
+
+### 4. 易混淆点
+- `next()`和`nextLine()`：Scanner的`next()`读取一个单词，`nextLine()`读取一整行。
+- `next()`通常不做类型转换，`nextInt()`等会尝试将输入转换为指定类型。
+
+### 5. 实际开发建议
+- 使用`nextXxx()`方法时，建议先用`hasNextXxx()`判断是否有下一个元素或输入，避免异常。
+- 理解“next”语义有助于快速掌握Java集合、输入、生成器等API的用法。
+
+> 总结：以next开头的方法体现了Java对顺序处理、流式操作的高度抽象，是高效、可读代码的重要基础。 
+
+## Java数组基础
+
+### 1. 数组的概念
+- 数组是存储同一类型数据的有序集合，长度固定。
+- 每个元素通过下标（索引）访问，下标从0开始。
+
+### 2. 数组的声明与初始化
+- 声明数组：
+  ```java
+  int[] arr;
+  String[] names;
+  ```
+- 分配空间并初始化：
+  ```java
+  arr = new int[5]; // 长度为5，默认值为0
+  String[] cities = new String[3]; // 长度为3，默认值为null
+  ```
+- 声明+初始化（静态初始化）：
+  ```java
+  int[] nums = {1, 2, 3, 4, 5};
+  String[] colors = {"red", "green", "blue"};
+  ```
+
+### 3. 访问和修改数组元素
+```java
+int[] arr = {10, 20, 30};
+System.out.println(arr[0]); // 10
+arr[1] = 99;
+System.out.println(arr[1]); // 99
+```
+
+### 4. 数组的遍历
+- for循环遍历：
+  ```java
+  for (int i = 0; i < arr.length; i++) {
+      System.out.println(arr[i]);
+  }
+  ```
+- 增强for循环（for-each）：
+  ```java
+  for (int num : arr) {
+      System.out.println(num);
+  }
+  ```
+
+### 5. 数组的常用属性和特性
+- `length`：数组长度属性，如arr.length。
+- 数组一旦创建，长度不可变。
+- 支持多维数组（如int[][] matrix = new int[3][4];）。
+- 数组元素类型可以是基本类型或引用类型。
+
+### 6. 示例：求数组元素之和
+```java
+int[] nums = {1, 2, 3, 4, 5};
+int sum = 0;
+for (int n : nums) {
+    sum += n;
+}
+System.out.println("总和：" + sum);
+```
+
+### 7. 直接输出数组与地址格式说明
+- 直接输出数组对象（如System.out.println(arr);）时，显示的不是数组内容，而是数组的类型和哈希码地址。
+- 格式通常为：[类型标识@哈希码]，如：[I@6d06d69c
+  - [I 表示int[]类型，@后为哈希码的十六进制。
+  - 其他类型如String[]会显示为 [Ljava.lang.String;@xxxxxx
+
+**示例：**
+```java
+int[] arr = {1, 2, 3};
+System.out.println(arr); // 输出：[I@6d06d69c（示例）
+```
+
+- 如果要输出数组内容，需用循环或工具类：
+  - for循环/增强for循环遍历输出
+  - 使用Arrays.toString(arr)
+
+**示例：**
+```java
+import java.util.Arrays;
+int[] arr = {1, 2, 3};
+System.out.println(Arrays.toString(arr)); // 输出：[1, 2, 3]
+```
+
+> 直接输出数组变量看到的是“地址信息”，不是数组元素本身。建议用Arrays.toString()等方法查看内容。
+
+> 数组是Java中最基础的数据结构，后续可学习ArrayList等集合类实现更灵活的数据管理。 
+
+### 8. 动态初始化时的默认值
+- 使用`new`关键字动态初始化数组时，数组中的每个元素都会被自动赋予默认值。
+- 不同类型的数组默认值如下：
+  - 整型（int、byte、short、long）：默认值为0
+  - 浮点型（float、double）：默认值为0.0
+  - 字符型（char）：默认值为'\u0000'（空字符）
+  - 布尔型（boolean）：默认值为false
+  - 引用类型（如String、对象）：默认值为null
+
+**示例：**
+```java
+int[] arr = new int[3];
+System.out.println(Arrays.toString(arr)); // [0, 0, 0]
+
+boolean[] flags = new boolean[2];
+System.out.println(Arrays.toString(flags)); // [false, false]
+
+String[] names = new String[2];
+System.out.println(Arrays.toString(names)); // [null, null]
+```
+
+> 动态初始化时，数组元素的默认值由类型决定，无需手动赋值。 
+
+## Java内存分布
+
+Java程序运行时，JVM会将内存划分为不同的区域，每个区域负责不同类型的数据存储和管理。
+
+### 1. 方法区（Method Area）
+- 存储类的结构信息（如类的元数据、静态变量、常量、运行时常量池等）。
+- 所有线程共享。
+
+### 2. 堆（Heap）
+- 存储所有对象实例和数组。
+- 由垃圾回收器统一管理。
+- 所有线程共享。
+
+### 3. 虚拟机栈（Stack）
+- 每个线程独有，存储方法调用时的局部变量、操作数栈、方法返回地址等。
+- 局部变量包括基本类型、对象引用等。
+
+### 4. 本地方法栈（Native Method Stack）
+- 为JVM调用本地（Native）方法服务。
+- 每个线程独有。
+
+### 5. 程序计数器（Program Counter Register）
+- 记录当前线程所执行字节码的行号指示器。
+- 每个线程独有。
+
+### 6. 内存分布结构图
+```mermaid
+graph TD
+  A[方法区 Method Area]
+  B[堆 Heap]
+  C[虚拟机栈 Stack]
+  D[本地方法栈 Native Method Stack]
+  E[程序计数器 PC Register]
+  subgraph 线程1
+    C
+    D
+    E
+  end
+  subgraph 线程2
+    C2[虚拟机栈 Stack]
+    D2[本地方法栈 Native Method Stack]
+    E2[程序计数器 PC Register]
+  end
+  A -->|共享| B
+  B -->|共享| C
+  B -->|共享| D
+  B -->|共享| E
+```
+
+### 7. 总结
+- 堆和方法区是所有线程共享的，栈、本地方法栈、程序计数器是线程私有的。
+- 对象实例存储在堆，局部变量存储在栈。
+- 合理理解内存分布有助于掌握对象生命周期、垃圾回收、线程安全等核心知识。 

@@ -970,3 +970,192 @@ System.out.println(nums[0]); // 仍输出1，原数组未被替换
   - 传递的是“引用的副本”，可通过引用修改堆中对象内容。
 
 > 总结：Java所有参数传递本质上都是值传递。基本类型传递值，引用类型传递引用的值（地址）。理解堆栈分布和引用机制，有助于避免参数修改的误区。 
+
+## Java二维数组的创建与初始化
+
+### 1. 二维数组的声明
+- 语法：
+  ```java
+  int[][] matrix;
+  String[][] table;
+  ```
+
+### 2. 二维数组的创建
+- 指定行和列：
+  ```java
+  int[][] arr = new int[3][4]; // 3行4列，所有元素默认值为0
+  ```
+- 只指定行，列可后续单独分配（不规则数组）：
+  ```java
+  int[][] arr = new int[3][];
+  arr[0] = new int[2]; // 第一行2列
+  arr[1] = new int[4]; // 第二行4列
+  arr[2] = new int[3]; // 第三行3列
+  ```
+
+### 3. 二维数组的静态初始化
+- 声明+赋值：
+  ```java
+  int[][] nums = {
+      {1, 2, 3},
+      {4, 5, 6},
+      {7, 8, 9}
+  };
+  ```
+
+### 4. 访问和遍历二维数组
+- 访问元素：`arr[i][j]` 表示第i行第j列元素。
+- 遍历方式：
+  ```java
+  for (int i = 0; i < arr.length; i++) {
+      for (int j = 0; j < arr[i].length; j++) {
+          System.out.print(arr[i][j] + " ");
+      }
+      System.out.println();
+  }
+  ```
+- 增强for循环：
+  ```java
+  for (int[] row : arr) {
+      for (int val : row) {
+          System.out.print(val + " ");
+      }
+      System.out.println();
+  }
+  ```
+
+### 5. 特点说明
+- Java二维数组本质上是“数组的数组”，每一行可以有不同的列数（不规则数组）。
+- 默认值规则与一维数组一致。
+
+> 二维数组常用于矩阵、表格、棋盘等场景，是多维数据结构的基础。 
+
+## Java面向对象编程（OOP）基础
+
+### 1. 类与对象
+- **类（Class）**：对象的模板或蓝图，定义属性和行为。
+- **对象（Object）**：类的实例，实际存在的实体。
+
+**示例：**
+```java
+class Person {
+    String name;
+    int age;
+    void sayHello() {
+        System.out.println("Hello, my name is " + name);
+    }
+}
+Person p = new Person();
+p.name = "Tom";
+p.age = 20;
+p.sayHello();
+```
+
+### 2. 封装（Encapsulation）
+- 将属性和方法封装在类内部，属性私有（private），通过公有方法（getter/setter）访问。
+- 提高安全性和可维护性。
+
+**示例：**
+```java
+class Student {
+    private int score;
+    public int getScore() { return score; }
+    public void setScore(int s) { score = s; }
+}
+```
+
+### 3. 继承（Inheritance）
+- 子类通过`extends`继承父类，获得父类的属性和方法。
+- 支持单继承。
+
+**示例：**
+```java
+class Animal {
+    void eat() { System.out.println("吃东西"); }
+}
+class Dog extends Animal {
+    void bark() { System.out.println("汪汪"); }
+}
+Dog d = new Dog();
+d.eat();
+d.bark();
+```
+
+### 4. 多态（Polymorphism）
+- 父类引用指向子类对象，调用方法时表现出不同形态。
+- 体现为方法重写（Override）和接口实现。
+
+**示例：**
+```java
+Animal a = new Dog();
+a.eat(); // 调用Dog的eat方法（如果重写）
+```
+
+### 5. 构造方法（Constructor）
+- 与类名相同，无返回值，用于对象初始化。
+- 可重载多个构造方法。
+
+**示例：**
+```java
+class Person {
+    String name;
+    Person() { name = "无名"; }
+    Person(String n) { name = n; }
+}
+```
+
+### 6. this与super关键字
+- `this`：当前对象的引用，区分成员变量和局部变量，调用本类方法/构造器。
+- `super`：父类对象的引用，调用父类属性、方法、构造器。
+
+**示例：**
+```java
+class Parent {
+    int x = 1;
+}
+class Child extends Parent {
+    int x = 2;
+    void print() {
+        System.out.println(this.x); // 2
+        System.out.println(super.x); // 1
+    }
+}
+```
+
+### 7. 方法重写（Override）与重载（Overload）
+- **重写**：子类重写父类方法，方法名、参数、返回值完全一致，需加@Override注解。
+- **重载**：同类中方法名相同，参数列表不同。
+
+### 8. final与abstract
+- `final`类不能被继承，final方法不能被重写，final变量为常量。
+- `abstract`类不能实例化，抽象方法无方法体，子类必须实现。
+
+### 9. 接口（Interface）
+- 用`interface`定义，所有方法默认public abstract，属性默认public static final。
+- 类用`implements`实现接口，可多实现。
+
+**示例：**
+```java
+interface USB {
+    void connect();
+}
+class Mouse implements USB {
+    public void connect() { System.out.println("鼠标连接"); }
+}
+```
+
+### 10. 静态成员（static）
+- static变量/方法属于类本身，不依赖对象。
+- 可用类名直接访问。
+
+### 11. 内部类
+- 类中定义的类，分为成员内部类、静态内部类、局部内部类、匿名内部类。
+
+### 12. 对象的创建与内存分布
+- new对象时，属性分配在堆，引用变量在栈。
+- 构造方法初始化对象。
+
+### 13. 常见OOP原则
+- 单一职责、开闭原则、里氏替换、依赖倒置、接口隔离、迪米特法则等。
+
+> 面向对象是Java的核心思想，掌握OOP有助于开发高内聚、低耦合、易维护的系统。 

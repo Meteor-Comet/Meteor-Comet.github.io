@@ -92,5 +92,6 @@ page-mathjax: false
 friends:
   [  
      { title: "算法学习《Hello 算法》", href: "https://www.hello-algo.com/"},
+     { title: "Java开发手册(Alibaba)", href: "_doc/阿里巴巴Java开发.pdf"},
      { title: "流量卡推广(自用)", href: "https://ym.ksjhaoka.com/?s=6pEsPUEf255309"}
   ]

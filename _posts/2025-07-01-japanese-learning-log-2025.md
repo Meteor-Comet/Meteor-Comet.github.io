@@ -1,6 +1,6 @@
 ---
 layout:     post
-title:      "日语学习日志2025"
+title:      "日语学习日志"
 date:       2025-7-1 08:00:00
 author:     "Comet"
 header-style: text

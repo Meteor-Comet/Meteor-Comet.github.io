@@ -1348,3 +1348,55 @@ class Person {
 - 访问未初始化的元素会抛出NullPointerException。
 
 > 对象数组常用于批量管理同类对象，如学生列表、商品清单等，是面向对象编程的重要应用。 
+
+## Java字符串（String）常用API
+
+### 1. 字符串的创建
+- 直接赋值：
+  ```java
+  String s1 = "Hello";
+  ```
+- 使用构造方法：
+  ```java
+  String s2 = new String("World");
+  ```
+
+### 2. 字符串的不可变性
+- String对象一旦创建，内容不可更改，所有修改操作都会生成新字符串。
+- 适合做常量、作为Map的key等。
+
+### 3. 常用API方法
+- `length()`：获取字符串长度
+- `charAt(int index)`：获取指定位置字符
+- `equals(String other)`：内容比较
+- `equalsIgnoreCase(String other)`：忽略大小写比较
+- `compareTo(String other)`：字典序比较
+- `isEmpty()`：是否为空串
+- `toUpperCase()/toLowerCase()`：转大/小写
+- `substring(int begin, int end)`：截取子串
+- `indexOf(String str)`：查找子串首次出现位置
+- `lastIndexOf(String str)`：查找子串最后出现位置
+- `contains(String str)`：是否包含子串
+- `replace(old, new)`：替换内容
+- `split(String regex)`：分割字符串
+- `trim()`：去除首尾空白
+- `startsWith()/endsWith()`：前缀/后缀判断
+- `getBytes()`：转为字节数组
+- `toCharArray()`：转为字符数组
+
+### 4. 示例代码
+```java
+String str = "  Hello, Java!  ";
+System.out.println(str.length()); // 15
+System.out.println(str.trim()); // "Hello, Java!"
+System.out.println(str.substring(2, 7)); // "Hello"
+System.out.println(str.toUpperCase()); // "  HELLO, JAVA!  "
+System.out.println(str.replace("Java", "World")); // "  Hello, World!  "
+String[] arr = str.split(",");
+System.out.println(arr[0]); // "  Hello"
+```
+
+### 5. 字符串拼接与效率
+- 使用`+`拼接字符串简单但效率低，建议多次拼接时用`StringBuilder`或`StringBuffer`。
+
+> 熟练掌握String API是Java开发的基础，能高效处理文本数据。 

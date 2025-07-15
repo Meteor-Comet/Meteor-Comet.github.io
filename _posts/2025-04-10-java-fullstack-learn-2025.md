@@ -1159,3 +1159,89 @@ class Mouse implements USB {
 - 单一职责、开闭原则、里氏替换、依赖倒置、接口隔离、迪米特法则等。
 
 > 面向对象是Java的核心思想，掌握OOP有助于开发高内聚、低耦合、易维护的系统。 
+
+### 面向对象的内存分布图解
+
+下面用Mermaid图示说明Java对象在内存中的分布关系：
+
+```mermaid
+graph TD
+  Stack[栈内存（Stack）]
+  Heap[堆内存（Heap）]
+  MethodArea[方法区（Method Area）]
+  Ref[对象引用变量]
+  Obj[对象实例（属性、方法等）]
+  ClassInfo[类的结构信息]
+
+  Stack --> Ref
+  Ref --指向--> Obj
+  Heap --> Obj
+  MethodArea --> ClassInfo
+  Obj --所属类信息--> ClassInfo
+```
+
+**说明：**
+- 对象引用变量（如Person p）存储在栈内存，实际对象实例（new出来的对象）存储在堆内存。
+- 类的结构信息（如方法、静态变量等）存储在方法区。
+- 引用变量通过“指针”指向堆中的对象。
+- 多个引用变量可以指向同一个对象。
+
+> 理解对象的内存分布有助于掌握Java对象的生命周期、垃圾回收和参数传递机制。 
+
+#### 一个对象的内存分布示意
+
+```mermaid
+graph TD
+  Stack[栈内存]
+  Heap[堆内存]
+  Ref[Person p]
+  Obj[Person对象实例]
+
+  Stack --> Ref
+  Ref --指向--> Obj
+  Heap --> Obj
+```
+
+- 变量p在栈内存，实际对象实例在堆内存。
+- p通过引用指向堆中的Person对象。
+
+#### 两个对象引用的内存分布示意
+
+**情况1：两个引用指向同一个对象**
+```mermaid
+graph TD
+  Stack[栈内存]
+  Heap[堆内存]
+  Ref1[Person p1]
+  Ref2[Person p2]
+  Obj[Person对象实例]
+
+  Stack --> Ref1
+  Stack --> Ref2
+  Ref1 --指向--> Obj
+  Ref2 --指向--> Obj
+  Heap --> Obj
+```
+- p1和p2都在栈内存，指向同一个堆内存中的对象。
+- 修改p1或p2指向的对象内容，另一个引用也能看到。
+
+**情况2：两个引用指向不同对象**
+```mermaid
+graph TD
+  Stack[栈内存]
+  Heap[堆内存]
+  Ref1[Person p1]
+  Ref2[Person p2]
+  Obj1[Person对象1]
+  Obj2[Person对象2]
+
+  Stack --> Ref1
+  Stack --> Ref2
+  Ref1 --指向--> Obj1
+  Ref2 --指向--> Obj2
+  Heap --> Obj1
+  Heap --> Obj2
+```
+- p1和p2分别指向堆中的不同对象，互不影响。
+
+> 通过图解可以清晰理解Java中引用变量和对象实例的内存分布关系。 

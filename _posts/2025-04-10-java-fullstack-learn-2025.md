@@ -51,7 +51,7 @@ tags:
   如果已经有编译好的.class字节码文件，运行时只需要JRE环境，无需JDK。JRE包含JVM和Java核心类库，能够加载和执行.class文件。
 - JVM负责Java程序的跨平台运行。
   
-  JVM实现跨平台的原理在于：Java源代码经过编译后生成与平台无关的字节码文件（.class），这种字节码并不能直接被操作系统识别和执行。无论在Windows、Linux还是macOS等不同操作系统上，只要安装了对应平台的JVM，JVM就能识别并执行这些字节码。JVM会根据当前操作系统和硬件环境，将字节码翻译为本地机器指令，从而实现“编写一次，到处运行”（Write Once, Run Anywhere, WORA）的目标。这也是Java语言最大的优势之一。
+  JVM实现跨平台的原理在于：Java源代码经过编译后生成与平台无关的字节码文件（.class），这种字节码并不能直接被操作系统识别和执行。无论在Windows、Linux还是macOS等不同操作系统上，只要安装了对应平台的JVM，JVM就能识别并执行这些字节码。JVM会根据当前操作系统和硬件环境，将字节码翻译为本地机器指令，从而实现"编写一次，到处运行"（Write Once, Run Anywhere, WORA）的目标。这也是Java语言最大的优势之一。
   
   总结：只要有.class文件，任何装有JRE的操作系统都能运行该Java程序，无需JDK参与。
 
@@ -509,7 +509,7 @@ switch (day) {
 
 **case穿透（fall through）说明：**
 - 如果某个case分支没有写break，程序会继续执行后续case或default中的代码，直到遇到break或switch结束。
-- 这称为“case穿透”或“fall through”。
+- 这称为"case穿透"或"fall through"。
 
 **穿透示例：**
 ```java
@@ -531,7 +531,7 @@ switch (num) {
 > 建议每个case后都加break，除非有意为之。
 
 **case -> 新写法（Java 14+）：**
-- 从Java 14开始，switch语句支持“case ->”箭头写法，简化代码且不允许穿透。
+- 从Java 14开始，switch语句支持"case ->"箭头写法，简化代码且不允许穿透。
 - 每个case只能执行对应的代码块，自动break，无需手动添加。
 
 **示例：**
@@ -638,10 +638,10 @@ public class RandomDemo {
 
 ## Java中的next命名规范详细解释
 
-在Java标准库和第三方库中，许多方法以`next`开头，这是一种广泛采用的命名规范，体现了“获取序列中的下一个元素”或“生成下一个值”的设计思想。
+在Java标准库和第三方库中，许多方法以`next`开头，这是一种广泛采用的命名规范，体现了"获取序列中的下一个元素"或"生成下一个值"的设计思想。
 
 ### 1. 设计思想
-- `next`强调“顺序获取”，通常用于遍历、生成、读取等需要依次处理数据的场景。
+- `next`强调"顺序获取"，通常用于遍历、生成、读取等需要依次处理数据的场景。
 - 以`nextXxx()`命名的方法，往往每调用一次就返回序列中的下一个元素或值。
 - 这种命名方式让API的用途一目了然，易于理解和记忆。
 
@@ -668,7 +668,7 @@ public class RandomDemo {
 - **随机数生成（Random）**：
   - `nextInt()`、`nextDouble()`等每次生成一个新的随机值。
 - **枚举、流、生成器等**：
-  - 只要是“顺序获取”或“生成下一个”，都常用next命名。
+  - 只要是"顺序获取"或"生成下一个"，都常用next命名。
 
 ### 3. 与hasNext的配合
 - 在迭代器、流等场景，通常有`hasNext()`方法判断是否还有下一个元素，配合`next()`安全遍历。
@@ -680,7 +680,7 @@ public class RandomDemo {
 
 ### 5. 实际开发建议
 - 使用`nextXxx()`方法时，建议先用`hasNextXxx()`判断是否有下一个元素或输入，避免异常。
-- 理解“next”语义有助于快速掌握Java集合、输入、生成器等API的用法。
+- 理解"next"语义有助于快速掌握Java集合、输入、生成器等API的用法。
 
 > 总结：以next开头的方法体现了Java对顺序处理、流式操作的高度抽象，是高效、可读代码的重要基础。 
 
@@ -768,7 +768,7 @@ int[] arr = {1, 2, 3};
 System.out.println(Arrays.toString(arr)); // 输出：[1, 2, 3]
 ```
 
-> 直接输出数组变量看到的是“地址信息”，不是数组元素本身。建议用Arrays.toString()等方法查看内容。
+> 直接输出数组变量看到的是"地址信息"，不是数组元素本身。建议用Arrays.toString()等方法查看内容。
 
 > 数组是Java中最基础的数据结构，后续可学习ArrayList等集合类实现更灵活的数据管理。 
 
@@ -919,10 +919,10 @@ public double max(double a, double b) {
 
 ### 8. 方法参数传递机制详解
 
-Java方法参数传递采用“值传递”机制，但根据参数类型（基本类型或引用类型），在堆和栈上的表现和影响不同。
+Java方法参数传递采用"值传递"机制，但根据参数类型（基本类型或引用类型），在堆和栈上的表现和影响不同。
 
 #### 1. 基本类型参数（int、double、char等）
-- 传递的是变量的“值”副本。
+- 传递的是变量的"值"副本。
 - 方法内对参数的修改不会影响原变量。
 - 存储在栈内存中。
 
@@ -937,7 +937,7 @@ System.out.println(a); // 输出10，a未被改变
 ```
 
 #### 2. 引用类型参数（数组、对象等）
-- 传递的是对象引用的“值”副本（即对象在堆中的地址）。
+- 传递的是对象引用的"值"副本（即对象在堆中的地址）。
 - 方法内通过引用可以修改堆中对象的内容，影响原对象。
 - 但如果在方法内让引用指向新对象，不会影响原对象。
 - 引用本身在栈内存，对象内容在堆内存。
@@ -967,7 +967,7 @@ System.out.println(nums[0]); // 仍输出1，原数组未被替换
   - 变量和参数都在栈，互不影响。
 - 引用类型参数：
   - 引用变量在栈，实际对象在堆。
-  - 传递的是“引用的副本”，可通过引用修改堆中对象内容。
+  - 传递的是"引用的副本"，可通过引用修改堆中对象内容。
 
 > 总结：Java所有参数传递本质上都是值传递。基本类型传递值，引用类型传递引用的值（地址）。理解堆栈分布和引用机制，有助于避免参数修改的误区。 
 
@@ -1025,7 +1025,7 @@ System.out.println(nums[0]); // 仍输出1，原数组未被替换
   ```
 
 ### 5. 特点说明
-- Java二维数组本质上是“数组的数组”，每一行可以有不同的列数（不规则数组）。
+- Java二维数组本质上是"数组的数组"，每一行可以有不同的列数（不规则数组）。
 - 默认值规则与一维数组一致。
 
 > 二维数组常用于矩阵、表格、棋盘等场景，是多维数据结构的基础。 
@@ -1180,7 +1180,7 @@ class Mouse implements USB {
 
 #### 1. 一个对象引用的情况
 - 当你写 `Person p = new Person();` 时，发生了什么？
-  1. **栈内存**：变量`p`在栈上分配空间，存储的是一个“地址”。
+  1. **栈内存**：变量`p`在栈上分配空间，存储的是一个"地址"。
   2. **堆内存**：`new Person()`会在堆上开辟一块空间，存放Person对象的实际内容（属性等）。
   3. **引用关系**：`p`保存的是堆中Person对象的地址（引用），通过`p`可以访问和操作该对象。
 - **影响**：如果`p`被赋值为`null`，则它不再指向任何对象，但堆中的对象如果没有其他引用指向，会被垃圾回收。
@@ -1298,7 +1298,7 @@ class Person {
 
 ### 1. 概念
 - 对象数组是存放对象引用的数组，每个元素都是某个类的对象引用。
-- 本质上是“引用类型数组”，数组本身在堆，元素为对象引用。
+- 本质上是"引用类型数组"，数组本身在堆，元素为对象引用。
 
 ### 2. 声明与创建
 - 声明：
@@ -1399,4 +1399,309 @@ System.out.println(arr[0]); // "  Hello"
 ### 5. 字符串拼接与效率
 - 使用`+`拼接字符串简单但效率低，建议多次拼接时用`StringBuilder`或`StringBuffer`。
 
+### 6. String构造方法参数说明
+- `String s = new String()` 这句代码中的括号内可以写多种内容，取决于String类的构造方法重载。
+- 常见构造方法有：
+  - `new String()`：创建空字符串，等价于""
+  - `new String(String original)`：根据已有字符串创建新字符串
+  - `new String(char[] value)`：由字符数组创建字符串
+  - `new String(char[] value, int offset, int count)`：由字符数组的部分内容创建字符串
+  - `new String(byte[] bytes)`：由字节数组创建字符串（按平台默认编码）
+  - `new String(byte[] bytes, String charsetName)`：由字节数组按指定编码创建字符串
+  - `new String(StringBuffer buffer)`、`new String(StringBuilder builder)`：由可变字符串对象创建
+
+**示例：**
+```java
+String s1 = new String(); // 空字符串
+String s2 = new String("abc");
+char[] arr = {'H', 'e', 'l', 'l', 'o'};
+String s3 = new String(arr); // "Hello"
+String s4 = new String(arr, 1, 3); // "ell"
+byte[] bytes = {65, 66, 67};
+String s5 = new String(bytes); // "ABC"（默认编码）
+String s6 = new String(bytes, "UTF-8"); // "ABC"
+StringBuffer sb = new StringBuffer("hi");
+String s7 = new String(sb);
+```
+- 通过不同构造方法，可以实现字符串与字符数组、字节数组、StringBuffer/StringBuilder等类型的灵活转换。
+
 > 熟练掌握String API是Java开发的基础，能高效处理文本数据。 
+
+## StringBuilder与StringBuffer
+
+### 1. 概念与区别
+- **StringBuilder** 和 **StringBuffer** 都是可变字符串类，适合频繁修改字符串内容的场景。
+- 区别：
+  - StringBuilder：线程不安全，效率高，JDK 1.5后推荐单线程场景使用。
+  - StringBuffer：线程安全，效率略低，适合多线程环境。
+- 二者都比String拼接效率高，避免产生大量无用字符串对象。
+
+### 2. 常用API
+- `append(xxx)`：追加内容
+- `insert(offset, xxx)`：插入内容
+- `delete(start, end)`：删除指定区间内容
+- `replace(start, end, str)`：替换内容
+- `reverse()`：反转字符串
+- `toString()`：转为不可变String
+- `setCharAt(index, ch)`：修改指定位置字符
+- `length()`：获取长度
+
+### 3. 示例代码
+```java
+StringBuilder sb = new StringBuilder("Hello");
+sb.append(", Java!");
+sb.insert(5, " World");
+sb.delete(0, 6);
+sb.replace(0, 4, "Hi");
+sb.reverse();
+System.out.println(sb.toString());
+
+StringBuffer sbf = new StringBuffer();
+sbf.append("abc").append(123);
+System.out.println(sbf);
+```
+
+### 4. 适用场景
+- StringBuilder：推荐用于单线程环境下的大量字符串拼接、修改，如循环拼接、临时字符串处理等。
+- StringBuffer：用于多线程环境下对同一字符串变量的并发修改。
+
+> 总结：字符串频繁拼接、修改时优先考虑StringBuilder，需线程安全时用StringBuffer，普通不可变字符串用String。 
+
+### StringBuilder和StringBuffer的区别
+
+1. **线程安全性**
+   - **StringBuffer**：线程安全。其大多数方法都用`synchronized`修饰，多线程环境下可安全操作同一个StringBuffer对象。
+   - **StringBuilder**：线程不安全。没有同步机制，适合单线程环境，效率更高。
+
+2. **执行效率**
+   - **StringBuffer**：由于线程安全，方法有同步开销，效率略低。
+   - **StringBuilder**：无同步开销，执行速度更快，推荐在单线程下使用。
+
+3. **JDK版本**
+   - **StringBuffer**：JDK 1.0就有。
+   - **StringBuilder**：JDK 1.5引入，作为StringBuffer的高效替代。
+
+4. **用法和API**
+   - 二者API几乎完全一致，如`append()`、`insert()`、`delete()`、`reverse()`等。
+   - 用法相同，唯一差别在于线程安全性和效率。
+
+5. **适用场景**
+   - **StringBuffer**：多线程环境下字符串频繁修改。
+   - **StringBuilder**：单线程环境下字符串频繁修改（如循环拼接、临时字符串处理等）。
+
+**示例对比：**
+```java
+StringBuffer sbf = new StringBuffer("abc");
+sbf.append(123);
+
+StringBuilder sbd = new StringBuilder("abc");
+sbd.append(123);
+```
+
+**总结：**
+- 需要线程安全时用StringBuffer，否则优先用StringBuilder。
+- 普通不可变字符串用String，频繁拼接/修改用Builder或Buffer。
+
+## Java链式编程（链式调用）
+
+### 1. 概念
+- 链式编程（Fluent Interface/Method Chaining）是指通过连续调用对象的方法，每个方法返回当前对象自身（this），从而实现多个操作的连贯书写。
+- 常见于构建器模式、StringBuilder、集合操作等。
+
+### 2. 实现原理
+- 方法返回`this`（当前对象），使得可以继续调用该对象的其他方法。
+- 适用于需要对同一对象连续操作的场景。
+
+**示例：**
+```java
+class Person {
+    private String name;
+    private int age;
+    public Person setName(String name) {
+        this.name = name;
+        return this;
+    }
+    public Person setAge(int age) {
+        this.age = age;
+        return this;
+    }
+    public void show() {
+        System.out.println(name + ", " + age);
+    }
+}
+
+Person p = new Person().setName("Tom").setAge(20);
+p.show();
+```
+
+### 3. 常见场景
+- StringBuilder/StringBuffer的append、insert等方法：
+  ```java
+  StringBuilder sb = new StringBuilder().append("Hello").append(", ").append("World");
+  ```
+- Java集合的add、remove等方法（部分实现支持）：
+  ```java
+  List<String> list = new ArrayList<>();
+  list.add("a").add("b"); // 需返回this
+  ```
+- 构建器模式（Builder Pattern）：用于复杂对象的灵活构建。
+
+### 4. 优缺点
+- **优点**：代码简洁、可读性强、便于批量设置属性。
+- **缺点**：不适合所有场景，方法需返回this，易导致调试困难。
+
+> 链式编程是现代Java开发中常用的风格，尤其适合配置、构建、批量操作等场景。
+
+## StringJoiner的用法
+
+### 1. 概念
+- StringJoiner是Java 8引入的字符串连接工具类，位于java.util包。
+- 用于高效拼接多个字符串，并可自定义分隔符、前缀和后缀。
+
+### 2. 构造方法
+- `StringJoiner(CharSequence delimiter)`：指定分隔符。
+- `StringJoiner(CharSequence delimiter, CharSequence prefix, CharSequence suffix)`：指定分隔符、前缀和后缀。
+
+### 3. 常用API
+- `add(String element)`：添加元素。
+- `toString()`：返回拼接后的字符串。
+- `setEmptyValue(String emptyValue)`：设置无元素时的返回值。
+- `length()`：当前拼接字符串的长度。
+
+### 4. 示例代码
+```java
+import java.util.StringJoiner;
+
+StringJoiner sj = new StringJoiner(", ");
+sj.add("Java").add("Python").add("C++");
+System.out.println(sj.toString()); // Java, Python, C++
+
+StringJoiner sj2 = new StringJoiner(", ", "[", "]");
+sj2.add("A").add("B");
+System.out.println(sj2); // [A, B]
+
+StringJoiner sj3 = new StringJoiner("-");
+System.out.println(sj3.setEmptyValue("空").toString()); // 空
+```
+
+### 5. 适用场景
+- 拼接集合、数组等多个字符串，需自定义分隔符、前后缀时。
+- 替代手动循环拼接，代码更简洁高效。
+
+> StringJoiner常与Stream API结合使用，也可用于String.join()等场景，是现代Java字符串拼接的推荐方式之一。
+
+## Java字符串（String）的底层原理
+
+### 1. 不可变性
+- String对象一旦创建，内容不可更改（final修饰的char[]数组存储字符）。
+- 修改字符串（如拼接、替换）会生成新的String对象，原对象不变。
+- 不可变性带来线程安全、可缓存、可作为Map的key等优势。
+
+### 2. 内存结构
+- String底层由一个final char[]数组存储字符内容（JDK 9+为byte[]，支持压缩存储）。
+- String对象本身在堆内存，char[]数组也在堆内存。
+
+### 3. 字符串常量池
+- Java为提高效率和节省内存，维护一个字符串常量池（String Pool）。
+- 直接赋值的字符串字面量会被放入常量池，池中相同内容的字符串只存一份。
+- new String("abc")会在堆中新建对象，不会自动放入常量池。
+- 可用intern()方法将字符串加入常量池。
+
+**示例：**
+```java
+String s1 = "hello";
+String s2 = "hello";
+System.out.println(s1 == s2); // true，指向常量池同一对象
+String s3 = new String("hello");
+System.out.println(s1 == s3); // false，s3为新对象
+System.out.println(s1 == s3.intern()); // true
+```
+
+### 4. 字符串比较
+- == 比较的是引用（地址），equals()比较的是内容。
+- 推荐用equals()判断字符串内容是否相等。
+
+### 5. 字符串拼接机制
+- 字符串拼接（+）在编译期会优化为StringBuilder.append()，但多次拼接建议手动用StringBuilder。
+- 字符串常量拼接会在编译期合并，变量拼接则在运行时生成新对象。
+
+**示例：**
+```java
+String a = "he" + "llo"; // 编译期合并为"hello"
+String b = "he";
+String c = b + "llo"; // 运行时拼接
+System.out.println(a == "hello"); // true
+System.out.println(c == "hello"); // false
+```
+
+### 6. 性能影响
+- 频繁修改字符串建议用StringBuilder/StringBuffer，避免生成大量无用String对象。
+- 字符串不可变性有利于安全和性能优化，但需注意拼接和创建方式。
+
+> 理解String的底层原理有助于编写高效、健壮的Java代码，避免常见性能和内存问题。
+
+### 7. 字符串拼接的底层原理
+
+- **编译期优化**：
+  - 对于字符串常量的拼接（如"a" + "b"），编译器会在编译阶段直接合并为一个常量（"ab"），不会生成多余对象。
+  - 例如：
+    ```java
+    String s = "a" + "b" + "c"; // 编译后等价于 String s = "abc";
+    ```
+
+- **运行时机制**：
+  - 对于包含变量的拼接（如a + b），编译器会将其转换为StringBuilder的append()方法链式调用，最后toString()生成新字符串。
+  - 例如：
+    ```java
+    String a = "hello";
+    String b = "world";
+    String s = a + b;
+    // 实际等价于：
+    // String s = new StringBuilder().append(a).append(b).toString();
+    ```
+
+- **多次拼接建议**：
+  - 在循环或大量拼接场景下，建议手动使用StringBuilder/StringBuffer，避免生成大量临时String对象，提升性能。
+  - 例如：
+    ```java
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < 1000; i++) {
+        sb.append(i);
+    }
+    String result = sb.toString();
+    ```
+
+- **常量拼接与变量拼接的区别**：
+  - 常量拼接在编译期完成，结果在常量池。
+  - 变量拼接在运行期完成，结果在堆内存。
+
+- **性能影响**：
+  - 频繁使用+拼接字符串会导致性能下降，尤其是在循环中。
+  - 推荐用StringBuilder进行高效拼接。
+
+> 理解字符串拼接的底层原理有助于写出高效、可维护的Java代码，避免无谓的内存浪费和性能瓶颈。
+
+### 8. 直接赋值字符串与变量拼接字符串的==比较
+
+- **直接赋值字符串**（如String s1 = "abc";）会被放入字符串常量池，池中相同内容的字符串只存一份。
+- **变量拼接字符串**（如String s2 = a + b;）即使内容相同，结果是运行时新创建的对象，存放在堆内存，不会自动进入常量池。
+- 因此，内容相同但创建方式不同的字符串，用==比较时结果通常为false。
+- == 比较的是引用（地址），不是内容。内容比较应使用equals()。
+
+**示例：**
+```java
+String s1 = "hello";
+String s2 = "he" + "llo"; // 编译期常量拼接，等价于"hello"，与s1同一对象
+System.out.println(s1 == s2); // true
+
+String a = "he";
+String b = "llo";
+String s3 = a + b; // 运行时拼接，生成新对象
+System.out.println(s1 == s3); // false
+System.out.println(s1.equals(s3)); // true
+```
+
+**重点总结：**
+- 直接赋值或常量拼接的字符串，内容相同==为true。
+- 变量拼接的字符串，即使内容相同==为false。
+- 判断字符串内容相等，必须用equals()方法。

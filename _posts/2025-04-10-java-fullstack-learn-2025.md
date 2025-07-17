@@ -1705,3 +1705,196 @@ System.out.println(s1.equals(s3)); // true
 - 直接赋值或常量拼接的字符串，内容相同==为true。
 - 变量拼接的字符串，即使内容相同==为false。
 - 判断字符串内容相等，必须用equals()方法。
+
+## Java集合框架基础
+
+### 1. 集合的概念
+- 集合（Collection）是存储、操作一组数据的容器，支持动态扩容、去重、排序等功能。
+- Java集合框架（Collection Framework）提供了丰富的数据结构和算法，位于java.util包。
+- 集合只能存引用类型（对象），基本类型需用包装类（如Integer、Double）。
+
+### 2. 主要接口与体系结构
+- **Collection接口**：单值集合的根接口，子接口有List、Set、Queue等。
+- **List接口**：有序、可重复元素，如ArrayList、LinkedList。
+- **Set接口**：无序、不可重复元素，如HashSet、TreeSet。
+- **Map接口**：键值对集合，如HashMap、TreeMap，不继承Collection。
+
+```
+Collection
+  ├── List（有序、可重复）
+  │     ├── ArrayList
+  │     └── LinkedList
+  └── Set（无序、不可重复）
+        ├── HashSet
+        └── TreeSet
+Map（键值对）
+  ├── HashMap
+  └── TreeMap
+```
+
+### 3. 常用实现类
+- **ArrayList**：基于数组，查询快，增删慢，常用。
+- **LinkedList**：基于链表，增删快，查询慢。
+- **HashSet**：基于哈希表，无序、唯一。
+- **TreeSet**：基于红黑树，自动排序、唯一。
+- **HashMap**：基于哈希表，键值对，无序，key唯一。
+- **TreeMap**：基于红黑树，键值对，自动按key排序。
+
+### 4. 基本用法与常见操作
+- 添加元素：add()/put()
+- 删除元素：remove()
+- 判断包含：contains()/containsKey()
+- 获取元素：get()/iterator()/for-each
+- 清空集合：clear()
+- 获取大小：size()
+
+### 5. 示例代码
+```java
+import java.util.*;
+
+List<String> list = new ArrayList<>();
+list.add("A");
+list.add("B");
+System.out.println(list.get(0)); // A
+
+Set<Integer> set = new HashSet<>();
+set.add(1);
+set.add(2);
+System.out.println(set.contains(1)); // true
+
+Map<String, Integer> map = new HashMap<>();
+map.put("Tom", 18);
+map.put("Jerry", 20);
+System.out.println(map.get("Tom")); // 18
+```
+
+### 6. 遍历集合
+- for-each循环：
+  ```java
+  for (String s : list) {
+      System.out.println(s);
+  }
+  ```
+- 迭代器遍历：
+  ```java
+  Iterator<Integer> it = set.iterator();
+  while (it.hasNext()) {
+      System.out.println(it.next());
+  }
+  ```
+- Map遍历：
+  ```java
+  for (Map.Entry<String, Integer> entry : map.entrySet()) {
+      System.out.println(entry.getKey() + ":" + entry.getValue());
+  }
+  ```
+
+> 集合是Java开发中最常用的数据结构，掌握其用法有助于高效管理和处理数据。
+
+## Java泛型（Generics）
+
+### 1. 概念
+- 泛型是JDK 1.5引入的特性，用于在类、接口、方法中定义和使用类型参数，实现类型安全和代码复用。
+- 常用于集合类、工具类等，避免强制类型转换和运行时类型错误。
+
+### 2. 基本语法
+- 泛型类/接口：
+  ```java
+  class Box<T> {
+      private T value;
+      public void set(T value) { this.value = value; }
+      public T get() { return value; }
+  }
+  Box<Integer> box = new Box<>();
+  box.set(123);
+  ```
+- 泛型方法：
+  ```java
+  public <T> void print(T t) {
+      System.out.println(t);
+  }
+  ```
+- 泛型接口：
+  ```java
+  interface Converter<F, T> {
+      T convert(F from);
+  }
+  ```
+
+### 3. 集合中的泛型
+- 指定集合元素类型，避免强转：
+  ```java
+  List<String> list = new ArrayList<>();
+  list.add("abc");
+  String s = list.get(0); // 无需强转
+  ```
+
+### 4. 通配符与类型限定
+- `?`：通配符，表示未知类型。
+- `? extends T`：上限通配符，表示T或T的子类（如读取数据时）。
+- `? super T`：下限通配符，表示T或T的父类（如写入数据时）。
+
+**示例：**
+```java
+List<? extends Number> nums = new ArrayList<Integer>(); // 只能读，不能写
+List<? super Integer> ints = new ArrayList<Number>(); // 可写入Integer及其子类
+```
+
+### 5. 好处
+- 类型安全：编译期检查类型，避免ClassCastException。
+- 代码复用：同一泛型类/方法可适用于多种类型。
+- 可读性强：代码意图明确。
+
+> 泛型是Java类型系统的重要组成部分，合理使用可提升代码的健壮性和灵活性。
+
+## 数组与集合的选择：什么时候用集合，什么时候用数组？
+
+在Java开发中，选择"集合"还是"数组"主要取决于你的具体需求。下面详细说明它们各自的适用场景和选择依据：
+
+### 一、数组适用场景
+
+1. **元素数量固定且已知**  
+   例如：存储一周7天的名称、12个月份等。  
+   一旦创建，长度不可变。
+2. **对性能要求极高**  
+   数组在内存中是连续分布，访问速度快，适合对性能有极高要求的场景（如底层算法、频繁索引访问）。
+3. **存储基本数据类型或对象引用**  
+   可以存储任何类型（基本类型或引用类型），但类型必须一致。
+4. **内存占用可控**  
+   数组没有额外的对象封装和元数据，内存开销小。
+
+### 二、集合适用场景
+
+1. **元素数量不确定或经常变化**  
+   例如：用户动态输入、数据量随时增减的场景。  
+   集合可以动态扩容，元素数量不受限制。
+2. **需要丰富的操作和功能**  
+   集合类（如List、Set、Map）提供了丰富的API，如增删查改、排序、去重、查找等。
+3. **需要存储对象（引用类型）**  
+   集合只能存储对象，不能直接存储基本数据类型（但可以用包装类）。
+4. **需要灵活的数据结构**  
+   如链表、队列、栈、哈希表、树等，集合框架都提供了相应实现。
+
+### 三、选择建议
+
+- **数据量固定且类型单一**：优先用数组。
+- **数据量不确定或需频繁增删**：优先用集合。
+- **需要高级操作（如排序、去重、查找）**：优先用集合。
+- **只需存储基本类型且追求极致性能**：用基本类型数组。
+
+### 四、举例说明
+
+- **数组**：  
+  ```java
+  int[] scores = new int[5]; // 固定5个成绩
+  ```
+- **集合**：  
+  ```java
+  List<Integer> scoreList = new ArrayList<>(); // 可以随时添加、删除成绩
+  ```
+
+### 五、总结口诀
+
+> "定长用数组，变长用集合；操作多用集合，性能极致用数组。"
+
+如需更详细的代码示例或对比，也可以补充说明！

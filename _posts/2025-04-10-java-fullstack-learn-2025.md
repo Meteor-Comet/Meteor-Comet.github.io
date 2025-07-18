@@ -2018,3 +2018,141 @@ public class StaticDemo {
 ```
 
 > static是Java类成员管理和工具方法设计的核心，理解其原理有助于写出高效、规范的Java代码。
+
+## Java中的继承（Inheritance）
+
+### 1. 概念
+- 继承是面向对象编程的三大特性之一，允许子类自动获得父类的属性和方法，实现代码复用和扩展。
+- Java使用`extends`关键字实现类的继承。
+
+### 2. 语法
+```java
+class 父类名 {
+    // 父类内容
+}
+class 子类名 extends 父类名 {
+    // 子类内容
+}
+```
+
+### 3. 特性
+- 子类继承父类的非private成员（属性和方法）。
+- 子类可以新增自己的成员。
+- 子类可以重写（Override）父类的方法。
+- Java只支持单继承（一个类只能有一个直接父类），但支持多层继承和多实现接口。
+
+### 4. super关键字
+- super用于在子类中引用父类的成员（属性、方法、构造器）。
+- 可用于区分同名成员、调用父类构造方法。
+
+**示例：**
+```java
+class Animal {
+    String name = "动物";
+    void eat() { System.out.println("吃东西"); }
+}
+class Dog extends Animal {
+    String name = "狗";
+    void eat() {
+        super.eat(); // 调用父类方法
+        System.out.println("狗吃骨头");
+    }
+    void printName() {
+        System.out.println(super.name); // 父类name
+        System.out.println(this.name);  // 子类name
+    }
+}
+```
+
+### 5. 构造方法调用
+- 子类构造方法会默认先调用父类的无参构造方法（super()），如需调用父类有参构造，需显式写super(参数)。
+- 父类构造方法执行完后才执行子类构造方法。
+
+### 6. 方法重写（Override）
+- 子类可重写父类方法，方法名、参数、返回值完全一致，访问权限不能更低。
+- 重写方法可加@Override注解，提升可读性和安全性。
+
+### 7. final/abstract与继承
+- final类不能被继承，final方法不能被重写。
+- abstract类不能实例化，可包含抽象方法，子类必须实现抽象方法。
+
+### 8. 单继承与多态
+- Java类只支持单继承，但可多层继承和多实现接口。
+- 继承是实现多态的基础，父类引用可指向子类对象。
+
+### 9. 常见面试点
+- 构造方法的调用顺序？（父类→子类）
+- super和this的区别？
+- 方法重写与重载的区别？
+- final/abstract与继承的关系？
+- 为什么Java不支持多继承？（避免菱形继承、简化设计）
+
+### 10. 示例代码
+```java
+class Animal {
+    void speak() { System.out.println("动物叫"); }
+}
+class Cat extends Animal {
+    @Override
+    void speak() { System.out.println("喵喵"); }
+}
+public class Test {
+    public static void main(String[] args) {
+        Animal a = new Cat();
+        a.speak(); // 输出：喵喵
+    }
+}
+```
+
+> 继承是Java代码复用和多态实现的基础，合理设计继承结构有助于提升系统的可维护性和扩展性。
+
+### 11. 继承中成员变量和成员方法的访问与重写
+
+#### 1. 成员变量
+- 子类可以定义与父类同名的成员变量，这种情况下，子类变量会"隐藏"父类变量。
+- 通过子类对象访问变量时，**编译和运行都看引用类型**，即变量的类型由引用变量的声明类型决定。
+- 可用super关键字访问父类的同名变量。
+
+**示例：**
+```java
+class Parent {
+    int x = 1;
+}
+class Child extends Parent {
+    int x = 2;
+    void print() {
+        System.out.println(x); // 2，子类变量
+        System.out.println(super.x); // 1，父类变量
+    }
+}
+Parent p = new Child();
+System.out.println(p.x); // 1，引用类型为Parent
+```
+
+#### 2. 成员方法
+- 子类可以重写（Override）父类的成员方法。
+- 方法重写时，**编译看引用类型，运行看对象实际类型**（多态）。
+- 可用super关键字调用父类被重写的方法。
+
+**示例：**
+```java
+class Parent {
+    void show() { System.out.println("Parent"); }
+}
+class Child extends Parent {
+    @Override
+    void show() { System.out.println("Child"); }
+}
+Parent p = new Child();
+p.show(); // 输出：Child
+```
+
+#### 3. 访问权限
+- private成员不能被继承，protected和public成员可被继承。
+- 子类重写方法时，访问权限不能低于父类方法。
+
+#### 4. super与this的区别
+- this：指向当前对象（子类对象），可访问本类成员。
+- super：指向父类对象（父类部分），可访问父类被隐藏/重写的成员。
+
+> 理解继承中成员变量和方法的访问与重写规则，有助于正确使用多态、避免变量隐藏和方法覆盖带来的困惑。

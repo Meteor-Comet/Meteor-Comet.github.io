@@ -2156,3 +2156,90 @@ p.show(); // 输出：Child
 - super：指向父类对象（父类部分），可访问父类被隐藏/重写的成员。
 
 > 理解继承中成员变量和方法的访问与重写规则，有助于正确使用多态、避免变量隐藏和方法覆盖带来的困惑。
+
+## Java方法重写（Override）详解
+
+### 1. 概念
+- 方法重写（Override）是指子类对父类继承的方法进行重新实现，方法名、参数列表、返回值类型完全一致。
+- 目的是让子类对象调用时有不同的行为，实现多态。
+
+### 2. 语法规则
+- 子类方法必须与父类被重写方法的方法名、参数列表、返回值类型完全一致。
+- 访问权限不能低于父类（可相同或更大）。
+- 不能重写父类的private、static、final方法。
+- 子类方法抛出的异常不能比父类更宽泛。
+- 推荐加@Override注解，编译器会检查是否正确重写。
+
+### 3. @Override注解
+- 放在重写方法前，提升代码可读性和安全性。
+- 如果方法签名不一致，编译器会报错。
+
+### 4. 与重载（Overload）的区别
+- **重写**：子类对父类方法重新实现，方法签名完全一致，发生在继承体系中。
+- **重载**：同一个类中方法名相同，参数列表不同，返回值类型可不同。
+
+### 5. 常见面试点
+- 重写方法的访问权限、异常、返回值要求？
+- static方法能否重写？（不能，只能被隐藏）
+- 构造方法能否重写？（不能）
+- 为什么要用@Override注解？
+
+### 6. 示例代码
+```java
+class Animal {
+    void speak() { System.out.println("动物叫"); }
+}
+class Dog extends Animal {
+    @Override
+    void speak() { System.out.println("汪汪"); }
+}
+public class Test {
+    public static void main(String[] args) {
+        Animal a = new Dog();
+        a.speak(); // 输出：汪汪
+    }
+}
+```
+
+> 方法重写是实现多态的基础，合理使用可提升代码的灵活性和可维护性。
+
+### 12. 继承中构造方法的自动调用（super）
+
+- 在Java中，子类构造方法执行时会**自动调用父类的构造方法**，以保证父类部分被正确初始化。
+- 如果子类构造方法没有显式写`super(...)`，编译器会自动在第一行加上`super();`，即调用父类的无参构造方法。
+- 如果父类没有无参构造方法，子类必须显式调用父类的有参构造方法，否则编译报错。
+- `super(...)`必须是子类构造方法的第一条语句。
+
+**调用顺序：**
+1. 先执行父类构造方法（super），再执行子类构造方法。
+2. 多层继承时，先最顶层父类，再逐层向下。
+
+**示例：**
+```java
+class Parent {
+    Parent() { System.out.println("父类构造"); }
+}
+class Child extends Parent {
+    Child() { System.out.println("子类构造"); }
+}
+public class Test {
+    public static void main(String[] args) {
+        new Child();
+        // 输出：
+        // 父类构造
+        // 子类构造
+    }
+}
+```
+
+**有参构造情况：**
+```java
+class Parent {
+    Parent(String msg) { System.out.println(msg); }
+}
+class Child extends Parent {
+    Child() { super("父类有参构造"); System.out.println("子类构造"); }
+}
+```
+
+> 理解构造方法的自动调用顺序，有助于正确初始化继承体系中的对象，避免常见的编译和运行错误。

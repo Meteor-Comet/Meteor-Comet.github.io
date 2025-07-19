@@ -2074,7 +2074,7 @@ class Dog extends Animal {
 
 ### 7. final/abstract与继承
 - final类不能被继承，final方法不能被重写。
-- abstract类不能实例化，可包含抽象方法，子类必须实现抽象方法。
+- abstract类不能实例化，可包含抽象方法，子类必须实现。
 
 ### 8. 单继承与多态
 - Java类只支持单继承，但可多层继承和多实现接口。
@@ -2243,3 +2243,1080 @@ class Child extends Parent {
 ```
 
 > 理解构造方法的自动调用顺序，有助于正确初始化继承体系中的对象，避免常见的编译和运行错误。
+
+### 13. 构造方法中this(...)的含义与用法
+
+- 在Java构造方法中，`this(...)`用于调用本类的另一个构造方法，实现构造方法之间的重用和统一初始化。
+- `this(...)`只能出现在构造方法的第一行，且不能与super(...)同时出现。
+- 通过this(...)可以实现构造方法的链式调用，最终会调用到某个没有this(...)的构造方法（通常是最全参的构造方法）。
+
+**示例：**
+```java
+class Person {
+    String name;
+    int age;
+
+    // 无参构造
+    public Person() {
+        this("无名氏", 0); // 调用有参构造
+        System.out.println("无参构造执行");
+    }
+
+    // 有参构造
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+        System.out.println("有参构造执行");
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        Person p = new Person();
+        // 输出：
+        // 有参构造执行
+        // 无参构造执行
+    }
+}
+```
+
+**注意事项：**
+- this(...)只能用于构造方法，且必须是第一条语句。
+- 不能和super(...)同时出现。
+
+**作用总结：**
+- 统一初始化逻辑，减少重复代码。
+- 便于维护和扩展构造方法。
+
+> 在构造方法中用this(...)，就是"让本类的另一个构造方法帮我初始化"。
+
+### 14. 多态（Polymorphism）
+
+多态是面向对象编程的三大特性之一，指同一个行为具有多个不同表现形式或形态的能力。在Java中，多态主要通过继承和接口实现。
+
+#### 14.1 多态的概念
+
+- **多态**：同一个接口，使用不同的实例而执行不同操作。
+- **编译时多态**：方法重载（Overloading）
+- **运行时多态**：方法重写（Overriding）
+
+#### 14.2 多态的实现方式
+
+**1. 继承多态**
+```java
+class Animal {
+    public void makeSound() {
+        System.out.println("动物发出声音");
+    }
+}
+
+class Dog extends Animal {
+    @Override
+    public void makeSound() {
+        System.out.println("汪汪汪");
+    }
+}
+
+class Cat extends Animal {
+    @Override
+    public void makeSound() {
+        System.out.println("喵喵喵");
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        Animal animal1 = new Dog(); // 父类引用指向子类对象
+        Animal animal2 = new Cat();
+        
+        animal1.makeSound(); // 输出：汪汪汪
+        animal2.makeSound(); // 输出：喵喵喵
+    }
+}
+```
+
+**2. 接口多态**
+```java
+interface Flyable {
+    void fly();
+}
+
+class Bird implements Flyable {
+    @Override
+    public void fly() {
+        System.out.println("鸟儿飞翔");
+    }
+}
+
+class Airplane implements Flyable {
+    @Override
+    public void fly() {
+        System.out.println("飞机飞行");
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        Flyable flyable1 = new Bird();
+        Flyable flyable2 = new Airplane();
+        
+        flyable1.fly(); // 输出：鸟儿飞翔
+        flyable2.fly(); // 输出：飞机飞行
+    }
+}
+```
+
+#### 14.3 多态的特点
+
+**1. 向上转型（Upcasting）**
+- 子类对象可以赋值给父类引用
+- 自动类型转换，安全可靠
+```java
+Animal animal = new Dog(); // 向上转型
+```
+
+**2. 向下转型（Downcasting）**
+- 父类引用转换为子类引用
+- 需要强制类型转换，可能抛出ClassCastException
+```java
+Animal animal = new Dog();
+Dog dog = (Dog) animal; // 向下转型
+```
+
+**3. instanceof运算符**
+- 用于判断对象是否为某个类的实例
+- 避免ClassCastException异常
+```java
+Animal animal = new Dog();
+if (animal instanceof Dog) {
+    Dog dog = (Dog) animal;
+    dog.makeSound();
+}
+```
+
+#### 14.4 多态的应用场景
+
+**1. 方法参数多态**
+```java
+public class AnimalTrainer {
+    public void train(Animal animal) {
+        animal.makeSound();
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        AnimalTrainer trainer = new AnimalTrainer();
+        trainer.train(new Dog()); // 输出：汪汪汪
+        trainer.train(new Cat()); // 输出：喵喵喵
+    }
+}
+```
+
+**2. 方法返回值多态**
+```java
+public class AnimalFactory {
+    public static Animal createAnimal(String type) {
+        if ("dog".equals(type)) {
+            return new Dog();
+        } else if ("cat".equals(type)) {
+            return new Cat();
+        }
+        return null;
+    }
+}
+```
+
+**3. 集合中的多态**
+```java
+List<Animal> animals = new ArrayList<>();
+animals.add(new Dog());
+animals.add(new Cat());
+
+for (Animal animal : animals) {
+    animal.makeSound(); // 多态调用
+}
+```
+
+#### 14.5 多态的注意事项
+
+**1. 成员变量没有多态**
+```java
+class Parent {
+    int num = 10;
+}
+
+class Child extends Parent {
+    int num = 20;
+}
+
+public class Test {
+    public static void main(String[] args) {
+        Parent p = new Child();
+        System.out.println(p.num); // 输出：10（成员变量没有多态）
+    }
+}
+```
+
+**2. 静态方法没有多态**
+```java
+class Parent {
+    public static void method() {
+        System.out.println("父类静态方法");
+    }
+}
+
+class Child extends Parent {
+    public static void method() {
+        System.out.println("子类静态方法");
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        Parent p = new Child();
+        p.method(); // 输出：父类静态方法（静态方法没有多态）
+    }
+}
+```
+
+**3. 构造方法没有多态**
+- 构造方法不能被重写，因此不存在多态
+
+#### 14.6 多态的优势
+
+1. **可扩展性**：新增子类不需要修改现有代码
+2. **可维护性**：统一的接口，便于维护
+3. **可复用性**：一个方法可以处理多种类型的对象
+4. **灵活性**：运行时动态绑定，提高程序灵活性
+
+#### 14.7 实际应用示例
+
+**图形计算器**
+```java
+abstract class Shape {
+    abstract double getArea();
+    abstract double getPerimeter();
+}
+
+class Circle extends Shape {
+    private double radius;
+    
+    public Circle(double radius) {
+        this.radius = radius;
+    }
+    
+    @Override
+    double getArea() {
+        return Math.PI * radius * radius;
+    }
+    
+    @Override
+    double getPerimeter() {
+        return 2 * Math.PI * radius;
+    }
+}
+
+class Rectangle extends Shape {
+    private double width, height;
+    
+    public Rectangle(double width, double height) {
+        this.width = width;
+        this.height = height;
+    }
+    
+    @Override
+    double getArea() {
+        return width * height;
+    }
+    
+    @Override
+    double getPerimeter() {
+        return 2 * (width + height);
+    }
+}
+
+public class ShapeCalculator {
+    public static void printShapeInfo(Shape shape) {
+        System.out.println("面积：" + shape.getArea());
+        System.out.println("周长：" + shape.getPerimeter());
+    }
+    
+    public static void main(String[] args) {
+        printShapeInfo(new Circle(5));
+        printShapeInfo(new Rectangle(4, 6));
+    }
+}
+```
+
+> 多态是面向对象编程的核心特性，通过多态可以实现代码的灵活性和可扩展性，是设计优秀面向对象程序的重要基础。
+
+### 15. 多态中成员变量与成员方法的调用机制
+
+多态中成员变量和成员方法的调用行为存在重要差异，理解这些差异有助于正确使用多态特性。
+
+#### 15.1 成员变量的调用机制
+
+**核心规则：成员变量没有多态，编译时确定**
+
+```java
+class Parent {
+    int num = 10;
+    String name = "父类";
+    
+    public void showInfo() {
+        System.out.println("父类方法中的num: " + num);
+        System.out.println("父类方法中的name: " + name);
+    }
+}
+
+class Child extends Parent {
+    int num = 20;
+    String name = "子类";
+    
+    @Override
+    public void showInfo() {
+        System.out.println("子类方法中的num: " + num);
+        System.out.println("子类方法中的name: " + name);
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        Parent p = new Child(); // 父类引用指向子类对象
+        
+        // 成员变量调用 - 看引用类型
+        System.out.println(p.num);    // 输出：10（父类的num）
+        System.out.println(p.name);   // 输出：父类（父类的name）
+        
+        // 成员方法调用 - 看对象类型
+        p.showInfo(); // 输出：
+        // 子类方法中的num: 20
+        // 子类方法中的name: 子类
+    }
+}
+```
+
+**内存原理分析：**
+```
+内存中的对象结构：
+Child对象 {
+    Parent部分 {
+        num = 10
+        name = "父类"
+    }
+    Child部分 {
+        num = 20  (隐藏了父类的num)
+        name = "子类"  (隐藏了父类的name)
+    }
+}
+
+当使用 Parent p = new Child() 时：
+- p.num 访问的是 Parent 部分的 num (10)
+- p.showInfo() 调用的是 Child 的 showInfo() 方法
+- 在 Child 的 showInfo() 方法中，num 和 name 访问的是 Child 部分的变量
+```
+
+#### 15.2 成员方法的调用机制
+
+**核心规则：成员方法有多态，运行时确定**
+
+```java
+class Animal {
+    public void eat() {
+        System.out.println("动物吃东西");
+    }
+    
+    public void sleep() {
+        System.out.println("动物睡觉");
+        this.eat(); // 调用的是实际对象的方法
+    }
+}
+
+class Dog extends Animal {
+    @Override
+    public void eat() {
+        System.out.println("狗吃骨头");
+    }
+    
+    public void bark() {
+        System.out.println("狗叫");
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        Animal animal = new Dog();
+        
+        animal.eat();   // 输出：狗吃骨头（多态调用）
+        animal.sleep(); // 输出：动物睡觉 + 狗吃骨头
+        // animal.bark(); // 编译错误：父类引用无法调用子类特有方法
+    }
+}
+```
+
+#### 15.3 静态成员的调用机制
+
+**核心规则：静态成员没有多态，编译时确定**
+
+```java
+class Parent {
+    static int staticNum = 100;
+    
+    public static void staticMethod() {
+        System.out.println("父类静态方法");
+    }
+    
+    public void instanceMethod() {
+        System.out.println("父类实例方法");
+    }
+}
+
+class Child extends Parent {
+    static int staticNum = 200;
+    
+    public static void staticMethod() {
+        System.out.println("子类静态方法");
+    }
+    
+    @Override
+    public void instanceMethod() {
+        System.out.println("子类实例方法");
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        Parent p = new Child();
+        
+        // 静态成员调用 - 看引用类型
+        System.out.println(p.staticNum);     // 输出：100
+        p.staticMethod();                    // 输出：父类静态方法
+        
+        // 实例方法调用 - 看对象类型
+        p.instanceMethod();                  // 输出：子类实例方法
+    }
+}
+```
+
+#### 15.4 构造方法中的调用
+
+```java
+class Parent {
+    int num = 10;
+    
+    public Parent() {
+        System.out.println("父类构造方法中的num: " + num);
+        this.showNum();
+    }
+    
+    public void showNum() {
+        System.out.println("父类showNum方法中的num: " + num);
+    }
+}
+
+class Child extends Parent {
+    int num = 20;
+    
+    public Child() {
+        super(); // 调用父类构造方法
+        System.out.println("子类构造方法中的num: " + num);
+        this.showNum();
+    }
+    
+    @Override
+    public void showNum() {
+        System.out.println("子类showNum方法中的num: " + num);
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        Child child = new Child();
+        // 输出：
+        // 父类构造方法中的num: 10
+        // 父类showNum方法中的num: 10
+        // 子类构造方法中的num: 20
+        // 子类showNum方法中的num: 20
+    }
+}
+```
+
+#### 15.5 实际应用中的注意事项
+
+**1. 避免在父类方法中直接访问成员变量**
+```java
+class Shape {
+    protected double area;
+    
+    public void calculateArea() {
+        // 子类重写此方法时，area的访问可能不符合预期
+        System.out.println("面积: " + area);
+    }
+}
+
+class Circle extends Shape {
+    private double radius;
+    
+    @Override
+    public void calculateArea() {
+        this.area = Math.PI * radius * radius; // 正确设置area
+        super.calculateArea(); // 调用父类方法显示
+    }
+}
+```
+
+**2. 使用getter/setter方法**
+```java
+class Person {
+    private String name;
+    
+    public String getName() {
+        return name;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+}
+
+class Student extends Person {
+    private String studentId;
+    
+    @Override
+    public String getName() {
+        return "学生: " + super.getName();
+    }
+}
+```
+
+**3. 方法重写时的变量访问**
+```java
+class Base {
+    protected int value = 10;
+    
+    public void display() {
+        System.out.println("Base value: " + value);
+    }
+}
+
+class Derived extends Base {
+    protected int value = 20;
+    
+    @Override
+    public void display() {
+        System.out.println("Derived value: " + value);        // 20
+        System.out.println("Base value: " + super.value);     // 10
+    }
+}
+```
+
+#### 15.6 总结对比
+
+| 特性 | 成员变量 | 成员方法 | 静态成员 |
+|------|----------|----------|----------|
+| 多态性 | ❌ 无多态 | ✅ 有多态 | ❌ 无多态 |
+| 调用依据 | 引用类型 | 对象类型 | 引用类型 |
+| 确定时机 | 编译时 | 运行时 | 编译时 |
+| 内存访问 | 直接访问 | 动态绑定 | 直接访问 |
+
+> **记忆口诀**：变量看引用，方法看对象，静态看引用。理解这个机制有助于避免多态使用中的常见错误。
+
+### 16. 多态中的强制类型转换
+
+多态中的类型转换是Java面向对象编程中的重要概念，包括向上转型和向下转型两种方式。
+
+#### 16.1 向上转型（Upcasting）
+
+**概念：** 子类对象赋值给父类引用，自动进行类型转换。
+
+```java
+class Animal {
+    public void eat() {
+        System.out.println("动物吃东西");
+    }
+}
+
+class Dog extends Animal {
+    @Override
+    public void eat() {
+        System.out.println("狗吃骨头");
+    }
+    
+    public void bark() {
+        System.out.println("狗叫");
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        // 向上转型 - 自动转换，安全可靠
+        Animal animal = new Dog();
+        animal.eat(); // 可以调用父类方法
+        
+        // animal.bark(); // 编译错误：父类引用无法调用子类特有方法
+    }
+}
+```
+
+**特点：**
+- 自动进行，无需强制转换
+- 安全可靠，不会抛出异常
+- 可以调用父类方法，无法调用子类特有方法
+
+#### 16.2 向下转型（Downcasting）
+
+**概念：** 父类引用转换为子类引用，需要强制类型转换。
+
+```java
+class Animal {
+    public void eat() {
+        System.out.println("动物吃东西");
+    }
+}
+
+class Dog extends Animal {
+    @Override
+    public void eat() {
+        System.out.println("狗吃骨头");
+    }
+    
+    public void bark() {
+        System.out.println("狗叫");
+    }
+}
+
+class Cat extends Animal {
+    @Override
+    public void eat() {
+        System.out.println("猫吃鱼");
+    }
+    
+    public void meow() {
+        System.out.println("猫叫");
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        Animal animal1 = new Dog();
+        Animal animal2 = new Cat();
+        
+        // 向下转型 - 需要强制转换
+        Dog dog = (Dog) animal1; // 成功
+        dog.bark(); // 可以调用子类特有方法
+        
+        // Cat cat = (Cat) animal1; // 运行时异常：ClassCastException
+    }
+}
+```
+
+#### 16.3 instanceof运算符
+
+**作用：** 判断对象是否为某个类的实例，避免ClassCastException异常。
+
+```java
+public class Test {
+    public static void main(String[] args) {
+        Animal animal1 = new Dog();
+        Animal animal2 = new Cat();
+        
+        // 使用instanceof进行安全转换
+        if (animal1 instanceof Dog) {
+            Dog dog = (Dog) animal1;
+            dog.bark();
+        }
+        
+        if (animal2 instanceof Cat) {
+            Cat cat = (Cat) animal2;
+            cat.meow();
+        }
+        
+        // 检查是否为null
+        Animal animal3 = null;
+        System.out.println(animal3 instanceof Animal); // false，null不是任何类的实例
+    }
+}
+```
+
+#### 16.4 类型转换的实际应用
+
+**1. 集合中的类型转换**
+```java
+import java.util.*;
+
+class Animal {
+    public void eat() {
+        System.out.println("动物吃东西");
+    }
+}
+
+class Dog extends Animal {
+    @Override
+    public void eat() {
+        System.out.println("狗吃骨头");
+    }
+    
+    public void bark() {
+        System.out.println("狗叫");
+    }
+}
+
+class Cat extends Animal {
+    @Override
+    public void eat() {
+        System.out.println("猫吃鱼");
+    }
+    
+    public void meow() {
+        System.out.println("猫叫");
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        List<Animal> animals = new ArrayList<>();
+        animals.add(new Dog());
+        animals.add(new Cat());
+        animals.add(new Dog());
+        
+        for (Animal animal : animals) {
+            animal.eat(); // 多态调用
+            
+            // 根据类型调用特有方法
+            if (animal instanceof Dog) {
+                Dog dog = (Dog) animal;
+                dog.bark();
+            } else if (animal instanceof Cat) {
+                Cat cat = (Cat) animal;
+                cat.meow();
+            }
+        }
+    }
+}
+```
+
+**2. 工厂模式中的类型转换**
+```java
+interface Vehicle {
+    void drive();
+}
+
+class Car implements Vehicle {
+    @Override
+    public void drive() {
+        System.out.println("汽车行驶");
+    }
+    
+    public void park() {
+        System.out.println("汽车停车");
+    }
+}
+
+class Motorcycle implements Vehicle {
+    @Override
+    public void drive() {
+        System.out.println("摩托车行驶");
+    }
+    
+    public void wheelie() {
+        System.out.println("摩托车翘头");
+    }
+}
+
+class VehicleFactory {
+    public static Vehicle createVehicle(String type) {
+        if ("car".equals(type)) {
+            return new Car();
+        } else if ("motorcycle".equals(type)) {
+            return new Motorcycle();
+        }
+        return null;
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        Vehicle vehicle1 = VehicleFactory.createVehicle("car");
+        Vehicle vehicle2 = VehicleFactory.createVehicle("motorcycle");
+        
+        // 使用instanceof进行安全转换
+        if (vehicle1 instanceof Car) {
+            Car car = (Car) vehicle1;
+            car.drive();
+            car.park();
+        }
+        
+        if (vehicle2 instanceof Motorcycle) {
+            Motorcycle motorcycle = (Motorcycle) vehicle2;
+            motorcycle.drive();
+            motorcycle.wheelie();
+        }
+    }
+}
+```
+
+#### 16.5 类型转换的注意事项
+
+**1. 避免不必要的转换**
+```java
+class Animal {
+    public void eat() {
+        System.out.println("动物吃东西");
+    }
+}
+
+class Dog extends Animal {
+    @Override
+    public void eat() {
+        System.out.println("狗吃骨头");
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        Dog dog = new Dog();
+        Animal animal = dog; // 向上转型
+        
+        // 不必要的向下转型
+        Dog dog2 = (Dog) animal; // 可以，但不必要
+        
+        // 直接使用原始引用更好
+        dog.eat(); // 更直接，无需转换
+    }
+}
+```
+
+**2. 处理转换异常**
+```java
+public class Test {
+    public static void main(String[] args) {
+        Animal animal = new Dog();
+        
+        try {
+            Cat cat = (Cat) animal; // 会抛出ClassCastException
+        } catch (ClassCastException e) {
+            System.out.println("类型转换失败：" + e.getMessage());
+        }
+        
+        // 使用instanceof更安全
+        if (animal instanceof Cat) {
+            Cat cat = (Cat) animal;
+            cat.meow();
+        } else {
+            System.out.println("animal不是Cat类型");
+        }
+    }
+}
+```
+
+**3. 接口类型转换**
+```java
+interface Flyable {
+    void fly();
+}
+
+interface Swimmable {
+    void swim();
+}
+
+class Duck implements Flyable, Swimmable {
+    @Override
+    public void fly() {
+        System.out.println("鸭子飞翔");
+    }
+    
+    @Override
+    public void swim() {
+        System.out.println("鸭子游泳");
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        Duck duck = new Duck();
+        
+        // 向上转型到接口
+        Flyable flyable = duck;
+        Swimmable swimmable = duck;
+        
+        // 向下转型回具体类
+        Duck duck2 = (Duck) flyable;
+        Duck duck3 = (Duck) swimmable;
+        
+        // 接口之间的转换
+        if (flyable instanceof Swimmable) {
+            Swimmable swimmable2 = (Swimmable) flyable;
+            swimmable2.swim();
+        }
+    }
+}
+```
+
+#### 16.6 类型转换的最佳实践
+
+**1. 优先使用instanceof检查**
+```java
+public void processAnimal(Animal animal) {
+    if (animal instanceof Dog) {
+        Dog dog = (Dog) animal;
+        dog.bark();
+    } else if (animal instanceof Cat) {
+        Cat cat = (Cat) animal;
+        cat.meow();
+    } else {
+        animal.eat(); // 使用父类方法
+    }
+}
+```
+
+**2. 使用模式匹配（Java 14+）**
+```java
+public void processAnimal(Animal animal) {
+    if (animal instanceof Dog dog) {
+        dog.bark(); // 自动转换
+    } else if (animal instanceof Cat cat) {
+        cat.meow(); // 自动转换
+    } else {
+        animal.eat();
+    }
+}
+```
+
+**3. 避免过度使用类型转换**
+```java
+// 不好的设计
+public void process(Object obj) {
+    if (obj instanceof String) {
+        String str = (String) obj;
+        // 处理字符串
+    } else if (obj instanceof Integer) {
+        Integer num = (Integer) obj;
+        // 处理数字
+    }
+}
+
+// 更好的设计 - 使用泛型
+public <T> void process(T obj) {
+    // 直接使用，无需类型转换
+}
+```
+
+#### 16.7 总结
+
+| 转换类型 | 语法 | 安全性 | 使用场景 |
+|----------|------|--------|----------|
+| 向上转型 | 自动 | 安全 | 多态使用 |
+| 向下转型 | 强制 | 需检查 | 调用子类特有方法 |
+| instanceof | 检查 | 安全 | 类型判断 |
+
+> **关键要点**：向上转型安全自动，向下转型需要检查，instanceof是安全转换的保障。合理使用类型转换可以充分利用多态的优势，但要注意避免ClassCastException异常。
+
+### 17. Java包（package）的命名规范、作用与分类
+
+#### 17.1 包的作用
+
+- **组织管理类文件**：将相关类、接口、枚举等组织在一起，便于项目结构清晰、维护方便。
+- **避免命名冲突**：不同包下可以有同名的类，互不影响。
+- **访问控制**：包提供包访问权限（default/package-private），有助于封装实现细节。
+- **便于代码复用和分发**：包结构清晰，便于模块化开发和第三方库的分发。
+
+#### 17.2 包的命名规范
+
+- **全部小写**，多个单词用点`.`分隔。
+- **推荐使用反域名（Reverse Domain Name）命名法**，保证全局唯一性。
+  - 例如：`com.example.project.module`
+- **不要使用Java保留字或特殊字符**。
+- **包名应简洁明了，体现所属公司、项目、模块等信息**。
+- **常见命名结构**：
+  - 公司/组织域名反写 + 项目名 + 模块名 + 功能名
+  - 例：`com.alibaba.fastjson.parser`
+  - 例：`org.springframework.context.annotation`
+- **避免使用下划线、连字符等特殊符号**。
+
+**示例：**
+```java
+package com.example.myapp.service;
+package org.apache.commons.lang3;
+package cn.itcast.demo.util;
+```
+
+#### 17.3 包的分类方法
+
+1. **按功能分层**（推荐，最常见）
+   - `controller`：控制层（如Web接口、API入口）
+   - `service`：业务逻辑层
+   - `dao` / `repository`：数据访问层
+   - `model` / `entity` / `domain`：实体类、数据模型
+   - `util` / `utils`：工具类
+   - `config`：配置类
+   - `exception`：异常处理
+   - `constant`：常量
+   - 例：
+     ```
+     com.example.project.controller
+     com.example.project.service
+     com.example.project.dao
+     com.example.project.model
+     com.example.project.util
+     ```
+
+2. **按业务模块分类**
+   - 适用于大型项目，将不同业务模块分包管理
+   - 例：
+     ```
+     com.example.project.user
+     com.example.project.order
+     com.example.project.product
+     ```
+
+3. **按技术/层次混合分类**
+   - 结合功能和业务模块
+   - 例：
+     ```
+     com.example.project.user.controller
+     com.example.project.user.service
+     com.example.project.order.controller
+     ```
+
+4. **第三方/开源包命名**
+   - 通常以组织域名反写开头，如`org.apache`, `com.google`, `io.reactivex`等
+
+#### 17.4 包的使用示例
+
+**定义包：**
+```java
+package com.example.myapp.service;
+
+public class UserService {
+    // ...
+}
+```
+
+**导入包：**
+```java
+import com.example.myapp.service.UserService;
+```
+
+**包结构示意：**
+```
+src/
+  └─ main/
+      └─ java/
+          └─ com/
+              └─ example/
+                  └─ myapp/
+                      ├─ controller/
+                      ├─ service/
+                      ├─ dao/
+                      ├─ model/
+                      └─ util/
+```
+
+#### 17.5 总结
+
+- 包的命名要规范、唯一、简洁，体现公司、项目、模块等信息。
+- 合理分类包结构有助于项目的可维护性、可扩展性和团队协作。
+- 推荐采用"反域名+项目+模块+功能"方式命名和分层。
+
+> **最佳实践**：始终遵循公司/社区的包命名规范，保持包结构清晰有序，便于团队协作和代码管理。

@@ -3506,7 +3506,7 @@ public class Constants {
 #### 20.1 不可变的含义
 
 - **不可变（immutable）**：一旦创建，字符串对象的内容（字符序列）就不能被更改。
-- 对字符串的任何修改操作（如拼接、替换、截取等）都会生成新的字符串对象，原有对象不会被改变。
+- 对字符串的任何修改操作（如拼接、替换、截取等）都会生成新的String对象，原有对象不会被改变。
 
 #### 20.2 不可变的实现原理
 
@@ -3735,5 +3735,812 @@ public class Order {
 - 静态代码块适合一次性初始化，构造代码块适合对象级初始化，局部代码块适合临时变量管理。
 
 > **最佳实践**：优先用构造方法实现初始化，代码块用于特殊场景和通用逻辑，避免滥用。
+
+### 23. Java 抽象类（Abstract Class）
+
+#### 23.1 抽象类的概念
+
+抽象类是一种特殊的类，用 `abstract` 关键字修饰，可以包含抽象方法和具体方法。
+抽象类不能被实例化，只能被继承，子类必须实现所有抽象方法。
+
+#### 23.2 抽象类的语法
+
+```java
+public abstract class Animal {
+    // 抽象方法：没有方法体，子类必须实现
+    public abstract void makeSound();
+    
+    // 具体方法：有方法体，子类可以直接使用
+    public void sleep() {
+        System.out.println("动物在睡觉");
+    }
+    
+    // 构造方法：用于初始化
+    public Animal() {
+        System.out.println("动物被创建");
+    }
+    
+    // 成员变量
+    protected String name;
+    protected int age;
+}
+```
+
+#### 23.3 抽象类的特点
+
+1. **不能实例化**
+   ```java
+   // Animal animal = new Animal(); // 编译错误
+   ```
+
+2. **可以包含抽象方法和具体方法**
+   ```java
+   public abstract class Shape {
+       // 抽象方法
+       public abstract double getArea();
+       public abstract double getPerimeter();
+       
+       // 具体方法
+       public void display() {
+           System.out.println("这是一个形状");
+       }
+   }
+   ```
+
+3. **可以有构造方法**
+   ```java
+   public abstract class Vehicle {
+       protected String brand;
+       
+       public Vehicle(String brand) {
+           this.brand = brand;
+       }
+   }
+   ```
+
+4. **可以有成员变量**
+   ```java
+   public abstract class Person {
+       protected String name;
+       protected int age;
+   }
+   ```
+
+#### 23.4 抽象方法的特点
+
+- 用 `abstract` 关键字修饰
+- 没有方法体（没有 `{}`）
+- 子类必须实现
+- 不能是 `private` 或 `static`
+
+```java
+public abstract class Database {
+    // 抽象方法
+    public abstract void connect();
+    public abstract void disconnect();
+    public abstract void executeQuery(String sql);
+    
+    // 具体方法
+    public void log(String message) {
+        System.out.println("日志: " + message);
+    }
+}
+```
+
+#### 23.5 抽象类的继承
+
+```java
+// 抽象类继承抽象类
+public abstract class Bird extends Animal {
+    public abstract void fly();
+}
+
+// 具体类继承抽象类
+public class Dog extends Animal {
+    @Override
+    public void makeSound() {
+        System.out.println("汪汪汪");
+    }
+}
+
+public class Cat extends Animal {
+    @Override
+    public void makeSound() {
+        System.out.println("喵喵喵");
+    }
+}
+```
+
+#### 23.6 抽象类与接口的区别
+
+| 特性 | 抽象类 | 接口 |
+|------|--------|------|
+| 关键字 | `abstract class` | `interface` |
+| 构造方法 | 可以有 | 不能有 |
+| 成员变量 | 可以有各种修饰符 | 默认 `public static final` |
+| 方法实现 | 可以有具体方法 | Java 8+ 可以有默认方法 |
+| 继承 | 单继承 | 多实现 |
+| 访问修饰符 | 各种修饰符 | 默认 `public` |
+
+#### 23.7 抽象类的使用场景
+
+1. **模板方法模式**
+   ```java
+   public abstract class Game {
+       // 模板方法
+       public final void play() {
+           initialize();
+           startPlay();
+           endPlay();
+       }
+       
+       // 抽象方法，子类实现
+       protected abstract void initialize();
+       protected abstract void startPlay();
+       protected abstract void endPlay();
+   }
+   
+   public class Cricket extends Game {
+       @Override
+       protected void initialize() {
+           System.out.println("板球游戏初始化");
+       }
+       
+       @Override
+       protected void startPlay() {
+           System.out.println("开始板球游戏");
+       }
+       
+       @Override
+       protected void endPlay() {
+           System.out.println("结束板球游戏");
+       }
+   }
+   ```
+
+2. **代码复用**
+   ```java
+   public abstract class Employee {
+       protected String name;
+       protected double salary;
+       
+       public Employee(String name, double salary) {
+           this.name = name;
+           this.salary = salary;
+       }
+       
+       // 通用方法
+       public void work() {
+           System.out.println(name + " 在工作");
+       }
+       
+       // 抽象方法，子类实现
+       public abstract double calculateBonus();
+   }
+   
+   public class Manager extends Employee {
+       public Manager(String name, double salary) {
+           super(name, salary);
+       }
+       
+       @Override
+       public double calculateBonus() {
+           return salary * 0.2;
+       }
+   }
+   ```
+
+#### 23.8 注意事项
+
+1. **抽象类不能被 `final` 修饰**
+   ```java
+   // public final abstract class Test {} // 编译错误
+   ```
+
+2. **抽象方法不能是 `private`**
+   ```java
+   public abstract class Test {
+       // private abstract void method(); // 编译错误
+       protected abstract void method(); // 正确
+   }
+   ```
+
+3. **抽象方法不能是 `static`**
+   ```java
+   public abstract class Test {
+       // public static abstract void method(); // 编译错误
+       public abstract void method(); // 正确
+   }
+   ```
+
+4. **子类必须实现所有抽象方法**
+   ```java
+   public abstract class Parent {
+       public abstract void method1();
+       public abstract void method2();
+   }
+   
+   public class Child extends Parent {
+       @Override
+       public void method1() {
+           // 实现
+       }
+       
+       @Override
+       public void method2() {
+           // 实现
+       }
+   }
+   ```
+
+#### 23.9 抽象类的优势
+
+1. **代码复用**：具体方法可以在子类中直接使用
+2. **强制规范**：抽象方法强制子类实现特定功能
+3. **封装性**：可以隐藏实现细节
+4. **扩展性**：易于添加新的子类
+
+#### 23.10 实际应用示例
+
+```java
+// 数据库操作抽象类
+public abstract class DatabaseOperation {
+    protected Connection connection;
+    
+    public DatabaseOperation() {
+        this.connection = getConnection();
+    }
+    
+    // 模板方法
+    public final void executeOperation() {
+        openConnection();
+        performOperation();
+        closeConnection();
+    }
+    
+    // 具体方法
+    protected void openConnection() {
+        System.out.println("打开数据库连接");
+    }
+    
+    protected void closeConnection() {
+        System.out.println("关闭数据库连接");
+    }
+    
+    // 抽象方法
+    protected abstract void performOperation();
+    protected abstract Connection getConnection();
+}
+
+// 具体实现
+public class MySQLOperation extends DatabaseOperation {
+    @Override
+    protected void performOperation() {
+        System.out.println("执行MySQL操作");
+    }
+    
+    @Override
+    protected Connection getConnection() {
+        return new MySQLConnection();
+    }
+}
+```
+
+#### 23.11 总结
+
+- 抽象类提供了一种介于接口和具体类之间的抽象层次
+- 适合有共同属性和行为的类族设计
+- 支持代码复用和强制规范
+- 是面向对象设计中重要的抽象工具
+
+> **最佳实践**：当多个类有共同属性和行为时，使用抽象类；当只需要定义规范时，使用接口。抽象类适合"是什么"的关系，接口适合"能做什么"的关系。
+
+---
+
+### 24. Java 接口（Interface）
+
+#### 24.1 接口的概念
+
+接口是一种完全抽象的类，用 `interface` 关键字声明，定义了一组抽象方法。
+接口不能被实例化，只能被实现，实现类必须实现所有抽象方法。
+
+#### 24.2 接口的语法
+
+```java
+public interface Animal {
+    // 常量（默认 public static final）
+    String TYPE = "动物";
+    
+    // 抽象方法（默认 public abstract）
+    void makeSound();
+    void move();
+    
+    // 默认方法（Java 8+）
+    default void sleep() {
+        System.out.println("动物在睡觉");
+    }
+    
+    // 静态方法（Java 8+）
+    static void info() {
+        System.out.println("这是一个动物接口");
+    }
+}
+```
+
+#### 24.3 接口的特点
+
+1. **不能实例化**
+   ```java
+   // Animal animal = new Animal(); // 编译错误
+   ```
+
+2. **只能包含抽象方法、默认方法、静态方法和常量**
+   ```java
+   public interface Drawable {
+       // 常量
+       String COLOR = "黑色";
+       
+       // 抽象方法
+       void draw();
+       
+       // 默认方法
+       default void erase() {
+           System.out.println("擦除图形");
+       }
+       
+       // 静态方法
+       static void showInfo() {
+           System.out.println("可绘制接口");
+       }
+   }
+   ```
+
+3. **成员变量默认是 `public static final`**
+   ```java
+   public interface Constants {
+       int MAX_SIZE = 100; // 等同于 public static final int MAX_SIZE = 100;
+       String DEFAULT_NAME = "default";
+   }
+   ```
+
+4. **方法默认是 `public abstract`**
+   ```java
+   public interface Movable {
+       void move(); // 等同于 public abstract void move();
+   }
+   ```
+
+#### 24.4 接口的实现
+
+```java
+// 实现接口
+public class Dog implements Animal {
+    @Override
+    public void makeSound() {
+        System.out.println("汪汪汪");
+    }
+    
+    @Override
+    public void move() {
+        System.out.println("狗在跑");
+    }
+}
+
+public class Cat implements Animal {
+    @Override
+    public void makeSound() {
+        System.out.println("喵喵喵");
+    }
+    
+    @Override
+    public void move() {
+        System.out.println("猫在走");
+    }
+    
+    // 可以重写默认方法
+    @Override
+    public void sleep() {
+        System.out.println("猫在懒洋洋地睡觉");
+    }
+}
+```
+
+#### 24.5 多接口实现
+
+```java
+public interface Flyable {
+    void fly();
+}
+
+public interface Swimmable {
+    void swim();
+}
+
+// 实现多个接口
+public class Duck implements Animal, Flyable, Swimmable {
+    @Override
+    public void makeSound() {
+        System.out.println("嘎嘎嘎");
+    }
+    
+    @Override
+    public void move() {
+        System.out.println("鸭子在地上走");
+    }
+    
+    @Override
+    public void fly() {
+        System.out.println("鸭子在天上飞");
+    }
+    
+    @Override
+    public void swim() {
+        System.out.println("鸭子在水里游");
+    }
+}
+```
+
+#### 24.6 接口继承
+
+```java
+public interface Vehicle {
+    void start();
+    void stop();
+}
+
+public interface Car extends Vehicle {
+    void accelerate();
+    void brake();
+}
+
+// 实现继承的接口
+public class SportsCar implements Car {
+    @Override
+    public void start() {
+        System.out.println("跑车启动");
+    }
+    
+    @Override
+    public void stop() {
+        System.out.println("跑车停止");
+    }
+    
+    @Override
+    public void accelerate() {
+        System.out.println("跑车加速");
+    }
+    
+    @Override
+    public void brake() {
+        System.out.println("跑车刹车");
+    }
+}
+```
+
+#### 24.7 默认方法（Default Methods）
+
+Java 8 引入默认方法，允许接口提供方法实现。
+
+```java
+public interface Logger {
+    // 抽象方法
+    void log(String message);
+    
+    // 默认方法
+    default void logInfo(String message) {
+        log("INFO: " + message);
+    }
+    
+    default void logError(String message) {
+        log("ERROR: " + message);
+    }
+    
+    default void logWarning(String message) {
+        log("WARNING: " + message);
+    }
+}
+
+public class ConsoleLogger implements Logger {
+    @Override
+    public void log(String message) {
+        System.out.println(message);
+    }
+    
+    // 可以选择重写默认方法
+    @Override
+    public void logError(String message) {
+        System.err.println("ERROR: " + message);
+    }
+}
+```
+
+#### 24.8 静态方法（Static Methods）
+
+Java 8 允许接口包含静态方法。
+
+```java
+public interface MathUtils {
+    static int add(int a, int b) {
+        return a + b;
+    }
+    
+    static int multiply(int a, int b) {
+        return a * b;
+    }
+    
+    static double sqrt(double value) {
+        return Math.sqrt(value);
+    }
+}
+
+// 使用静态方法
+public class Calculator {
+    public void calculate() {
+        int sum = MathUtils.add(5, 3);
+        int product = MathUtils.multiply(4, 6);
+        double root = MathUtils.sqrt(16);
+        
+        System.out.println("和: " + sum);
+        System.out.println("积: " + product);
+        System.out.println("平方根: " + root);
+    }
+}
+```
+
+#### 24.9 函数式接口（Functional Interface）
+
+只有一个抽象方法的接口称为函数式接口，可以用 `@FunctionalInterface` 注解标记。
+
+```java
+@FunctionalInterface
+public interface Calculator {
+    int calculate(int a, int b);
+}
+
+// 使用 Lambda 表达式
+public class MathDemo {
+    public static void main(String[] args) {
+        // Lambda 表达式
+        Calculator add = (a, b) -> a + b;
+        Calculator subtract = (a, b) -> a - b;
+        Calculator multiply = (a, b) -> a * b;
+        
+        System.out.println("加法: " + add.calculate(10, 5));
+        System.out.println("减法: " + subtract.calculate(10, 5));
+        System.out.println("乘法: " + multiply.calculate(10, 5));
+    }
+}
+```
+
+#### 24.10 常用函数式接口
+
+```java
+// Predicate<T> - 判断条件
+Predicate<String> isEmpty = String::isEmpty;
+Predicate<String> isLong = s -> s.length() > 10;
+
+// Function<T, R> - 转换函数
+Function<String, Integer> getLength = String::length;
+Function<Integer, String> toString = Object::toString;
+
+// Consumer<T> - 消费函数
+Consumer<String> printer = System.out::println;
+Consumer<String> upperCase = s -> System.out.println(s.toUpperCase());
+
+// Supplier<T> - 供应函数
+Supplier<String> getRandomString = () -> "随机字符串";
+Supplier<LocalDateTime> getCurrentTime = LocalDateTime::now;
+
+// 使用示例
+public class FunctionalDemo {
+    public static void main(String[] args) {
+        String text = "Hello World";
+        
+        // Predicate
+        System.out.println("是否为空: " + isEmpty.test(text));
+        System.out.println("是否很长: " + isLong.test(text));
+        
+        // Function
+        System.out.println("长度: " + getLength.apply(text));
+        
+        // Consumer
+        printer.accept(text);
+        upperCase.accept(text);
+        
+        // Supplier
+        System.out.println(getRandomString.get());
+        System.out.println(getCurrentTime.get());
+    }
+}
+```
+
+#### 24.11 接口的使用场景
+
+1. **定义规范**
+   ```java
+   public interface Database {
+       void connect();
+       void disconnect();
+       ResultSet executeQuery(String sql);
+       int executeUpdate(String sql);
+   }
+   ```
+
+2. **回调机制**
+   ```java
+   public interface ClickListener {
+       void onClick();
+   }
+   
+   public class Button {
+       private ClickListener listener;
+       
+       public void setClickListener(ClickListener listener) {
+           this.listener = listener;
+       }
+       
+       public void click() {
+           if (listener != null) {
+               listener.onClick();
+           }
+       }
+   }
+   ```
+
+3. **策略模式**
+   ```java
+   public interface PaymentStrategy {
+       void pay(double amount);
+   }
+   
+   public class CreditCardPayment implements PaymentStrategy {
+       @Override
+       public void pay(double amount) {
+           System.out.println("信用卡支付: " + amount);
+       }
+   }
+   
+   public class CashPayment implements PaymentStrategy {
+       @Override
+       public void pay(double amount) {
+           System.out.println("现金支付: " + amount);
+       }
+   }
+   ```
+
+#### 24.12 注意事项
+
+1. **接口不能被 `final` 修饰**
+   ```java
+   // public final interface Test {} // 编译错误
+   ```
+
+2. **接口方法不能是 `private`（Java 9+ 支持私有方法）**
+   ```java
+   public interface Test {
+       // private void method(); // Java 9+ 支持
+       void method(); // 正确
+   }
+   ```
+
+3. **实现类必须实现所有抽象方法**
+   ```java
+   public interface Test {
+       void method1();
+       void method2();
+   }
+   
+   public class Impl implements Test {
+       @Override
+       public void method1() {
+           // 实现
+       }
+       
+       @Override
+       public void method2() {
+           // 实现
+       }
+   }
+   ```
+
+4. **默认方法冲突解决**
+   ```java
+   public interface A {
+       default void method() {
+           System.out.println("A");
+       }
+   }
+   
+   public interface B {
+       default void method() {
+           System.out.println("B");
+       }
+   }
+   
+   public class C implements A, B {
+       @Override
+       public void method() {
+           // 必须重写解决冲突
+           System.out.println("C");
+       }
+   }
+   ```
+
+#### 24.13 接口的优势
+
+1. **多实现**：一个类可以实现多个接口
+2. **松耦合**：接口与实现分离
+3. **可扩展性**：易于添加新的实现
+4. **标准化**：定义统一的规范
+
+#### 24.14 实际应用示例
+
+```java
+// 排序接口
+public interface Sortable<T> {
+    void sort(List<T> list);
+}
+
+// 冒泡排序实现
+public class BubbleSort<T extends Comparable<T>> implements Sortable<T> {
+    @Override
+    public void sort(List<T> list) {
+        for (int i = 0; i < list.size() - 1; i++) {
+            for (int j = 0; j < list.size() - 1 - i; j++) {
+                if (list.get(j).compareTo(list.get(j + 1)) > 0) {
+                    T temp = list.get(j);
+                    list.set(j, list.get(j + 1));
+                    list.set(j + 1, temp);
+                }
+            }
+        }
+    }
+}
+
+// 快速排序实现
+public class QuickSort<T extends Comparable<T>> implements Sortable<T> {
+    @Override
+    public void sort(List<T> list) {
+        quickSort(list, 0, list.size() - 1);
+    }
+    
+    private void quickSort(List<T> list, int low, int high) {
+        if (low < high) {
+            int pi = partition(list, low, high);
+            quickSort(list, low, pi - 1);
+            quickSort(list, pi + 1, high);
+        }
+    }
+    
+    private int partition(List<T> list, int low, int high) {
+        T pivot = list.get(high);
+        int i = low - 1;
+        
+        for (int j = low; j < high; j++) {
+            if (list.get(j).compareTo(pivot) <= 0) {
+                i++;
+                T temp = list.get(i);
+                list.set(i, list.get(j));
+                list.set(j, temp);
+            }
+        }
+        
+        T temp = list.get(i + 1);
+        list.set(i + 1, list.get(high));
+        list.set(high, temp);
+        
+        return i + 1;
+    }
+}
+```
+
+#### 24.15 总结
+
+- 接口是Java中重要的抽象机制，用于定义规范和实现多态
+- 支持默认方法和静态方法，增强了接口的功能
+- 函数式接口为Lambda表达式提供了基础
+- 接口与抽象类各有优势，应根据具体需求选择
+
+> **最佳实践**：接口用于定义"能做什么"，抽象类用于定义"是什么"。优先使用接口，需要共享代码时使用抽象类。
 
 ---

@@ -2073,7 +2073,7 @@ class Dog extends Animal {
 - 重写方法可加@Override注解，提升可读性和安全性。
 
 ### 7. final/abstract与继承
-- final类不能被继承，final方法不能被重写。
+- final类不能被继承，final方法不能被重写，final变量为常量。
 - abstract类不能实例化，抽象方法无方法体，子类必须实现。
 
 ### 8. 单继承与多态
@@ -4542,5 +4542,359 @@ public class QuickSort<T extends Comparable<T>> implements Sortable<T> {
 - 接口与抽象类各有优势，应根据具体需求选择
 
 > **最佳实践**：接口用于定义"能做什么"，抽象类用于定义"是什么"。优先使用接口，需要共享代码时使用抽象类。
+
+#### 24.16 接口默认方法的应用场景
+
+接口的默认方法（default method）主要用于以下几类场景：
+
+**1. 接口演进与向后兼容**
+
+当接口已经被广泛实现后，如果需要为接口新增方法，直接添加抽象方法会导致所有实现类都必须修改，违背了向后兼容原则。通过默认方法，可以为接口新增带有默认实现的方法，老的实现类无需修改即可继续工作。
+
+```java
+public interface Logger {
+    void log(String message);
+
+    // 新增默认方法，不影响已有实现
+    default void logInfo(String message) {
+        log("INFO: " + message);
+    }
+}
+```
+
+**2. 提供通用实现，减少重复代码**
+
+有些接口方法的实现逻辑是通用的，可以直接在接口中提供默认实现，避免每个实现类都写一遍。
+
+```java
+public interface ListUtils {
+    boolean isEmpty();
+
+    // 提供通用的非空判断
+    default boolean isNotEmpty() {
+        return !isEmpty();
+    }
+}
+```
+
+**3. 组合多个接口时解决方法冲突**
+
+当一个类实现多个接口且这些接口有同名默认方法时，必须在实现类中显式重写，解决冲突。这种机制让接口的多继承更灵活。
+
+```java
+public interface A {
+    default void hello() { System.out.println("A"); }
+}
+public interface B {
+    default void hello() { System.out.println("B"); }
+}
+public class C implements A, B {
+    @Override
+    public void hello() {
+        // 必须重写，解决冲突
+        A.super.hello();
+    }
+}
+```
+
+**4. 支持函数式接口的扩展**
+
+在Java标准库中，许多函数式接口（如Comparator、Iterable等）通过默认方法扩展了丰富的功能，便于链式调用和组合。
+
+```java
+Comparator<String> cmp = Comparator.naturalOrder()
+    .thenComparing(String::length); // thenComparing是默认方法
+```
+
+**5. 便于接口工具方法的封装**
+
+有些工具方法与接口密切相关，但又不适合放在实现类中，可以作为默认方法直接放在接口里。
+
+```java
+public interface Shape {
+    double area();
+    default boolean isBiggerThan(Shape other) {
+        return this.area() > other.area();
+    }
+}
+```
+
+---
+
+**总结：**  
+接口的默认方法主要用于接口升级、通用实现、方法冲突解决、函数式接口扩展和工具方法封装等场景。它让接口更灵活、可扩展，同时兼顾了向后兼容和代码复用。
+
+---
+
+#### 24.17 接口中的私有方法（Private Methods）
+
+Java 9 引入了接口私有方法，允许在接口中定义私有方法，用于代码复用和封装。
+
+**1. 私有方法的语法**
+
+```java
+public interface DataProcessor {
+    // 抽象方法
+    void process(String data);
+    
+    // 默认方法
+    default void processInfo(String data) {
+        String formatted = formatData(data);
+        validateData(formatted);
+        process(formatted);
+    }
+    
+    // 私有方法（Java 9+）
+    private String formatData(String data) {
+        return data.trim().toLowerCase();
+    }
+    
+    // 私有静态方法
+    private static void validateData(String data) {
+        if (data == null || data.isEmpty()) {
+            throw new IllegalArgumentException("数据不能为空");
+        }
+    }
+}
+```
+
+**2. 私有方法的特点**
+
+- 只能在接口内部使用
+- 不能被实现类访问
+- 可以调用其他私有方法
+- 支持私有静态方法
+
+```java
+public interface StringUtils {
+    default String reverse(String str) {
+        return reverseInternal(str);
+    }
+    
+    default String reverseAndUpper(String str) {
+        String reversed = reverseInternal(str);
+        return reversed.toUpperCase();
+    }
+    
+    // 私有方法，避免代码重复
+    private String reverseInternal(String str) {
+        if (str == null) return null;
+        return new StringBuilder(str).reverse().toString();
+    }
+    
+    // 私有静态方法
+    private static boolean isValid(String str) {
+        return str != null && !str.isEmpty();
+    }
+}
+```
+
+**3. 私有方法的使用场景**
+
+**场景1：代码复用**
+```java
+public interface Logger {
+    void log(String message);
+    
+    default void logInfo(String message) {
+        logWithLevel("INFO", message);
+    }
+    
+    default void logError(String message) {
+        logWithLevel("ERROR", message);
+    }
+    
+    default void logWarning(String message) {
+        logWithLevel("WARNING", message);
+    }
+    
+    // 私有方法复用格式化逻辑
+    private void logWithLevel(String level, String message) {
+        String formatted = String.format("[%s] %s", level, message);
+        log(formatted);
+    }
+}
+```
+
+**场景2：数据验证**
+```java
+public interface Validator {
+    boolean isValid(String data);
+    
+    default void validateAndProcess(String data) {
+        if (isValidInput(data)) {
+            processValidData(data);
+        } else {
+            throw new IllegalArgumentException("无效数据");
+        }
+    }
+    
+    // 私有方法进行输入验证
+    private boolean isValidInput(String data) {
+        return data != null && !data.trim().isEmpty();
+    }
+    
+    // 私有方法处理有效数据
+    private void processValidData(String data) {
+        // 处理逻辑
+        System.out.println("处理数据: " + data);
+    }
+}
+```
+
+**场景3：复杂计算**
+```java
+public interface Calculator {
+    double calculate(double a, double b);
+    
+    default double add(double a, double b) {
+        validateInputs(a, b);
+        return calculate(a, b);
+    }
+    
+    default double multiply(double a, double b) {
+        validateInputs(a, b);
+        return calculate(a, b);
+    }
+    
+    // 私有方法验证输入
+    private void validateInputs(double a, double b) {
+        if (Double.isNaN(a) || Double.isNaN(b)) {
+            throw new IllegalArgumentException("输入不能为NaN");
+        }
+        if (Double.isInfinite(a) || Double.isInfinite(b)) {
+            throw new IllegalArgumentException("输入不能为无穷大");
+        }
+    }
+}
+```
+
+**4. 私有静态方法**
+
+```java
+public interface MathUtils {
+    static double add(double a, double b) {
+        validateInputs(a, b);
+        return a + b;
+    }
+    
+    static double multiply(double a, double b) {
+        validateInputs(a, b);
+        return a * b;
+    }
+    
+    // 私有静态方法
+    private static void validateInputs(double a, double b) {
+        if (Double.isNaN(a) || Double.isNaN(b)) {
+            throw new IllegalArgumentException("输入不能为NaN");
+        }
+    }
+}
+```
+
+**5. 私有方法与默认方法的结合**
+
+```java
+public interface FileProcessor {
+    void processFile(String filename);
+    
+    default void processTextFile(String filename) {
+        validateFile(filename);
+        String content = readFile(filename);
+        String processed = processContent(content);
+        writeFile(filename, processed);
+    }
+    
+    default void processBinaryFile(String filename) {
+        validateFile(filename);
+        byte[] content = readBinaryFile(filename);
+        byte[] processed = processBinaryContent(content);
+        writeBinaryFile(filename, processed);
+    }
+    
+    // 私有方法验证文件
+    private void validateFile(String filename) {
+        if (filename == null || filename.trim().isEmpty()) {
+            throw new IllegalArgumentException("文件名不能为空");
+        }
+    }
+    
+    // 私有方法读取文件
+    private String readFile(String filename) {
+        // 文件读取逻辑
+        return "文件内容";
+    }
+    
+    // 私有方法处理内容
+    private String processContent(String content) {
+        return content.toUpperCase();
+    }
+    
+    // 私有方法写入文件
+    private void writeFile(String filename, String content) {
+        // 文件写入逻辑
+        System.out.println("写入文件: " + filename);
+    }
+    
+    // 私有方法读取二进制文件
+    private byte[] readBinaryFile(String filename) {
+        // 二进制文件读取逻辑
+        return new byte[0];
+    }
+    
+    // 私有方法处理二进制内容
+    private byte[] processBinaryContent(byte[] content) {
+        // 二进制内容处理逻辑
+        return content;
+    }
+    
+    // 私有方法写入二进制文件
+    private void writeBinaryFile(String filename, byte[] content) {
+        // 二进制文件写入逻辑
+        System.out.println("写入二进制文件: " + filename);
+    }
+}
+```
+
+**6. 注意事项**
+
+1. **Java 9+ 特性**：私有方法只在 Java 9 及以上版本支持
+2. **访问限制**：私有方法只能在接口内部使用
+3. **继承规则**：私有方法不能被继承或重写
+4. **静态私有方法**：可以包含静态私有方法
+
+```java
+public interface AdvancedProcessor {
+    void process(String data);
+    
+    default void processWithValidation(String data) {
+        if (isValidData(data)) {
+            process(data);
+        } else {
+            handleInvalidData(data);
+        }
+    }
+    
+    // 私有方法
+    private boolean isValidData(String data) {
+        return data != null && data.length() > 0;
+    }
+    
+    // 私有静态方法
+    private static void handleInvalidData(String data) {
+        System.err.println("无效数据: " + data);
+    }
+}
+```
+
+**7. 总结**
+
+接口私有方法的主要优势：
+- **代码复用**：避免默认方法中的重复代码
+- **封装性**：隐藏接口内部的实现细节
+- **可维护性**：提高代码的可读性和维护性
+- **模块化**：将复杂逻辑拆分为小的私有方法
+
+> **最佳实践**：当接口中有多个默认方法需要共享相同的逻辑时，使用私有方法来避免代码重复，提高代码质量。
 
 ---

@@ -4898,3 +4898,406 @@ public interface AdvancedProcessor {
 > **最佳实践**：当接口中有多个默认方法需要共享相同的逻辑时，使用私有方法来避免代码重复，提高代码质量。
 
 ---
+
+#### 24.18 接口的多态
+
+接口的多态性是面向对象编程的重要特性之一。
+
+**1. 概念**
+
+接口的多态指的是：父接口类型的变量可以引用任何实现了该接口的对象。通过接口引用调用方法时，实际执行的是实现类中重写的方法。这种机制实现了"编程面向接口"，提高了代码的灵活性和可扩展性。
+
+**2. 语法与示例**
+
+```java
+public interface Animal {
+    void makeSound();
+}
+
+public class Dog implements Animal {
+    @Override
+    public void makeSound() {
+        System.out.println("汪汪汪");
+    }
+}
+
+public class Cat implements Animal {
+    @Override
+    public void makeSound() {
+        System.out.println("喵喵喵");
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Animal a1 = new Dog();
+        Animal a2 = new Cat();
+
+        a1.makeSound(); // 输出：汪汪汪
+        a2.makeSound(); // 输出：喵喵喵
+    }
+}
+```
+
+**3. 多态的体现**
+
+- 接口变量可以指向任意实现类对象
+- 调用方法时，执行的是实际对象的实现
+- 便于扩展和解耦
+
+**4. 典型应用场景**
+
+- 回调机制：如事件监听、策略模式等
+- 统一处理：如集合中存放接口类型，统一遍历处理
+- 依赖倒置：高层模块依赖接口而非具体实现
+
+*示例：统一处理*
+```java
+List<Animal> animals = Arrays.asList(new Dog(), new Cat());
+for (Animal animal : animals) {
+    animal.makeSound(); // 多态调用
+}
+```
+
+*示例：策略模式*
+```java
+public interface PaymentStrategy {
+    void pay(double amount);
+}
+
+public class CreditCardPayment implements PaymentStrategy {
+    public void pay(double amount) {
+        System.out.println("信用卡支付: " + amount);
+    }
+}
+
+public class CashPayment implements PaymentStrategy {
+    public void pay(double amount) {
+        System.out.println("现金支付: " + amount);
+    }
+}
+
+public class PayContext {
+    private PaymentStrategy strategy;
+    public PayContext(PaymentStrategy strategy) {
+        this.strategy = strategy;
+    }
+    public void execute(double amount) {
+        strategy.pay(amount); // 多态调用
+    }
+}
+```
+
+**5. 向下转型与接口多态**
+
+如果需要调用实现类特有的方法，可以进行类型强制转换（向下转型）：
+
+```java
+Animal animal = new Dog();
+if (animal instanceof Dog) {
+    Dog dog = (Dog) animal;
+    // 调用Dog特有方法
+}
+```
+
+**6. 注意事项**
+
+- 只能通过接口变量调用接口中声明的方法，不能直接调用实现类特有的方法，除非强制类型转换。
+- 多态的前提是实现类重写了接口的方法。
+- 接口多态是Java解耦和扩展的基础。
+
+**7. 总结**
+
+接口多态让代码更加灵活、可扩展、易于维护，是面向接口编程的核心。实际开发中应优先依赖接口而非具体实现，充分利用多态带来的好处。
+
+---
+
+### 25. 适配器设计模式
+
+适配器模式（Adapter Pattern）是一种结构型设计模式，它允许将一个类的接口转换成客户端所期望的另一个接口，使得原本由于接口不兼容而不能一起工作的类可以一起工作。
+
+#### 25.1 基本概念
+
+- **目标接口（Target）**：客户端所期望的接口
+- **适配者（Adaptee）**：需要被适配的类或接口
+- **适配器（Adapter）**：将适配者转换为目标接口的类
+
+#### 25.2 适配器的两种实现方式
+
+1. **类适配器**：通过继承适配者来实现
+2. **对象适配器**：通过组合适配者来实现
+
+#### 25.3 类适配器模式
+
+类适配器使用继承机制实现适配。
+
+```java
+// 目标接口
+public interface Target {
+    void request();
+}
+
+// 适配者
+public class Adaptee {
+    public void specificRequest() {
+        System.out.println("适配者的特殊请求");
+    }
+}
+
+// 类适配器
+public class ClassAdapter extends Adaptee implements Target {
+    @Override
+    public void request() {
+        specificRequest(); // 调用适配者的方法
+    }
+}
+
+// 客户端代码
+public class Client {
+    public static void main(String[] args) {
+        Target target = new ClassAdapter();
+        target.request(); // 通过适配器调用适配者的方法
+    }
+}
+```
+
+#### 25.4 对象适配器模式
+
+对象适配器使用组合机制实现适配。
+
+```java
+// 目标接口
+public interface Target {
+    void request();
+}
+
+// 适配者
+public class Adaptee {
+    public void specificRequest() {
+        System.out.println("适配者的特殊请求");
+    }
+}
+
+// 对象适配器
+public class ObjectAdapter implements Target {
+    private Adaptee adaptee;
+
+    public ObjectAdapter(Adaptee adaptee) {
+        this.adaptee = adaptee;
+    }
+
+    @Override
+    public void request() {
+        adaptee.specificRequest(); // 调用适配者的方法
+    }
+}
+
+// 客户端代码
+public class Client {
+    public static void main(String[] args) {
+        Adaptee adaptee = new Adaptee();
+        Target target = new ObjectAdapter(adaptee);
+        target.request(); // 通过适配器调用适配者的方法
+    }
+}
+```
+
+#### 25.5 实际应用场景
+
+**1. 电源适配器示例**
+
+```java
+// 220V交流电
+public class AC220 {
+    public int output220V() {
+        return 220;
+    }
+}
+
+// 5V直流电接口
+public interface DC5 {
+    int output5V();
+}
+
+// 电源适配器
+public class PowerAdapter implements DC5 {
+    private AC220 ac220;
+
+    public PowerAdapter(AC220 ac220) {
+        this.ac220 = ac220;
+    }
+
+    @Override
+    public int output5V() {
+        int input = ac220.output220V();
+        // 变压
+        int output = input / 44;
+        System.out.println("输入电压: " + input + "V -> 输出电压: " + output + "V");
+        return output;
+    }
+}
+
+// 使用示例
+public class PowerAdapterDemo {
+    public static void main(String[] args) {
+        DC5 dc5 = new PowerAdapter(new AC220());
+        dc5.output5V();
+    }
+}
+```
+
+**2. 日期格式转换适配器**
+
+```java
+// 老的日期接口
+public class OldDateFormat {
+    public String formatDate(Date date) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        return sdf.format(date);
+    }
+}
+
+// 新的日期接口
+public interface NewDateFormat {
+    String formatDate(LocalDate date);
+}
+
+// 日期格式适配器
+public class DateFormatAdapter implements NewDateFormat {
+    private OldDateFormat oldFormat;
+
+    public DateFormatAdapter(OldDateFormat oldFormat) {
+        this.oldFormat = oldFormat;
+    }
+
+    @Override
+    public String formatDate(LocalDate date) {
+        // 将LocalDate转换为Date
+        Date oldDate = Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        return oldFormat.formatDate(oldDate);
+    }
+}
+
+// 使用示例
+public class DateFormatDemo {
+    public static void main(String[] args) {
+        NewDateFormat adapter = new DateFormatAdapter(new OldDateFormat());
+        String formattedDate = adapter.formatDate(LocalDate.now());
+        System.out.println("格式化日期: " + formattedDate);
+    }
+}
+```
+
+**3. 第三方SDK适配**
+
+```java
+// 第三方支付接口
+public interface ThirdPartyPayment {
+    void processPayment(String orderId, double amount);
+}
+
+// 支付宝SDK
+public class AlipaySDK {
+    public void payWithAlipay(String orderNo, double money) {
+        System.out.println("使用支付宝支付: " + money + "元");
+    }
+}
+
+// 微信支付SDK
+public class WeChatPaySDK {
+    public void pay(String orderId, float price) {
+        System.out.println("使用微信支付: " + price + "元");
+    }
+}
+
+// 统一支付接口
+public interface UnifiedPayment {
+    void pay(String orderId, double amount);
+}
+
+// 支付宝适配器
+public class AlipayAdapter implements UnifiedPayment {
+    private AlipaySDK alipaySDK;
+
+    public AlipayAdapter(AlipaySDK alipaySDK) {
+        this.alipaySDK = alipaySDK;
+    }
+
+    @Override
+    public void pay(String orderId, double amount) {
+        alipaySDK.payWithAlipay(orderId, amount);
+    }
+}
+
+// 微信支付适配器
+public class WeChatPayAdapter implements UnifiedPayment {
+    private WeChatPaySDK weChatPaySDK;
+
+    public WeChatPayAdapter(WeChatPaySDK weChatPaySDK) {
+        this.weChatPaySDK = weChatPaySDK;
+    }
+
+    @Override
+    public void pay(String orderId, double amount) {
+        weChatPaySDK.pay(orderId, (float)amount);
+    }
+}
+
+// 支付服务
+public class PaymentService {
+    private UnifiedPayment paymentMethod;
+
+    public void setPaymentMethod(UnifiedPayment paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public void processPayment(String orderId, double amount) {
+        paymentMethod.pay(orderId, amount);
+    }
+}
+
+// 使用示例
+public class PaymentDemo {
+    public static void main(String[] args) {
+        PaymentService paymentService = new PaymentService();
+
+        // 使用支付宝支付
+        paymentService.setPaymentMethod(new AlipayAdapter(new AlipaySDK()));
+        paymentService.processPayment("ORDER001", 100.00);
+
+        // 使用微信支付
+        paymentService.setPaymentMethod(new WeChatPayAdapter(new WeChatPaySDK()));
+        paymentService.processPayment("ORDER002", 200.00);
+    }
+}
+```
+
+#### 25.6 适配器模式的优缺点
+
+**优点：**
+1. 将目标类和适配者类解耦
+2. 增加了类的透明性
+3. 提高了类的复用性
+4. 灵活性好
+
+**缺点：**
+1. 过多使用适配器会让系统变得凌乱
+2. 类适配器模式的缺点是不支持适配器的适配者类的子类
+
+#### 25.7 使用场景
+
+1. 系统需要使用现有的类，但接口不符合要求
+2. 想要建立一个可以重复使用的类，用于与一些彼此之间没有太大关联的类一起工作
+3. 需要统一多个类的接口设计
+4. 旧系统改造与升级
+
+#### 25.8 最佳实践
+
+1. 优先使用对象适配器，更符合组合复用原则
+2. 尽量保持适配器的简单性，只做必要的转换
+3. 适配器类命名应当以"Adapter"结尾
+4. 适配器中的代码应该是"薄"的，只做必要的接口转换
+
+> **注意**：适配器模式是一种"补偿模式"，用来补救设计上的缺陷。如果在设计之初就能协调好接口，就不需要适配器模式了。
+
+---

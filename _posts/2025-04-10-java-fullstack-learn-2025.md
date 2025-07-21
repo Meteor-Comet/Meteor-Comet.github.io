@@ -5301,3 +5301,307 @@ public class PaymentDemo {
 > **注意**：适配器模式是一种"补偿模式"，用来补救设计上的缺陷。如果在设计之初就能协调好接口，就不需要适配器模式了。
 
 ---
+
+### 26. Java内部类
+
+内部类（Inner Class）是定义在另一个类内部的类。Java支持四种内部类：成员内部类、静态内部类、局部内部类和匿名内部类。
+
+#### 26.1 成员内部类
+
+成员内部类是最普通的内部类，作为外部类的一个成员存在，可以无限制地访问外部类的所有成员。
+
+```java
+public class OuterClass {
+    private String outerField = "外部类字段";
+    
+    // 成员内部类
+    public class InnerClass {
+        private String innerField = "内部类字段";
+        
+        public void innerMethod() {
+            // 访问外部类的私有成员
+            System.out.println(outerField);
+            // 访问外部类的this引用
+            System.out.println(OuterClass.this.outerField);
+            // 访问内部类成员
+            System.out.println(innerField);
+        }
+    }
+    
+    // 外部类方法
+    public void createInner() {
+        InnerClass inner = new InnerClass();
+        inner.innerMethod();
+    }
+}
+
+// 使用示例
+public class Main {
+    public static void main(String[] args) {
+        // 创建外部类实例
+        OuterClass outer = new OuterClass();
+        // 创建内部类实例
+        OuterClass.InnerClass inner = outer.new InnerClass();
+        inner.innerMethod();
+    }
+}
+```
+
+**特点：**
+1. 可以访问外部类的所有成员，包括私有成员
+2. 必须先创建外部类实例，才能创建内部类实例
+3. 内部类中可以使用OuterClass.this引用外部类实例
+
+#### 26.2 静态内部类
+
+静态内部类（Static Nested Class）是使用static修饰的内部类，不依赖外部类实例。
+
+```java
+public class OuterClass {
+    private static String staticField = "静态字段";
+    private String instanceField = "实例字段";
+    
+    // 静态内部类
+    public static class StaticInnerClass {
+        public void display() {
+            // 可以访问外部类的静态成员
+            System.out.println(staticField);
+            // 不能直接访问外部类的实例成员
+            // System.out.println(instanceField); // 编译错误
+        }
+    }
+}
+
+// 使用示例
+public class Main {
+    public static void main(String[] args) {
+        // 直接创建静态内部类实例，不需要外部类实例
+        OuterClass.StaticInnerClass inner = new OuterClass.StaticInnerClass();
+        inner.display();
+    }
+}
+```
+
+**特点：**
+1. 只能访问外部类的静态成员
+2. 不需要外部类实例即可创建
+3. 可以包含静态成员和实例成员
+
+#### 26.3 局部内部类
+
+局部内部类是定义在方法或作用域内的类。
+
+```java
+public class OuterClass {
+    private String field = "外部类字段";
+    
+    public void method(final String param) {
+        final String localVar = "局部变量";
+        
+        // 局部内部类
+        class LocalInnerClass {
+            public void print() {
+                // 访问外部类成员
+                System.out.println(field);
+                // 访问方法参数和局部变量（必须是final或实际上的final）
+                System.out.println(param);
+                System.out.println(localVar);
+            }
+        }
+        
+        // 创建并使用局部内部类
+        LocalInnerClass local = new LocalInnerClass();
+        local.print();
+    }
+}
+```
+
+**特点：**
+1. 只能在定义它的方法或作用域内使用
+2. 可以访问外部类的所有成员
+3. 可以访问所在方法的final或实际上final的局部变量
+
+#### 26.4 匿名内部类
+
+匿名内部类是没有名字的内部类，必须继承一个父类或实现一个接口。
+
+```java
+public interface Greeting {
+    void greet();
+}
+
+public class OuterClass {
+    public void sayHello() {
+        // 匿名内部类实现接口
+        Greeting greeting = new Greeting() {
+            @Override
+            public void greet() {
+                System.out.println("Hello from anonymous class!");
+            }
+        };
+        greeting.greet();
+    }
+    
+    public void processRunnable() {
+        // 匿名内部类实现Runnable接口
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("Running in anonymous class");
+            }
+        };
+        new Thread(runnable).start();
+        
+        // 使用Lambda表达式（简化的匿名内部类）
+        Runnable lambda = () -> System.out.println("Running in lambda");
+        new Thread(lambda).start();
+    }
+}
+```
+
+**特点：**
+1. 没有类名，创建时必须继承或实现一个接口
+2. 只能使用一次
+3. 可以访问外部类的所有成员
+4. 经常用于事件处理和回调
+
+#### 26.5 实际应用场景
+
+**1. 适配器模式中使用匿名内部类**
+```java
+public class Button {
+    private OnClickListener listener;
+    
+    public interface OnClickListener {
+        void onClick();
+    }
+    
+    public void setOnClickListener(OnClickListener listener) {
+        this.listener = listener;
+    }
+    
+    public void click() {
+        if (listener != null) {
+            listener.onClick();
+        }
+    }
+}
+
+// 使用示例
+public class Main {
+    public static void main(String[] args) {
+        Button button = new Button();
+        
+        // 使用匿名内部类设置点击监听器
+        button.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick() {
+                System.out.println("Button clicked!");
+            }
+        });
+        
+        // 使用Lambda表达式（简化形式）
+        button.setOnClickListener(() -> System.out.println("Button clicked!"));
+        
+        button.click();
+    }
+}
+```
+
+**2. 构建器模式中使用静态内部类**
+```java
+public class Person {
+    private final String name;
+    private final int age;
+    private final String address;
+    
+    private Person(Builder builder) {
+        this.name = builder.name;
+        this.age = builder.age;
+        this.address = builder.address;
+    }
+    
+    // 静态内部类作为构建器
+    public static class Builder {
+        private String name;
+        private int age;
+        private String address;
+        
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+        
+        public Builder age(int age) {
+            this.age = age;
+            return this;
+        }
+        
+        public Builder address(String address) {
+            this.address = address;
+            return this;
+        }
+        
+        public Person build() {
+            return new Person(this);
+        }
+    }
+}
+
+// 使用示例
+Person person = new Person.Builder()
+    .name("张三")
+    .age(25)
+    .address("北京")
+    .build();
+```
+
+**3. 数据封装中使用成员内部类**
+```java
+public class LinkedList<E> {
+    private Node<E> first;
+    private int size;
+    
+    // 成员内部类封装节点实现
+    private class Node<E> {
+        E item;
+        Node<E> next;
+        
+        Node(E element, Node<E> next) {
+            this.item = element;
+            this.next = next;
+        }
+    }
+    
+    public void add(E element) {
+        Node<E> newNode = new Node<>(element, first);
+        first = newNode;
+        size++;
+    }
+}
+```
+
+#### 26.6 内部类的优点
+
+1. **封装性**：内部类可以访问外部类的私有成员
+2. **代码组织**：将相关的类放在一起，提高可读性
+3. **回调机制**：匿名内部类适合用于事件处理
+4. **数据隐藏**：可以对外隐藏实现细节
+
+#### 26.7 注意事项
+
+1. 内部类会持有外部类的引用，可能导致内存泄漏
+2. 过多使用内部类会使代码结构复杂
+3. 静态内部类不持有外部类引用，内存效率更高
+4. 局部内部类访问局部变量时，变量必须是final或实际上的final
+
+#### 26.8 最佳实践
+
+1. 优先使用静态内部类，除非需要访问外部类的实例成员
+2. 使用内部类封装实现细节
+3. 合理使用匿名内部类简化代码
+4. 注意内存泄漏问题，适时释放资源
+
+> **提示**：在Java 8及以后的版本中，对于函数式接口，优先使用Lambda表达式替代匿名内部类，代码更简洁。
+
+---

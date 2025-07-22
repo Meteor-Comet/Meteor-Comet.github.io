@@ -117,7 +117,7 @@ tags:
   用于switch语句的默认分支，或接口的默认方法实现。
 
 
-## Java中的字面量分类
+## 3. Java中的字面量分类
 
 Java中的字面量（Literal）是指在代码中直接表示固定值的数据。常见字面量分类如下：
 
@@ -144,7 +144,7 @@ Java中的字面量（Literal）是指在代码中直接表示固定值的数据
 
 字面量是Java程序中最基本的数据表示方式，直接参与表达式和赋值。 
 
-## Java变量定义的格式
+## 4. Java变量定义的格式
 
 Java中变量的定义格式如下：
 
@@ -173,7 +173,7 @@ score = 100;
 
 变量名建议使用有意义的英文单词，遵循小驼峰命名法（如 studentName）。 
 
-## Java中的键盘录入
+## 5. Java中的键盘录入
 
 在Java中，常用`Scanner`类实现从键盘读取用户输入。`Scanner`类位于`java.util`包中。
 
@@ -209,7 +209,7 @@ public class InputDemo {
 
 > 提示：使用完Scanner后建议调用`sc.close();`关闭资源。 
 
-## IDEA中Java项目的结构介绍
+## 6. IDEA中Java项目的结构介绍
 
 在IntelliJ IDEA中创建的标准Java项目通常包含如下目录结构：
 
@@ -260,7 +260,7 @@ project-name/
 
 > 简单理解：项目 > 模块 > 类，三者层层包含，便于大型系统的分工、协作和维护。 
 
-## Java运算符及其运算规则
+## 7. Java运算符及其运算规则
 
 ### 1. 算术运算符
 - `+` ：加法，两数相加。例如：a + b
@@ -387,7 +387,7 @@ System.out.println(obj instanceof Integer); // false
 
 > 如需详细举例或对某类运算符深入讲解，可随时补充！ 
 
-## Java字符串运算规则
+## 8. Java字符串运算规则
 
 - **字符串拼接**
   - 使用 + 运算符可以将两个字符串拼接为一个新字符串。
@@ -417,7 +417,7 @@ System.out.println(obj instanceof Integer); // false
 
 > 字符串运算是Java开发中最常见的操作之一，理解其规则有助于避免常见错误和提升性能。 
 
-## 原码、反码与补码
+## 9. 原码、反码与补码
 
 在Java等计算机系统中，整数的底层存储采用二进制，负数的表示依赖于补码。理解原码、反码、补码有助于掌握位运算、溢出等底层原理。
 
@@ -461,9 +461,9 @@ System.out.println(Integer.toBinaryString(b)); // 111111111111111111111111111110
 
 > 理解补码机制有助于深入掌握Java底层运算和调试技巧。 
 
-## Java三大程序结构
+## 10. Java三大程序结构
 
-### 1. 顺序结构
+### 10.1 顺序结构
 - 程序从上到下依次执行每一条语句，中间没有任何判断和跳转。
 - 是最简单、最常见的结构。
 
@@ -475,7 +475,7 @@ int sum = a + b;
 System.out.println("和为：" + sum);
 ```
 
-### 2. 分支结构（选择结构）
+### 10.2 分支结构（选择结构）
 - 根据条件判断，决定执行哪一部分代码。
 - 常用的分支语句有：if、if-else、if-else if-else、switch。
 
@@ -555,7 +555,7 @@ System.out.println(result);
 ```
 > 箭头写法更简洁、安全，推荐在支持的JDK版本中使用。
 
-### 3. 循环结构
+### 10.3 循环结构
 - 根据条件反复执行某段代码。
 - 常用的循环语句有：for、while、do-while。
 
@@ -596,7 +596,7 @@ do {
 
 > 顺序、分支、循环结构是所有程序的基础，合理组合可实现各种复杂逻辑。 
 
-## Java中的Random库
+## 11. Java中的Random库
 
 在Java中，`Random`类用于生成伪随机数，位于`java.util`包。
 
@@ -636,7 +636,7 @@ public class RandomDemo {
 
 > Random生成的随机数是伪随机数，种子相同则序列相同。Java 1.7+还可用`ThreadLocalRandom`和`SecureRandom`。 
 
-## Java中的next命名规范详细解释
+## 12. Java中的next命名规范详细解释
 
 在Java标准库和第三方库中，许多方法以`next`开头，这是一种广泛采用的命名规范，体现了"获取序列中的下一个元素"或"生成下一个值"的设计思想。
 
@@ -684,13 +684,13 @@ public class RandomDemo {
 
 > 总结：以next开头的方法体现了Java对顺序处理、流式操作的高度抽象，是高效、可读代码的重要基础。 
 
-## Java数组基础
+## 13. Java数组基础
 
-### 1. 数组的概念
+### 13.1 数组的概念
 - 数组是存储同一类型数据的有序集合，长度固定。
 - 每个元素通过下标（索引）访问，下标从0开始。
 
-### 2. 数组的声明与初始化
+### 13.2 数组的声明与初始化
 - 声明数组：
   ```java
   int[] arr;
@@ -707,7 +707,7 @@ public class RandomDemo {
   String[] colors = {"red", "green", "blue"};
   ```
 
-### 3. 访问和修改数组元素
+### 13.3 访问和修改数组元素
 ```java
 int[] arr = {10, 20, 30};
 System.out.println(arr[0]); // 10
@@ -715,7 +715,7 @@ arr[1] = 99;
 System.out.println(arr[1]); // 99
 ```
 
-### 4. 数组的遍历
+### 13.4 数组的遍历
 - for循环遍历：
   ```java
   for (int i = 0; i < arr.length; i++) {
@@ -729,13 +729,13 @@ System.out.println(arr[1]); // 99
   }
   ```
 
-### 5. 数组的常用属性和特性
+### 13.5 数组的常用属性和特性
 - `length`：数组长度属性，如arr.length。
 - 数组一旦创建，长度不可变。
 - 支持多维数组（如int[][] matrix = new int[3][4];）。
 - 数组元素类型可以是基本类型或引用类型。
 
-### 6. 示例：求数组元素之和
+### 13.6 示例：求数组元素之和
 ```java
 int[] nums = {1, 2, 3, 4, 5};
 int sum = 0;
@@ -745,7 +745,7 @@ for (int n : nums) {
 System.out.println("总和：" + sum);
 ```
 
-### 7. 直接输出数组与地址格式说明
+### 13.7 直接输出数组与地址格式说明
 - 直接输出数组对象（如System.out.println(arr);）时，显示的不是数组内容，而是数组的类型和哈希码地址。
 - 格式通常为：[类型标识@哈希码]，如：[I@6d06d69c
   - [I 表示int[]类型，@后为哈希码的十六进制。
@@ -772,7 +772,7 @@ System.out.println(Arrays.toString(arr)); // 输出：[1, 2, 3]
 
 > 数组是Java中最基础的数据结构，后续可学习ArrayList等集合类实现更灵活的数据管理。 
 
-### 8. 动态初始化时的默认值
+### 13.8 动态初始化时的默认值
 - 使用`new`关键字动态初始化数组时，数组中的每个元素都会被自动赋予默认值。
 - 不同类型的数组默认值如下：
   - 整型（int、byte、short、long）：默认值为0
@@ -795,7 +795,7 @@ System.out.println(Arrays.toString(names)); // [null, null]
 
 > 动态初始化时，数组元素的默认值由类型决定，无需手动赋值。 
 
-## Java内存分布
+## 14. Java内存分布
 
 Java程序运行时，JVM会将内存划分为不同的区域，每个区域负责不同类型的数据存储和管理。
 
@@ -849,7 +849,7 @@ graph TD
 - 对象实例存储在堆，局部变量存储在栈。
 - 合理理解内存分布有助于掌握对象生命周期、垃圾回收、线程安全等核心知识。 
 
-## Java方法基础
+## 15. Java方法基础
 
 ### 1. 方法的概念
 - 方法（Method）是完成特定功能的代码块，可以重复调用。
@@ -971,7 +971,7 @@ System.out.println(nums[0]); // 仍输出1，原数组未被替换
 
 > 总结：Java所有参数传递本质上都是值传递。基本类型传递值，引用类型传递引用的值（地址）。理解堆栈分布和引用机制，有助于避免参数修改的误区。 
 
-## Java二维数组的创建与初始化
+## 16. Java二维数组的创建与初始化
 
 ### 1. 二维数组的声明
 - 语法：
@@ -1030,7 +1030,7 @@ System.out.println(nums[0]); // 仍输出1，原数组未被替换
 
 > 二维数组常用于矩阵、表格、棋盘等场景，是多维数据结构的基础。 
 
-## Java面向对象编程（OOP）基础
+## 17. Java面向对象编程（OOP）基础
 
 ### 1. 类与对象
 - **类（Class）**：对象的模板或蓝图，定义属性和行为。
@@ -1791,7 +1791,7 @@ System.out.println(map.get("Tom")); // 18
 
 > 集合是Java开发中最常用的数据结构，掌握其用法有助于高效管理和处理数据。
 
-## Java泛型（Generics）
+## 26. Java泛型（Generics）
 
 ### 1. 概念
 - 泛型是JDK 1.5引入的特性，用于在类、接口、方法中定义和使用类型参数，实现类型安全和代码复用。
@@ -1847,7 +1847,7 @@ List<? super Integer> ints = new ArrayList<Number>(); // 可写入Integer及其�
 
 > 泛型是Java类型系统的重要组成部分，合理使用可提升代码的健壮性和灵活性。
 
-## 数组与集合的选择：什么时候用集合，什么时候用数组？
+## 28. 数组与集合的选择：什么时候用集合，什么时候用数组？
 
 在Java开发中，选择"集合"还是"数组"主要取决于你的具体需求。下面详细说明它们各自的适用场景和选择依据：
 
@@ -1899,7 +1899,7 @@ List<? super Integer> ints = new ArrayList<Number>(); // 可写入Integer及其�
 
 如需更详细的代码示例或对比，也可以补充说明！
 
-## static关键字详解
+## 29. static关键字详解
 
 static是Java中用于修饰成员变量、成员方法、代码块和内部类的关键字，表示"静态"，即属于类本身而不是某个对象。
 
@@ -2019,7 +2019,7 @@ public class StaticDemo {
 
 > static是Java类成员管理和工具方法设计的核心，理解其原理有助于写出高效、规范的Java代码。
 
-## Java中的继承（Inheritance）
+## 30. Java中的继承（Inheritance）
 
 ### 1. 概念
 - 继承是面向对象编程的三大特性之一，允许子类自动获得父类的属性和方法，实现代码复用和扩展。
@@ -2157,7 +2157,7 @@ p.show(); // 输出：Child
 
 > 理解继承中成员变量和方法的访问与重写规则，有助于正确使用多态、避免变量隐藏和方法覆盖带来的困惑。
 
-## Java方法重写（Override）详解
+## 30.2 Java方法重写（Override）详解
 
 ### 1. 概念
 - 方法重写（Override）是指子类对父类继承的方法进行重新实现，方法名、参数列表、返回值类型完全一致。
@@ -5603,5 +5603,959 @@ public class LinkedList<E> {
 4. 注意内存泄漏问题，适时释放资源
 
 > **提示**：在Java 8及以后的版本中，对于函数式接口，优先使用Lambda表达式替代匿名内部类，代码更简洁。
+
+---
+
+### 31.1 多态中成员变量与成员方法的调用机制
+
+多态中成员变量和成员方法的调用行为存在重要差异，理解这些差异有助于正确使用多态特性。
+
+#### 15.1 成员变量的调用机制
+
+**核心规则：成员变量没有多态，编译时确定**
+
+```java
+class Parent {
+    int num = 10;
+    String name = "父类";
+    
+    public void showInfo() {
+        System.out.println("父类方法中的num: " + num);
+        System.out.println("父类方法中的name: " + name);
+    }
+}
+
+class Child extends Parent {
+    int num = 20;
+    String name = "子类";
+    
+    @Override
+    public void showInfo() {
+        System.out.println("子类方法中的num: " + num);
+        System.out.println("子类方法中的name: " + name);
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        Parent p = new Child(); // 父类引用指向子类对象
+        
+        // 成员变量调用 - 看引用类型
+        System.out.println(p.num);    // 输出：10（父类的num）
+        System.out.println(p.name);   // 输出：父类（父类的name）
+        
+        // 成员方法调用 - 看对象类型
+        p.showInfo(); // 输出：
+        // 子类方法中的num: 20
+        // 子类方法中的name: 子类
+    }
+}
+```
+
+**内存原理分析：**
+```
+内存中的对象结构：
+Child对象 {
+    Parent部分 {
+        num = 10
+        name = "父类"
+    }
+    Child部分 {
+        num = 20  (隐藏了父类的num)
+        name = "子类"  (隐藏了父类的name)
+    }
+}
+
+当使用 Parent p = new Child() 时：
+- p.num 访问的是 Parent 部分的 num (10)
+- p.showInfo() 调用的是 Child 的 showInfo() 方法
+- 在 Child 的 showInfo() 方法中，num 和 name 访问的是 Child 部分的变量
+```
+
+#### 15.2 成员方法的调用机制
+
+**核心规则：成员方法有多态，运行时确定**
+
+```java
+class Animal {
+    public void eat() {
+        System.out.println("动物吃东西");
+    }
+    
+    public void sleep() {
+        System.out.println("动物睡觉");
+        this.eat(); // 调用的是实际对象的方法
+    }
+}
+
+class Dog extends Animal {
+    @Override
+    public void eat() {
+        System.out.println("狗吃骨头");
+    }
+    
+    public void bark() {
+        System.out.println("狗叫");
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        Animal animal = new Dog();
+        
+        animal.eat();   // 输出：狗吃骨头（多态调用）
+        animal.sleep(); // 输出：动物睡觉 + 狗吃骨头
+        // animal.bark(); // 编译错误：父类引用无法调用子类特有方法
+    }
+}
+```
+
+#### 15.3 静态成员的调用机制
+
+**核心规则：静态成员没有多态，编译时确定**
+
+```java
+class Parent {
+    static int staticNum = 100;
+    
+    public static void staticMethod() {
+        System.out.println("父类静态方法");
+    }
+    
+    public void instanceMethod() {
+        System.out.println("父类实例方法");
+    }
+}
+
+class Child extends Parent {
+    static int staticNum = 200;
+    
+    public static void staticMethod() {
+        System.out.println("子类静态方法");
+    }
+    
+    @Override
+    public void instanceMethod() {
+        System.out.println("子类实例方法");
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        Parent p = new Child();
+        
+        // 静态成员调用 - 看引用类型
+        System.out.println(p.staticNum);     // 输出：100
+        p.staticMethod();                    // 输出：父类静态方法
+        
+        // 实例方法调用 - 看对象类型
+        p.instanceMethod();                  // 输出：子类实例方法
+    }
+}
+```
+
+#### 15.4 构造方法中的调用
+
+```java
+class Parent {
+    int num = 10;
+    
+    public Parent() {
+        System.out.println("父类构造方法中的num: " + num);
+        this.showNum();
+    }
+    
+    public void showNum() {
+        System.out.println("父类showNum方法中的num: " + num);
+    }
+}
+
+class Child extends Parent {
+    int num = 20;
+    
+    public Child() {
+        super(); // 调用父类构造方法
+        System.out.println("子类构造方法中的num: " + num);
+        this.showNum();
+    }
+    
+    @Override
+    public void showNum() {
+        System.out.println("子类showNum方法中的num: " + num);
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        Child child = new Child();
+        // 输出：
+        // 父类构造方法中的num: 10
+        // 父类showNum方法中的num: 10
+        // 子类构造方法中的num: 20
+        // 子类showNum方法中的num: 20
+    }
+}
+```
+
+#### 15.5 实际应用中的注意事项
+
+**1. 避免在父类方法中直接访问成员变量**
+```java
+class Shape {
+    protected double area;
+    
+    public void calculateArea() {
+        // 子类重写此方法时，area的访问可能不符合预期
+        System.out.println("面积: " + area);
+    }
+}
+
+class Circle extends Shape {
+    private double radius;
+    
+    @Override
+    public void calculateArea() {
+        this.area = Math.PI * radius * radius; // 正确设置area
+        super.calculateArea(); // 调用父类方法显示
+    }
+}
+```
+
+**2. 使用getter/setter方法**
+```java
+class Person {
+    private String name;
+    
+    public String getName() {
+        return name;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+}
+
+class Student extends Person {
+    private String studentId;
+    
+    @Override
+    public String getName() {
+        return "学生: " + super.getName();
+    }
+}
+```
+
+**3. 方法重写时的变量访问**
+```java
+class Base {
+    protected int value = 10;
+    
+    public void display() {
+        System.out.println("Base value: " + value);
+    }
+}
+
+class Derived extends Base {
+    protected int value = 20;
+    
+    @Override
+    public void display() {
+        System.out.println("Derived value: " + value);        // 20
+        System.out.println("Base value: " + super.value);     // 10
+    }
+}
+```
+
+#### 15.6 总结对比
+
+| 特性 | 成员变量 | 成员方法 | 静态成员 |
+|------|----------|----------|----------|
+| 多态性 | ❌ 无多态 | ✅ 有多态 | ❌ 无多态 |
+| 调用依据 | 引用类型 | 对象类型 | 引用类型 |
+| 确定时机 | 编译时 | 运行时 | 编译时 |
+| 内存访问 | 直接访问 | 动态绑定 | 直接访问 |
+
+> **记忆口诀**：变量看引用，方法看对象，静态看引用。理解这个机制有助于避免多态使用中的常见错误。
+
+### 31.2 多态中的强制类型转换
+
+多态中的类型转换是Java面向对象编程中的重要概念，包括向上转型和向下转型两种方式。
+
+#### 16.1 向上转型（Upcasting）
+
+**概念：** 子类对象赋值给父类引用，自动进行类型转换。
+
+```java
+class Animal {
+    public void eat() {
+        System.out.println("动物吃东西");
+    }
+}
+
+class Dog extends Animal {
+    @Override
+    public void eat() {
+        System.out.println("狗吃骨头");
+    }
+    
+    public void bark() {
+        System.out.println("狗叫");
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        // 向上转型 - 自动转换，安全可靠
+        Animal animal = new Dog();
+        animal.eat(); // 可以调用父类方法
+        
+        // animal.bark(); // 编译错误：父类引用无法调用子类特有方法
+    }
+}
+```
+
+**特点：**
+- 自动进行，无需强制转换
+- 安全可靠，不会抛出异常
+- 可以调用父类方法，无法调用子类特有方法
+
+#### 16.2 向下转型（Downcasting）
+
+**概念：** 父类引用转换为子类引用，需要强制类型转换。
+
+```java
+class Animal {
+    public void eat() {
+        System.out.println("动物吃东西");
+    }
+}
+
+class Dog extends Animal {
+    @Override
+    public void eat() {
+        System.out.println("狗吃骨头");
+    }
+    
+    public void bark() {
+        System.out.println("狗叫");
+    }
+}
+
+class Cat extends Animal {
+    @Override
+    public void eat() {
+        System.out.println("猫吃鱼");
+    }
+    
+    public void meow() {
+        System.out.println("猫叫");
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        Animal animal1 = new Dog();
+        Animal animal2 = new Cat();
+        
+        // 向下转型 - 需要强制转换
+        Dog dog = (Dog) animal1; // 成功
+        dog.bark(); // 可以调用子类特有方法
+        
+        // Cat cat = (Cat) animal1; // 运行时异常：ClassCastException
+    }
+}
+```
+
+#### 16.3 instanceof运算符
+
+**作用：** 判断对象是否为某个类的实例，避免ClassCastException异常。
+
+```java
+public class Test {
+    public static void main(String[] args) {
+        Animal animal1 = new Dog();
+        Animal animal2 = new Cat();
+        
+        // 使用instanceof进行安全转换
+        if (animal1 instanceof Dog) {
+            Dog dog = (Dog) animal1;
+            dog.bark();
+        }
+        
+        if (animal2 instanceof Cat) {
+            Cat cat = (Cat) animal2;
+            cat.meow();
+        }
+        
+        // 检查是否为null
+        Animal animal3 = null;
+        System.out.println(animal3 instanceof Animal); // false，null不是任何类的实例
+    }
+}
+```
+
+#### 16.4 类型转换的实际应用
+
+**1. 集合中的类型转换**
+```java
+import java.util.*;
+
+class Animal {
+    public void eat() {
+        System.out.println("动物吃东西");
+    }
+}
+
+class Dog extends Animal {
+    @Override
+    public void eat() {
+        System.out.println("狗吃骨头");
+    }
+    
+    public void bark() {
+        System.out.println("狗叫");
+    }
+}
+
+class Cat extends Animal {
+    @Override
+    public void eat() {
+        System.out.println("猫吃鱼");
+    }
+    
+    public void meow() {
+        System.out.println("猫叫");
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        List<Animal> animals = new ArrayList<>();
+        animals.add(new Dog());
+        animals.add(new Cat());
+        animals.add(new Dog());
+        
+        for (Animal animal : animals) {
+            animal.eat(); // 多态调用
+            
+            // 根据类型调用特有方法
+            if (animal instanceof Dog) {
+                Dog dog = (Dog) animal;
+                dog.bark();
+            } else if (animal instanceof Cat) {
+                Cat cat = (Cat) animal;
+                cat.meow();
+            }
+        }
+    }
+}
+```
+
+**2. 工厂模式中的类型转换**
+```java
+interface Vehicle {
+    void drive();
+}
+
+class Car implements Vehicle {
+    @Override
+    public void drive() {
+        System.out.println("汽车行驶");
+    }
+    
+    public void park() {
+        System.out.println("汽车停车");
+    }
+}
+
+class Motorcycle implements Vehicle {
+    @Override
+    public void drive() {
+        System.out.println("摩托车行驶");
+    }
+    
+    public void wheelie() {
+        System.out.println("摩托车翘头");
+    }
+}
+
+class VehicleFactory {
+    public static Vehicle createVehicle(String type) {
+        if ("car".equals(type)) {
+            return new Car();
+        } else if ("motorcycle".equals(type)) {
+            return new Motorcycle();
+        }
+        return null;
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        Vehicle vehicle1 = VehicleFactory.createVehicle("car");
+        Vehicle vehicle2 = VehicleFactory.createVehicle("motorcycle");
+        
+        // 使用instanceof进行安全转换
+        if (vehicle1 instanceof Car) {
+            Car car = (Car) vehicle1;
+            car.drive();
+            car.park();
+        }
+        
+        if (vehicle2 instanceof Motorcycle) {
+            Motorcycle motorcycle = (Motorcycle) vehicle2;
+            motorcycle.drive();
+            motorcycle.wheelie();
+        }
+    }
+}
+```
+
+#### 16.5 类型转换的注意事项
+
+**1. 避免不必要的转换**
+```java
+class Animal {
+    public void eat() {
+        System.out.println("动物吃东西");
+    }
+}
+
+class Dog extends Animal {
+    @Override
+    public void eat() {
+        System.out.println("狗吃骨头");
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        Dog dog = new Dog();
+        Animal animal = dog; // 向上转型
+        
+        // 不必要的向下转型
+        Dog dog2 = (Dog) animal; // 可以，但不必要
+        
+        // 直接使用原始引用更好
+        dog.eat(); // 更直接，无需转换
+    }
+}
+```
+
+**2. 处理转换异常**
+```java
+public class Test {
+    public static void main(String[] args) {
+        Animal animal = new Dog();
+        
+        try {
+            Cat cat = (Cat) animal; // 会抛出ClassCastException
+        } catch (ClassCastException e) {
+            System.out.println("类型转换失败：" + e.getMessage());
+        }
+        
+        // 使用instanceof更安全
+        if (animal instanceof Cat) {
+            Cat cat = (Cat) animal;
+            cat.meow();
+        } else {
+            System.out.println("animal不是Cat类型");
+        }
+    }
+}
+```
+
+**3. 接口类型转换**
+```java
+interface Flyable {
+    void fly();
+}
+
+interface Swimmable {
+    void swim();
+}
+
+class Duck implements Flyable, Swimmable {
+    @Override
+    public void fly() {
+        System.out.println("鸭子飞翔");
+    }
+    
+    @Override
+    public void swim() {
+        System.out.println("鸭子游泳");
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        Duck duck = new Duck();
+        
+        // 向上转型到接口
+        Flyable flyable = duck;
+        Swimmable swimmable = duck;
+        
+        // 向下转型回具体类
+        Duck duck2 = (Duck) flyable;
+        Duck duck3 = (Duck) swimmable;
+        
+        // 接口之间的转换
+        if (flyable instanceof Swimmable) {
+            Swimmable swimmable2 = (Swimmable) flyable;
+            swimmable2.swim();
+        }
+    }
+}
+```
+
+#### 16.6 类型转换的最佳实践
+
+**1. 优先使用instanceof检查**
+```java
+public void processAnimal(Animal animal) {
+    if (animal instanceof Dog) {
+        Dog dog = (Dog) animal;
+        dog.bark();
+    } else if (animal instanceof Cat) {
+        Cat cat = (Cat) animal;
+        cat.meow();
+    } else {
+        animal.eat(); // 使用父类方法
+    }
+}
+```
+
+**2. 使用模式匹配（Java 14+）**
+```java
+public void processAnimal(Animal animal) {
+    if (animal instanceof Dog dog) {
+        dog.bark(); // 自动转换
+    } else if (animal instanceof Cat cat) {
+        cat.meow(); // 自动转换
+    } else {
+        animal.eat();
+    }
+}
+```
+
+**3. 避免过度使用类型转换**
+```java
+// 不好的设计
+public void process(Object obj) {
+    if (obj instanceof String) {
+        String str = (String) obj;
+        // 处理字符串
+    } else if (obj instanceof Integer) {
+        Integer num = (Integer) obj;
+        // 处理数字
+    }
+}
+
+// 更好的设计 - 使用泛型
+public <T> void process(T obj) {
+    // 直接使用，无需类型转换
+}
+```
+
+#### 16.7 总结
+
+| 转换类型 | 语法 | 安全性 | 使用场景 |
+|----------|------|--------|----------|
+| 向上转型 | 自动 | 安全 | 多态使用 |
+| 向下转型 | 强制 | 需检查 | 调用子类特有方法 |
+| instanceof | 检查 | 安全 | 类型判断 |
+
+> **关键要点**：向上转型安全自动，向下转型需要检查，instanceof是安全转换的保障。合理使用类型转换可以充分利用多态的优势，但要注意避免ClassCastException异常。
+
+---
+
+### 32. Java包（package）的命名规范、作用与分类
+
+#### 32.1 包的作用
+
+- **组织管理类文件**：将相关类、接口、枚举等组织在一起，便于项目结构清晰、维护方便。
+- **避免命名冲突**：不同包下可以有同名的类，互不影响。
+- **访问控制**：包提供包访问权限（default/package-private），有助于封装实现细节。
+- **便于代码复用和分发**：包结构清晰，便于模块化开发和第三方库的分发。
+
+#### 32.2 包的命名规范
+
+- **全部小写**，多个单词用点`.`分隔。
+- **推荐使用反域名（Reverse Domain Name）命名法**，保证全局唯一性。
+  - 例如：`com.example.project.module`
+- **不要使用Java保留字或特殊字符**。
+- **包名应简洁明了，体现所属公司、项目、模块等信息**。
+- **常见命名结构**：
+  - 公司/组织域名反写 + 项目名 + 模块名 + 功能名
+  - 例：`com.alibaba.fastjson.parser`
+  - 例：`org.springframework.context.annotation`
+- **避免使用下划线、连字符等特殊符号**。
+
+**示例：**
+```java
+package com.example.myapp.service;
+package org.apache.commons.lang3;
+package cn.itcast.demo.util;
+```
+
+#### 32.3 包的分类方法
+
+1. **按功能分层**（推荐，最常见）
+   - `controller`：控制层（如Web接口、API入口）
+   - `service`：业务逻辑层
+   - `dao` / `repository`：数据访问层
+   - `model` / `entity` / `domain`：实体类、数据模型
+   - `util` / `utils`：工具类
+   - `config`：配置类
+   - `exception`：异常处理
+   - `constant`：常量
+   - 例：
+     ```
+     com.example.project.controller
+     com.example.project.service
+     com.example.project.dao
+     com.example.project.model
+     com.example.project.util
+     ```
+
+2. **按业务模块分类**
+   - 适用于大型项目，将不同业务模块分包管理
+   - 例：
+     ```
+     com.example.project.user
+     com.example.project.order
+     com.example.project.product
+     ```
+
+3. **按技术/层次混合分类**
+   - 结合功能和业务模块
+   - 例：
+     ```
+     com.example.project.user.controller
+     com.example.project.user.service
+     com.example.project.order.controller
+     ```
+
+4. **第三方/开源包命名**
+   - 通常以组织域名反写开头，如`org.apache`, `com.google`, `io.reactivex`等
+
+#### 32.4 包的使用示例
+
+**定义包：**
+```java
+package com.example.myapp.service;
+
+public class UserService {
+    // ...
+}
+```
+
+**导入包：**
+```java
+import com.example.myapp.service.UserService;
+```
+
+**包结构示意：**
+```
+src/
+  └─ main/
+      └─ java/
+          └─ com/
+              └─ example/
+                  └─ myapp/
+                      ├─ controller/
+                      ├─ service/
+                      ├─ dao/
+                      ├─ model/
+                      └─ util/
+```
+
+#### 32.5 总结
+
+- 包的命名要规范、唯一、简洁，体现公司、项目、模块等信息。
+- 合理分类包结构有助于项目的可维护性、可扩展性和团队协作。
+- 推荐采用"反域名+项目+模块+功能"方式命名和分层。
+
+> **最佳实践**：始终遵循公司/社区的包命名规范，保持包结构清晰有序，便于团队协作和代码管理。
+
+### 33. final 关键词的作用与用法
+
+#### 33.1 final 的基本作用
+
+final 是 Java 的一个修饰符，可以用于**变量**、**方法**和**类**，其核心作用是"不可更改"：
+
+- **final 变量**：值不可更改（常量）
+- **final 方法**：不可被子类重写
+- **final 类**：不可被继承
+
+#### 33.2 final 用于变量
+
+1. **修饰基本类型变量**  
+   变量赋值后不可再更改
+   ```java
+   final int a = 10;
+   // a = 20; // 编译错误
+   ```
+
+2. **修饰引用类型变量**  
+   引用不可更改（即不能指向其他对象），但对象内容可变
+   ```java
+   final StringBuilder sb = new StringBuilder("hello");
+   sb.append(" world"); // 合法，对象内容可变
+   // sb = new StringBuilder(); // 编译错误，引用不可变
+   ```
+
+3. **修饰成员变量**  
+   必须在定义时或构造方法中初始化
+   ```java
+   class Person {
+       final String name;
+       Person(String name) {
+           this.name = name; // 构造器中初始化
+       }
+   }
+   ```
+
+4. **修饰静态变量**  
+   通常与 static 连用，定义全局常量
+   ```java
+   public static final double PI = 3.1415926;
+   ```
+
+#### 33.3 final 用于方法
+
+- 被 final 修饰的方法不能被子类重写（override），但可以被继承和重载（overload）。
+```java
+class Parent {
+    public final void show() {
+        System.out.println("父类方法");
+    }
+}
+class Child extends Parent {
+    // public void show() {} // 编译错误，不能重写
+}
+```
+
+#### 33.4 final 用于类
+
+- 被 final 修饰的类不能被继承，所有方法都隐式为 final。
+```java
+final class Constants {
+    // ...
+}
+// class MyConstants extends Constants {} // 编译错误
+```
+- 常见应用：工具类（如 java.lang.String、java.lang.Math）
+
+#### 33.5 final 的注意事项
+
+- final 变量必须初始化，且只能赋值一次。
+- final 不能与 abstract 同时使用（final 意味着不可变，abstract 意味着需被重写，两者矛盾）。
+- final 方法可以被子类继承，但不能被重写。
+- final 类不能有子类，但可以创建对象。
+
+#### 33.6 典型应用场景
+
+- 定义常量（public static final）
+- 保证安全性（防止被继承或重写）
+- 设计不可变类（如 String）
+
+#### 33.7 示例总结
+
+```java
+public final class MyUtils {
+    public static final double PI = 3.14;
+
+    public final void printHello() {
+        System.out.println("Hello");
+    }
+}
+```
+
+> **最佳实践**：final 用于常量、工具类、不可变对象和防止继承/重写的场景，能提升代码安全性和可维护性。
+
+### 34. Java 常量（Constant）的定义与使用
+
+#### 34.1 什么是常量
+
+- 常量（Constant）指在程序运行过程中其值不可更改的量。
+- 在 Java 中，常量通常用 `final` 关键字修饰，配合 `static` 关键字可定义全局常量。
+
+#### 34.2 常量的定义方式
+
+1. **局部常量**
+   ```java
+   final int DAYS_IN_WEEK = 7;
+   ```
+
+2. **类常量（全局常量）**
+   - 推荐用 `public static final` 修饰，通常放在类的顶部。
+   ```java
+   public class MathConstants {
+       public static final double PI = 3.1415926;
+       public static final int MAX_SIZE = 1000;
+   }
+   ```
+
+3. **接口常量**
+   - 接口中的变量默认是 `public static final`，可省略修饰符。
+   ```java
+   public interface Status {
+       int SUCCESS = 1;
+       int ERROR = 0;
+   }
+   ```
+
+#### 34.3 常量的命名规范
+
+- **全部大写**，单词间用下划线 `_` 分隔。
+- 命名应简洁明了，表达常量含义。
+- 例：`MAX_VALUE`, `DEFAULT_TIMEOUT`, `PI`
+
+#### 34.4 常量的使用场景
+
+- 表示不会改变的物理量、配置信息、状态码、魔法数字等。
+- 便于统一管理和维护，避免硬编码。
+- 提高代码可读性和可维护性。
+
+**示例：**
+```java
+public class Config {
+    public static final String BASE_URL = "https://api.example.com";
+    public static final int TIMEOUT_SECONDS = 30;
+}
+```
+
+**使用：**
+```java
+System.out.println(Config.BASE_URL);
+```
+
+#### 34.5 常量的最佳实践
+
+- 常量应集中管理，建议放在专门的常量类或接口中。
+- 不要在代码中直接写"魔法数字"或"魔法字符串"，应使用常量代替。
+- 常量一旦定义，不应再修改其值。
+
+#### 34.6 常量与变量的区别
+
+| 特性     | 常量（final）         | 变量                |
+|----------|----------------------|---------------------|
+| 值是否可变 | 不可变               | 可变                |
+| 命名规范 | 全大写+下划线         | 小驼峰/下划线       |
+| 赋值次数 | 只能赋值一次          | 可多次赋值          |
+| 典型修饰 | static final         | 无                  |
+
+#### 34.7 示例总结
+
+```java
+public class Constants {
+    public static final double PI = 3.1415926;
+    public static final int MAX_USER = 1000;
+    public static final String APP_NAME = "MyApp";
+}
+```
+
+> **最佳实践**：常量集中管理、命名规范、避免魔法数字，提升代码可维护性和可读性。
 
 ---

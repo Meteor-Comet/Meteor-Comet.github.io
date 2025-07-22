@@ -34,7 +34,7 @@ tags:
 
 ---
 
-## Java基础：JDK、JRE、JVM的关系与作用
+## 1.Java基础：JDK、JRE、JVM的关系与作用
 
 - **JVM（Java Virtual Machine）**：Java虚拟机，负责Java字节码的加载、验证、执行和内存管理，是Java实现跨平台的核心。
 - **JRE（Java Runtime Environment）**：Java运行环境，包含JVM和Java核心类库，提供运行Java程序的最小环境。
@@ -57,7 +57,7 @@ tags:
 
 ---
 
-## Java主要关键词及其作用
+## 2.Java主要关键词及其作用
 
 - **class**  
   定义一个类，是Java的基本结构单元。
@@ -1215,7 +1215,7 @@ class Mouse implements USB {
 - 多个引用可以指向同一个对象，也可以各自指向不同对象。
 - 理解这种分布有助于掌握Java对象的共享、参数传递、垃圾回收等机制。 
 
-## Java的基本数据类型与引用数据类型
+## 18.Java的基本数据类型与引用数据类型
 
 ### 1. 基本数据类型（Primitive Types）
 - Java共有8种基本数据类型，直接存储具体的数值，分配在栈内存。
@@ -1254,7 +1254,7 @@ Person p = new Person();
 
 > 理解两者区别有助于掌握Java的内存管理、参数传递、对象操作等核心机制。 
 
-## this关键字的内存原理
+## 19.this关键字的内存原理
 
 ### 1. this的本质
 - this是Java中每个实例方法内部的一个隐式引用，指向当前调用该方法的对象本身。
@@ -1294,7 +1294,7 @@ class Person {
 
 > 理解this的内存原理有助于掌握对象方法的调用机制、链式编程和构造方法重载等高级用法。 
 
-## Java对象数组
+## 20.Java对象数组
 
 ### 1. 概念
 - 对象数组是存放对象引用的数组，每个元素都是某个类的对象引用。
@@ -1349,7 +1349,7 @@ class Person {
 
 > 对象数组常用于批量管理同类对象，如学生列表、商品清单等，是面向对象编程的重要应用。 
 
-## Java字符串（String）常用API
+## 21.Java字符串（String）常用API
 
 ### 1. 字符串的创建
 - 直接赋值：
@@ -1427,7 +1427,7 @@ String s7 = new String(sb);
 
 > 熟练掌握String API是Java开发的基础，能高效处理文本数据。 
 
-## StringBuilder与StringBuffer
+## 22.StringBuilder与StringBuffer
 
 ### 1. 概念与区别
 - **StringBuilder** 和 **StringBuffer** 都是可变字符串类，适合频繁修改字符串内容的场景。
@@ -1502,7 +1502,7 @@ sbd.append(123);
 - 需要线程安全时用StringBuffer，否则优先用StringBuilder。
 - 普通不可变字符串用String，频繁拼接/修改用Builder或Buffer。
 
-## Java链式编程（链式调用）
+## 23.Java链式编程（链式调用）
 
 ### 1. 概念
 - 链式编程（Fluent Interface/Method Chaining）是指通过连续调用对象的方法，每个方法返回当前对象自身（this），从而实现多个操作的连贯书写。
@@ -1552,7 +1552,7 @@ p.show();
 
 > 链式编程是现代Java开发中常用的风格，尤其适合配置、构建、批量操作等场景。
 
-## StringJoiner的用法
+## 24.StringJoiner的用法
 
 ### 1. 概念
 - StringJoiner是Java 8引入的字符串连接工具类，位于java.util包。
@@ -1590,7 +1590,7 @@ System.out.println(sj3.setEmptyValue("空").toString()); // 空
 
 > StringJoiner常与Stream API结合使用，也可用于String.join()等场景，是现代Java字符串拼接的推荐方式之一。
 
-## Java字符串（String）的底层原理
+## 25.Java字符串（String）的底层原理
 
 ### 1. 不可变性
 - String对象一旦创建，内容不可更改（final修饰的char[]数组存储字符）。
@@ -1706,7 +1706,7 @@ System.out.println(s1.equals(s3)); // true
 - 变量拼接的字符串，即使内容相同==为false。
 - 判断字符串内容相等，必须用equals()方法。
 
-## Java集合框架基础
+## 26.Java集合框架基础
 
 ### 1. 集合的概念
 - 集合（Collection）是存储、操作一组数据的容器，支持动态扩容、去重、排序等功能。
@@ -1791,7 +1791,7 @@ System.out.println(map.get("Tom")); // 18
 
 > 集合是Java开发中最常用的数据结构，掌握其用法有助于高效管理和处理数据。
 
-## 26. Java泛型（Generics）
+## 27. Java泛型（Generics）
 
 ### 1. 概念
 - 泛型是JDK 1.5引入的特性，用于在类、接口、方法中定义和使用类型参数，实现类型安全和代码复用。
@@ -4041,112 +4041,30 @@ public class MySQLOperation extends DatabaseOperation {
 
 #### 24.1 接口的概念
 
-接口是一种完全抽象的类，用 `interface` 关键字声明，定义了一组抽象方法。
-接口不能被实例化，只能被实现，实现类必须实现所有抽象方法。
+- 接口（interface）是Java中用`interface`关键字定义的一种引用类型，是抽象方法和常量值的集合。
+- 接口只定义规范（方法签名、常量），不包含具体实现。
+- 接口用于描述一组类应当遵循的行为标准，实现代码解耦和多态。
 
-#### 24.2 接口的语法
+#### 24.2 接口的语法与定义
 
 ```java
 public interface Animal {
-    // 常量（默认 public static final）
-    String TYPE = "动物";
-    
-    // 抽象方法（默认 public abstract）
-    void makeSound();
-    void move();
-    
-    // 默认方法（Java 8+）
-    default void sleep() {
-        System.out.println("动物在睡觉");
-    }
-    
-    // 静态方法（Java 8+）
-    static void info() {
-        System.out.println("这是一个动物接口");
-    }
+    void makeSound(); // 抽象方法，默认public abstract
+    int AGE = 10;     // 常量，默认public static final
 }
 ```
 
-#### 24.3 接口的特点
+- 接口中的方法默认是`public abstract`，可以省略。
+- 接口中的变量默认是`public static final`，必须初始化。
+- 接口不能有构造方法。
 
-1. **不能实例化**
-   ```java
-   // Animal animal = new Animal(); // 编译错误
-   ```
+#### 24.3 接口的实现与多继承
 
-2. **只能包含抽象方法、默认方法、静态方法和常量**
-   ```java
-   public interface Drawable {
-       // 常量
-       String COLOR = "黑色";
-       
-       // 抽象方法
-       void draw();
-       
-       // 默认方法
-       default void erase() {
-           System.out.println("擦除图形");
-       }
-       
-       // 静态方法
-       static void showInfo() {
-           System.out.println("可绘制接口");
-       }
-   }
-   ```
+- 类通过`implements`关键字实现接口，可以实现多个接口（用逗号分隔）。
+- 一个类可以继承一个父类，同时实现多个接口。
+- 接口之间可以多继承（`extends`），一个接口可以继承多个接口。
 
-3. **成员变量默认是 `public static final`**
-   ```java
-   public interface Constants {
-       int MAX_SIZE = 100; // 等同于 public static final int MAX_SIZE = 100;
-       String DEFAULT_NAME = "default";
-   }
-   ```
-
-4. **方法默认是 `public abstract`**
-   ```java
-   public interface Movable {
-       void move(); // 等同于 public abstract void move();
-   }
-   ```
-
-#### 24.4 接口的实现
-
-```java
-// 实现接口
-public class Dog implements Animal {
-    @Override
-    public void makeSound() {
-        System.out.println("汪汪汪");
-    }
-    
-    @Override
-    public void move() {
-        System.out.println("狗在跑");
-    }
-}
-
-public class Cat implements Animal {
-    @Override
-    public void makeSound() {
-        System.out.println("喵喵喵");
-    }
-    
-    @Override
-    public void move() {
-        System.out.println("猫在走");
-    }
-    
-    // 可以重写默认方法
-    @Override
-    public void sleep() {
-        System.out.println("猫在懒洋洋地睡觉");
-    }
-}
-```
-
-#### 24.5 多接口实现
-
+**示例：**
 ```java
 public interface Flyable {
     void fly();
@@ -4156,859 +4074,115 @@ public interface Swimmable {
     void swim();
 }
 
-// 实现多个接口
-public class Duck implements Animal, Flyable, Swimmable {
-    @Override
-    public void makeSound() {
-        System.out.println("嘎嘎嘎");
-    }
-    
-    @Override
-    public void move() {
-        System.out.println("鸭子在地上走");
-    }
-    
+public class Duck implements Flyable, Swimmable {
     @Override
     public void fly() {
-        System.out.println("鸭子在天上飞");
+        System.out.println("鸭子飞翔");
     }
-    
     @Override
     public void swim() {
-        System.out.println("鸭子在水里游");
+        System.out.println("鸭子游泳");
     }
 }
 ```
 
-#### 24.6 接口继承
+#### 24.4 接口的默认方法与静态方法（Java 8+）
 
+- 接口可以有`default`修饰的默认方法（有方法体），用于接口升级时的兼容。
+- 接口可以有`static`修饰的静态方法（有方法体），只能通过接口名调用。
+
+**示例：**
 ```java
-public interface Vehicle {
-    void start();
-    void stop();
+public interface MyInterface {
+    void abstractMethod();
+    default void defaultMethod() {
+        System.out.println("默认方法");
+    }
+    static void staticMethod() {
+        System.out.println("静态方法");
+    }
 }
 
-public interface Car extends Vehicle {
-    void accelerate();
-    void brake();
+public class MyClass implements MyInterface {
+    @Override
+    public void abstractMethod() {
+        System.out.println("实现抽象方法");
+    }
 }
 
-// 实现继承的接口
-public class SportsCar implements Car {
-    @Override
-    public void start() {
-        System.out.println("跑车启动");
-    }
-    
-    @Override
-    public void stop() {
-        System.out.println("跑车停止");
-    }
-    
-    @Override
-    public void accelerate() {
-        System.out.println("跑车加速");
-    }
-    
-    @Override
-    public void brake() {
-        System.out.println("跑车刹车");
-    }
-}
+// 调用
+MyClass obj = new MyClass();
+obj.defaultMethod(); // 默认方法
+MyInterface.staticMethod(); // 静态方法
 ```
 
-#### 24.7 默认方法（Default Methods）
+#### 24.5 接口的特性与规则
 
-Java 8 引入默认方法，允许接口提供方法实现。
+- 接口不能被实例化。
+- 实现类必须实现接口的所有抽象方法，否则实现类也必须声明为抽象类。
+- 接口支持多继承，类只支持单继承。
+- 接口可以有常量、抽象方法、默认方法、静态方法（Java 8+）、私有方法（Java 9+）。
+- 接口方法不能是private、protected、final、static（除非是静态方法实现）。
+
+#### 24.6 接口的使用场景
+
+- 规范API设计，定义一组类的统一行为。
+- 解耦系统结构，实现多态和灵活扩展。
+- 回调机制、策略模式、适配器模式等设计模式。
+- JDK大量API（如Runnable、Comparator、List等）都基于接口设计。
+
+#### 24.7 示例代码
 
 ```java
-public interface Logger {
-    // 抽象方法
-    void log(String message);
-    
-    // 默认方法
-    default void logInfo(String message) {
-        log("INFO: " + message);
-    }
-    
-    default void logError(String message) {
-        log("ERROR: " + message);
-    }
-    
-    default void logWarning(String message) {
-        log("WARNING: " + message);
-    }
+public interface USB {
+    void connect();
+    void disconnect();
 }
 
-public class ConsoleLogger implements Logger {
+public class Mouse implements USB {
     @Override
-    public void log(String message) {
-        System.out.println(message);
+    public void connect() {
+        System.out.println("鼠标已连接");
     }
-    
-    // 可以选择重写默认方法
     @Override
-    public void logError(String message) {
-        System.err.println("ERROR: " + message);
-    }
-}
-```
-
-#### 24.8 静态方法（Static Methods）
-
-Java 8 允许接口包含静态方法。
-
-```java
-public interface MathUtils {
-    static int add(int a, int b) {
-        return a + b;
-    }
-    
-    static int multiply(int a, int b) {
-        return a * b;
-    }
-    
-    static double sqrt(double value) {
-        return Math.sqrt(value);
+    public void disconnect() {
+        System.out.println("鼠标已断开");
     }
 }
 
-// 使用静态方法
-public class Calculator {
-    public void calculate() {
-        int sum = MathUtils.add(5, 3);
-        int product = MathUtils.multiply(4, 6);
-        double root = MathUtils.sqrt(16);
-        
-        System.out.println("和: " + sum);
-        System.out.println("积: " + product);
-        System.out.println("平方根: " + root);
+public class Keyboard implements USB {
+    @Override
+    public void connect() {
+        System.out.println("键盘已连接");
+    }
+    @Override
+    public void disconnect() {
+        System.out.println("键盘已断开");
     }
 }
-```
 
-#### 24.9 函数式接口（Functional Interface）
-
-只有一个抽象方法的接口称为函数式接口，可以用 `@FunctionalInterface` 注解标记。
-
-```java
-@FunctionalInterface
-public interface Calculator {
-    int calculate(int a, int b);
-}
-
-// 使用 Lambda 表达式
-public class MathDemo {
+public class Computer {
+    public void useUSB(USB usb) {
+        usb.connect();
+        System.out.println("设备工作中...");
+        usb.disconnect();
+    }
     public static void main(String[] args) {
-        // Lambda 表达式
-        Calculator add = (a, b) -> a + b;
-        Calculator subtract = (a, b) -> a - b;
-        Calculator multiply = (a, b) -> a * b;
-        
-        System.out.println("加法: " + add.calculate(10, 5));
-        System.out.println("减法: " + subtract.calculate(10, 5));
-        System.out.println("乘法: " + multiply.calculate(10, 5));
+        Computer pc = new Computer();
+        pc.useUSB(new Mouse());
+        pc.useUSB(new Keyboard());
     }
 }
 ```
 
-#### 24.10 常用函数式接口
+#### 24.8 注意事项与补充
 
-```java
-// Predicate<T> - 判断条件
-Predicate<String> isEmpty = String::isEmpty;
-Predicate<String> isLong = s -> s.length() > 10;
+- 一个类可以实现多个接口，接口之间用逗号分隔。
+- 接口可以继承多个接口，实现多继承特性。
+- 接口中的常量建议大写字母+下划线命名。
+- 接口适合做规范、回调、扩展点，避免滥用。
 
-// Function<T, R> - 转换函数
-Function<String, Integer> getLength = String::length;
-Function<Integer, String> toString = Object::toString;
-
-// Consumer<T> - 消费函数
-Consumer<String> printer = System.out::println;
-Consumer<String> upperCase = s -> System.out.println(s.toUpperCase());
-
-// Supplier<T> - 供应函数
-Supplier<String> getRandomString = () -> "随机字符串";
-Supplier<LocalDateTime> getCurrentTime = LocalDateTime::now;
-
-// 使用示例
-public class FunctionalDemo {
-    public static void main(String[] args) {
-        String text = "Hello World";
-        
-        // Predicate
-        System.out.println("是否为空: " + isEmpty.test(text));
-        System.out.println("是否很长: " + isLong.test(text));
-        
-        // Function
-        System.out.println("长度: " + getLength.apply(text));
-        
-        // Consumer
-        printer.accept(text);
-        upperCase.accept(text);
-        
-        // Supplier
-        System.out.println(getRandomString.get());
-        System.out.println(getCurrentTime.get());
-    }
-}
-```
-
-#### 24.11 接口的使用场景
-
-1. **定义规范**
-   ```java
-   public interface Database {
-       void connect();
-       void disconnect();
-       ResultSet executeQuery(String sql);
-       int executeUpdate(String sql);
-   }
-   ```
-
-2. **回调机制**
-   ```java
-   public interface ClickListener {
-       void onClick();
-   }
-   
-   public class Button {
-       private ClickListener listener;
-       
-       public void setClickListener(ClickListener listener) {
-           this.listener = listener;
-       }
-       
-       public void click() {
-           if (listener != null) {
-               listener.onClick();
-           }
-       }
-   }
-   ```
-
-3. **策略模式**
-   ```java
-   public interface PaymentStrategy {
-       void pay(double amount);
-   }
-   
-   public class CreditCardPayment implements PaymentStrategy {
-       @Override
-       public void pay(double amount) {
-           System.out.println("信用卡支付: " + amount);
-       }
-   }
-   
-   public class CashPayment implements PaymentStrategy {
-       @Override
-       public void pay(double amount) {
-           System.out.println("现金支付: " + amount);
-       }
-   }
-   ```
-
-#### 24.12 注意事项
-
-1. **接口不能被 `final` 修饰**
-   ```java
-   // public final interface Test {} // 编译错误
-   ```
-
-2. **接口方法不能是 `private`（Java 9+ 支持私有方法）**
-   ```java
-   public interface Test {
-       // private void method(); // Java 9+ 支持
-       void method(); // 正确
-   }
-   ```
-
-3. **实现类必须实现所有抽象方法**
-   ```java
-   public interface Test {
-       void method1();
-       void method2();
-   }
-   
-   public class Impl implements Test {
-       @Override
-       public void method1() {
-           // 实现
-       }
-       
-       @Override
-       public void method2() {
-           // 实现
-       }
-   }
-   ```
-
-4. **默认方法冲突解决**
-   ```java
-   public interface A {
-       default void method() {
-           System.out.println("A");
-       }
-   }
-   
-   public interface B {
-       default void method() {
-           System.out.println("B");
-       }
-   }
-   
-   public class C implements A, B {
-       @Override
-       public void method() {
-           // 必须重写解决冲突
-           System.out.println("C");
-       }
-   }
-   ```
-
-#### 24.13 接口的优势
-
-1. **多实现**：一个类可以实现多个接口
-2. **松耦合**：接口与实现分离
-3. **可扩展性**：易于添加新的实现
-4. **标准化**：定义统一的规范
-
-#### 24.14 实际应用示例
-
-```java
-// 排序接口
-public interface Sortable<T> {
-    void sort(List<T> list);
-}
-
-// 冒泡排序实现
-public class BubbleSort<T extends Comparable<T>> implements Sortable<T> {
-    @Override
-    public void sort(List<T> list) {
-        for (int i = 0; i < list.size() - 1; i++) {
-            for (int j = 0; j < list.size() - 1 - i; j++) {
-                if (list.get(j).compareTo(list.get(j + 1)) > 0) {
-                    T temp = list.get(j);
-                    list.set(j, list.get(j + 1));
-                    list.set(j + 1, temp);
-                }
-            }
-        }
-    }
-}
-
-// 快速排序实现
-public class QuickSort<T extends Comparable<T>> implements Sortable<T> {
-    @Override
-    public void sort(List<T> list) {
-        quickSort(list, 0, list.size() - 1);
-    }
-    
-    private void quickSort(List<T> list, int low, int high) {
-        if (low < high) {
-            int pi = partition(list, low, high);
-            quickSort(list, low, pi - 1);
-            quickSort(list, pi + 1, high);
-        }
-    }
-    
-    private int partition(List<T> list, int low, int high) {
-        T pivot = list.get(high);
-        int i = low - 1;
-        
-        for (int j = low; j < high; j++) {
-            if (list.get(j).compareTo(pivot) <= 0) {
-                i++;
-                T temp = list.get(i);
-                list.set(i, list.get(j));
-                list.set(j, temp);
-            }
-        }
-        
-        T temp = list.get(i + 1);
-        list.set(i + 1, list.get(high));
-        list.set(high, temp);
-        
-        return i + 1;
-    }
-}
-```
-
-#### 24.15 总结
-
-- 接口是Java中重要的抽象机制，用于定义规范和实现多态
-- 支持默认方法和静态方法，增强了接口的功能
-- 函数式接口为Lambda表达式提供了基础
-- 接口与抽象类各有优势，应根据具体需求选择
-
-> **最佳实践**：接口用于定义"能做什么"，抽象类用于定义"是什么"。优先使用接口，需要共享代码时使用抽象类。
-
-#### 24.16 接口默认方法的应用场景
-
-接口的默认方法（default method）主要用于以下几类场景：
-
-**1. 接口演进与向后兼容**
-
-当接口已经被广泛实现后，如果需要为接口新增方法，直接添加抽象方法会导致所有实现类都必须修改，违背了向后兼容原则。通过默认方法，可以为接口新增带有默认实现的方法，老的实现类无需修改即可继续工作。
-
-```java
-public interface Logger {
-    void log(String message);
-
-    // 新增默认方法，不影响已有实现
-    default void logInfo(String message) {
-        log("INFO: " + message);
-    }
-}
-```
-
-**2. 提供通用实现，减少重复代码**
-
-有些接口方法的实现逻辑是通用的，可以直接在接口中提供默认实现，避免每个实现类都写一遍。
-
-```java
-public interface ListUtils {
-    boolean isEmpty();
-
-    // 提供通用的非空判断
-    default boolean isNotEmpty() {
-        return !isEmpty();
-    }
-}
-```
-
-**3. 组合多个接口时解决方法冲突**
-
-当一个类实现多个接口且这些接口有同名默认方法时，必须在实现类中显式重写，解决冲突。这种机制让接口的多继承更灵活。
-
-```java
-public interface A {
-    default void hello() { System.out.println("A"); }
-}
-public interface B {
-    default void hello() { System.out.println("B"); }
-}
-public class C implements A, B {
-    @Override
-    public void hello() {
-        // 必须重写，解决冲突
-        A.super.hello();
-    }
-}
-```
-
-**4. 支持函数式接口的扩展**
-
-在Java标准库中，许多函数式接口（如Comparator、Iterable等）通过默认方法扩展了丰富的功能，便于链式调用和组合。
-
-```java
-Comparator<String> cmp = Comparator.naturalOrder()
-    .thenComparing(String::length); // thenComparing是默认方法
-```
-
-**5. 便于接口工具方法的封装**
-
-有些工具方法与接口密切相关，但又不适合放在实现类中，可以作为默认方法直接放在接口里。
-
-```java
-public interface Shape {
-    double area();
-    default boolean isBiggerThan(Shape other) {
-        return this.area() > other.area();
-    }
-}
-```
-
----
-
-**总结：**  
-接口的默认方法主要用于接口升级、通用实现、方法冲突解决、函数式接口扩展和工具方法封装等场景。它让接口更灵活、可扩展，同时兼顾了向后兼容和代码复用。
-
----
-
-#### 24.17 接口中的私有方法（Private Methods）
-
-Java 9 引入了接口私有方法，允许在接口中定义私有方法，用于代码复用和封装。
-
-**1. 私有方法的语法**
-
-```java
-public interface DataProcessor {
-    // 抽象方法
-    void process(String data);
-    
-    // 默认方法
-    default void processInfo(String data) {
-        String formatted = formatData(data);
-        validateData(formatted);
-        process(formatted);
-    }
-    
-    // 私有方法（Java 9+）
-    private String formatData(String data) {
-        return data.trim().toLowerCase();
-    }
-    
-    // 私有静态方法
-    private static void validateData(String data) {
-        if (data == null || data.isEmpty()) {
-            throw new IllegalArgumentException("数据不能为空");
-        }
-    }
-}
-```
-
-**2. 私有方法的特点**
-
-- 只能在接口内部使用
-- 不能被实现类访问
-- 可以调用其他私有方法
-- 支持私有静态方法
-
-```java
-public interface StringUtils {
-    default String reverse(String str) {
-        return reverseInternal(str);
-    }
-    
-    default String reverseAndUpper(String str) {
-        String reversed = reverseInternal(str);
-        return reversed.toUpperCase();
-    }
-    
-    // 私有方法，避免代码重复
-    private String reverseInternal(String str) {
-        if (str == null) return null;
-        return new StringBuilder(str).reverse().toString();
-    }
-    
-    // 私有静态方法
-    private static boolean isValid(String str) {
-        return str != null && !str.isEmpty();
-    }
-}
-```
-
-**3. 私有方法的使用场景**
-
-**场景1：代码复用**
-```java
-public interface Logger {
-    void log(String message);
-    
-    default void logInfo(String message) {
-        logWithLevel("INFO", message);
-    }
-    
-    default void logError(String message) {
-        logWithLevel("ERROR", message);
-    }
-    
-    default void logWarning(String message) {
-        logWithLevel("WARNING", message);
-    }
-    
-    // 私有方法复用格式化逻辑
-    private void logWithLevel(String level, String message) {
-        String formatted = String.format("[%s] %s", level, message);
-        log(formatted);
-    }
-}
-```
-
-**场景2：数据验证**
-```java
-public interface Validator {
-    boolean isValid(String data);
-    
-    default void validateAndProcess(String data) {
-        if (isValidInput(data)) {
-            processValidData(data);
-        } else {
-            throw new IllegalArgumentException("无效数据");
-        }
-    }
-    
-    // 私有方法进行输入验证
-    private boolean isValidInput(String data) {
-        return data != null && !data.trim().isEmpty();
-    }
-    
-    // 私有方法处理有效数据
-    private void processValidData(String data) {
-        // 处理逻辑
-        System.out.println("处理数据: " + data);
-    }
-}
-```
-
-**场景3：复杂计算**
-```java
-public interface Calculator {
-    double calculate(double a, double b);
-    
-    default double add(double a, double b) {
-        validateInputs(a, b);
-        return calculate(a, b);
-    }
-    
-    default double multiply(double a, double b) {
-        validateInputs(a, b);
-        return calculate(a, b);
-    }
-    
-    // 私有方法验证输入
-    private void validateInputs(double a, double b) {
-        if (Double.isNaN(a) || Double.isNaN(b)) {
-            throw new IllegalArgumentException("输入不能为NaN");
-        }
-        if (Double.isInfinite(a) || Double.isInfinite(b)) {
-            throw new IllegalArgumentException("输入不能为无穷大");
-        }
-    }
-}
-```
-
-**4. 私有静态方法**
-
-```java
-public interface MathUtils {
-    static double add(double a, double b) {
-        validateInputs(a, b);
-        return a + b;
-    }
-    
-    static double multiply(double a, double b) {
-        validateInputs(a, b);
-        return a * b;
-    }
-    
-    // 私有静态方法
-    private static void validateInputs(double a, double b) {
-        if (Double.isNaN(a) || Double.isNaN(b)) {
-            throw new IllegalArgumentException("输入不能为NaN");
-        }
-    }
-}
-```
-
-**5. 私有方法与默认方法的结合**
-
-```java
-public interface FileProcessor {
-    void processFile(String filename);
-    
-    default void processTextFile(String filename) {
-        validateFile(filename);
-        String content = readFile(filename);
-        String processed = processContent(content);
-        writeFile(filename, processed);
-    }
-    
-    default void processBinaryFile(String filename) {
-        validateFile(filename);
-        byte[] content = readBinaryFile(filename);
-        byte[] processed = processBinaryContent(content);
-        writeBinaryFile(filename, processed);
-    }
-    
-    // 私有方法验证文件
-    private void validateFile(String filename) {
-        if (filename == null || filename.trim().isEmpty()) {
-            throw new IllegalArgumentException("文件名不能为空");
-        }
-    }
-    
-    // 私有方法读取文件
-    private String readFile(String filename) {
-        // 文件读取逻辑
-        return "文件内容";
-    }
-    
-    // 私有方法处理内容
-    private String processContent(String content) {
-        return content.toUpperCase();
-    }
-    
-    // 私有方法写入文件
-    private void writeFile(String filename, String content) {
-        // 文件写入逻辑
-        System.out.println("写入文件: " + filename);
-    }
-    
-    // 私有方法读取二进制文件
-    private byte[] readBinaryFile(String filename) {
-        // 二进制文件读取逻辑
-        return new byte[0];
-    }
-    
-    // 私有方法处理二进制内容
-    private byte[] processBinaryContent(byte[] content) {
-        // 二进制内容处理逻辑
-        return content;
-    }
-    
-    // 私有方法写入二进制文件
-    private void writeBinaryFile(String filename, byte[] content) {
-        // 二进制文件写入逻辑
-        System.out.println("写入二进制文件: " + filename);
-    }
-}
-```
-
-**6. 注意事项**
-
-1. **Java 9+ 特性**：私有方法只在 Java 9 及以上版本支持
-2. **访问限制**：私有方法只能在接口内部使用
-3. **继承规则**：私有方法不能被继承或重写
-4. **静态私有方法**：可以包含静态私有方法
-
-```java
-public interface AdvancedProcessor {
-    void process(String data);
-    
-    default void processWithValidation(String data) {
-        if (isValidData(data)) {
-            process(data);
-        } else {
-            handleInvalidData(data);
-        }
-    }
-    
-    // 私有方法
-    private boolean isValidData(String data) {
-        return data != null && data.length() > 0;
-    }
-    
-    // 私有静态方法
-    private static void handleInvalidData(String data) {
-        System.err.println("无效数据: " + data);
-    }
-}
-```
-
-**7. 总结**
-
-接口私有方法的主要优势：
-- **代码复用**：避免默认方法中的重复代码
-- **封装性**：隐藏接口内部的实现细节
-- **可维护性**：提高代码的可读性和维护性
-- **模块化**：将复杂逻辑拆分为小的私有方法
-
-> **最佳实践**：当接口中有多个默认方法需要共享相同的逻辑时，使用私有方法来避免代码重复，提高代码质量。
-
----
-
-#### 24.18 接口的多态
-
-接口的多态性是面向对象编程的重要特性之一。
-
-**1. 概念**
-
-接口的多态指的是：父接口类型的变量可以引用任何实现了该接口的对象。通过接口引用调用方法时，实际执行的是实现类中重写的方法。这种机制实现了"编程面向接口"，提高了代码的灵活性和可扩展性。
-
-**2. 语法与示例**
-
-```java
-public interface Animal {
-    void makeSound();
-}
-
-public class Dog implements Animal {
-    @Override
-    public void makeSound() {
-        System.out.println("汪汪汪");
-    }
-}
-
-public class Cat implements Animal {
-    @Override
-    public void makeSound() {
-        System.out.println("喵喵喵");
-    }
-}
-
-public class Main {
-    public static void main(String[] args) {
-        Animal a1 = new Dog();
-        Animal a2 = new Cat();
-
-        a1.makeSound(); // 输出：汪汪汪
-        a2.makeSound(); // 输出：喵喵喵
-    }
-}
-```
-
-**3. 多态的体现**
-
-- 接口变量可以指向任意实现类对象
-- 调用方法时，执行的是实际对象的实现
-- 便于扩展和解耦
-
-**4. 典型应用场景**
-
-- 回调机制：如事件监听、策略模式等
-- 统一处理：如集合中存放接口类型，统一遍历处理
-- 依赖倒置：高层模块依赖接口而非具体实现
-
-*示例：统一处理*
-```java
-List<Animal> animals = Arrays.asList(new Dog(), new Cat());
-for (Animal animal : animals) {
-    animal.makeSound(); // 多态调用
-}
-```
-
-*示例：策略模式*
-```java
-public interface PaymentStrategy {
-    void pay(double amount);
-}
-
-public class CreditCardPayment implements PaymentStrategy {
-    public void pay(double amount) {
-        System.out.println("信用卡支付: " + amount);
-    }
-}
-
-public class CashPayment implements PaymentStrategy {
-    public void pay(double amount) {
-        System.out.println("现金支付: " + amount);
-    }
-}
-
-public class PayContext {
-    private PaymentStrategy strategy;
-    public PayContext(PaymentStrategy strategy) {
-        this.strategy = strategy;
-    }
-    public void execute(double amount) {
-        strategy.pay(amount); // 多态调用
-    }
-}
-```
-
-**5. 向下转型与接口多态**
-
-如果需要调用实现类特有的方法，可以进行类型强制转换（向下转型）：
-
-```java
-Animal animal = new Dog();
-if (animal instanceof Dog) {
-    Dog dog = (Dog) animal;
-    // 调用Dog特有方法
-}
-```
-
-**6. 注意事项**
-
-- 只能通过接口变量调用接口中声明的方法，不能直接调用实现类特有的方法，除非强制类型转换。
-- 多态的前提是实现类重写了接口的方法。
-- 接口多态是Java解耦和扩展的基础。
-
-**7. 总结**
-
-接口多态让代码更加灵活、可扩展、易于维护，是面向接口编程的核心。实际开发中应优先依赖接口而非具体实现，充分利用多态带来的好处。
+> **总结：** 接口是行为规范和扩展点，是Java实现多态和解耦的核心机制。合理设计接口有助于系统的灵活性、可维护性和可扩展性。
 
 ---
 
@@ -5606,14 +4780,178 @@ public class LinkedList<E> {
 
 ---
 
-### 31.1 多态中成员变量与成员方法的调用机制
+## 30.3 继承中构造方法的自动调用（super）
 
-多态中成员变量和成员方法的调用行为存在重要差异，理解这些差异有助于正确使用多态特性。
+- 在Java中，子类构造方法执行时会**自动调用父类的构造方法**，以保证父类部分被正确初始化。
+- 如果子类构造方法没有显式写`super(...)`，编译器会自动在第一行加上`super();`，即调用父类的无参构造方法。
+- 如果父类没有无参构造方法，子类必须显式调用父类的有参构造方法，否则编译报错。
+- `super(...)`必须是子类构造方法的第一条语句。
 
-#### 15.1 成员变量的调用机制
+**调用顺序：**
+1. 先执行父类构造方法（super），再执行子类构造方法。
+2. 多层继承时，先最顶层父类，再逐层向下。
 
-**核心规则：成员变量没有多态，编译时确定**
+**示例：**
+```java
+class Parent {
+    Parent() { System.out.println("父类构造"); }
+}
+class Child extends Parent {
+    Child() { System.out.println("子类构造"); }
+}
+public class Test {
+    public static void main(String[] args) {
+        new Child();
+        // 输出：
+        // 父类构造
+        // 子类构造
+    }
+}
+```
 
+**有参构造情况：**
+```java
+class Parent {
+    Parent(String msg) { System.out.println(msg); }
+}
+class Child extends Parent {
+    Child() { super("父类有参构造"); System.out.println("子类构造"); }
+}
+```
+
+> 理解构造方法的自动调用顺序，有助于正确初始化继承体系中的对象，避免常见的编译和运行错误。
+
+## 30.4 构造方法中this(...)的含义与用法
+
+- 在Java构造方法中，`this(...)`用于调用本类的另一个构造方法，实现构造方法之间的重用和统一初始化。
+- `this(...)`只能出现在构造方法的第一行，且不能与super(...)同时出现。
+- 通过this(...)可以实现构造方法的链式调用，最终会调用到某个没有this(...)的构造方法（通常是最全参的构造方法）。
+
+**示例：**
+```java
+class Person {
+    String name;
+    int age;
+
+    // 无参构造
+    public Person() {
+        this("无名氏", 0); // 调用有参构造
+        System.out.println("无参构造执行");
+    }
+
+    // 有参构造
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+        System.out.println("有参构造执行");
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        Person p = new Person();
+        // 输出：
+        // 有参构造执行
+        // 无参构造执行
+    }
+}
+```
+
+**注意事项：**
+- this(...)只能用于构造方法，且必须是第一条语句。
+- 不能和super(...)同时出现。
+
+**作用总结：**
+- 统一初始化逻辑，减少重复代码。
+- 便于维护和扩展构造方法。
+
+> 在构造方法中用this(...)，就是"让本类的另一个构造方法帮我初始化"。
+
+## 31. 多态（Polymorphism）
+
+### 31.1 多态的概念与实现方式
+
+- **多态**：同一个接口，使用不同的实例而执行不同操作。
+- **编译时多态**：方法重载（Overloading）
+- **运行时多态**：方法重写（Overriding）
+
+**示例：**
+```java
+interface Animal {
+    void makeSound();
+}
+
+class Dog implements Animal {
+    @Override
+    public void makeSound() {
+        System.out.println("汪汪汪");
+    }
+}
+
+class Cat implements Animal {
+    @Override
+    public void makeSound() {
+        System.out.println("喵喵喵");
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        Animal animal1 = new Dog(); // 父类引用指向子类对象
+        Animal animal2 = new Cat();
+        
+        animal1.makeSound(); // 输出：汪汪汪
+        animal2.makeSound(); // 输出：喵喵喵
+    }
+}
+```
+
+### 31.2 多态的应用场景
+
+- **方法参数多态**：一个方法可以接受不同类型的参数，实现不同的行为。
+- **方法返回值多态**：一个方法可以返回不同类型的对象，实现不同的行为。
+- **集合中的多态**：如List、Set、Map等，可以存储不同类型的对象，实现统一处理。
+
+**示例：**
+```java
+public class AnimalTrainer {
+    public void train(Animal animal) {
+        animal.makeSound();
+    }
+}
+
+public class AnimalFactory {
+    public static Animal createAnimal(String type) {
+        if ("dog".equals(type)) {
+            return new Dog();
+        } else if ("cat".equals(type)) {
+            return new Cat();
+        }
+        return null;
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        AnimalTrainer trainer = new AnimalTrainer();
+        trainer.train(new Dog()); // 输出：汪汪汪
+        trainer.train(new Cat()); // 输出：喵喵喵
+
+        Animal dog = AnimalFactory.createAnimal("dog");
+        Animal cat = AnimalFactory.createAnimal("cat");
+        dog.makeSound(); // 输出：汪汪汪
+        cat.makeSound(); // 输出：喵喵喵
+    }
+}
+```
+
+### 31.3 多态的注意事项
+
+- **成员变量没有多态**：父类和子类的成员变量是独立的，子类不能访问父类的成员变量。
+- **静态方法没有多态**：父类的静态方法不能被子类重写，子类可以定义同名的静态方法。
+- **构造方法没有多态**：子类不能重写父类的构造方法。
+
+**示例：**
 ```java
 class Parent {
     int num = 10;
@@ -5652,439 +4990,27 @@ public class Test {
 }
 ```
 
-**内存原理分析：**
-```
-内存中的对象结构：
-Child对象 {
-    Parent部分 {
-        num = 10
-        name = "父类"
-    }
-    Child部分 {
-        num = 20  (隐藏了父类的num)
-        name = "子类"  (隐藏了父类的name)
-    }
-}
+### 31.4 多态的优势与实际应用
 
-当使用 Parent p = new Child() 时：
-- p.num 访问的是 Parent 部分的 num (10)
-- p.showInfo() 调用的是 Child 的 showInfo() 方法
-- 在 Child 的 showInfo() 方法中，num 和 name 访问的是 Child 部分的变量
-```
+1. **可扩展性**：新增子类不需要修改现有代码，只需添加新的子类即可。
+2. **可维护性**：统一的接口，便于维护和扩展。
+3. **可复用性**：一个方法可以处理多种类型的对象，提高代码的复用性。
+4. **灵活性**：运行时动态绑定，提高程序的灵活性。
 
-#### 15.2 成员方法的调用机制
-
-**核心规则：成员方法有多态，运行时确定**
-
+**示例：**
 ```java
-class Animal {
-    public void eat() {
-        System.out.println("动物吃东西");
-    }
-    
-    public void sleep() {
-        System.out.println("动物睡觉");
-        this.eat(); // 调用的是实际对象的方法
+public class AnimalTrainer {
+    public void train(Animal animal) {
+        animal.makeSound();
     }
 }
 
-class Dog extends Animal {
-    @Override
-    public void eat() {
-        System.out.println("狗吃骨头");
-    }
-    
-    public void bark() {
-        System.out.println("狗叫");
-    }
-}
-
-public class Test {
-    public static void main(String[] args) {
-        Animal animal = new Dog();
-        
-        animal.eat();   // 输出：狗吃骨头（多态调用）
-        animal.sleep(); // 输出：动物睡觉 + 狗吃骨头
-        // animal.bark(); // 编译错误：父类引用无法调用子类特有方法
-    }
-}
-```
-
-#### 15.3 静态成员的调用机制
-
-**核心规则：静态成员没有多态，编译时确定**
-
-```java
-class Parent {
-    static int staticNum = 100;
-    
-    public static void staticMethod() {
-        System.out.println("父类静态方法");
-    }
-    
-    public void instanceMethod() {
-        System.out.println("父类实例方法");
-    }
-}
-
-class Child extends Parent {
-    static int staticNum = 200;
-    
-    public static void staticMethod() {
-        System.out.println("子类静态方法");
-    }
-    
-    @Override
-    public void instanceMethod() {
-        System.out.println("子类实例方法");
-    }
-}
-
-public class Test {
-    public static void main(String[] args) {
-        Parent p = new Child();
-        
-        // 静态成员调用 - 看引用类型
-        System.out.println(p.staticNum);     // 输出：100
-        p.staticMethod();                    // 输出：父类静态方法
-        
-        // 实例方法调用 - 看对象类型
-        p.instanceMethod();                  // 输出：子类实例方法
-    }
-}
-```
-
-#### 15.4 构造方法中的调用
-
-```java
-class Parent {
-    int num = 10;
-    
-    public Parent() {
-        System.out.println("父类构造方法中的num: " + num);
-        this.showNum();
-    }
-    
-    public void showNum() {
-        System.out.println("父类showNum方法中的num: " + num);
-    }
-}
-
-class Child extends Parent {
-    int num = 20;
-    
-    public Child() {
-        super(); // 调用父类构造方法
-        System.out.println("子类构造方法中的num: " + num);
-        this.showNum();
-    }
-    
-    @Override
-    public void showNum() {
-        System.out.println("子类showNum方法中的num: " + num);
-    }
-}
-
-public class Test {
-    public static void main(String[] args) {
-        Child child = new Child();
-        // 输出：
-        // 父类构造方法中的num: 10
-        // 父类showNum方法中的num: 10
-        // 子类构造方法中的num: 20
-        // 子类showNum方法中的num: 20
-    }
-}
-```
-
-#### 15.5 实际应用中的注意事项
-
-**1. 避免在父类方法中直接访问成员变量**
-```java
-class Shape {
-    protected double area;
-    
-    public void calculateArea() {
-        // 子类重写此方法时，area的访问可能不符合预期
-        System.out.println("面积: " + area);
-    }
-}
-
-class Circle extends Shape {
-    private double radius;
-    
-    @Override
-    public void calculateArea() {
-        this.area = Math.PI * radius * radius; // 正确设置area
-        super.calculateArea(); // 调用父类方法显示
-    }
-}
-```
-
-**2. 使用getter/setter方法**
-```java
-class Person {
-    private String name;
-    
-    public String getName() {
-        return name;
-    }
-    
-    public void setName(String name) {
-        this.name = name;
-    }
-}
-
-class Student extends Person {
-    private String studentId;
-    
-    @Override
-    public String getName() {
-        return "学生: " + super.getName();
-    }
-}
-```
-
-**3. 方法重写时的变量访问**
-```java
-class Base {
-    protected int value = 10;
-    
-    public void display() {
-        System.out.println("Base value: " + value);
-    }
-}
-
-class Derived extends Base {
-    protected int value = 20;
-    
-    @Override
-    public void display() {
-        System.out.println("Derived value: " + value);        // 20
-        System.out.println("Base value: " + super.value);     // 10
-    }
-}
-```
-
-#### 15.6 总结对比
-
-| 特性 | 成员变量 | 成员方法 | 静态成员 |
-|------|----------|----------|----------|
-| 多态性 | ❌ 无多态 | ✅ 有多态 | ❌ 无多态 |
-| 调用依据 | 引用类型 | 对象类型 | 引用类型 |
-| 确定时机 | 编译时 | 运行时 | 编译时 |
-| 内存访问 | 直接访问 | 动态绑定 | 直接访问 |
-
-> **记忆口诀**：变量看引用，方法看对象，静态看引用。理解这个机制有助于避免多态使用中的常见错误。
-
-### 31.2 多态中的强制类型转换
-
-多态中的类型转换是Java面向对象编程中的重要概念，包括向上转型和向下转型两种方式。
-
-#### 16.1 向上转型（Upcasting）
-
-**概念：** 子类对象赋值给父类引用，自动进行类型转换。
-
-```java
-class Animal {
-    public void eat() {
-        System.out.println("动物吃东西");
-    }
-}
-
-class Dog extends Animal {
-    @Override
-    public void eat() {
-        System.out.println("狗吃骨头");
-    }
-    
-    public void bark() {
-        System.out.println("狗叫");
-    }
-}
-
-public class Test {
-    public static void main(String[] args) {
-        // 向上转型 - 自动转换，安全可靠
-        Animal animal = new Dog();
-        animal.eat(); // 可以调用父类方法
-        
-        // animal.bark(); // 编译错误：父类引用无法调用子类特有方法
-    }
-}
-```
-
-**特点：**
-- 自动进行，无需强制转换
-- 安全可靠，不会抛出异常
-- 可以调用父类方法，无法调用子类特有方法
-
-#### 16.2 向下转型（Downcasting）
-
-**概念：** 父类引用转换为子类引用，需要强制类型转换。
-
-```java
-class Animal {
-    public void eat() {
-        System.out.println("动物吃东西");
-    }
-}
-
-class Dog extends Animal {
-    @Override
-    public void eat() {
-        System.out.println("狗吃骨头");
-    }
-    
-    public void bark() {
-        System.out.println("狗叫");
-    }
-}
-
-class Cat extends Animal {
-    @Override
-    public void eat() {
-        System.out.println("猫吃鱼");
-    }
-    
-    public void meow() {
-        System.out.println("猫叫");
-    }
-}
-
-public class Test {
-    public static void main(String[] args) {
-        Animal animal1 = new Dog();
-        Animal animal2 = new Cat();
-        
-        // 向下转型 - 需要强制转换
-        Dog dog = (Dog) animal1; // 成功
-        dog.bark(); // 可以调用子类特有方法
-        
-        // Cat cat = (Cat) animal1; // 运行时异常：ClassCastException
-    }
-}
-```
-
-#### 16.3 instanceof运算符
-
-**作用：** 判断对象是否为某个类的实例，避免ClassCastException异常。
-
-```java
-public class Test {
-    public static void main(String[] args) {
-        Animal animal1 = new Dog();
-        Animal animal2 = new Cat();
-        
-        // 使用instanceof进行安全转换
-        if (animal1 instanceof Dog) {
-            Dog dog = (Dog) animal1;
-            dog.bark();
-        }
-        
-        if (animal2 instanceof Cat) {
-            Cat cat = (Cat) animal2;
-            cat.meow();
-        }
-        
-        // 检查是否为null
-        Animal animal3 = null;
-        System.out.println(animal3 instanceof Animal); // false，null不是任何类的实例
-    }
-}
-```
-
-#### 16.4 类型转换的实际应用
-
-**1. 集合中的类型转换**
-```java
-import java.util.*;
-
-class Animal {
-    public void eat() {
-        System.out.println("动物吃东西");
-    }
-}
-
-class Dog extends Animal {
-    @Override
-    public void eat() {
-        System.out.println("狗吃骨头");
-    }
-    
-    public void bark() {
-        System.out.println("狗叫");
-    }
-}
-
-class Cat extends Animal {
-    @Override
-    public void eat() {
-        System.out.println("猫吃鱼");
-    }
-    
-    public void meow() {
-        System.out.println("猫叫");
-    }
-}
-
-public class Test {
-    public static void main(String[] args) {
-        List<Animal> animals = new ArrayList<>();
-        animals.add(new Dog());
-        animals.add(new Cat());
-        animals.add(new Dog());
-        
-        for (Animal animal : animals) {
-            animal.eat(); // 多态调用
-            
-            // 根据类型调用特有方法
-            if (animal instanceof Dog) {
-                Dog dog = (Dog) animal;
-                dog.bark();
-            } else if (animal instanceof Cat) {
-                Cat cat = (Cat) animal;
-                cat.meow();
-            }
-        }
-    }
-}
-```
-
-**2. 工厂模式中的类型转换**
-```java
-interface Vehicle {
-    void drive();
-}
-
-class Car implements Vehicle {
-    @Override
-    public void drive() {
-        System.out.println("汽车行驶");
-    }
-    
-    public void park() {
-        System.out.println("汽车停车");
-    }
-}
-
-class Motorcycle implements Vehicle {
-    @Override
-    public void drive() {
-        System.out.println("摩托车行驶");
-    }
-    
-    public void wheelie() {
-        System.out.println("摩托车翘头");
-    }
-}
-
-class VehicleFactory {
-    public static Vehicle createVehicle(String type) {
-        if ("car".equals(type)) {
-            return new Car();
-        } else if ("motorcycle".equals(type)) {
-            return new Motorcycle();
+public class AnimalFactory {
+    public static Animal createAnimal(String type) {
+        if ("dog".equals(type)) {
+            return new Dog();
+        } else if ("cat".equals(type)) {
+            return new Cat();
         }
         return null;
     }
@@ -6092,470 +5018,379 @@ class VehicleFactory {
 
 public class Test {
     public static void main(String[] args) {
-        Vehicle vehicle1 = VehicleFactory.createVehicle("car");
-        Vehicle vehicle2 = VehicleFactory.createVehicle("motorcycle");
-        
-        // 使用instanceof进行安全转换
-        if (vehicle1 instanceof Car) {
-            Car car = (Car) vehicle1;
-            car.drive();
-            car.park();
-        }
-        
-        if (vehicle2 instanceof Motorcycle) {
-            Motorcycle motorcycle = (Motorcycle) vehicle2;
-            motorcycle.drive();
-            motorcycle.wheelie();
-        }
+        AnimalTrainer trainer = new AnimalTrainer();
+        trainer.train(new Dog()); // 输出：汪汪汪
+        trainer.train(new Cat()); // 输出：喵喵喵
+
+        Animal dog = AnimalFactory.createAnimal("dog");
+        Animal cat = AnimalFactory.createAnimal("cat");
+        dog.makeSound(); // 输出：汪汪汪
+        cat.makeSound(); // 输出：喵喵喵
     }
 }
 ```
 
-#### 16.5 类型转换的注意事项
+### 31.5 多态中成员变量与成员方法的调用机制
 
-**1. 避免不必要的转换**
+多态中成员变量和成员方法的调用行为存在重要差异，理解这些差异有助于正确使用多态特性。
+
+
+
+### 32. 抽象类与抽象方法
+
+#### 32.1 抽象类的概念
+
+- 抽象类（abstract class）是用`abstract`关键字修饰的类，不能被实例化，只能被继承。
+- 抽象类可以包含抽象方法（没有方法体的方法）和普通方法（有方法体的方法）。
+- 抽象类用于描述一类事物的通用特征，具体实现由子类完成。
+
+#### 32.2 抽象方法的概念
+
+- 抽象方法用`abstract`关键字修饰，没有方法体（只声明，不实现）。
+- 抽象方法只能出现在抽象类或接口中。
+- 子类继承抽象类后，必须实现所有抽象方法，否则子类也必须声明为抽象类。
+
+**抽象类和抽象方法的语法：**
 ```java
-class Animal {
+public abstract class Animal {
+    public abstract void makeSound(); // 抽象方法
+    public void eat() {
+        System.out.println("动物吃东西");
+    }
+}
+```
+
+#### 32.3 特性与规则
+
+- 抽象类不能被实例化：`new Animal()`会报错。
+- 抽象类可以有构造方法（用于子类初始化）。
+- 抽象类可以有成员变量、普通方法、静态方法、常量等。
+- 抽象类可以没有抽象方法（但一般有）。
+- 抽象方法不能有方法体，不能用`private`、`static`、`final`修饰。
+- 子类必须实现所有抽象方法，除非子类也是抽象类。
+
+#### 32.4 使用场景
+
+- 抽象类用于描述一组具有共性但不完全相同的对象。
+- 适合做模板、基类，定义规范和通用行为，具体细节由子类实现。
+- 常用于框架、模板方法设计模式等。
+
+#### 32.5 示例代码
+
+```java
+// 抽象类定义
+public abstract class Animal {
+    public abstract void makeSound(); // 抽象方法
     public void eat() {
         System.out.println("动物吃东西");
     }
 }
 
-class Dog extends Animal {
+// 具体子类实现
+public class Dog extends Animal {
     @Override
-    public void eat() {
-        System.out.println("狗吃骨头");
+    public void makeSound() {
+        System.out.println("汪汪汪");
+    }
+}
+
+public class Cat extends Animal {
+    @Override
+    public void makeSound() {
+        System.out.println("喵喵喵");
     }
 }
 
 public class Test {
     public static void main(String[] args) {
-        Dog dog = new Dog();
-        Animal animal = dog; // 向上转型
-        
-        // 不必要的向下转型
-        Dog dog2 = (Dog) animal; // 可以，但不必要
-        
-        // 直接使用原始引用更好
-        dog.eat(); // 更直接，无需转换
+        Animal dog = new Dog();
+        Animal cat = new Cat();
+        dog.makeSound(); // 输出：汪汪汪
+        cat.makeSound(); // 输出：喵喵喵
+        dog.eat(); // 输出：动物吃东西
     }
 }
 ```
 
-**2. 处理转换异常**
+#### 32.6 注意事项与补充
+
+- 抽象类可以有构造方法，但不能直接创建对象。
+- 抽象类的子类如果没有实现所有抽象方法，子类也必须声明为抽象类。
+- 抽象方法不能是private、static、final。
+- 抽象类可以有静态方法和常量。
+- 抽象类可以实现接口，也可以被其他类继承。
+
+> **总结：** 抽象类是模板，抽象方法是规范。用抽象类可以统一一组子类的行为规范，强制子类实现核心功能，提升代码的可扩展性和可维护性。
+
+---
+
+### 33. 接口（Interface）
+
+#### 33.1 接口的概念
+
+- 接口（interface）是Java中用`interface`关键字定义的一种引用类型，是抽象方法和常量值的集合。
+- 接口只定义规范（方法签名、常量），不包含具体实现。
+- 接口用于描述一组类应当遵循的行为标准，实现代码解耦和多态。
+
+#### 33.2 接口的语法与定义
+
 ```java
-public class Test {
-    public static void main(String[] args) {
-        Animal animal = new Dog();
-        
-        try {
-            Cat cat = (Cat) animal; // 会抛出ClassCastException
-        } catch (ClassCastException e) {
-            System.out.println("类型转换失败：" + e.getMessage());
-        }
-        
-        // 使用instanceof更安全
-        if (animal instanceof Cat) {
-            Cat cat = (Cat) animal;
-            cat.meow();
-        } else {
-            System.out.println("animal不是Cat类型");
-        }
-    }
+public interface Animal {
+    void makeSound(); // 抽象方法，默认public abstract
+    int AGE = 10;     // 常量，默认public static final
 }
 ```
 
-**3. 接口类型转换**
+- 接口中的方法默认是`public abstract`，可以省略。
+- 接口中的变量默认是`public static final`，必须初始化。
+- 接口不能有构造方法。
+
+#### 33.3 接口的实现与多继承
+
+- 类通过`implements`关键字实现接口，可以实现多个接口（用逗号分隔）。
+- 一个类可以继承一个父类，同时实现多个接口。
+- 接口之间可以多继承（`extends`），一个接口可以继承多个接口。
+
+**示例：**
 ```java
-interface Flyable {
+public interface Flyable {
     void fly();
 }
 
-interface Swimmable {
+public interface Swimmable {
     void swim();
 }
 
-class Duck implements Flyable, Swimmable {
+public class Duck implements Flyable, Swimmable {
     @Override
     public void fly() {
         System.out.println("鸭子飞翔");
     }
-    
     @Override
     public void swim() {
         System.out.println("鸭子游泳");
     }
 }
+```
 
-public class Test {
+#### 33.4 接口的默认方法与静态方法（Java 8+）
+
+- 接口可以有`default`修饰的默认方法（有方法体），用于接口升级时的兼容。
+- 接口可以有`static`修饰的静态方法（有方法体），只能通过接口名调用。
+
+**示例：**
+```java
+public interface MyInterface {
+    void abstractMethod();
+    default void defaultMethod() {
+        System.out.println("默认方法");
+    }
+    static void staticMethod() {
+        System.out.println("静态方法");
+    }
+}
+
+public class MyClass implements MyInterface {
+    @Override
+    public void abstractMethod() {
+        System.out.println("实现抽象方法");
+    }
+}
+
+// 调用
+MyClass obj = new MyClass();
+obj.defaultMethod(); // 默认方法
+MyInterface.staticMethod(); // 静态方法
+```
+
+#### 33.5 接口的特性与规则
+
+- 接口不能被实例化。
+- 实现类必须实现接口的所有抽象方法，否则实现类也必须声明为抽象类。
+- 接口支持多继承，类只支持单继承。
+- 接口可以有常量、抽象方法、默认方法、静态方法（Java 8+）、私有方法（Java 9+）。
+- 接口方法不能是private、protected、final、static（除非是静态方法实现）。
+
+#### 33.6 接口的使用场景
+
+- 规范API设计，定义一组类的统一行为。
+- 解耦系统结构，实现多态和灵活扩展。
+- 回调机制、策略模式、适配器模式等设计模式。
+- JDK大量API（如Runnable、Comparator、List等）都基于接口设计。
+
+#### 33.7 示例代码
+
+```java
+public interface USB {
+    void connect();
+    void disconnect();
+}
+
+public class Mouse implements USB {
+    @Override
+    public void connect() {
+        System.out.println("鼠标已连接");
+    }
+    @Override
+    public void disconnect() {
+        System.out.println("鼠标已断开");
+    }
+}
+
+public class Keyboard implements USB {
+    @Override
+    public void connect() {
+        System.out.println("键盘已连接");
+    }
+    @Override
+    public void disconnect() {
+        System.out.println("键盘已断开");
+    }
+}
+
+public class Computer {
+    public void useUSB(USB usb) {
+        usb.connect();
+        System.out.println("设备工作中...");
+        usb.disconnect();
+    }
     public static void main(String[] args) {
-        Duck duck = new Duck();
-        
-        // 向上转型到接口
-        Flyable flyable = duck;
-        Swimmable swimmable = duck;
-        
-        // 向下转型回具体类
-        Duck duck2 = (Duck) flyable;
-        Duck duck3 = (Duck) swimmable;
-        
-        // 接口之间的转换
-        if (flyable instanceof Swimmable) {
-            Swimmable swimmable2 = (Swimmable) flyable;
-            swimmable2.swim();
+        Computer pc = new Computer();
+        pc.useUSB(new Mouse());
+        pc.useUSB(new Keyboard());
+    }
+}
+```
+
+#### 33.8 注意事项与补充
+
+- 一个类可以实现多个接口，接口之间用逗号分隔。
+- 接口可以继承多个接口，实现多继承特性。
+- 接口中的常量建议大写字母+下划线命名。
+- 接口适合做规范、回调、扩展点，避免滥用。
+
+> **总结：** 接口是行为规范和扩展点，是Java实现多态和解耦的核心机制。合理设计接口有助于系统的灵活性、可维护性和可扩展性。
+
+---
+
+### 34. 内部类（Inner Class）
+
+#### 34.1 内部类的概念
+
+- 内部类是定义在另一个类内部的类。
+- 内部类可以访问外部类的成员，包括私有成员。
+- 内部类的主要作用是更好地组织代码、实现封装和逻辑关联。
+
+#### 34.2 内部类的分类
+
+1. **成员内部类**（普通内部类）：定义在类的成员位置，没有static修饰。
+2. **静态内部类**：用static修饰，类似于外部类的静态成员。
+3. **局部内部类**：定义在方法、代码块、构造器内部，只在其作用域内有效。
+4. **匿名内部类**：没有名字的内部类，通常用于简化接口或抽象类的临时实现。
+
+#### 34.3 成员内部类
+
+- 作为外部类的成员存在，可以访问外部类的所有成员。
+- 需要通过外部类对象创建。
+
+**示例：**
+```java
+public class Outer {
+    private int data = 10;
+    class Inner {
+        public void show() {
+            System.out.println("外部类data: " + data);
         }
     }
-}
-```
-
-#### 16.6 类型转换的最佳实践
-
-**1. 优先使用instanceof检查**
-```java
-public void processAnimal(Animal animal) {
-    if (animal instanceof Dog) {
-        Dog dog = (Dog) animal;
-        dog.bark();
-    } else if (animal instanceof Cat) {
-        Cat cat = (Cat) animal;
-        cat.meow();
-    } else {
-        animal.eat(); // 使用父类方法
+    public void test() {
+        Inner inner = new Inner();
+        inner.show();
     }
 }
 ```
 
-**2. 使用模式匹配（Java 14+）**
-```java
-public void processAnimal(Animal animal) {
-    if (animal instanceof Dog dog) {
-        dog.bark(); // 自动转换
-    } else if (animal instanceof Cat cat) {
-        cat.meow(); // 自动转换
-    } else {
-        animal.eat();
-    }
-}
-```
+#### 34.4 静态内部类
 
-**3. 避免过度使用类型转换**
-```java
-// 不好的设计
-public void process(Object obj) {
-    if (obj instanceof String) {
-        String str = (String) obj;
-        // 处理字符串
-    } else if (obj instanceof Integer) {
-        Integer num = (Integer) obj;
-        // 处理数字
-    }
-}
-
-// 更好的设计 - 使用泛型
-public <T> void process(T obj) {
-    // 直接使用，无需类型转换
-}
-```
-
-#### 16.7 总结
-
-| 转换类型 | 语法 | 安全性 | 使用场景 |
-|----------|------|--------|----------|
-| 向上转型 | 自动 | 安全 | 多态使用 |
-| 向下转型 | 强制 | 需检查 | 调用子类特有方法 |
-| instanceof | 检查 | 安全 | 类型判断 |
-
-> **关键要点**：向上转型安全自动，向下转型需要检查，instanceof是安全转换的保障。合理使用类型转换可以充分利用多态的优势，但要注意避免ClassCastException异常。
-
----
-
-### 32. Java包（package）的命名规范、作用与分类
-
-#### 32.1 包的作用
-
-- **组织管理类文件**：将相关类、接口、枚举等组织在一起，便于项目结构清晰、维护方便。
-- **避免命名冲突**：不同包下可以有同名的类，互不影响。
-- **访问控制**：包提供包访问权限（default/package-private），有助于封装实现细节。
-- **便于代码复用和分发**：包结构清晰，便于模块化开发和第三方库的分发。
-
-#### 32.2 包的命名规范
-
-- **全部小写**，多个单词用点`.`分隔。
-- **推荐使用反域名（Reverse Domain Name）命名法**，保证全局唯一性。
-  - 例如：`com.example.project.module`
-- **不要使用Java保留字或特殊字符**。
-- **包名应简洁明了，体现所属公司、项目、模块等信息**。
-- **常见命名结构**：
-  - 公司/组织域名反写 + 项目名 + 模块名 + 功能名
-  - 例：`com.alibaba.fastjson.parser`
-  - 例：`org.springframework.context.annotation`
-- **避免使用下划线、连字符等特殊符号**。
+- 用static修饰，只能访问外部类的静态成员。
+- 可以直接通过外部类名创建。
 
 **示例：**
 ```java
-package com.example.myapp.service;
-package org.apache.commons.lang3;
-package cn.itcast.demo.util;
-```
-
-#### 32.3 包的分类方法
-
-1. **按功能分层**（推荐，最常见）
-   - `controller`：控制层（如Web接口、API入口）
-   - `service`：业务逻辑层
-   - `dao` / `repository`：数据访问层
-   - `model` / `entity` / `domain`：实体类、数据模型
-   - `util` / `utils`：工具类
-   - `config`：配置类
-   - `exception`：异常处理
-   - `constant`：常量
-   - 例：
-     ```
-     com.example.project.controller
-     com.example.project.service
-     com.example.project.dao
-     com.example.project.model
-     com.example.project.util
-     ```
-
-2. **按业务模块分类**
-   - 适用于大型项目，将不同业务模块分包管理
-   - 例：
-     ```
-     com.example.project.user
-     com.example.project.order
-     com.example.project.product
-     ```
-
-3. **按技术/层次混合分类**
-   - 结合功能和业务模块
-   - 例：
-     ```
-     com.example.project.user.controller
-     com.example.project.user.service
-     com.example.project.order.controller
-     ```
-
-4. **第三方/开源包命名**
-   - 通常以组织域名反写开头，如`org.apache`, `com.google`, `io.reactivex`等
-
-#### 32.4 包的使用示例
-
-**定义包：**
-```java
-package com.example.myapp.service;
-
-public class UserService {
-    // ...
-}
-```
-
-**导入包：**
-```java
-import com.example.myapp.service.UserService;
-```
-
-**包结构示意：**
-```
-src/
-  └─ main/
-      └─ java/
-          └─ com/
-              └─ example/
-                  └─ myapp/
-                      ├─ controller/
-                      ├─ service/
-                      ├─ dao/
-                      ├─ model/
-                      └─ util/
-```
-
-#### 32.5 总结
-
-- 包的命名要规范、唯一、简洁，体现公司、项目、模块等信息。
-- 合理分类包结构有助于项目的可维护性、可扩展性和团队协作。
-- 推荐采用"反域名+项目+模块+功能"方式命名和分层。
-
-> **最佳实践**：始终遵循公司/社区的包命名规范，保持包结构清晰有序，便于团队协作和代码管理。
-
-### 33. final 关键词的作用与用法
-
-#### 33.1 final 的基本作用
-
-final 是 Java 的一个修饰符，可以用于**变量**、**方法**和**类**，其核心作用是"不可更改"：
-
-- **final 变量**：值不可更改（常量）
-- **final 方法**：不可被子类重写
-- **final 类**：不可被继承
-
-#### 33.2 final 用于变量
-
-1. **修饰基本类型变量**  
-   变量赋值后不可再更改
-   ```java
-   final int a = 10;
-   // a = 20; // 编译错误
-   ```
-
-2. **修饰引用类型变量**  
-   引用不可更改（即不能指向其他对象），但对象内容可变
-   ```java
-   final StringBuilder sb = new StringBuilder("hello");
-   sb.append(" world"); // 合法，对象内容可变
-   // sb = new StringBuilder(); // 编译错误，引用不可变
-   ```
-
-3. **修饰成员变量**  
-   必须在定义时或构造方法中初始化
-   ```java
-   class Person {
-       final String name;
-       Person(String name) {
-           this.name = name; // 构造器中初始化
-       }
-   }
-   ```
-
-4. **修饰静态变量**  
-   通常与 static 连用，定义全局常量
-   ```java
-   public static final double PI = 3.1415926;
-   ```
-
-#### 33.3 final 用于方法
-
-- 被 final 修饰的方法不能被子类重写（override），但可以被继承和重载（overload）。
-```java
-class Parent {
-    public final void show() {
-        System.out.println("父类方法");
+public class Outer {
+    private static int data = 20;
+    static class StaticInner {
+        public void show() {
+            System.out.println("外部类静态data: " + data);
+        }
     }
-}
-class Child extends Parent {
-    // public void show() {} // 编译错误，不能重写
-}
-```
-
-#### 33.4 final 用于类
-
-- 被 final 修饰的类不能被继承，所有方法都隐式为 final。
-```java
-final class Constants {
-    // ...
-}
-// class MyConstants extends Constants {} // 编译错误
-```
-- 常见应用：工具类（如 java.lang.String、java.lang.Math）
-
-#### 33.5 final 的注意事项
-
-- final 变量必须初始化，且只能赋值一次。
-- final 不能与 abstract 同时使用（final 意味着不可变，abstract 意味着需被重写，两者矛盾）。
-- final 方法可以被子类继承，但不能被重写。
-- final 类不能有子类，但可以创建对象。
-
-#### 33.6 典型应用场景
-
-- 定义常量（public static final）
-- 保证安全性（防止被继承或重写）
-- 设计不可变类（如 String）
-
-#### 33.7 示例总结
-
-```java
-public final class MyUtils {
-    public static final double PI = 3.14;
-
-    public final void printHello() {
-        System.out.println("Hello");
+    public static void test() {
+        StaticInner inner = new StaticInner();
+        inner.show();
     }
 }
 ```
 
-> **最佳实践**：final 用于常量、工具类、不可变对象和防止继承/重写的场景，能提升代码安全性和可维护性。
+#### 34.5 局部内部类
 
-### 34. Java 常量（Constant）的定义与使用
-
-#### 34.1 什么是常量
-
-- 常量（Constant）指在程序运行过程中其值不可更改的量。
-- 在 Java 中，常量通常用 `final` 关键字修饰，配合 `static` 关键字可定义全局常量。
-
-#### 34.2 常量的定义方式
-
-1. **局部常量**
-   ```java
-   final int DAYS_IN_WEEK = 7;
-   ```
-
-2. **类常量（全局常量）**
-   - 推荐用 `public static final` 修饰，通常放在类的顶部。
-   ```java
-   public class MathConstants {
-       public static final double PI = 3.1415926;
-       public static final int MAX_SIZE = 1000;
-   }
-   ```
-
-3. **接口常量**
-   - 接口中的变量默认是 `public static final`，可省略修饰符。
-   ```java
-   public interface Status {
-       int SUCCESS = 1;
-       int ERROR = 0;
-   }
-   ```
-
-#### 34.3 常量的命名规范
-
-- **全部大写**，单词间用下划线 `_` 分隔。
-- 命名应简洁明了，表达常量含义。
-- 例：`MAX_VALUE`, `DEFAULT_TIMEOUT`, `PI`
-
-#### 34.4 常量的使用场景
-
-- 表示不会改变的物理量、配置信息、状态码、魔法数字等。
-- 便于统一管理和维护，避免硬编码。
-- 提高代码可读性和可维护性。
+- 定义在方法、代码块、构造器内部。
+- 只能在其作用域内使用。
+- 可以访问外部类的成员和方法内的final或effectively final局部变量。
 
 **示例：**
 ```java
-public class Config {
-    public static final String BASE_URL = "https://api.example.com";
-    public static final int TIMEOUT_SECONDS = 30;
+public class Outer {
+    public void method() {
+        int num = 100;
+        class LocalInner {
+            public void show() {
+                System.out.println("num: " + num);
+            }
+        }
+        LocalInner inner = new LocalInner();
+        inner.show();
+    }
 }
 ```
 
-**使用：**
+#### 34.6 匿名内部类
+
+- 没有名字的内部类，通常用于简化接口或抽象类的临时实现。
+- 常用于回调、事件监听等场景。
+
+**示例：**
 ```java
-System.out.println(Config.BASE_URL);
-```
-
-#### 34.5 常量的最佳实践
-
-- 常量应集中管理，建议放在专门的常量类或接口中。
-- 不要在代码中直接写"魔法数字"或"魔法字符串"，应使用常量代替。
-- 常量一旦定义，不应再修改其值。
-
-#### 34.6 常量与变量的区别
-
-| 特性     | 常量（final）         | 变量                |
-|----------|----------------------|---------------------|
-| 值是否可变 | 不可变               | 可变                |
-| 命名规范 | 全大写+下划线         | 小驼峰/下划线       |
-| 赋值次数 | 只能赋值一次          | 可多次赋值          |
-| 典型修饰 | static final         | 无                  |
-
-#### 34.7 示例总结
-
-```java
-public class Constants {
-    public static final double PI = 3.1415926;
-    public static final int MAX_USER = 1000;
-    public static final String APP_NAME = "MyApp";
+public class Test {
+    public static void main(String[] args) {
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("匿名内部类实现线程");
+            }
+        };
+        new Thread(r).start();
+        // 或者直接：
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("直接传递匿名内部类");
+            }
+        }).start();
+    }
 }
 ```
 
-> **最佳实践**：常量集中管理、命名规范、避免魔法数字，提升代码可维护性和可读性。
+#### 34.7 内部类的特性与注意事项
 
----
+- 内部类可以访问外部类的所有成员，包括private。
+- 外部类访问成员内部类需通过对象，访问静态内部类可直接通过外部类名。
+- 局部内部类访问方法内变量时，该变量需为final或"实际上final"。
+- 匿名内部类不能有构造方法，只能重写父类或接口的方法。
+- 内部类有自己的字节码文件，命名格式为：外部类$内部类.class。
+
+#### 34.8 内部类的使用场景
+
+- 事件监听、回调机制（如GUI编程、线程等）。
+- 封装只为外部类服务的辅助类。
+- 实现与外部类强关联的功能。
+
+> **总结：** 内部类是Java实现封装、逻辑关联和简化代码的重要机制。合理使用内部类可以提升代码的结构性和可维护性。

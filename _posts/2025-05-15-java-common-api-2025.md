@@ -828,6 +828,194 @@ public static double sphereVolume(double radius) {
 - Math.random()生成的是伪随机数，对于需要高安全性的场景应使用SecureRandom
 - 浮点数运算可能存在精度问题，需要特别注意比较操作
 
+##### 7.6 System类
+
+**系统相关操作：**
+```java
+import java.lang.System;
+
+// 获取当前时间戳
+long currentTime = System.currentTimeMillis();  // 毫秒时间戳
+long nanoTime = System.nanoTime();              // 纳秒时间戳
+
+// 系统属性
+String osName = System.getProperty("os.name");           // 操作系统名称
+String javaVersion = System.getProperty("java.version"); // Java版本
+String userHome = System.getProperty("user.home");       // 用户主目录
+String userDir = System.getProperty("user.dir");         // 当前工作目录
+String fileSeparator = System.getProperty("file.separator"); // 文件分隔符
+String lineSeparator = System.getProperty("line.separator"); // 行分隔符
+
+// 获取所有系统属性
+Properties props = System.getProperties();
+props.list(System.out);
+
+// 设置系统属性
+System.setProperty("my.property", "my.value");
+String myProp = System.getProperty("my.property");
+
+// 环境变量
+String path = System.getenv("PATH");
+Map<String, String> env = System.getenv();
+
+// 数组复制
+int[] source = {1, 2, 3, 4, 5};
+int[] dest = new int[5];
+System.arraycopy(source, 0, dest, 0, source.length);
+
+// 垃圾回收
+System.gc();  // 建议进行垃圾回收
+
+// 程序退出
+System.exit(0);  // 正常退出
+System.exit(1);  // 异常退出
+
+// 安全检查
+SecurityManager sm = System.getSecurityManager();
+```
+
+**System.out输出流：**
+```java
+// 标准输出
+System.out.println("Hello World");
+System.out.print("不换行输出");
+System.out.printf("格式化输出: %s, %d", "字符串", 123);
+
+// 输出格式控制
+System.out.printf("整数: %d%n", 100);
+System.out.printf("浮点数: %.2f%n", 3.14159);
+System.out.printf("字符串: %s%n", "Java");
+System.out.printf("字符: %c%n", 'A');
+System.out.printf("布尔值: %b%n", true);
+System.out.printf("十六进制: %x%n", 255);
+System.out.printf("八进制: %o%n", 255);
+
+// 重定向输出流
+PrintStream originalOut = System.out;
+try {
+    // 重定向到文件
+    PrintStream fileOut = new PrintStream("output.txt");
+    System.setOut(fileOut);
+    System.out.println("这条消息会写入文件");
+} finally {
+    // 恢复原始输出流
+    System.setOut(originalOut);
+}
+```
+
+**System.in输入流：**
+```java
+// 标准输入
+Scanner scanner = new Scanner(System.in);
+System.out.print("请输入姓名: ");
+String name = scanner.nextLine();
+System.out.print("请输入年龄: ");
+int age = scanner.nextInt();
+
+// 直接读取字节
+try {
+    System.out.print("请输入一个字符: ");
+    int ch = System.in.read();
+    System.out.println("输入的字符: " + (char)ch);
+} catch (IOException e) {
+    e.printStackTrace();
+}
+
+// 重定向输入流
+try {
+    // 从文件读取输入
+    FileInputStream fileIn = new FileInputStream("input.txt");
+    System.setIn(fileIn);
+    Scanner fileScanner = new Scanner(System.in);
+    while (fileScanner.hasNextLine()) {
+        System.out.println(fileScanner.nextLine());
+    }
+} catch (FileNotFoundException e) {
+    e.printStackTrace();
+}
+```
+
+**System.err错误输出流：**
+```java
+// 错误输出
+System.err.println("这是一个错误消息");
+System.err.print("错误信息不换行");
+
+// 格式化错误输出
+System.err.printf("错误代码: %d, 错误信息: %s%n", 404, "页面未找到");
+
+// 重定向错误流
+PrintStream originalErr = System.err;
+try {
+    PrintStream errorFile = new PrintStream("error.log");
+    System.setErr(errorFile);
+    System.err.println("错误日志会写入文件");
+} finally {
+    System.setErr(originalErr);
+}
+```
+
+**System类的实用工具方法：**
+```java
+public class SystemUtils {
+    
+    // 获取系统信息
+    public static void printSystemInfo() {
+        System.out.println("操作系统: " + System.getProperty("os.name"));
+        System.out.println("Java版本: " + System.getProperty("java.version"));
+        System.out.println("Java供应商: " + System.getProperty("java.vendor"));
+        System.out.println("JVM版本: " + System.getProperty("java.vm.version"));
+        System.out.println("用户目录: " + System.getProperty("user.dir"));
+        System.out.println("用户主目录: " + System.getProperty("user.home"));
+    }
+    
+    // 性能测试工具
+    public static void performanceTest(Runnable task, String taskName) {
+        long startTime = System.currentTimeMillis();
+        long startNano = System.nanoTime();
+        
+        task.run();
+        
+        long endTime = System.currentTimeMillis();
+        long endNano = System.nanoTime();
+        
+        System.out.println(taskName + " 执行时间:");
+        System.out.println("  毫秒: " + (endTime - startTime) + "ms");
+        System.out.println("  纳秒: " + (endNano - startNano) + "ns");
+    }
+    
+    // 内存使用情况
+    public static void printMemoryInfo() {
+        Runtime runtime = Runtime.getRuntime();
+        long totalMemory = runtime.totalMemory();
+        long freeMemory = runtime.freeMemory();
+        long usedMemory = totalMemory - freeMemory;
+        long maxMemory = runtime.maxMemory();
+        
+        System.out.println("内存使用情况:");
+        System.out.println("  总内存: " + (totalMemory / 1024 / 1024) + "MB");
+        System.out.println("  已用内存: " + (usedMemory / 1024 / 1024) + "MB");
+        System.out.println("  空闲内存: " + (freeMemory / 1024 / 1024) + "MB");
+        System.out.println("  最大内存: " + (maxMemory / 1024 / 1024) + "MB");
+    }
+    
+    // 安全退出程序
+    public static void safeExit(int code) {
+        System.out.println("程序即将退出，代码: " + code);
+        System.gc();  // 建议垃圾回收
+        System.exit(code);
+    }
+}
+```
+
+**System类的注意事项：**
+- System.currentTimeMillis()返回的是毫秒级时间戳，适合一般用途
+- System.nanoTime()返回纳秒级时间戳，适合高精度计时
+- System.exit()会强制终止JVM，谨慎使用
+- System.gc()只是建议进行垃圾回收，不保证立即执行
+- 重定向流后记得恢复原始流，避免影响其他代码
+- 系统属性是全局的，修改会影响整个JVM
+
 #### 8. 网络编程API
 
 ##### 8.1 Socket编程

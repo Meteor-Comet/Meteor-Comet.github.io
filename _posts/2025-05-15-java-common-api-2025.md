@@ -2023,7 +2023,1125 @@ public class RegexPerformance {
    - 日志分析：提取关键信息
    - 数据清洗：格式化、标准化
 
-##### 7.9 对象克隆
+##### 7.9 包装类
+
+**基本数据类型与包装类对应关系：**
+```java
+// 基本数据类型 -> 包装类
+byte -> Byte
+short -> Short
+int -> Integer
+long -> Long
+float -> Float
+double -> Double
+char -> Character
+boolean -> Boolean
+
+// 创建包装类对象
+Integer intObj = new Integer(100);           // 构造方法（已过时）
+Integer intObj2 = Integer.valueOf(100);       // 推荐使用valueOf方法
+Integer intObj3 = 100;                        // 自动装箱
+
+// 输出结果
+System.out.println("intObj: " + intObj);      // 输出: intObj: 100
+System.out.println("intObj2: " + intObj2);    // 输出: intObj2: 100
+System.out.println("intObj3: " + intObj3);    // 输出: intObj3: 100
+```
+
+**装箱与拆箱：**
+```java
+// 自动装箱（Autoboxing）
+Integer autoBoxed = 100;                      // 基本类型自动转换为包装类
+Double autoBoxedDouble = 3.14;               // 基本类型自动转换为包装类
+
+// 自动拆箱（Unboxing）
+int primitive = autoBoxed;                    // 包装类自动转换为基本类型
+double primitiveDouble = autoBoxedDouble;     // 包装类自动转换为基本类型
+
+// 输出结果
+System.out.println("autoBoxed: " + autoBoxed);           // 输出: autoBoxed: 100
+System.out.println("primitive: " + primitive);           // 输出: primitive: 100
+System.out.println("autoBoxedDouble: " + autoBoxedDouble); // 输出: autoBoxedDouble: 3.14
+System.out.println("primitiveDouble: " + primitiveDouble); // 输出: primitiveDouble: 3.14
+
+// 在集合中使用
+List<Integer> numbers = new ArrayList<>();
+numbers.add(1);    // 自动装箱
+numbers.add(2);    // 自动装箱
+numbers.add(3);    // 自动装箱
+
+int first = numbers.get(0);  // 自动拆箱
+int second = numbers.get(1); // 自动拆箱
+
+// 输出结果
+System.out.println("numbers: " + numbers);     // 输出: numbers: [1, 2, 3]
+System.out.println("first: " + first);         // 输出: first: 1
+System.out.println("second: " + second);       // 输出: second: 2
+```
+
+**包装类的常用方法：**
+```java
+// Integer类的常用方法
+Integer num = 123;
+
+// 转换为基本类型
+int intValue = num.intValue();
+long longValue = num.longValue();
+float floatValue = num.floatValue();
+double doubleValue = num.doubleValue();
+
+// 输出结果
+System.out.println("intValue: " + intValue);       // 输出: intValue: 123
+System.out.println("longValue: " + longValue);     // 输出: longValue: 123
+System.out.println("floatValue: " + floatValue);   // 输出: floatValue: 123.0
+System.out.println("doubleValue: " + doubleValue); // 输出: doubleValue: 123.0
+
+// 字符串转换
+String str = num.toString();
+String hexStr = Integer.toHexString(num);
+String binaryStr = Integer.toBinaryString(num);
+String octalStr = Integer.toOctalString(num);
+
+// 输出结果
+System.out.println("str: " + str);           // 输出: str: 123
+System.out.println("hexStr: " + hexStr);     // 输出: hexStr: 7b
+System.out.println("binaryStr: " + binaryStr); // 输出: binaryStr: 1111011
+System.out.println("octalStr: " + octalStr); // 输出: octalStr: 173
+
+// 解析字符串
+int parsed1 = Integer.parseInt("123");
+int parsed2 = Integer.parseInt("7b", 16);    // 十六进制
+int parsed3 = Integer.parseInt("1111011", 2); // 二进制
+
+// 输出结果
+System.out.println("parsed1: " + parsed1);   // 输出: parsed1: 123
+System.out.println("parsed2: " + parsed2);   // 输出: parsed2: 123
+System.out.println("parsed3: " + parsed3);   // 输出: parsed3: 123
+
+// 比较方法
+int compare = Integer.compare(100, 200);
+boolean equals = Integer.valueOf(100).equals(Integer.valueOf(100));
+
+// 输出结果
+System.out.println("compare: " + compare);   // 输出: compare: -1 (100 < 200)
+System.out.println("equals: " + equals);     // 输出: equals: true
+
+// 最大最小值
+int max = Integer.max(100, 200);
+int min = Integer.min(100, 200);
+int sum = Integer.sum(100, 200);
+
+// 输出结果
+System.out.println("max: " + max);           // 输出: max: 200
+System.out.println("min: " + min);           // 输出: min: 100
+System.out.println("sum: " + sum);           // 输出: sum: 300
+```
+
+**Character类的特殊方法：**
+```java
+char ch = 'A';
+
+// 字符类型判断
+boolean isLetter = Character.isLetter(ch);
+boolean isDigit = Character.isDigit('5');
+boolean isWhitespace = Character.isWhitespace(' ');
+boolean isUpperCase = Character.isUpperCase(ch);
+boolean isLowerCase = Character.isLowerCase('a');
+
+// 输出结果
+System.out.println("isLetter: " + isLetter);         // 输出: isLetter: true
+System.out.println("isDigit: " + isDigit);           // 输出: isDigit: true
+System.out.println("isWhitespace: " + isWhitespace); // 输出: isWhitespace: true
+System.out.println("isUpperCase: " + isUpperCase);   // 输出: isUpperCase: true
+System.out.println("isLowerCase: " + isLowerCase);   // 输出: isLowerCase: true
+
+// 字符转换
+char upper = Character.toUpperCase('a');
+char lower = Character.toLowerCase('A');
+int digit = Character.getNumericValue('9');
+
+// 输出结果
+System.out.println("upper: " + upper);       // 输出: upper: A
+System.out.println("lower: " + lower);       // 输出: lower: a
+System.out.println("digit: " + digit);       // 输出: digit: 9
+
+// 字符分类
+boolean isJavaIdentifierStart = Character.isJavaIdentifierStart('_');
+boolean isJavaIdentifierPart = Character.isJavaIdentifierPart('$');
+
+// 输出结果
+System.out.println("isJavaIdentifierStart: " + isJavaIdentifierStart); // 输出: isJavaIdentifierStart: true
+System.out.println("isJavaIdentifierPart: " + isJavaIdentifierPart);   // 输出: isJavaIdentifierPart: true
+```
+
+**包装类的缓存机制：**
+```java
+// Integer缓存（-128到127）
+Integer a = 100;
+Integer b = 100;
+Integer c = 200;
+Integer d = 200;
+
+// 输出结果
+System.out.println("a == b: " + (a == b));   // 输出: a == b: true（缓存）
+System.out.println("c == d: " + (c == d));   // 输出: c == d: false（未缓存）
+
+// 使用equals比较
+System.out.println("a.equals(b): " + a.equals(b)); // 输出: a.equals(b): true
+System.out.println("c.equals(d): " + c.equals(d)); // 输出: c.equals(d): true
+
+// Boolean缓存（只有true和false两个值）
+Boolean bool1 = true;
+Boolean bool2 = true;
+Boolean bool3 = new Boolean(true);
+
+// 输出结果
+System.out.println("bool1 == bool2: " + (bool1 == bool2));     // 输出: bool1 == bool2: true
+System.out.println("bool1 == bool3: " + (bool1 == bool3));     // 输出: bool1 == bool3: false
+System.out.println("bool1.equals(bool3): " + bool1.equals(bool3)); // 输出: bool1.equals(bool3): true
+```
+
+**包装类的实用工具类：**
+```java
+public class WrapperUtils {
+    
+    // 安全转换字符串为整数
+    public static Integer safeParseInt(String str) {
+        try {
+            return Integer.parseInt(str);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+    
+    // 安全转换字符串为长整数
+    public static Long safeParseLong(String str) {
+        try {
+            return Long.parseLong(str);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+    
+    // 安全转换字符串为双精度浮点数
+    public static Double safeParseDouble(String str) {
+        try {
+            return Double.parseDouble(str);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+    
+    // 检查字符串是否为有效数字
+    public static boolean isValidNumber(String str) {
+        if (str == null || str.trim().isEmpty()) {
+            return false;
+        }
+        try {
+            Double.parseDouble(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+    
+    // 获取数字的位数
+    public static int getDigitCount(int number) {
+        if (number == 0) return 1;
+        return (int) Math.log10(Math.abs(number)) + 1;
+    }
+    
+    // 获取数字的各位数字
+    public static int[] getDigits(int number) {
+        int count = getDigitCount(number);
+        int[] digits = new int[count];
+        int temp = Math.abs(number);
+        
+        for (int i = count - 1; i >= 0; i--) {
+            digits[i] = temp % 10;
+            temp /= 10;
+        }
+        
+        return digits;
+    }
+    
+    // 检查字符是否为元音字母
+    public static boolean isVowel(char ch) {
+        char lower = Character.toLowerCase(ch);
+        return lower == 'a' || lower == 'e' || lower == 'i' || 
+               lower == 'o' || lower == 'u';
+    }
+    
+    // 统计字符串中各种字符的数量
+    public static void analyzeString(String str) {
+        if (str == null) {
+            System.out.println("字符串为null");
+            return;
+        }
+        
+        int letters = 0, digits = 0, spaces = 0, others = 0;
+        
+        for (char ch : str.toCharArray()) {
+            if (Character.isLetter(ch)) {
+                letters++;
+            } else if (Character.isDigit(ch)) {
+                digits++;
+            } else if (Character.isWhitespace(ch)) {
+                spaces++;
+            } else {
+                others++;
+            }
+        }
+        
+        System.out.println("字符串分析结果:");
+        System.out.println("  字母: " + letters);
+        System.out.println("  数字: " + digits);
+        System.out.println("  空格: " + spaces);
+        System.out.println("  其他: " + others);
+    }
+    
+    // 格式化数字
+    public static String formatNumber(Number number, String pattern) {
+        if (number == null) return "null";
+        
+        java.text.DecimalFormat df = new java.text.DecimalFormat(pattern);
+        return df.format(number);
+    }
+    
+    // 生成随机包装类对象
+    public static Integer randomInteger(int min, int max) {
+        return (int)(Math.random() * (max - min + 1)) + min;
+    }
+    
+    public static Double randomDouble(double min, double max) {
+        return min + (Math.random() * (max - min));
+    }
+    
+    public static Boolean randomBoolean() {
+        return Math.random() < 0.5;
+    }
+}
+
+// 使用示例
+public class WrapperUtilsExample {
+    public static void main(String[] args) {
+        // 安全解析
+        System.out.println("safeParseInt('123'): " + WrapperUtils.safeParseInt("123")); // 输出: 123
+        System.out.println("safeParseInt('abc'): " + WrapperUtils.safeParseInt("abc")); // 输出: null
+        
+        // 数字验证
+        System.out.println("isValidNumber('123.45'): " + WrapperUtils.isValidNumber("123.45")); // 输出: true
+        System.out.println("isValidNumber('abc'): " + WrapperUtils.isValidNumber("abc")); // 输出: false
+        
+        // 数字分析
+        int number = 12345;
+        System.out.println("位数: " + WrapperUtils.getDigitCount(number)); // 输出: 位数: 5
+        System.out.println("各位数字: " + Arrays.toString(WrapperUtils.getDigits(number))); // 输出: 各位数字: [1, 2, 3, 4, 5]
+        
+        // 字符分析
+        WrapperUtils.analyzeString("Hello World 123!");
+        // 输出:
+        // 字符串分析结果:
+        //   字母: 10
+        //   数字: 3
+        //   空格: 2
+        //   其他: 1
+        
+        // 格式化
+        System.out.println("格式化: " + WrapperUtils.formatNumber(1234.5678, "#,##0.00")); // 输出: 格式化: 1,234.57
+        
+        // 随机生成
+        System.out.println("随机整数: " + WrapperUtils.randomInteger(1, 100)); // 输出: 随机整数: 45
+        System.out.println("随机浮点数: " + WrapperUtils.randomDouble(0.0, 1.0)); // 输出: 随机浮点数: 0.123456789
+        System.out.println("随机布尔值: " + WrapperUtils.randomBoolean()); // 输出: 随机布尔值: true
+    }
+}
+```
+
+**包装类的性能考虑：**
+```java
+public class WrapperPerformance {
+    
+    // 性能测试：基本类型 vs 包装类
+    public static void performanceTest() {
+        int iterations = 10000000;
+        
+        // 基本类型测试
+        long startTime = System.currentTimeMillis();
+        int sum = 0;
+        for (int i = 0; i < iterations; i++) {
+            sum += i;
+        }
+        long endTime = System.currentTimeMillis();
+        System.out.println("基本类型耗时: " + (endTime - startTime) + "ms");
+        
+        // 包装类测试
+        startTime = System.currentTimeMillis();
+        Integer sumObj = 0;
+        for (int i = 0; i < iterations; i++) {
+            sumObj += i; // 自动装箱和拆箱
+        }
+        endTime = System.currentTimeMillis();
+        System.out.println("包装类耗时: " + (endTime - startTime) + "ms");
+        
+        // 输出结果示例:
+        // 基本类型耗时: 5ms
+        // 包装类耗时: 45ms
+    }
+    
+    // 避免不必要的装箱拆箱
+    public static void avoidUnnecessaryBoxing() {
+        // 不好的做法
+        Integer sum = 0;
+        for (int i = 0; i < 1000; i++) {
+            sum += i; // 每次循环都有装箱和拆箱
+        }
+        
+        // 好的做法
+        int sum2 = 0;
+        for (int i = 0; i < 1000; i++) {
+            sum2 += i; // 使用基本类型
+        }
+        Integer result = sum2; // 最后才装箱
+    }
+    
+    // 使用valueOf而不是构造方法
+    public static void useValueOf() {
+        // 推荐
+        Integer good = Integer.valueOf(100);
+        Double good2 = Double.valueOf(3.14);
+        
+        // 不推荐（已过时）
+        // Integer bad = new Integer(100);
+        // Double bad2 = new Double(3.14);
+    }
+}
+```
+
+**包装类的常见陷阱：**
+```java
+public class WrapperTraps {
+    
+    public static void demonstrateTraps() {
+        // 陷阱1：null值拆箱
+        Integer nullInt = null;
+        try {
+            int value = nullInt; // NullPointerException
+        } catch (NullPointerException e) {
+            System.out.println("陷阱1：null值拆箱会抛出NullPointerException");
+        }
+        
+        // 陷阱2：比较时使用==而不是equals
+        Integer a = 100;
+        Integer b = 100;
+        Integer c = 200;
+        Integer d = 200;
+        
+        System.out.println("a == b: " + (a == b)); // true（缓存）
+        System.out.println("c == d: " + (c == d)); // false（未缓存）
+        System.out.println("c.equals(d): " + c.equals(d)); // true
+        
+        // 陷阱3：自动装箱的性能问题
+        Long sum = 0L;
+        for (long i = 0; i < 1000000; i++) {
+            sum += i; // 每次都有装箱和拆箱
+        }
+        
+        // 更好的做法
+        long sum2 = 0L;
+        for (long i = 0; i < 1000000; i++) {
+            sum2 += i; // 使用基本类型
+        }
+        Long result = sum2; // 最后才装箱
+        
+        // 陷阱4：包装类不可变
+        Integer num = 100;
+        num = 200; // 不是修改原对象，而是创建新对象
+        
+        // 陷阱5：类型转换问题
+        Double dbl = 3.14;
+        int intValue = dbl.intValue(); // 截断小数部分
+        System.out.println("intValue: " + intValue); // 输出: 3
+    }
+}
+```
+
+**包装类的最佳实践：**
+```java
+public class WrapperBestPractices {
+    
+    // 1. 优先使用基本类型
+    public static void preferPrimitives() {
+        // 好的做法
+        int[] numbers = new int[1000];
+        double sum = 0.0;
+        
+        // 避免
+        // Integer[] numbers = new Integer[1000];
+        // Double sum = 0.0;
+    }
+    
+    // 2. 在集合中使用包装类
+    public static void useWrappersInCollections() {
+        List<Integer> numbers = new ArrayList<>();
+        Map<String, Double> prices = new HashMap<>();
+        
+        numbers.add(100); // 自动装箱
+        prices.put("apple", 2.99); // 自动装箱
+    }
+    
+    // 3. 使用equals比较包装类
+    public static void compareWrappers() {
+        Integer a = 100;
+        Integer b = 100;
+        
+        // 正确的比较方式
+        boolean equals = a.equals(b);
+        int compare = a.compareTo(b);
+        
+        // 避免使用==（除非是缓存范围内的值）
+    }
+    
+    // 4. 处理null值
+    public static Integer safeUnboxing(Integer wrapper) {
+        return wrapper != null ? wrapper : 0; // 提供默认值
+    }
+    
+    // 5. 使用工具方法
+    public static void useUtilityMethods() {
+        // 字符串解析
+        int num = Integer.parseInt("123");
+        double dbl = Double.parseDouble("3.14");
+        
+        // 格式化
+        String hex = Integer.toHexString(255);
+        String binary = Integer.toBinaryString(255);
+        
+        // 比较
+        int max = Integer.max(10, 20);
+        int min = Integer.min(10, 20);
+    }
+    
+    // 6. 性能优化
+    public static void performanceOptimization() {
+        // 避免在循环中频繁装箱拆箱
+        int sum = 0;
+        for (int i = 0; i < 1000000; i++) {
+            sum += i; // 使用基本类型
+        }
+        Integer result = sum; // 最后装箱
+        
+        // 使用缓存
+        Integer cached = Integer.valueOf(100); // 使用缓存
+        Integer notCached = Integer.valueOf(200); // 不在缓存范围内
+    }
+}
+```
+
+**包装类的注意事项：**
+
+1. **性能考虑**：
+   - 基本类型比包装类性能更好
+   - 避免在循环中频繁装箱拆箱
+   - 优先使用基本类型进行数值计算
+
+2. **null值处理**：
+   - 包装类可以为null，基本类型不能
+   - 拆箱前要检查null值
+   - 提供默认值处理null情况
+
+3. **比较操作**：
+   - 使用equals()比较包装类内容
+   - 使用compareTo()进行排序
+   - 避免使用==比较（除非是缓存值）
+
+4. **缓存机制**：
+   - Integer缓存-128到127
+   - Boolean缓存true和false
+   - Character缓存0到127
+   - 使用valueOf()方法利用缓存
+
+5. **不可变性**：
+   - 所有包装类都是不可变的
+   - 修改操作会创建新对象
+   - 适合作为Map的键
+
+6. **应用场景**：
+   - 集合中存储数值
+   - 需要null值的场景
+   - 反射和泛型中使用
+   - 数据库操作中的null处理
+
+##### 7.10 Lambda表达式
+
+**Lambda表达式基础：**
+```java
+// Lambda表达式语法：(参数列表) -> {表达式或语句块}
+
+// 1. 无参数Lambda表达式
+Runnable runnable = () -> System.out.println("Hello Lambda");
+runnable.run(); // 输出: Hello Lambda
+
+// 2. 单参数Lambda表达式
+Consumer<String> consumer = (str) -> System.out.println("接收: " + str);
+consumer.accept("Hello"); // 输出: 接收: Hello
+
+// 3. 多参数Lambda表达式
+BiFunction<Integer, Integer, Integer> add = (a, b) -> a + b;
+int result = add.apply(5, 3);
+System.out.println("结果: " + result); // 输出: 结果: 8
+
+// 4. 带类型声明的Lambda表达式
+BiFunction<String, String, String> concat = (String a, String b) -> a + b;
+String result2 = concat.apply("Hello", " World");
+System.out.println("拼接结果: " + result2); // 输出: 拼接结果: Hello World
+
+// 5. 多行Lambda表达式
+Consumer<String> multiLine = (str) -> {
+    System.out.println("处理字符串: " + str);
+    System.out.println("字符串长度: " + str.length());
+    System.out.println("转换为大写: " + str.toUpperCase());
+};
+multiLine.accept("hello world");
+// 输出:
+// 处理字符串: hello world
+// 字符串长度: 11
+// 转换为大写: HELLO WORLD
+```
+
+**函数式接口：**
+```java
+// 自定义函数式接口
+@FunctionalInterface
+interface MathOperation {
+    int operate(int a, int b);
+}
+
+@FunctionalInterface
+interface StringProcessor {
+    String process(String input);
+}
+
+// 使用自定义函数式接口
+MathOperation add = (a, b) -> a + b;
+MathOperation subtract = (a, b) -> a - b;
+MathOperation multiply = (a, b) -> a * b;
+MathOperation divide = (a, b) -> a / b;
+
+// 输出结果
+System.out.println("加法: " + add.operate(10, 5));      // 输出: 加法: 15
+System.out.println("减法: " + subtract.operate(10, 5)); // 输出: 减法: 5
+System.out.println("乘法: " + multiply.operate(10, 5)); // 输出: 乘法: 50
+System.out.println("除法: " + divide.operate(10, 5));   // 输出: 除法: 2
+
+// 字符串处理
+StringProcessor upper = str -> str.toUpperCase();
+StringProcessor reverse = str -> new StringBuilder(str).reverse().toString();
+StringProcessor addPrefix = str -> "处理后的: " + str;
+
+// 输出结果
+System.out.println("大写: " + upper.process("hello"));           // 输出: 大写: HELLO
+System.out.println("反转: " + reverse.process("hello"));         // 输出: 反转: olleh
+System.out.println("加前缀: " + addPrefix.process("hello"));     // 输出: 加前缀: 处理后的: hello
+```
+
+**Java内置函数式接口：**
+```java
+import java.util.function.*;
+import java.util.*;
+
+// Predicate<T> - 断言接口
+Predicate<String> isLongerThan5 = str -> str.length() > 5;
+Predicate<String> startsWithA = str -> str.startsWith("A");
+Predicate<String> isLongerThan5AndStartsWithA = isLongerThan5.and(startsWithA);
+
+// 输出结果
+System.out.println("长度大于5: " + isLongerThan5.test("Hello"));     // 输出: 长度大于5: false
+System.out.println("长度大于5: " + isLongerThan5.test("Hello World")); // 输出: 长度大于5: true
+System.out.println("以A开头且长度大于5: " + isLongerThan5AndStartsWithA.test("Apple")); // 输出: 以A开头且长度大于5: false
+
+// Function<T, R> - 函数接口
+Function<String, Integer> getLength = str -> str.length();
+Function<String, String> toUpperCase = str -> str.toUpperCase();
+Function<String, String> addExclamation = str -> str + "!";
+
+// 函数组合
+Function<String, String> combined = getLength.andThen(length -> "长度: " + length);
+Function<String, String> pipeline = toUpperCase.andThen(addExclamation);
+
+// 输出结果
+System.out.println("长度: " + getLength.apply("Hello"));           // 输出: 长度: 5
+System.out.println("组合结果: " + combined.apply("Hello"));        // 输出: 组合结果: 长度: 5
+System.out.println("管道处理: " + pipeline.apply("hello"));        // 输出: 管道处理: HELLO!
+
+// Consumer<T> - 消费者接口
+Consumer<String> print = str -> System.out.println("打印: " + str);
+Consumer<String> printLength = str -> System.out.println("长度: " + str.length());
+Consumer<String> combinedConsumer = print.andThen(printLength);
+
+// 输出结果
+combinedConsumer.accept("Hello");
+// 输出:
+// 打印: Hello
+// 长度: 5
+
+// Supplier<T> - 供应者接口
+Supplier<Double> randomDouble = () -> Math.random();
+Supplier<String> currentTime = () -> new Date().toString();
+Supplier<List<String>> emptyList = ArrayList::new;
+
+// 输出结果
+System.out.println("随机数: " + randomDouble.get());     // 输出: 随机数: 0.123456789
+System.out.println("当前时间: " + currentTime.get());   // 输出: 当前时间: Wed May 15 20:30:45 CST 2025
+System.out.println("空列表: " + emptyList.get());       // 输出: 空列表: []
+
+// BiFunction<T, U, R> - 双参数函数接口
+BiFunction<String, String, String> concat = (a, b) -> a + b;
+BiFunction<Integer, Integer, Integer> max = Math::max;
+BiFunction<String, Integer, String> repeat = (str, times) -> str.repeat(times);
+
+// 输出结果
+System.out.println("拼接: " + concat.apply("Hello", " World")); // 输出: 拼接: Hello World
+System.out.println("最大值: " + max.apply(10, 20));             // 输出: 最大值: 20
+System.out.println("重复: " + repeat.apply("Ha", 3));           // 输出: 重复: HaHaHa
+```
+
+**Lambda表达式在集合中的应用：**
+```java
+import java.util.*;
+import java.util.stream.Collectors;
+
+List<String> names = Arrays.asList("Alice", "Bob", "Charlie", "David", "Eve");
+
+// 1. forEach - 遍历
+System.out.println("=== forEach遍历 ===");
+names.forEach(name -> System.out.println("名字: " + name));
+// 输出:
+// 名字: Alice
+// 名字: Bob
+// 名字: Charlie
+// 名字: David
+// 名字: Eve
+
+// 2. removeIf - 条件删除
+List<String> namesCopy = new ArrayList<>(names);
+namesCopy.removeIf(name -> name.length() < 4);
+System.out.println("删除短名字后: " + namesCopy); // 输出: 删除短名字后: [Alice, Charlie, David]
+
+// 3. replaceAll - 批量替换
+List<String> namesCopy2 = new ArrayList<>(names);
+namesCopy2.replaceAll(name -> name.toUpperCase());
+System.out.println("转换为大写: " + namesCopy2); // 输出: 转换为大写: [ALICE, BOB, CHARLIE, DAVID, EVE]
+
+// 4. sort - 排序
+List<String> namesCopy3 = new ArrayList<>(names);
+namesCopy3.sort((a, b) -> a.compareTo(b)); // 按字母顺序排序
+System.out.println("排序后: " + namesCopy3); // 输出: 排序后: [Alice, Bob, Charlie, David, Eve]
+
+// 按长度排序
+namesCopy3.sort((a, b) -> Integer.compare(a.length(), b.length()));
+System.out.println("按长度排序: " + namesCopy3); // 输出: 按长度排序: [Bob, Eve, Alice, David, Charlie]
+
+// 5. Map操作
+Map<String, Integer> scores = new HashMap<>();
+scores.put("Alice", 85);
+scores.put("Bob", 92);
+scores.put("Charlie", 78);
+
+// 遍历Map
+System.out.println("=== Map遍历 ===");
+scores.forEach((name, score) -> System.out.println(name + ": " + score));
+// 输出:
+// Alice: 85
+// Bob: 92
+// Charlie: 78
+
+// 条件操作
+scores.entrySet().removeIf(entry -> entry.getValue() < 80);
+System.out.println("删除低分后: " + scores); // 输出: 删除低分后: {Alice=85, Bob=92}
+
+// 6. Stream API与Lambda
+System.out.println("=== Stream操作 ===");
+
+// 过滤
+List<String> longNames = names.stream()
+    .filter(name -> name.length() > 4)
+    .collect(Collectors.toList());
+System.out.println("长名字: " + longNames); // 输出: 长名字: [Alice, Charlie, David]
+
+// 映射
+List<Integer> nameLengths = names.stream()
+    .map(String::length)
+    .collect(Collectors.toList());
+System.out.println("名字长度: " + nameLengths); // 输出: 名字长度: [5, 3, 7, 5, 3]
+
+// 归约
+int totalLength = names.stream()
+    .mapToInt(String::length)
+    .sum();
+System.out.println("总长度: " + totalLength); // 输出: 总长度: 23
+
+// 分组
+Map<Integer, List<String>> groupedByLength = names.stream()
+    .collect(Collectors.groupingBy(String::length));
+System.out.println("按长度分组: " + groupedByLength); // 输出: 按长度分组: {3=[Bob, Eve], 5=[Alice, David], 7=[Charlie]}
+```
+
+**Lambda表达式的高级用法：**
+```java
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.function.*;
+
+// 1. 方法引用
+List<String> names = Arrays.asList("Alice", "Bob", "Charlie");
+
+// 静态方法引用
+names.forEach(System.out::println);
+// 输出:
+// Alice
+// Bob
+// Charlie
+
+// 实例方法引用
+names.forEach(String::toUpperCase);
+names.stream().map(String::length).forEach(System.out::println);
+
+// 构造方法引用
+Supplier<ArrayList<String>> listSupplier = ArrayList::new;
+ArrayList<String> newList = listSupplier.get();
+
+// 2. 闭包和变量捕获
+int factor = 10;
+Function<Integer, Integer> multiplier = x -> x * factor;
+System.out.println("乘以因子: " + multiplier.apply(5)); // 输出: 乘以因子: 50
+
+// 注意：捕获的变量必须是final或effectively final
+// int mutableFactor = 10;
+// Function<Integer, Integer> badMultiplier = x -> x * mutableFactor; // 编译错误
+// mutableFactor = 20; // 如果这行存在，上面的Lambda表达式会编译错误
+
+// 3. 异常处理
+Function<String, Integer> safeParseInt = str -> {
+    try {
+        return Integer.parseInt(str);
+    } catch (NumberFormatException e) {
+        return 0;
+    }
+};
+
+System.out.println("安全解析: " + safeParseInt.apply("123")); // 输出: 安全解析: 123
+System.out.println("安全解析: " + safeParseInt.apply("abc")); // 输出: 安全解析: 0
+
+// 4. 递归Lambda
+// 使用函数式接口实现递归
+Function<Integer, Integer> factorial = new Function<Integer, Integer>() {
+    @Override
+    public Integer apply(Integer n) {
+        return n <= 1 ? 1 : n * this.apply(n - 1);
+    }
+};
+
+System.out.println("阶乘: " + factorial.apply(5)); // 输出: 阶乘: 120
+
+// 5. 组合模式
+Function<String, String> pipeline = ((Function<String, String>) String::toUpperCase)
+    .andThen(str -> str + "!")
+    .andThen(str -> "处理结果: " + str);
+
+System.out.println("管道处理: " + pipeline.apply("hello")); // 输出: 管道处理: 处理结果: HELLO!
+
+// 6. 条件Lambda
+Predicate<String> isLong = str -> str.length() > 5;
+Predicate<String> startsWithA = str -> str.startsWith("A");
+
+Function<String, String> conditionalProcessor = str -> {
+    if (isLong.test(str)) {
+        return str.toUpperCase();
+    } else if (startsWithA.test(str)) {
+        return str.toLowerCase();
+    } else {
+        return str + " (默认处理)";
+    }
+};
+
+System.out.println("条件处理1: " + conditionalProcessor.apply("Hello World")); // 输出: 条件处理1: HELLO WORLD
+System.out.println("条件处理2: " + conditionalProcessor.apply("Apple"));      // 输出: 条件处理2: apple
+System.out.println("条件处理3: " + conditionalProcessor.apply("Hi"));         // 输出: 条件处理3: Hi (默认处理)
+```
+
+**Lambda表达式的性能优化：**
+```java
+import java.util.*;
+import java.util.stream.*;
+
+public class LambdaPerformance {
+    
+    // 1. 避免在循环中创建Lambda
+    public static void avoidLambdaInLoop() {
+        List<String> names = Arrays.asList("Alice", "Bob", "Charlie", "David");
+        
+        // 不好的做法：每次循环都创建新的Lambda
+        for (String name : names) {
+            Consumer<String> printer = str -> System.out.println("名字: " + str);
+            printer.accept(name);
+        }
+        
+        // 好的做法：预先定义Lambda
+        Consumer<String> printer = str -> System.out.println("名字: " + str);
+        for (String name : names) {
+            printer.accept(name);
+        }
+        
+        // 更好的做法：使用forEach
+        names.forEach(str -> System.out.println("名字: " + str));
+    }
+    
+    // 2. 使用并行流提高性能
+    public static void parallelStreamExample() {
+        List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+        
+        // 顺序流
+        long startTime = System.currentTimeMillis();
+        int sum = numbers.stream()
+            .mapToInt(Integer::intValue)
+            .sum();
+        long endTime = System.currentTimeMillis();
+        System.out.println("顺序流耗时: " + (endTime - startTime) + "ms");
+        
+        // 并行流
+        startTime = System.currentTimeMillis();
+        int sumParallel = numbers.parallelStream()
+            .mapToInt(Integer::intValue)
+            .sum();
+        endTime = System.currentTimeMillis();
+        System.out.println("并行流耗时: " + (endTime - startTime) + "ms");
+    }
+    
+    // 3. 缓存Lambda表达式
+    public static void cacheLambda() {
+        // 缓存常用的Lambda表达式
+        Function<String, String> upperCase = String::toUpperCase;
+        Function<String, String> addExclamation = str -> str + "!";
+        Predicate<String> isLong = str -> str.length() > 5;
+        
+        List<String> names = Arrays.asList("Alice", "Bob", "Charlie", "David");
+        
+        // 重用缓存的Lambda
+        names.stream()
+            .filter(isLong)
+            .map(upperCase)
+            .map(addExclamation)
+            .forEach(System.out::println);
+    }
+    
+    // 4. 避免不必要的装箱拆箱
+    public static void avoidBoxing() {
+        List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
+        
+        // 不好的做法：有装箱拆箱
+        int sum = numbers.stream()
+            .mapToInt(Integer::intValue) // 避免装箱
+            .sum();
+        
+        // 更好的做法：直接使用基本类型
+        int[] primitiveNumbers = {1, 2, 3, 4, 5};
+        int sum2 = Arrays.stream(primitiveNumbers)
+            .sum();
+    }
+}
+
+// 使用示例
+public class LambdaPerformanceExample {
+    public static void main(String[] args) {
+        // 性能测试
+        LambdaPerformance.avoidLambdaInLoop();
+        LambdaPerformance.parallelStreamExample();
+        LambdaPerformance.cacheLambda();
+        LambdaPerformance.avoidBoxing();
+    }
+}
+```
+
+**Lambda表达式的实用工具类：**
+```java
+import java.util.*;
+import java.util.function.*;
+import java.util.stream.Collectors;
+
+public class LambdaUtils {
+    
+    // 1. 安全的函数执行
+    public static <T, R> Optional<R> safeApply(Function<T, R> function, T input) {
+        try {
+            return Optional.of(function.apply(input));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
+    }
+    
+    // 2. 重试机制
+    public static <T> T retry(Supplier<T> supplier, int maxAttempts) {
+        for (int i = 0; i < maxAttempts; i++) {
+            try {
+                return supplier.get();
+            } catch (Exception e) {
+                if (i == maxAttempts - 1) {
+                    throw new RuntimeException("重试失败", e);
+                }
+            }
+        }
+        throw new RuntimeException("重试失败");
+    }
+    
+    // 3. 条件执行
+    public static <T> Optional<T> executeIf(Predicate<T> condition, Function<T, T> action, T input) {
+        return condition.test(input) ? Optional.of(action.apply(input)) : Optional.of(input);
+    }
+    
+    // 4. 管道处理
+    @SafeVarargs
+    public static <T> Function<T, T> pipeline(Function<T, T>... functions) {
+        return Arrays.stream(functions)
+            .reduce(Function.identity(), Function::andThen);
+    }
+    
+    // 5. 批量处理
+    public static <T, R> List<R> batchProcess(List<T> items, Function<T, R> processor, int batchSize) {
+        return items.stream()
+            .collect(Collectors.groupingBy(item -> items.indexOf(item) / batchSize))
+            .values()
+            .stream()
+            .flatMap(batch -> batch.stream().map(processor))
+            .collect(Collectors.toList());
+    }
+    
+    // 6. 异步执行
+    public static <T> CompletableFuture<T> asyncExecute(Supplier<T> supplier) {
+        return CompletableFuture.supplyAsync(supplier);
+    }
+    
+    // 7. 缓存函数结果
+    public static <T, R> Function<T, R> memoize(Function<T, R> function) {
+        Map<T, R> cache = new ConcurrentHashMap<>();
+        return input -> cache.computeIfAbsent(input, function);
+    }
+    
+    // 8. 组合多个谓词
+    @SafeVarargs
+    public static <T> Predicate<T> allOf(Predicate<T>... predicates) {
+        return Arrays.stream(predicates)
+            .reduce(Predicate::and)
+            .orElse(x -> true);
+    }
+    
+    @SafeVarargs
+    public static <T> Predicate<T> anyOf(Predicate<T>... predicates) {
+        return Arrays.stream(predicates)
+            .reduce(Predicate::or)
+            .orElse(x -> false);
+    }
+    
+    // 9. 函数柯里化
+    public static <T, U, R> Function<T, Function<U, R>> curry(BiFunction<T, U, R> function) {
+        return t -> u -> function.apply(t, u);
+    }
+    
+    // 10. 部分应用
+    public static <T, U, R> Function<U, R> partial(BiFunction<T, U, R> function, T first) {
+        return u -> function.apply(first, u);
+    }
+}
+
+// 使用示例
+public class LambdaUtilsExample {
+    public static void main(String[] args) {
+        // 安全执行
+        Optional<String> result = LambdaUtils.safeApply(
+            str -> str.toUpperCase(), "hello");
+        System.out.println("安全执行结果: " + result); // 输出: 安全执行结果: Optional[HELLO]
+        
+        // 重试机制
+        String retryResult = LambdaUtils.retry(
+            () -> "成功", 3);
+        System.out.println("重试结果: " + retryResult); // 输出: 重试结果: 成功
+        
+        // 条件执行
+        Optional<String> conditionalResult = LambdaUtils.executeIf(
+            str -> str.length() > 3,
+            str -> str.toUpperCase(),
+            "hello");
+        System.out.println("条件执行结果: " + conditionalResult); // 输出: 条件执行结果: Optional[HELLO]
+        
+        // 管道处理
+        Function<String, String> pipeline = LambdaUtils.pipeline(
+            String::toUpperCase,
+            str -> str + "!",
+            str -> "处理结果: " + str
+        );
+        System.out.println("管道处理: " + pipeline.apply("hello")); // 输出: 管道处理: 处理结果: HELLO!
+        
+        // 批量处理
+        List<String> items = Arrays.asList("a", "b", "c", "d", "e");
+        List<String> processed = LambdaUtils.batchProcess(
+            items, str -> str.toUpperCase(), 2);
+        System.out.println("批量处理结果: " + processed); // 输出: 批量处理结果: [A, B, C, D, E]
+        
+        // 组合谓词
+        Predicate<String> combined = LambdaUtils.allOf(
+            str -> str.length() > 3,
+            str -> str.startsWith("h")
+        );
+        System.out.println("组合谓词测试: " + combined.test("hello")); // 输出: 组合谓词测试: true
+        
+        // 柯里化
+        BiFunction<Integer, Integer, Integer> add = (a, b) -> a + b;
+        Function<Integer, Function<Integer, Integer>> curriedAdd = LambdaUtils.curry(add);
+        Function<Integer, Integer> addFive = curriedAdd.apply(5);
+        System.out.println("柯里化结果: " + addFive.apply(3)); // 输出: 柯里化结果: 8
+    }
+}
+```
+
+**Lambda表达式的注意事项：**
+
+1. **语法规则**：
+   - 参数类型可以省略（类型推断）
+   - 单个参数可以省略括号
+   - 单行表达式可以省略return和大括号
+   - 多行表达式需要大括号和return
+
+2. **变量捕获**：
+   - 只能捕获final或effectively final的变量
+   - 不能修改捕获的变量
+   - 可以访问实例变量和静态变量
+
+3. **性能考虑**：
+   - 避免在循环中重复创建Lambda
+   - 使用并行流提高性能
+   - 缓存常用的Lambda表达式
+   - 避免不必要的装箱拆箱
+
+4. **常见陷阱**：
+   - 变量捕获的限制
+   - 异常处理
+   - 递归Lambda的实现
+   - 并发环境下的使用
+
+5. **最佳实践**：
+   - 优先使用方法引用
+   - 合理使用函数式接口
+   - 注意代码可读性
+   - 适当使用Stream API
+
+6. **应用场景**：
+   - 集合操作和遍历
+   - 事件处理
+   - 异步编程
+   - 函数式编程
+   - 回调函数
+
+##### 7.11 对象克隆
 
 **浅克隆（Shallow Clone）：**
 ```java
@@ -2429,7 +3547,9 @@ try {
 7. **工具类**：掌握Arrays、Collections、Objects、Optional等工具类的使用
 8. **大数运算**：掌握BigInteger和BigDecimal的使用，能够进行高精度数学计算和金融计算
 9. **正则表达式**：掌握Pattern、Matcher类的使用，能够进行文本匹配、验证和替换
-10. **网络编程**：理解Socket编程和URL处理的基本原理
+10. **包装类**：掌握基本类型与包装类的转换，理解装箱拆箱机制和性能优化
+11. **Lambda表达式**：掌握函数式编程，理解Lambda语法、函数式接口和Stream API
+12. **网络编程**：理解Socket编程和URL处理的基本原理
 
 这些API是Java开发的基础，为后续学习Spring框架、数据库操作、Web开发等高级主题奠定了坚实基础。
 
@@ -2484,6 +3604,55 @@ try {
 - 测试验证：编写充分的测试用例，确保正则表达式的正确性
 
 通过正则表达式的学习，对文本处理和模式匹配有了更深入的理解，这将为后续开发数据处理、日志分析、表单验证等功能提供重要支持。
+
+**包装类学习要点：**
+- 掌握了基本数据类型与包装类的对应关系，理解装箱拆箱机制
+- 熟练使用包装类的常用方法，包括类型转换、字符串解析、比较操作等
+- 理解了包装类的缓存机制，特别是Integer的-128到127缓存范围
+- 掌握了Character类的特殊方法，能够进行字符类型判断和转换
+- 学会了包装类的性能优化技巧，避免不必要的装箱拆箱操作
+- 能够编写实用的包装类工具方法，提高代码的安全性和可读性
+
+**包装类应用场景：**
+- 集合框架：在List、Set、Map中存储数值类型
+- 泛型编程：在泛型中使用包装类类型参数
+- 数据库操作：处理可能为null的数值字段
+- 反射机制：在反射中使用包装类类型
+- 序列化：包装类支持序列化操作
+
+**包装类注意事项：**
+- 性能考虑：基本类型比包装类性能更好，避免在循环中频繁装箱拆箱
+- null值处理：包装类可以为null，拆箱前要检查null值
+- 比较操作：使用equals()比较内容，使用compareTo()进行排序
+- 缓存机制：利用valueOf()方法使用缓存，提高性能
+- 不可变性：所有包装类都是不可变的，修改会创建新对象
+
+通过包装类的学习，对Java的类型系统有了更深入的理解，特别是在处理基本类型与对象类型转换、集合框架使用、数据库操作等方面的重要作用。这些知识为后续开发企业级应用、数据库操作、框架使用等提供了重要基础。
+
+**Lambda表达式学习要点：**
+- 掌握了Lambda表达式的基本语法，包括参数列表、箭头操作符和表达式体
+- 理解了函数式接口的概念，能够自定义和使用函数式接口
+- 熟练使用Java内置函数式接口：Predicate、Function、Consumer、Supplier、BiFunction等
+- 掌握了Lambda表达式在集合中的应用，包括forEach、removeIf、replaceAll、sort等
+- 学会了Stream API的使用，能够进行过滤、映射、归约、分组等操作
+- 理解了方法引用、闭包、变量捕获等高级概念
+- 学会了Lambda表达式的性能优化技巧，避免常见陷阱
+
+**Lambda表达式应用场景：**
+- 集合操作：简化遍历、过滤、映射、排序等操作
+- 事件处理：GUI事件、异步回调等
+- 函数式编程：函数组合、管道处理、柯里化等
+- Stream API：数据流处理、并行计算
+- 回调函数：异步编程、事件驱动编程
+
+**Lambda表达式注意事项：**
+- 语法规则：参数类型推断、括号省略、return省略等
+- 变量捕获：只能捕获final或effectively final的变量
+- 性能考虑：避免在循环中重复创建Lambda，使用并行流
+- 常见陷阱：变量捕获限制、异常处理、递归实现
+- 最佳实践：优先使用方法引用，合理使用函数式接口
+
+通过Lambda表达式的学习，对Java的函数式编程能力有了显著提升，特别是在集合处理、异步编程、事件处理等方面的应用。这些知识为后续学习现代Java框架、响应式编程、微服务开发等提供了重要基础。
 
 ---
 

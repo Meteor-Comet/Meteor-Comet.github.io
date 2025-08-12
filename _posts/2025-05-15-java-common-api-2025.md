@@ -1,6 +1,6 @@
 ---
 layout:     post
-title:      "Java常用API学习日志"
+title:      "Java常用API"
 date:       2025-05-15 20:00:00
 author:     "Comet"
 tags:
@@ -3141,7 +3141,633 @@ public class LambdaUtilsExample {
    - 函数式编程
    - 回调函数
 
-##### 7.11 对象克隆
+##### 7.11 Apache Commons IO
+
+**Commons IO简介：**
+```java
+// Maven依赖
+<dependency>
+    <groupId>commons-io</groupId>
+    <artifactId>commons-io</artifactId>
+    <version>2.15.1</version>
+</dependency>
+
+// Gradle依赖
+implementation 'commons-io:commons-io:2.15.1'
+
+// 主要包结构
+import org.apache.commons.io.*;
+import org.apache.commons.io.file.*;
+import org.apache.commons.io.input.*;
+import org.apache.commons.io.output.*;
+import org.apache.commons.io.monitor.*;
+```
+
+**FileUtils工具类：**
+```java
+import org.apache.commons.io.FileUtils;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+
+// 1. 文件读写操作
+public class FileUtilsExample {
+    
+    public static void fileOperations() throws IOException {
+        // 读取文件内容
+        String content = FileUtils.readFileToString(new File("input.txt"), StandardCharsets.UTF_8);
+        System.out.println("文件内容: " + content);
+        
+        // 写入文件内容
+        FileUtils.writeStringToFile(new File("output.txt"), "Hello Commons IO", StandardCharsets.UTF_8);
+        
+        // 追加内容
+        FileUtils.writeStringToFile(new File("output.txt"), "\n追加内容", StandardCharsets.UTF_8, true);
+        
+        // 读取文件为字节数组
+        byte[] bytes = FileUtils.readFileToByteArray(new File("input.txt"));
+        System.out.println("文件大小: " + bytes.length + " bytes");
+        
+        // 写入字节数组到文件
+        FileUtils.writeByteArrayToFile(new File("output.bin"), bytes);
+        
+        // 按行读取文件
+        List<String> lines = FileUtils.readLines(new File("input.txt"), StandardCharsets.UTF_8);
+        lines.forEach(System.out::println);
+        
+        // 按行写入文件
+        List<String> writeLines = Arrays.asList("第一行", "第二行", "第三行");
+        FileUtils.writeLines(new File("lines.txt"), writeLines, StandardCharsets.UTF_8);
+    }
+    
+    // 2. 文件操作
+    public static void fileManipulation() throws IOException {
+        File source = new File("source.txt");
+        File dest = new File("dest.txt");
+        
+        // 复制文件
+        FileUtils.copyFile(source, dest);
+        System.out.println("文件复制完成");
+        
+        // 复制目录
+        FileUtils.copyDirectory(new File("sourceDir"), new File("destDir"));
+        System.out.println("目录复制完成");
+        
+        // 移动文件
+        FileUtils.moveFile(source, new File("moved.txt"));
+        System.out.println("文件移动完成");
+        
+        // 删除文件或目录
+        FileUtils.deleteQuietly(new File("temp.txt")); // 静默删除，不抛异常
+        FileUtils.forceDelete(new File("tempDir"));    // 强制删除，抛异常
+        
+        // 创建目录
+        FileUtils.forceMkdir(new File("newDir"));
+        System.out.println("目录创建完成");
+        
+        // 清理目录
+        FileUtils.cleanDirectory(new File("tempDir")); // 删除目录内容，保留目录
+        System.out.println("目录清理完成");
+    }
+    
+    // 3. 文件信息
+    public static void fileInfo() throws IOException {
+        File file = new File("example.txt");
+        
+        // 获取文件大小
+        long size = FileUtils.sizeOf(file);
+        System.out.println("文件大小: " + size + " bytes");
+        
+        // 获取目录大小
+        long dirSize = FileUtils.sizeOfDirectory(new File("exampleDir"));
+        System.out.println("目录大小: " + dirSize + " bytes");
+        
+        // 获取文件大小（人类可读格式）
+        String humanReadableSize = FileUtils.byteCountToDisplaySize(size);
+        System.out.println("可读大小: " + humanReadableSize);
+        
+        // 检查文件是否为空
+        boolean isEmpty = FileUtils.isEmptyDirectory(new File("emptyDir"));
+        System.out.println("目录是否为空: " + isEmpty);
+        
+        // 获取文件修改时间
+        Date lastModified = new Date(file.lastModified());
+        System.out.println("最后修改时间: " + lastModified);
+    }
+    
+    // 4. 文件比较
+    public static void fileComparison() throws IOException {
+        File file1 = new File("file1.txt");
+        File file2 = new File("file2.txt");
+        
+        // 比较文件内容
+        boolean isEqual = FileUtils.contentEquals(file1, file2);
+        System.out.println("文件内容是否相同: " + isEqual);
+        
+        // 比较文件内容（忽略行结束符）
+        boolean isEqualIgnoreEOL = FileUtils.contentEqualsIgnoreEOL(file1, file2, StandardCharsets.UTF_8);
+        System.out.println("文件内容是否相同（忽略行结束符）: " + isEqualIgnoreEOL);
+    }
+}
+```
+
+**IOUtils工具类：**
+```java
+import org.apache.commons.io.IOUtils;
+import java.io.*;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+
+public class IOUtilsExample {
+    
+    // 1. 流操作
+    public static void streamOperations() throws IOException {
+        // 复制流
+        InputStream input = new FileInputStream("input.txt");
+        OutputStream output = new FileOutputStream("output.txt");
+        IOUtils.copy(input, output);
+        IOUtils.closeQuietly(input, output);
+        
+        // 复制流（指定缓冲区大小）
+        IOUtils.copy(input, output, 8192);
+        
+        // 复制流到字符串
+        String content = IOUtils.toString(input, StandardCharsets.UTF_8);
+        System.out.println("流内容: " + content);
+        
+        // 复制字符串到流
+        IOUtils.write("Hello IOUtils", output, StandardCharsets.UTF_8);
+        
+        // 复制流到字节数组
+        byte[] bytes = IOUtils.toByteArray(input);
+        System.out.println("字节数组大小: " + bytes.length);
+        
+        // 复制字节数组到流
+        IOUtils.write(bytes, output);
+        
+        // 按行读取
+        List<String> lines = IOUtils.readLines(input, StandardCharsets.UTF_8);
+        lines.forEach(System.out::println);
+        
+        // 按行写入
+        IOUtils.writeLines(lines, "\n", output, StandardCharsets.UTF_8);
+    }
+    
+    // 2. 网络操作
+    public static void networkOperations() throws IOException {
+        // 从URL读取内容
+        URL url = new URL("https://www.example.com");
+        String content = IOUtils.toString(url, StandardCharsets.UTF_8);
+        System.out.println("网页内容长度: " + content.length());
+        
+        // 从URL读取字节数组
+        byte[] bytes = IOUtils.toByteArray(url);
+        System.out.println("网页字节大小: " + bytes.length);
+        
+        // 下载文件
+        try (InputStream input = url.openStream();
+             FileOutputStream output = new FileOutputStream("downloaded.html")) {
+            IOUtils.copy(input, output);
+        }
+    }
+    
+    // 3. 流转换
+    public static void streamConversion() throws IOException {
+        // 字符串转输入流
+        String text = "Hello World";
+        InputStream inputStream = IOUtils.toInputStream(text, StandardCharsets.UTF_8);
+        
+        // 字节数组转输入流
+        byte[] bytes = "Hello Bytes".getBytes(StandardCharsets.UTF_8);
+        InputStream byteStream = IOUtils.toInputStream(bytes);
+        
+        // 读取所有内容
+        String allContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+        System.out.println("转换后的内容: " + allContent);
+    }
+    
+    // 4. 流监控
+    public static void streamMonitoring() throws IOException {
+        InputStream input = new FileInputStream("large.txt");
+        
+        // 创建带进度监控的流
+        InputStream monitoredStream = new ProgressMonitorInputStream(
+            null, "读取文件", input);
+        
+        // 读取内容
+        String content = IOUtils.toString(monitoredStream, StandardCharsets.UTF_8);
+        System.out.println("文件读取完成");
+    }
+}
+```
+
+**FilenameUtils工具类：**
+```java
+import org.apache.commons.io.FilenameUtils;
+import java.io.File;
+
+public class FilenameUtilsExample {
+    
+    public static void filenameOperations() {
+        String path = "/home/user/documents/file.txt";
+        
+        // 获取文件名（不含路径）
+        String name = FilenameUtils.getName(path);
+        System.out.println("文件名: " + name); // 输出: file.txt
+        
+        // 获取文件名（不含扩展名）
+        String baseName = FilenameUtils.getBaseName(path);
+        System.out.println("文件名（不含扩展名）: " + baseName); // 输出: file
+        
+        // 获取扩展名
+        String extension = FilenameUtils.getExtension(path);
+        System.out.println("扩展名: " + extension); // 输出: txt
+        
+        // 获取完整路径（不含文件名）
+        String fullPath = FilenameUtils.getFullPath(path);
+        System.out.println("完整路径: " + fullPath); // 输出: /home/user/documents/
+        
+        // 获取路径（不含文件名）
+        String pathOnly = FilenameUtils.getPath(path);
+        System.out.println("路径: " + pathOnly); // 输出: home/user/documents/
+        
+        // 获取前缀
+        String prefix = FilenameUtils.getPrefix(path);
+        System.out.println("前缀: " + prefix); // 输出: /
+        
+        // 规范化路径
+        String normalized = FilenameUtils.normalize(path);
+        System.out.println("规范化路径: " + normalized);
+        
+        // 连接路径
+        String joined = FilenameUtils.concat("/home/user", "documents/file.txt");
+        System.out.println("连接路径: " + joined); // 输出: /home/user/documents/file.txt
+        
+        // 检查扩展名
+        boolean isTxt = FilenameUtils.isExtension(path, "txt");
+        System.out.println("是否为txt文件: " + isTxt); // 输出: true
+        
+        boolean isImage = FilenameUtils.isExtension(path, "jpg", "png", "gif");
+        System.out.println("是否为图片文件: " + isImage); // 输出: false
+        
+        // 移除扩展名
+        String withoutExt = FilenameUtils.removeExtension(path);
+        System.out.println("移除扩展名: " + withoutExt); // 输出: /home/user/documents/file
+        
+        // 更改扩展名
+        String newExt = FilenameUtils.getBaseName(path) + ".bak";
+        System.out.println("新文件名: " + newExt); // 输出: file.bak
+    }
+}
+```
+
+**FileSystemUtils工具类：**
+```java
+import org.apache.commons.io.FileSystemUtils;
+import java.io.IOException;
+
+public class FileSystemUtilsExample {
+    
+    public static void fileSystemOperations() throws IOException {
+        // 获取磁盘空间（字节）
+        long freeSpace = FileSystemUtils.freeSpaceKb("/");
+        System.out.println("可用空间: " + freeSpace + " KB");
+        
+        // 获取磁盘空间（MB）
+        long freeSpaceMB = FileSystemUtils.freeSpaceKb("/") / 1024;
+        System.out.println("可用空间: " + freeSpaceMB + " MB");
+        
+        // 获取磁盘空间（GB）
+        long freeSpaceGB = FileSystemUtils.freeSpaceKb("/") / (1024 * 1024);
+        System.out.println("可用空间: " + freeSpaceGB + " GB");
+        
+        // 检查磁盘空间是否足够
+        long requiredSpace = 1024 * 1024; // 1GB in KB
+        boolean hasEnoughSpace = FileSystemUtils.freeSpaceKb("/") > requiredSpace;
+        System.out.println("是否有足够空间: " + hasEnoughSpace);
+    }
+}
+```
+
+**LineIterator工具类：**
+```java
+import org.apache.commons.io.LineIterator;
+import org.apache.commons.io.FileUtils;
+import java.io.File;
+import java.io.IOException;
+
+public class LineIteratorExample {
+    
+    public static void lineIteratorOperations() throws IOException {
+        File file = new File("large.txt");
+        
+        // 使用LineIterator逐行读取大文件
+        try (LineIterator lineIterator = FileUtils.lineIterator(file, "UTF-8")) {
+            while (lineIterator.hasNext()) {
+                String line = lineIterator.nextLine();
+                // 处理每一行
+                System.out.println("处理行: " + line);
+                
+                // 可以在这里添加处理逻辑
+                if (line.startsWith("ERROR")) {
+                    System.out.println("发现错误行: " + line);
+                }
+            }
+        }
+        
+        // 统计行数
+        try (LineIterator lineIterator = FileUtils.lineIterator(file, "UTF-8")) {
+            int lineCount = 0;
+            while (lineIterator.hasNext()) {
+                lineIterator.nextLine();
+                lineCount++;
+            }
+            System.out.println("文件总行数: " + lineCount);
+        }
+        
+        // 查找特定行
+        try (LineIterator lineIterator = FileUtils.lineIterator(file, "UTF-8")) {
+            int lineNumber = 0;
+            while (lineIterator.hasNext()) {
+                lineNumber++;
+                String line = lineIterator.nextLine();
+                if (line.contains("target")) {
+                    System.out.println("在第" + lineNumber + "行找到目标: " + line);
+                    break;
+                }
+            }
+        }
+    }
+}
+```
+
+**文件监控器：**
+```java
+import org.apache.commons.io.monitor.FileAlterationListener;
+import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
+import org.apache.commons.io.monitor.FileAlterationMonitor;
+import org.apache.commons.io.monitor.FileAlterationObserver;
+import java.io.File;
+
+public class FileMonitorExample {
+    
+    public static void fileMonitoring() throws Exception {
+        // 创建文件监听器
+        FileAlterationListener listener = new FileAlterationListenerAdaptor() {
+            @Override
+            public void onFileCreate(File file) {
+                System.out.println("文件创建: " + file.getName());
+            }
+            
+            @Override
+            public void onFileDelete(File file) {
+                System.out.println("文件删除: " + file.getName());
+            }
+            
+            @Override
+            public void onFileChange(File file) {
+                System.out.println("文件修改: " + file.getName());
+            }
+            
+            @Override
+            public void onDirectoryCreate(File directory) {
+                System.out.println("目录创建: " + directory.getName());
+            }
+            
+            @Override
+            public void onDirectoryDelete(File directory) {
+                System.out.println("目录删除: " + directory.getName());
+            }
+            
+            @Override
+            public void onDirectoryChange(File directory) {
+                System.out.println("目录修改: " + directory.getName());
+            }
+        };
+        
+        // 创建观察者
+        FileAlterationObserver observer = new FileAlterationObserver(
+            new File("monitored_dir"), null, null);
+        observer.addListener(listener);
+        
+        // 创建监控器
+        FileAlterationMonitor monitor = new FileAlterationMonitor(1000); // 1秒检查一次
+        monitor.addObserver(observer);
+        
+        // 启动监控
+        monitor.start();
+        System.out.println("文件监控已启动，监控目录: monitored_dir");
+        
+        // 运行一段时间后停止
+        Thread.sleep(30000); // 运行30秒
+        monitor.stop();
+        System.out.println("文件监控已停止");
+    }
+}
+```
+
+**实用工具类组合使用：**
+```java
+import org.apache.commons.io.*;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
+public class CommonsIOUtils {
+    
+    // 1. 文件备份工具
+    public static void backupFile(String sourcePath, String backupPath) throws IOException {
+        File source = new File(sourcePath);
+        File backup = new File(backupPath);
+        
+        if (source.exists()) {
+            // 创建备份目录
+            FileUtils.forceMkdirParent(backup);
+            
+            // 复制文件
+            FileUtils.copyFile(source, backup);
+            System.out.println("文件备份完成: " + backupPath);
+        } else {
+            System.out.println("源文件不存在: " + sourcePath);
+        }
+    }
+    
+    // 2. 批量文件处理
+    public static void batchProcessFiles(String directory, String extension) throws IOException {
+        File dir = new File(directory);
+        if (!dir.exists() || !dir.isDirectory()) {
+            System.out.println("目录不存在: " + directory);
+            return;
+        }
+        
+        // 获取所有指定扩展名的文件
+        String[] files = dir.list((dir1, name) -> name.endsWith(extension));
+        
+        if (files != null) {
+            for (String fileName : files) {
+                File file = new File(dir, fileName);
+                processFile(file);
+            }
+        }
+    }
+    
+    private static void processFile(File file) throws IOException {
+        // 读取文件内容
+        String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+        
+        // 处理内容（示例：转换为大写）
+        String processedContent = content.toUpperCase();
+        
+        // 写入处理后的内容
+        FileUtils.writeStringToFile(file, processedContent, StandardCharsets.UTF_8);
+        
+        System.out.println("文件处理完成: " + file.getName());
+    }
+    
+    // 3. 日志文件分析
+    public static void analyzeLogFile(String logPath) throws IOException {
+        File logFile = new File(logPath);
+        
+        if (!logFile.exists()) {
+            System.out.println("日志文件不存在: " + logPath);
+            return;
+        }
+        
+        // 统计行数
+        List<String> lines = FileUtils.readLines(logFile, StandardCharsets.UTF_8);
+        int totalLines = lines.size();
+        
+        // 统计错误行数
+        long errorLines = lines.stream()
+            .filter(line -> line.contains("ERROR"))
+            .count();
+        
+        // 统计警告行数
+        long warningLines = lines.stream()
+            .filter(line -> line.contains("WARN"))
+            .count();
+        
+        // 统计信息行数
+        long infoLines = lines.stream()
+            .filter(line -> line.contains("INFO"))
+            .count();
+        
+        System.out.println("日志文件分析结果:");
+        System.out.println("  总行数: " + totalLines);
+        System.out.println("  错误行数: " + errorLines);
+        System.out.println("  警告行数: " + warningLines);
+        System.out.println("  信息行数: " + infoLines);
+        System.out.println("  文件大小: " + FileUtils.byteCountToDisplaySize(logFile.length()));
+    }
+    
+    // 4. 文件同步工具
+    public static void syncDirectories(String sourceDir, String targetDir) throws IOException {
+        File source = new File(sourceDir);
+        File target = new File(targetDir);
+        
+        if (!source.exists() || !source.isDirectory()) {
+            System.out.println("源目录不存在: " + sourceDir);
+            return;
+        }
+        
+        // 创建目标目录
+        FileUtils.forceMkdir(target);
+        
+        // 复制目录
+        FileUtils.copyDirectory(source, target);
+        System.out.println("目录同步完成: " + targetDir);
+    }
+    
+    // 5. 文件清理工具
+    public static void cleanupOldFiles(String directory, long maxAge) {
+        File dir = new File(directory);
+        if (!dir.exists() || !dir.isDirectory()) {
+            System.out.println("目录不存在: " + directory);
+            return;
+        }
+        
+        File[] files = dir.listFiles();
+        if (files != null) {
+            long currentTime = System.currentTimeMillis();
+            int deletedCount = 0;
+            
+            for (File file : files) {
+                if (file.isFile()) {
+                    long fileAge = currentTime - file.lastModified();
+                    if (fileAge > maxAge) {
+                        if (FileUtils.deleteQuietly(file)) {
+                            deletedCount++;
+                            System.out.println("删除旧文件: " + file.getName());
+                        }
+                    }
+                }
+            }
+            
+            System.out.println("清理完成，共删除 " + deletedCount + " 个文件");
+        }
+    }
+}
+
+// 使用示例
+public class CommonsIOExample {
+    public static void main(String[] args) {
+        try {
+            // 文件备份
+            CommonsIOUtils.backupFile("important.txt", "backup/important.txt.bak");
+            
+            // 批量处理
+            CommonsIOUtils.batchProcessFiles("documents", ".txt");
+            
+            // 日志分析
+            CommonsIOUtils.analyzeLogFile("application.log");
+            
+            // 目录同步
+            CommonsIOUtils.syncDirectories("source", "backup");
+            
+            // 清理旧文件（7天前）
+            CommonsIOUtils.cleanupOldFiles("temp", 7 * 24 * 60 * 60 * 1000L);
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+**Commons IO的注意事项：**
+
+1. **性能考虑**：
+   - 大文件操作时使用流式处理
+   - 避免一次性加载大文件到内存
+   - 使用LineIterator处理大文本文件
+
+2. **异常处理**：
+   - 使用closeQuietly方法安全关闭流
+   - 处理IO异常和文件不存在异常
+   - 使用try-with-resources语句
+
+3. **字符编码**：
+   - 明确指定字符编码，避免平台差异
+   - 使用StandardCharsets常量
+   - 处理编码异常
+
+4. **文件操作**：
+   - 检查文件存在性
+   - 创建必要的目录
+   - 处理文件权限问题
+
+5. **最佳实践**：
+   - 使用工具类简化代码
+   - 合理使用文件监控
+   - 注意跨平台兼容性
+
+6. **应用场景**：
+   - 文件操作和IO处理
+   - 日志文件分析
+   - 文件备份和同步
+   - 批量文件处理
+   - 文件监控和事件处理
+
+##### 7.12 对象克隆
 
 **浅克隆（Shallow Clone）：**
 ```java

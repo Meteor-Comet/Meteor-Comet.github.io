@@ -1,6 +1,6 @@
 ---
 layout:     post
-title:      "Java全栈学习日志"
+title:      "JavaSE"
 date:       2025-04-10 20:00:00
 author:     "Comet"
 tags:
@@ -9,11 +9,8 @@ tags:
     - 学习日志
 ---
 
-# Java全栈学习日志
+# JavaSE学习日志
 
-## 重新学一遍Java全栈
-
-本系列日志将记录我重新学习Java全栈开发的过程，涵盖Java基础、Web开发、数据库、Spring全家桶、前端基础、项目实战等内容。
 
 ### 学习目标
 - 夯实Java基础，掌握面向对象编程思想

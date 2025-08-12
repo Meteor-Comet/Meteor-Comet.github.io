@@ -32,7 +32,13 @@ tags:
 5. **反射与注解API**：Class、Method、Field、注解处理器
 6. **日期时间API**：Date、Calendar、LocalDateTime、DateTimeFormatter
 7. **工具类API**：Arrays、Collections、Objects、Optional等
-8. **网络编程API**：Socket、URL、HTTP客户端等
+8. **大数运算**：BigInteger、BigDecimal
+9. **正则表达式**：Pattern、Matcher、常用正则模式
+10. **包装类**：Integer、Character、自动装箱拆箱
+11. **Lambda表达式**：函数式接口、Stream API、方法引用
+12. **Apache Commons IO**：FileUtils、IOUtils、文件操作
+13. **Hutool工具库**：StrUtil、DateUtil、CollUtil、HttpUtil、JSONUtil
+14. **网络编程API**：Socket、URL、HTTP客户端等
 
 ### 学习内容
 
@@ -3767,7 +3773,736 @@ public class CommonsIOExample {
    - 批量文件处理
    - 文件监控和事件处理
 
-##### 7.12 对象克隆
+##### 7.12 Hutool工具库
+
+**Hutool简介：**
+```java
+// Maven依赖
+<dependency>
+    <groupId>cn.hutool</groupId>
+    <artifactId>hutool-all</artifactId>
+    <version>5.8.25</version>
+</dependency>
+
+// Gradle依赖
+implementation 'cn.hutool:hutool-all:5.8.25'
+
+// 主要模块
+import cn.hutool.core.util.*;
+import cn.hutool.core.lang.*;
+import cn.hutool.core.date.*;
+import cn.hutool.core.io.*;
+import cn.hutool.core.text.*;
+import cn.hutool.core.collection.*;
+import cn.hutool.core.map.*;
+import cn.hutool.crypto.*;
+import cn.hutool.http.*;
+import cn.hutool.json.*;
+import cn.hutool.db.*;
+import cn.hutool.poi.*;
+```
+
+**StrUtil字符串工具类：**
+```java
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
+
+public class StrUtilExample {
+    
+    public static void stringOperations() {
+        // 1. 字符串判空
+        String str1 = "";
+        String str2 = null;
+        String str3 = "  ";
+        String str4 = "hello";
+        
+        System.out.println("isEmpty: " + StrUtil.isEmpty(str1));      // true
+        System.out.println("isEmpty: " + StrUtil.isEmpty(str2));      // true
+        System.out.println("isBlank: " + StrUtil.isBlank(str3));      // true
+        System.out.println("isNotBlank: " + StrUtil.isNotBlank(str4)); // true
+        
+        // 2. 字符串格式化
+        String template = "Hello {}, welcome to {}!";
+        String result = StrUtil.format(template, "World", "Java");
+        System.out.println("格式化结果: " + result); // Hello World, welcome to Java!
+        
+        // 3. 字符串截取
+        String text = "Hello World Java";
+        String sub1 = StrUtil.sub(text, 0, 5);           // Hello
+        String sub2 = StrUtil.subAfter(text, " ", false); // World Java
+        String sub3 = StrUtil.subBefore(text, " ", false); // Hello
+        
+        System.out.println("截取1: " + sub1);
+        System.out.println("截取2: " + sub2);
+        System.out.println("截取3: " + sub3);
+        
+        // 4. 字符串替换
+        String original = "Hello World World";
+        String replaced = StrUtil.replace(original, "World", "Java");
+        System.out.println("替换结果: " + replaced); // Hello Java Java
+        
+        // 5. 字符串分割
+        String csv = "apple,banana,orange,grape";
+        String[] fruits = StrUtil.split(csv, ',');
+        System.out.println("分割结果: " + Arrays.toString(fruits));
+        
+        // 6. 字符串连接
+        String[] words = {"Hello", "World", "Java"};
+        String joined = StrUtil.join(", ", words);
+        System.out.println("连接结果: " + joined); // Hello, World, Java
+        
+        // 7. 字符串填充
+        String padded = StrUtil.padPre("123", 5, '0');
+        System.out.println("左填充: " + padded); // 00123
+        
+        String padded2 = StrUtil.padAfter("123", 5, '0');
+        System.out.println("右填充: " + padded2); // 12300
+        
+        // 8. 字符串反转
+        String reversed = StrUtil.reverse("Hello");
+        System.out.println("反转结果: " + reversed); // olleH
+        
+        // 9. 驼峰转换
+        String camelCase = StrUtil.toCamelCase("hello_world");
+        System.out.println("驼峰转换: " + camelCase); // helloWorld
+        
+        String underLine = StrUtil.toUnderlineCase("helloWorld");
+        System.out.println("下划线转换: " + underLine); // hello_world
+        
+        // 10. 字符串模板
+        String template2 = "姓名：{name}，年龄：{age}，城市：{city}";
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "张三");
+        params.put("age", 25);
+        params.put("city", "北京");
+        
+        String result2 = StrUtil.format(template2, params);
+        System.out.println("模板结果: " + result2); // 姓名：张三，年龄：25，城市：北京
+    }
+}
+```
+
+**DateUtil日期工具类：**
+```java
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DatePattern;
+import java.util.Date;
+
+public class DateUtilExample {
+    
+    public static void dateOperations() {
+        // 1. 日期解析
+        String dateStr = "2025-05-15 14:30:45";
+        DateTime date = DateUtil.parse(dateStr);
+        System.out.println("解析日期: " + date);
+        
+        // 2. 日期格式化
+        String formatted = DateUtil.format(date, DatePattern.NORM_DATETIME_PATTERN);
+        System.out.println("格式化日期: " + formatted);
+        
+        // 3. 获取当前时间
+        DateTime now = DateUtil.date();
+        System.out.println("当前时间: " + now);
+        
+        // 4. 日期计算
+        DateTime tomorrow = DateUtil.tomorrow();
+        DateTime yesterday = DateUtil.yesterday();
+        DateTime nextWeek = DateUtil.nextWeek();
+        DateTime nextMonth = DateUtil.nextMonth();
+        
+        System.out.println("明天: " + tomorrow);
+        System.out.println("昨天: " + yesterday);
+        System.out.println("下周: " + nextWeek);
+        System.out.println("下月: " + nextMonth);
+        
+        // 5. 日期偏移
+        DateTime offset1 = DateUtil.offsetDay(now, 7);    // 7天后
+        DateTime offset2 = DateUtil.offsetMonth(now, 1);  // 1个月后
+        DateTime offset3 = DateUtil.offsetYear(now, 1);   // 1年后
+        
+        System.out.println("7天后: " + offset1);
+        System.out.println("1个月后: " + offset2);
+        System.out.println("1年后: " + offset3);
+        
+        // 6. 日期比较
+        DateTime date1 = DateUtil.parse("2025-05-15");
+        DateTime date2 = DateUtil.parse("2025-05-20");
+        
+        boolean isAfter = DateUtil.isAfter(date2, date1);
+        boolean isBefore = DateUtil.isBefore(date1, date2);
+        boolean isSame = DateUtil.isSameDay(date1, date2);
+        
+        System.out.println("date2在date1之后: " + isAfter);
+        System.out.println("date1在date2之前: " + isBefore);
+        System.out.println("同一天: " + isSame);
+        
+        // 7. 获取时间戳
+        long timestamp = DateUtil.current();
+        System.out.println("当前时间戳: " + timestamp);
+        
+        // 8. 时间差计算
+        long betweenDays = DateUtil.betweenDay(date1, date2, false);
+        long betweenHours = DateUtil.betweenHour(date1, date2, false);
+        long betweenMinutes = DateUtil.betweenMinute(date1, date2, false);
+        
+        System.out.println("相差天数: " + betweenDays);
+        System.out.println("相差小时: " + betweenHours);
+        System.out.println("相差分钟: " + betweenMinutes);
+        
+        // 9. 获取日期部分
+        int year = DateUtil.year(date);
+        int month = DateUtil.month(date) + 1; // 月份从0开始
+        int day = DateUtil.dayOfMonth(date);
+        int hour = DateUtil.hour(date, true);
+        int minute = DateUtil.minute(date);
+        int second = DateUtil.second(date);
+        
+        System.out.println("年: " + year + ", 月: " + month + ", 日: " + day);
+        System.out.println("时: " + hour + ", 分: " + minute + ", 秒: " + second);
+        
+        // 10. 日期范围
+        DateTime start = DateUtil.beginOfDay(date);
+        DateTime end = DateUtil.endOfDay(date);
+        
+        System.out.println("当天开始: " + start);
+        System.out.println("当天结束: " + end);
+        
+        // 11. 星期相关
+        int week = DateUtil.dayOfWeek(date);
+        String weekName = DateUtil.dayOfWeekEnum(date).toChinese();
+        
+        System.out.println("星期几(数字): " + week);
+        System.out.println("星期几(中文): " + weekName);
+    }
+}
+```
+
+**CollUtil集合工具类：**
+```java
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.ListUtil;
+import java.util.*;
+
+public class CollUtilExample {
+    
+    public static void collectionOperations() {
+        // 1. 创建集合
+        List<String> list1 = CollUtil.newArrayList("a", "b", "c");
+        Set<String> set1 = CollUtil.newHashSet("x", "y", "z");
+        Map<String, String> map1 = CollUtil.newHashMap("key1", "value1", "key2", "value2");
+        
+        System.out.println("列表: " + list1);
+        System.out.println("集合: " + set1);
+        System.out.println("映射: " + map1);
+        
+        // 2. 集合判空
+        List<String> emptyList = new ArrayList<>();
+        List<String> nullList = null;
+        
+        System.out.println("isEmpty: " + CollUtil.isEmpty(emptyList));    // true
+        System.out.println("isEmpty: " + CollUtil.isEmpty(nullList));     // true
+        System.out.println("isNotEmpty: " + CollUtil.isNotEmpty(list1)); // true
+        
+        // 3. 集合操作
+        List<String> list2 = Arrays.asList("d", "e", "f");
+        
+        // 并集
+        List<String> union = CollUtil.union(list1, list2);
+        System.out.println("并集: " + union);
+        
+        // 交集
+        List<String> intersection = CollUtil.intersection(list1, list2);
+        System.out.println("交集: " + intersection);
+        
+        // 差集
+        List<String> difference = CollUtil.disjunction(list1, list2);
+        System.out.println("差集: " + difference);
+        
+        // 4. 集合转换
+        // 列表转数组
+        String[] array = CollUtil.toArray(list1, String.class);
+        System.out.println("转数组: " + Arrays.toString(array));
+        
+        // 数组转列表
+        List<String> listFromArray = CollUtil.toList(array);
+        System.out.println("转列表: " + listFromArray);
+        
+        // 5. 集合分组
+        List<Person> persons = Arrays.asList(
+            new Person("张三", 25, "北京"),
+            new Person("李四", 30, "上海"),
+            new Person("王五", 25, "北京"),
+            new Person("赵六", 35, "广州")
+        );
+        
+        Map<Integer, List<Person>> ageGroup = CollUtil.groupByField(persons, "age");
+        System.out.println("按年龄分组: " + ageGroup);
+        
+        Map<String, List<Person>> cityGroup = CollUtil.groupByField(persons, "city");
+        System.out.println("按城市分组: " + cityGroup);
+        
+        // 6. 集合排序
+        List<Integer> numbers = Arrays.asList(3, 1, 4, 1, 5, 9, 2, 6);
+        CollUtil.sort(numbers);
+        System.out.println("排序后: " + numbers);
+        
+        // 自定义排序
+        CollUtil.sort(persons, (p1, p2) -> Integer.compare(p1.getAge(), p2.getAge()));
+        System.out.println("按年龄排序: " + persons);
+        
+        // 7. 集合分页
+        List<String> longList = Arrays.asList("a", "b", "c", "d", "e", "f", "g", "h", "i", "j");
+        List<String> page1 = CollUtil.page(0, 3, longList);
+        List<String> page2 = CollUtil.page(1, 3, longList);
+        
+        System.out.println("第1页: " + page1); // [a, b, c]
+        System.out.println("第2页: " + page2); // [d, e, f]
+        
+        // 8. 集合去重
+        List<String> duplicateList = Arrays.asList("a", "b", "a", "c", "b", "d");
+        List<String> uniqueList = CollUtil.distinct(duplicateList);
+        System.out.println("去重后: " + uniqueList);
+        
+        // 9. 集合过滤
+        List<String> filtered = CollUtil.filter(list1, str -> str.startsWith("a"));
+        System.out.println("过滤后: " + filtered);
+        
+        // 10. 集合映射
+        List<String> mapped = CollUtil.map(list1, String::toUpperCase);
+        System.out.println("映射后: " + mapped);
+    }
+    
+    static class Person {
+        private String name;
+        private int age;
+        private String city;
+        
+        public Person(String name, int age, String city) {
+            this.name = name;
+            this.age = age;
+            this.city = city;
+        }
+        
+        public String getName() { return name; }
+        public int getAge() { return age; }
+        public String getCity() { return city; }
+        
+        @Override
+        public String toString() {
+            return name + "(" + age + "," + city + ")";
+        }
+    }
+}
+```
+
+**HttpUtil网络工具类：**
+```java
+import cn.hutool.http.HttpUtil;
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
+import java.util.HashMap;
+import java.util.Map;
+
+public class HttpUtilExample {
+    
+    public static void httpOperations() {
+        // 1. GET请求
+        String getResult = HttpUtil.get("https://httpbin.org/get");
+        System.out.println("GET响应: " + getResult);
+        
+        // 带参数的GET请求
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "张三");
+        params.put("age", 25);
+        
+        String getWithParams = HttpUtil.get("https://httpbin.org/get", params);
+        System.out.println("带参数GET响应: " + getWithParams);
+        
+        // 2. POST请求
+        String postResult = HttpUtil.post("https://httpbin.org/post", "Hello World");
+        System.out.println("POST响应: " + postResult);
+        
+        // POST表单数据
+        Map<String, Object> formData = new HashMap<>();
+        formData.put("username", "admin");
+        formData.put("password", "123456");
+        
+        String postForm = HttpUtil.post("https://httpbin.org/post", formData);
+        System.out.println("POST表单响应: " + postForm);
+        
+        // 3. 设置请求头
+        HttpResponse response = HttpRequest.get("https://httpbin.org/headers")
+            .header("User-Agent", "Hutool/1.0")
+            .header("Authorization", "Bearer token123")
+            .execute();
+        
+        System.out.println("带请求头响应: " + response.body());
+        
+        // 4. 设置超时
+        HttpResponse timeoutResponse = HttpRequest.get("https://httpbin.org/delay/5")
+            .timeout(3000) // 3秒超时
+            .execute();
+        
+        System.out.println("超时响应状态: " + timeoutResponse.getStatus());
+        
+        // 5. 异步请求
+        HttpRequest.get("https://httpbin.org/get")
+            .async()
+            .thenAccept(resp -> {
+                System.out.println("异步响应: " + resp.body());
+            });
+    }
+}
+```
+
+**JSONUtil JSON工具类：**
+```java
+import cn.hutool.json.JSONUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONArray;
+import java.util.*;
+
+public class JSONUtilExample {
+    
+    public static void jsonOperations() {
+        // 1. 对象转JSON
+        Person person = new Person("张三", 25, "北京");
+        String jsonStr = JSONUtil.toJsonStr(person);
+        System.out.println("对象转JSON: " + jsonStr);
+        
+        // 2. JSON转对象
+        Person parsedPerson = JSONUtil.toBean(jsonStr, Person.class);
+        System.out.println("JSON转对象: " + parsedPerson);
+        
+        // 3. 创建JSONObject
+        JSONObject jsonObject = JSONUtil.createObj()
+            .put("name", "李四")
+            .put("age", 30)
+            .put("city", "上海")
+            .put("hobbies", Arrays.asList("读书", "游泳", "编程"));
+        
+        System.out.println("JSONObject: " + jsonObject);
+        
+        // 4. 获取JSON值
+        String name = jsonObject.getStr("name");
+        int age = jsonObject.getInt("age");
+        List<String> hobbies = jsonObject.getBeanList("hobbies", String.class);
+        
+        System.out.println("姓名: " + name);
+        System.out.println("年龄: " + age);
+        System.out.println("爱好: " + hobbies);
+        
+        // 5. 创建JSONArray
+        JSONArray jsonArray = JSONUtil.createArray()
+            .add(person)
+            .add(new Person("王五", 35, "广州"))
+            .add(new Person("赵六", 28, "深圳"));
+        
+        System.out.println("JSONArray: " + jsonArray);
+        
+        // 6. 遍历JSONArray
+        for (int i = 0; i < jsonArray.size(); i++) {
+            JSONObject obj = jsonArray.getJSONObject(i);
+            System.out.println("第" + (i+1) + "个人: " + obj.getStr("name"));
+        }
+        
+        // 7. JSONArray转List
+        List<Person> personList = jsonArray.toList(Person.class);
+        System.out.println("转List: " + personList);
+        
+        // 8. 复杂JSON操作
+        String complexJson = """
+            {
+                "company": {
+                    "name": "科技有限公司",
+                    "employees": [
+                        {"name": "张三", "age": 25, "department": "技术部"},
+                        {"name": "李四", "age": 30, "department": "产品部"},
+                        {"name": "王五", "age": 35, "department": "技术部"}
+                    ]
+                }
+            }
+            """;
+        
+        JSONObject companyJson = JSONUtil.parseObj(complexJson);
+        String companyName = companyJson.getByPath("company.name", String.class);
+        JSONArray employees = companyJson.getByPath("company.employees", JSONArray.class);
+        
+        System.out.println("公司名称: " + companyName);
+        System.out.println("员工数量: " + employees.size());
+        
+        // 9. JSON格式化
+        String formattedJson = JSONUtil.formatJsonStr(complexJson);
+        System.out.println("格式化JSON:\n" + formattedJson);
+        
+        // 10. JSON验证
+        boolean isValid = JSONUtil.isTypeJSON(complexJson);
+        System.out.println("是否为有效JSON: " + isValid);
+        
+        // 11. JSON合并
+        JSONObject obj1 = JSONUtil.createObj().put("a", 1).put("b", 2);
+        JSONObject obj2 = JSONUtil.createObj().put("c", 3).put("d", 4);
+        JSONObject merged = JSONUtil.merge(obj1, obj2);
+        System.out.println("合并结果: " + merged);
+    }
+    
+    static class Person {
+        private String name;
+        private int age;
+        private String city;
+        
+        public Person(String name, int age, String city) {
+            this.name = name;
+            this.age = age;
+            this.city = city;
+        }
+        
+        public String getName() { return name; }
+        public int getAge() { return age; }
+        public String getCity() { return city; }
+        
+        @Override
+        public String toString() {
+            return name + "(" + age + "," + city + ")";
+        }
+    }
+}
+```
+
+**Hutool实用工具类组合使用：**
+```java
+import cn.hutool.core.util.*;
+import cn.hutool.core.date.*;
+import cn.hutool.core.collection.*;
+import cn.hutool.http.*;
+import cn.hutool.json.*;
+import java.util.*;
+
+public class HutoolUtils {
+    
+    // 1. 配置文件读取工具
+    public static void readConfig() {
+        // 假设有一个配置文件 config.json
+        String configJson = """
+            {
+                "database": {
+                    "url": "jdbc:mysql://localhost:3306/test",
+                    "username": "root",
+                    "password": "123456"
+                },
+                "redis": {
+                    "host": "localhost",
+                    "port": 6379
+                }
+            }
+            """;
+        
+        JSONObject config = JSONUtil.parseObj(configJson);
+        String dbUrl = config.getByPath("database.url", String.class);
+        String redisHost = config.getByPath("redis.host", String.class);
+        
+        System.out.println("数据库URL: " + dbUrl);
+        System.out.println("Redis主机: " + redisHost);
+    }
+    
+    // 2. 日志分析工具
+    public static void analyzeLog(String logContent) {
+        List<String> lines = StrUtil.split(logContent, '\n');
+        
+        // 统计不同级别的日志
+        Map<String, Integer> levelCount = new HashMap<>();
+        List<String> errorLines = new ArrayList<>();
+        
+        for (String line : lines) {
+            if (StrUtil.contains(line, "ERROR")) {
+                levelCount.merge("ERROR", 1, Integer::sum);
+                errorLines.add(line);
+            } else if (StrUtil.contains(line, "WARN")) {
+                levelCount.merge("WARN", 1, Integer::sum);
+            } else if (StrUtil.contains(line, "INFO")) {
+                levelCount.merge("INFO", 1, Integer::sum);
+            }
+        }
+        
+        System.out.println("日志级别统计: " + levelCount);
+        System.out.println("错误日志数量: " + errorLines.size());
+    }
+    
+    // 3. 数据验证工具
+    public static boolean validateData(Map<String, Object> data) {
+        // 验证必填字段
+        String[] requiredFields = {"name", "age", "email"};
+        
+        for (String field : requiredFields) {
+            if (StrUtil.isBlank(StrUtil.toString(data.get(field)))) {
+                System.out.println("缺少必填字段: " + field);
+                return false;
+            }
+        }
+        
+        // 验证年龄
+        int age = Convert.toInt(data.get("age"));
+        if (age < 0 || age > 150) {
+            System.out.println("年龄无效: " + age);
+            return false;
+        }
+        
+        // 验证邮箱格式
+        String email = StrUtil.toString(data.get("email"));
+        if (!ReUtil.isMatch("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$", email)) {
+            System.out.println("邮箱格式无效: " + email);
+            return false;
+        }
+        
+        return true;
+    }
+    
+    // 4. 缓存工具
+    public static class SimpleCache<K, V> {
+        private final Map<K, CacheEntry<V>> cache = new HashMap<>();
+        private final long expireTime;
+        
+        public SimpleCache(long expireTime) {
+            this.expireTime = expireTime;
+        }
+        
+        public void put(K key, V value) {
+            cache.put(key, new CacheEntry<>(value, System.currentTimeMillis()));
+        }
+        
+        public V get(K key) {
+            CacheEntry<V> entry = cache.get(key);
+            if (entry != null && !entry.isExpired(expireTime)) {
+                return entry.getValue();
+            }
+            cache.remove(key);
+            return null;
+        }
+        
+        public void clear() {
+            cache.clear();
+        }
+        
+        private static class CacheEntry<V> {
+            private final V value;
+            private final long timestamp;
+            
+            public CacheEntry(V value, long timestamp) {
+                this.value = value;
+                this.timestamp = timestamp;
+            }
+            
+            public V getValue() { return value; }
+            
+            public boolean isExpired(long expireTime) {
+                return System.currentTimeMillis() - timestamp > expireTime;
+            }
+        }
+    }
+    
+    // 5. 数据转换工具
+    public static <T> T convertValue(Object value, Class<T> targetType) {
+        if (value == null) {
+            return null;
+        }
+        
+        if (targetType.isAssignableFrom(value.getClass())) {
+            return targetType.cast(value);
+        }
+        
+        if (targetType == String.class) {
+            return targetType.cast(StrUtil.toString(value));
+        }
+        
+        if (targetType == Integer.class || targetType == int.class) {
+            return targetType.cast(Convert.toInt(value));
+        }
+        
+        if (targetType == Long.class || targetType == long.class) {
+            return targetType.cast(Convert.toLong(value));
+        }
+        
+        if (targetType == Double.class || targetType == double.class) {
+            return targetType.cast(Convert.toDouble(value));
+        }
+        
+        if (targetType == Boolean.class || targetType == boolean.class) {
+            return targetType.cast(Convert.toBool(value));
+        }
+        
+        throw new IllegalArgumentException("不支持的类型转换: " + value.getClass() + " -> " + targetType);
+    }
+}
+
+// 使用示例
+public class HutoolExample {
+    public static void main(String[] args) {
+        // 配置读取
+        HutoolUtils.readConfig();
+        
+        // 日志分析
+        String logContent = """
+            [INFO] 应用启动成功
+            [ERROR] 数据库连接失败
+            [WARN] 内存使用率过高
+            [ERROR] 文件读取失败
+            [INFO] 用户登录成功
+            """;
+        HutoolUtils.analyzeLog(logContent);
+        
+        // 数据验证
+        Map<String, Object> userData = new HashMap<>();
+        userData.put("name", "张三");
+        userData.put("age", 25);
+        userData.put("email", "zhangsan@example.com");
+        
+        boolean isValid = HutoolUtils.validateData(userData);
+        System.out.println("数据验证结果: " + isValid);
+        
+        // 缓存使用
+        HutoolUtils.SimpleCache<String, String> cache = new HutoolUtils.SimpleCache<>(5000); // 5秒过期
+        cache.put("key1", "value1");
+        System.out.println("缓存值: " + cache.get("key1"));
+        
+        // 数据转换
+        String numberStr = "123";
+        Integer number = HutoolUtils.convertValue(numberStr, Integer.class);
+        System.out.println("转换结果: " + number);
+    }
+}
+```
+
+**Hutool的注意事项：**
+
+1. **性能考虑**：
+   - 合理使用缓存机制
+   - 避免频繁创建工具类实例
+   - 使用连接池管理HTTP连接
+
+2. **异常处理**：
+   - 处理网络请求异常
+   - 处理JSON解析异常
+   - 处理加密解密异常
+
+3. **安全性**：
+   - 使用安全的加密算法
+   - 保护敏感信息
+   - 验证输入数据
+
+4. **最佳实践**：
+   - 合理使用工具类
+   - 注意版本兼容性
+   - 遵循编码规范
+
+5. **应用场景**：
+   - 快速开发原型
+   - 数据处理和转换
+   - 网络请求和API调用
+   - 文件操作和IO处理
+   - 加密和安全处理
+
+##### 7.13 对象克隆
 
 **浅克隆（Shallow Clone）：**
 ```java
@@ -4279,6 +5014,33 @@ try {
 - 最佳实践：优先使用方法引用，合理使用函数式接口
 
 通过Lambda表达式的学习，对Java的函数式编程能力有了显著提升，特别是在集合处理、异步编程、事件处理等方面的应用。这些知识为后续学习现代Java框架、响应式编程、微服务开发等提供了重要基础。
+
+**Hutool工具库学习要点：**
+- 掌握了Hutool的核心工具类：StrUtil、DateUtil、CollUtil、MapUtil、HttpUtil、JSONUtil等
+- 理解了Hutool的设计理念：简化Java开发，提高开发效率
+- 熟练使用字符串处理工具，包括判空、格式化、截取、替换、分割、连接等操作
+- 掌握了日期时间处理工具，包括解析、格式化、计算、比较、偏移等操作
+- 学会了集合操作工具，包括创建、判空、并集交集差集、分组、排序、分页等
+- 理解了HTTP请求工具，包括GET、POST、文件上传、异步请求、请求拦截等
+- 掌握了JSON处理工具，包括对象转换、JSONObject、JSONArray、复杂JSON操作等
+- 学会了实用工具类的组合使用，提高代码复用性和开发效率
+
+**Hutool工具库应用场景：**
+- 快速开发：原型开发、工具脚本、测试代码
+- 数据处理：字符串处理、日期处理、集合操作
+- 网络编程：HTTP客户端、API调用、文件下载
+- 配置管理：JSON配置、配置文件读取、数据验证
+- 日志分析：日志解析、统计分析、错误监控
+- 缓存管理：简单缓存、数据缓存、性能优化
+
+**Hutool工具库注意事项：**
+- 性能考虑：合理使用缓存机制，避免频繁创建工具类实例
+- 异常处理：处理网络请求异常、JSON解析异常、加密解密异常
+- 安全性：使用安全的加密算法，保护敏感信息，验证输入数据
+- 版本兼容：注意版本兼容性，遵循编码规范
+- 最佳实践：合理使用工具类，避免过度依赖，保持代码简洁
+
+通过Hutool工具库的学习，对Java开发效率有了显著提升，特别是在快速开发、数据处理、网络编程等方面的应用。这些知识为后续开发企业级应用、微服务、工具脚本等提供了重要支持。
 
 ---
 

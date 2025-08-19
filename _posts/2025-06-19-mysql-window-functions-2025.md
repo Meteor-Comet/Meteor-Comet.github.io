@@ -36,7 +36,7 @@ tags:
 - **窗口函数定义**：在不折叠行的前提下，对一组相关行进行计算并将结果返回到每一行。
 - **与普通聚合的区别**：聚合函数（GROUP BY）会聚合成更少的行；窗口函数保留每一行。
 - **基本语法**：
-```sql
+```
 <window_function>() OVER (
   [PARTITION BY <expr_list>]
   [ORDER BY <order_list>]

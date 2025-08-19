@@ -2,7 +2,7 @@
 layout: post
 title: "如何解决误删除root用户"
 subtitle: "MySQL数据库管理员紧急恢复指南"
-date: 2025-08-17 12:00:00
+date: 2025-05-30 12:00:00
 author: "Comet"
 catalog: true
 tags:

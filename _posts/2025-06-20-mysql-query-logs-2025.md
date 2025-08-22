@@ -73,34 +73,23 @@ log_slow_admin_statements = 1
 {% endhighlight %}
 
 ### 1.4 慢查询日志格式
-{% highlight text %}
-# Time: 2025-06-20T10:30:15.123456Z
-# User@Host: root[root] @ localhost [127.0.0.1]  Id: 12345
-# Query_time: 5.234567  Lock_time: 0.000123  Rows_sent: 1000  Rows_examined: 50000
-SET timestamp=1624186215;
-SELECT * FROM users WHERE email LIKE '%@gmail.com';
-{% endhighlight %}
+> Time: 2025-06-20T10:30:15.123456Z
+>
+> User@Host: root[root] @ localhost [127.0.0.1]  Id: 12345
+>
+> Query_time: 5.234567  Lock_time: 0.000123  Rows_sent: 1000  Rows_examined: 50000
+>
+> `SET timestamp=1624186215;`
+>
+> `SELECT * FROM users WHERE email LIKE '%@gmail.com';`
 
 ### 1.5 使用mysqldumpslow分析
-{% highlight bash %}
-# 查看慢查询统计
-mysqldumpslow /var/log/mysql/slow.log
-
-# 按查询时间排序
-mysqldumpslow -t 10 /var/log/mysql/slow.log
-
-# 按执行次数排序
-mysqldumpslow -s c -t 10 /var/log/mysql/slow.log
-
-# 按锁定时间排序
-mysqldumpslow -s l -t 10 /var/log/mysql/slow.log
-
-# 显示完整SQL
-mysqldumpslow -a /var/log/mysql/slow.log
-
-# 过滤特定数据库
-mysqldumpslow -g "database_name" /var/log/mysql/slow.log
-{% endhighlight %}
+- **查看慢查询统计**: `mysqldumpslow /var/log/mysql/slow.log`
+- **按查询时间排序**: `mysqldumpslow -t 10 /var/log/mysql/slow.log`
+- **按执行次数排序**: `mysqldumpslow -s c -t 10 /var/log/mysql/slow.log`
+- **按锁定时间排序**: `mysqldumpslow -s l -t 10 /var/log/mysql/slow.log`
+- **显示完整SQL**: `mysqldumpslow -a /var/log/mysql/slow.log`
+- **过滤特定数据库**: `mysqldumpslow -g "database_name" /var/log/mysql/slow.log`
 
 ---
 
@@ -121,15 +110,12 @@ SHOW VARIABLES LIKE 'profiling';
 SHOW PROFILES;
 {% endhighlight %}
 输出示例：
-{% highlight text %}
-+----------+------------+----------------------------------+
-| Query_ID | Duration   | Query                            |
-+----------+------------+----------------------------------+
-|        1 | 0.00012345 | SELECT 1                        |
-|        2 | 0.00123456 | SELECT * FROM users LIMIT 10    |
-|        3 | 0.12345678 | SELECT * FROM orders WHERE ...  |
-+----------+------------+----------------------------------+
-{% endhighlight %}
+
+| Query_ID | Duration   | Query                           |
+|---------:|-----------:|---------------------------------|
+| 1        | 0.00012345 | SELECT 1                        |
+| 2        | 0.00123456 | SELECT * FROM users LIMIT 10    |
+| 3        | 0.12345678 | SELECT * FROM orders WHERE ...  |
 
 ### 2.3 SHOW PROFILE
 分析特定查询的详细执行信息：
@@ -183,11 +169,9 @@ EXPLAIN ANALYZE SELECT * FROM users WHERE id = 1;
 ### 3.3 EXPLAIN输出字段详解
 
 #### 3.3.1 核心字段
-{% highlight text %}
-+----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+-------+
-| id | select_type | table | partitions | type | possible_keys | key  | key_len | ref  | rows | filtered | Extra |
-+----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+-------+
-{% endhighlight %}
+
+| id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra |
+|---:|:------------|:------|:-----------|:-----|:--------------|:----|:--------|:----|----:|---------:|:------|
 
 #### 3.3.2 字段说明
 - **id**: 查询标识符，数字越大优先级越高

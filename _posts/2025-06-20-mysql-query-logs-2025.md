@@ -478,7 +478,7 @@ WHERE o.amount > 1000;
 ## 7. 日志管理和维护
 
 ### 7.1 日志轮转
-{% highlight bash
+{% highlight bash %}
 # 使用logrotate配置
 cat > /etc/logrotate.d/mysql << EOF
 /var/log/mysql/*.log {
@@ -510,7 +510,7 @@ SET GLOBAL general_log = 'ON';
 {% endhighlight %}
 
 ### 7.3 日志监控脚本
-{% highlight bash
+{% highlight bash %}
 #!/bin/bash
 # 监控慢查询数量
 SLOW_QUERIES=$(mysql -e "SHOW STATUS LIKE 'Slow_queries'" | awk 'NR==2 {print $2}')

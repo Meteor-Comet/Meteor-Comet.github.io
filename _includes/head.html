@@ -49,6 +49,35 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ " /css/hux-blog.min.css" | prepend: site.baseurl }}">
 
+    <!-- Readability overrides for code blocks -->
+    <style>
+        /* Light theme for code highlights to improve contrast */
+        .highlighter-rouge .highlight,
+        .highlight,
+        pre.highlight {
+            background: #f6f8fa;
+            color: #24292e;
+            border: 1px solid #d0d7de;
+        }
+
+        .highlighter-rouge .highlight pre {
+            background: transparent;
+            color: inherit;
+        }
+
+        .highlighter-rouge .highlight .rouge-code pre {
+            color: inherit;
+        }
+
+        .highlighter-rouge .highlight .lineno {
+            color: #6e7781;
+        }
+
+        pre code {
+            color: inherit;
+        }
+    </style>
+
     <!-- Custom Fonts -->
     <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
     <!-- Hux change font-awesome CDN to qiniu -->

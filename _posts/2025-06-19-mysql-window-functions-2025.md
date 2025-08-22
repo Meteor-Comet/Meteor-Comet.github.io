@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "MySQL窗口函数学习日志"
-subtitle: "OVER / PARTITION BY / ORDER BY / FRAME / LAG / LEAD 全面指南"
+title: "MySQL窗口函数"
+subtitle: "OVER / PARTITION BY / ORDER BY / FRAME / LAG / LEAD "
 date: 2025-06-19 18:00:00
-author: "Meteor-Comet"
+author: "Comet"
 catalog: true
 tags:
     - MySQL

@@ -16,6 +16,7 @@ tags:
 
 ## 学习目标
 - 掌握MySQL视图的创建、使用和管理
+- 理解WITH CHECK OPTION的安全机制和应用
 - 熟悉存储过程的编写和调用方法
 - 了解触发器的创建和应用场景
 - 学会使用数据库对象提高开发效率
@@ -23,6 +24,9 @@ tags:
 
 ## 学习计划
 1. MySQL视图（Views）详解
+   - 视图类型和创建方法
+   - WITH CHECK OPTION安全机制
+   - 视图管理和优化
 2. 存储过程（Stored Procedures）开发
 3. 触发器（Triggers）应用
 4. 数据库对象管理
@@ -41,6 +45,7 @@ tags:
 - 提供数据安全性
 - 隐藏表结构复杂性
 - 实现数据独立性
+- 通过WITH CHECK OPTION确保数据完整性
 
 ### 1.2 创建视图
 {% highlight sql %}
@@ -108,6 +113,82 @@ WHERE deleted_at IS NULL;
 UPDATE user_profiles 
 SET phone = '123-456-7890' 
 WHERE id = 1;
+{% endhighlight %}
+
+#### 1.3.4 WITH CHECK OPTION
+`WITH CHECK OPTION`是视图的一个重要安全特性，用于确保通过视图插入或更新的数据符合视图的WHERE条件。
+
+**作用：**
+- 防止通过视图插入不符合条件的数据
+- 确保数据完整性
+- 增强视图的安全性
+
+{% highlight sql %}
+-- 创建带WITH CHECK OPTION的视图
+CREATE VIEW active_users_view AS
+SELECT id, name, email, status
+FROM users
+WHERE status = 'active'
+WITH CHECK OPTION;
+
+-- 尝试插入不符合条件的数据（会失败）
+INSERT INTO active_users_view (name, email, status) 
+VALUES ('John', 'john@example.com', 'inactive');
+-- 错误：CHECK OPTION failed
+
+-- 插入符合条件的数据（成功）
+INSERT INTO active_users_view (name, email, status) 
+VALUES ('Jane', 'jane@example.com', 'active');
+
+-- 尝试更新为不符合条件的数据（会失败）
+UPDATE active_users_view 
+SET status = 'inactive' 
+WHERE id = 1;
+-- 错误：CHECK OPTION failed
+
+-- 更新为符合条件的数据（成功）
+UPDATE active_users_view 
+SET email = 'newemail@example.com' 
+WHERE id = 1;
+{% endhighlight %}
+
+**WITH CHECK OPTION的类型：**
+
+1. **CASCADED（默认）**：检查当前视图和所有依赖视图的条件
+{% highlight sql %}
+CREATE VIEW vip_users AS
+SELECT id, name, email, vip_level
+FROM active_users_view
+WHERE vip_level >= 3
+WITH CASCADED CHECK OPTION;
+{% endhighlight %}
+
+2. **LOCAL**：只检查当前视图的条件
+{% highlight sql %}
+CREATE VIEW premium_users AS
+SELECT id, name, email, membership_type
+FROM active_users_view
+WHERE membership_type = 'premium'
+WITH LOCAL CHECK OPTION;
+{% endhighlight %}
+
+**实际应用场景：**
+{% highlight sql %}
+-- 部门视图示例
+CREATE VIEW hr_department AS
+SELECT id, name, email, department, salary
+FROM employees
+WHERE department = 'HR'
+WITH CHECK OPTION;
+
+-- 只能操作HR部门的员工数据
+INSERT INTO hr_department (name, email, department, salary)
+VALUES ('Alice', 'alice@company.com', 'HR', 50000);
+
+-- 尝试操作其他部门数据会失败
+INSERT INTO hr_department (name, email, department, salary)
+VALUES ('Bob', 'bob@company.com', 'IT', 60000);
+-- 错误：CHECK OPTION failed
 {% endhighlight %}
 
 ### 1.4 视图管理

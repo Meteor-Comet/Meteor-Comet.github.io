@@ -80,6 +80,25 @@ random_arr = np.random.rand(3, 3)
 print("随机数组:\n", random_arr)
 {% endhighlight %}
 
+【预期输出】
+{% highlight text %}
+一维数组: [1 2 3 4 5]
+二维数组:
+ [[1 2 3]
+  [4 5 6]]
+零数组:
+ [[0. 0. 0. 0.]
+  [0. 0. 0. 0.]
+  [0. 0. 0. 0.]]
+一数组:
+ [[1. 1. 1.]
+  [1. 1. 1.]]
+范围数组: [0 2 4 6 8]
+线性空间数组: [0.   0.25 0.5  0.75 1.  ]
+随机数组:
+ [[... 3x3 随机小数 ...]]
+{% endhighlight %}
+
 ### 1.3 数组操作
 {% highlight python %}
 # 数组形状和维度
@@ -102,6 +121,25 @@ print("子数组:", arr[0:1, 1:3])
 bool_mask = arr > 3
 print("布尔掩码:\n", bool_mask)
 print("条件选择:", arr[bool_mask])
+{% endhighlight %}
+
+【预期输出】
+{% highlight text %}
+数组形状: (2, 3)
+数组维度: 2
+数组大小: 6
+数据类型: int64
+重塑后:
+ [[1 2]
+  [3 4]
+  [5 6]]
+第一行: [1 2 3]
+第一列: [1 4]
+子数组: [[2 3]]
+布尔掩码:
+ [[False False False]
+  [ True  True  True]]
+条件选择: [4 5 6]
 {% endhighlight %}
 
 ### 1.4 数学运算
@@ -132,6 +170,28 @@ print("逆矩阵:\n", np.linalg.inv(matrix))
 print("特征值:", np.linalg.eigvals(matrix))
 {% endhighlight %}
 
+【预期输出】
+{% highlight text %}
+加法: [ 6  8 10 12]
+乘法: [ 5 12 21 32]
+平方: [ 1  4  9 16]
+平方根: [1.         1.41421356 1.73205081 2.        ]
+平均值: 5.5
+中位数: 5.5
+标准差: 2.8722813232690143
+方差: 8.25
+最大值: 10
+最小值: 1
+矩阵:
+ [[1 2]
+  [3 4]]
+行列式: -2.0000000000000004
+逆矩阵:
+ [[-2.   1. ]
+  [ 1.5 -0.5]]
+特征值: [-0.37228132  5.37228132]
+{% endhighlight %}
+
 ### 1.5 广播机制
 {% highlight python %}
 # 广播示例
@@ -147,6 +207,19 @@ arr1 = np.array([[1, 2, 3], [4, 5, 6]])
 arr2 = np.array([10, 20, 30])
 
 print("广播加法:\n", arr1 + arr2)
+{% endhighlight %}
+
+【预期输出】
+{% highlight text %}
+数组 + 标量:
+ [[ 3  4  5]
+  [ 6  7  8]]
+数组 * 标量:
+ [[ 2  4  6]
+  [ 8 10 12]]
+广播加法:
+ [[11 22 33]
+  [14 25 36]]
 {% endhighlight %}
 
 ---
@@ -190,6 +263,34 @@ print("平均值:", s2.mean())
 print("标准差:", s2.std())
 {% endhighlight %}
 
+【预期输出】
+{% highlight text %}
+Series: 0    1
+1    3
+2    5
+3    7
+4    9
+dtype: int64
+带索引Series:
+ a    1
+b    2
+c    3
+d    4
+dtype: int64
+从字典创建:
+ a    1
+b    2
+c    3
+dtype: int64
+索引: Index(['a', 'b', 'c', 'd'], dtype='object')
+值: [1 2 3 4]
+数据类型: int64
+大小: 4
+求和: 10
+平均值: 2.5
+标准差: 1.2909944487358056
+{% endhighlight %}
+
 ### 2.3 DataFrame操作
 {% highlight python %}
 # 创建DataFrame
@@ -218,6 +319,46 @@ print("后2行:\n", df.tail(2))
 print("描述性统计:\n", df.describe())
 {% endhighlight %}
 
+【预期输出】
+{% highlight text %}
+DataFrame:
+      name  age      city  salary
+0    Alice   25  New York   50000
+1      Bob   30    London   60000
+2  Charlie   35     Paris   70000
+3    David   40     Tokyo   80000
+形状: (4, 4)
+列名: Index(['name', 'age', 'city', 'salary'], dtype='object')
+索引: RangeIndex(start=0, stop=4, step=1)
+数据类型:
+ name      object
+ age        int64
+ city     object
+ salary    int64
+dtype: object
+信息:
+ None  ← 在网页中 info() 返回 None，表结构打印在控制台
+前3行:
+      name  age      city  salary
+0    Alice   25  New York   50000
+1      Bob   30    London   60000
+2  Charlie   35     Paris   70000
+后2行:
+    name  age   city  salary
+2  Charlie   35  Paris   70000
+3    David   40  Tokyo   80000
+描述性统计:
+              age        salary
+count   4.000000      4.000000
+mean   32.500000  65000.000000
+std     6.454972  12909.944487
+min    25.000000  50000.000000
+25%    28.750000  57500.000000
+50%    32.500000  65000.000000
+75%    36.250000  72500.000000
+max    40.000000  80000.000000
+{% endhighlight %}
+
 ### 2.4 数据选择和索引
 {% highlight python %}
 # 列选择
@@ -238,6 +379,42 @@ print("高薪人员:\n", high_salary)
 # 复合条件
 filtered = df[(df['age'] > 30) & (df['salary'] > 60000)]
 print("复合条件筛选:\n", filtered)
+{% endhighlight %}
+
+【预期输出】
+{% highlight text %}
+选择单列: 0      Alice
+1        Bob
+2    Charlie
+3      David
+Name: name, dtype: object
+选择多列:
+      name  age
+0    Alice   25
+1      Bob   30
+2  Charlie   35
+3    David   40
+第一行: name      Alice
+age           25
+city     New York
+salary      50000
+Name: 0, dtype: object
+前两行:
+      name  age      city  salary
+0    Alice   25  New York   50000
+1      Bob   30    London   60000
+年轻人:
+      name  age      city  salary
+0    Alice   25  New York   50000
+1      Bob   30    London   60000
+高薪人员:
+      name  age    city  salary
+2  Charlie   35   Paris   70000
+3    David   40   Tokyo   80000
+复合条件筛选:
+      name  age   city  salary
+2  Charlie   35  Paris   70000
+3    David   40  Tokyo   80000
 {% endhighlight %}
 
 ### 2.5 数据处理
@@ -270,6 +447,43 @@ grouped = df.groupby('city')['salary'].mean()
 print("按城市分组平均薪资:\n", grouped)
 {% endhighlight %}
 
+【预期输出】
+{% highlight text %}
+原始数据:
+      A    B     C
+0  1.0  5.0   9.0
+1  2.0  NaN  10.0
+2  NaN  NaN  11.0
+3  4.0  8.0   NaN
+缺失值统计:
+A    1
+B    2
+C    1
+dtype: int64
+删除缺失值后:
+     A    B    C
+0  1.0  5.0  9.0
+填充0后:
+     A    B     C
+0  1.0  5.0   9.0
+1  2.0  0.0  10.0
+2  0.0  0.0  11.0
+3  4.0  8.0   0.0
+按年龄排序:
+      name  age      city  salary
+3    David   40     Tokyo   80000
+2  Charlie   35     Paris   70000
+1      Bob   30    London   60000
+0    Alice   25  New York   50000
+按城市分组平均薪资:
+ city
+London      60000.0
+New York    50000.0
+Paris       70000.0
+Tokyo       80000.0
+Name: salary, dtype: float64
+{% endhighlight %}
+
 ### 2.6 数据合并和连接
 {% highlight python %}
 # 创建两个DataFrame
@@ -298,6 +512,34 @@ print("外连接:\n", merged_outer)
 # 连接操作
 concatenated = pd.concat([df1, df2], axis=1)
 print("连接:\n", concatenated)
+{% endhighlight %}
+
+【预期输出】
+{% highlight text %}
+内连接:
+    id     name  salary
+0   1    Alice   50000
+1   2      Bob   60000
+2   3  Charlie   70000
+左连接:
+    id     name   salary
+0   1    Alice  50000.0
+1   2      Bob  60000.0
+2   3  Charlie  70000.0
+3   4    David      NaN
+外连接:
+    id     name   salary
+0   1    Alice  50000.0
+1   2      Bob  60000.0
+2   3  Charlie  70000.0
+3   4    David      NaN
+4   5      NaN  90000.0
+连接:
+    id     name   id   salary
+0   1    Alice  1.0  50000.0
+1   2      Bob  2.0  60000.0
+2   3  Charlie  3.0  70000.0
+3   4    David  5.0  90000.0
 {% endhighlight %}
 
 ---
@@ -348,6 +590,12 @@ plt.ylabel('y')
 plt.show()
 {% endhighlight %}
 
+【预期输出（图形效果说明）】
+{% highlight text %}
+图1：线图“正弦函数”，蓝色实线，带网格与图例。
+图2：散点图，100 个点，透明度 0.6。
+{% endhighlight %}
+
 ### 3.3 多子图
 {% highlight python %}
 # 创建子图
@@ -378,6 +626,11 @@ axes[1, 1].set_title('柱状图')
 
 plt.tight_layout()
 plt.show()
+{% endhighlight %}
+
+【预期输出（图形效果说明）】
+{% highlight text %}
+2x2 子图：左上 sin 曲线，右上 cos 曲线，左下散点，右下柱状图。
 {% endhighlight %}
 
 ### 3.4 统计图表
@@ -420,6 +673,11 @@ plt.xlabel('值')
 plt.ylabel('频次')
 plt.grid(True, alpha=0.3)
 plt.show()
+{% endhighlight %}
+
+【预期输出（图形效果说明）】
+{% highlight text %}
+柱状图带数值标签；饼图为圆形含百分比；直方图 30 个箱，网格可见。
 {% endhighlight %}
 
 ### 3.5 高级可视化
@@ -467,6 +725,11 @@ ax.set_zlabel('Z')
 
 fig.colorbar(surf)
 plt.show()
+{% endhighlight %}
+
+【预期输出（图形效果说明）】
+{% highlight text %}
+热力图显示 4x4 相关系数矩阵；箱线图 3 组；3D 表面图带颜色映射与colorbar。
 {% endhighlight %}
 
 ---
@@ -943,3 +1206,269 @@ plt.show()
 - Matplotlib官方文档：https://matplotlib.org/
 - Python数据科学手册
 - 数据科学实战指南
+
+---
+
+## 附录A：常用方法参数详解
+
+### NumPy
+
+```text
+np.array(object, dtype=None, copy=True, ndmin=0, order=None)
+- object: 可迭代对象或嵌套序列
+- dtype: 指定元素数据类型（如 np.int64, np.float32）
+- copy: 是否拷贝数据
+- ndmin: 指定最小维度
+- order: 内存布局（'C' 行优先，'F' 列优先）
+
+np.arange([start,] stop[, step], dtype=None)
+- start: 起始值（默认0）
+- stop: 结束值（不包含）
+- step: 步长（默认1）
+- dtype: 元素类型
+
+np.linspace(start, stop, num=50, endpoint=True, retstep=False, dtype=None)
+- start/stop: 起止值
+- num: 点数量
+- endpoint: 是否包含 stop
+- retstep: 是否返回步长
+- dtype: 元素类型
+
+ndarray.reshape(newshape, order='C')
+- newshape: 新形状（可用-1自适应）
+- order: 'C' 行优先，'F' 列优先
+
+np.mean(a, axis=None, dtype=None, keepdims=False)
+- a: 数组
+- axis: 轴（None 为整体；0 按列；1 按行）
+- dtype: 计算时使用的类型
+- keepdims: 是否保留降维后的维度
+
+np.linalg.inv(a)
+- a: 可逆方阵
+```
+
+### Pandas
+
+```text
+pd.Series(data=None, index=None, dtype=None, name=None)
+- data: 可迭代、ndarray、字典等
+- index: 索引标签
+- dtype: 数据类型
+- name: 名称
+
+pd.DataFrame(data=None, index=None, columns=None, dtype=None)
+- data: 字典/二维数组/记录序列等
+- index: 行索引
+- columns: 列名
+- dtype: 统一数据类型
+
+pd.read_csv(filepath_or_buffer, sep=',', header='infer', names=None,
+            index_col=None, usecols=None, dtype=None, parse_dates=False,
+            na_values=None, encoding=None)
+- filepath_or_buffer: 文件路径或缓冲
+- sep: 分隔符
+- header: 表头行号或 None
+- names: 列名（与 header 搭配）
+- index_col: 作为索引的列
+- usecols: 读取的列集合
+- dtype: 指定列类型
+- parse_dates: 解析日期列
+- na_values: 额外的缺失值标记
+- encoding: 文件编码
+
+DataFrame.groupby(by, axis=0, as_index=True, sort=True)
+- by: 列名或映射/函数
+- as_index: 分组键是否作索引
+- sort: 是否对组键排序
+
+pd.merge(left, right, how='inner', on=None, left_on=None, right_on=None,
+         left_index=False, right_index=False, suffixes=('_x','_y'))
+- left/right: 左右 DataFrame
+- how: 连接方式（'left'/'right'/'inner'/'outer'）
+- on/left_on/right_on: 连接键
+- left_index/right_index: 是否使用索引作为连接键
+- suffixes: 重名列后缀
+
+pd.concat(objs, axis=0, join='outer', ignore_index=False)
+- objs: 序列或字典的对象集合
+- axis: 0 纵向，1 横向
+- join: 'outer'/'inner'
+- ignore_index: 是否重建索引
+```
+
+### Matplotlib（pyplot）
+
+```text
+plt.plot(x, y=None, fmt='', label=None, linewidth=None, color=None)
+- x, y: 坐标序列（仅 x 时绘制 y=x 的索引）
+- fmt: 格式字符串（'b-' 蓝色实线等）
+- label: 图例标签
+- linewidth/color: 线宽/颜色
+
+plt.scatter(x, y, s=None, c=None, alpha=None, cmap=None, label=None)
+- x, y: 点坐标
+- s: 点大小
+- c: 颜色或序列（可配合 cmap）
+- alpha: 透明度
+- cmap: 颜色映射
+
+plt.bar(x, height, width=0.8, color=None, label=None)
+- x: 类别或位置
+- height: 高度
+- width: 宽度
+- color: 颜色
+
+plt.hist(x, bins=10, range=None, density=False, color=None)
+- x: 数据
+- bins: 箱数或边界
+- range: 范围
+- density: 是否密度归一化
+
+plt.pie(x, labels=None, colors=None, autopct=None, startangle=None)
+- x: 扇区大小
+- labels/colors: 标签/颜色
+- autopct: 数值格式（如 '%1.1f%%'）
+- startangle: 起始角度
+
+plt.subplots(nrows=1, ncols=1, figsize=None, sharex=False, sharey=False)
+- nrows/ncols: 子图行列
+- figsize: 画布尺寸
+- sharex/sharey: 共享坐标轴
+```
+
+---
+
+## 附录B：关键代码输出示例
+
+### NumPy 输出
+{% highlight text %}
+# 来自 1.2 节
+一维数组: [1 2 3 4 5]
+二维数组:
+ [[1 2 3]
+  [4 5 6]]
+零数组:
+ [[0. 0. 0. 0.]
+  [0. 0. 0. 0.]
+  [0. 0. 0. 0.]]
+一数组:
+ [[1. 1. 1.]
+  [1. 1. 1.]]
+范围数组: [0 2 4 6 8]
+线性空间数组: [0.   0.25 0.5  0.75 1.  ]
+
+# 来自 1.3 节
+数组形状: (2, 3)
+数组维度: 2
+数组大小: 6
+数据类型: int64
+重塑后:
+ [[1 2]
+  [3 4]
+  [5 6]]
+第一行: [1 2 3]
+第一列: [1 4]
+子数组: [[2 3]]
+布尔掩码:
+ [[False False False]
+  [ True  True  True]]
+条件选择: [4 5 6]
+
+# 来自 1.4 节（数值可能略有差异）
+加法: [ 6  8 10 12]
+乘法: [ 5 12 21 32]
+平方: [ 1  4  9 16]
+平方根: [1.         1.41421356 1.73205081 2.        ]
+平均值: 5.5
+中位数: 5.5
+标准差: 2.8722813232690143
+方差: 8.25
+最大值: 10
+最小值: 1
+矩阵:
+ [[1 2]
+  [3 4]]
+行列式: -2.0000000000000004
+逆矩阵:
+ [[-2.   1. ]
+  [ 1.5 -0.5]]
+{% endhighlight %}
+
+### Pandas 输出
+{% highlight text %}
+# 来自 2.3 节
+DataFrame:
+      name  age      city  salary
+0    Alice   25  New York   50000
+1      Bob   30    London   60000
+2  Charlie   35     Paris   70000
+3    David   40     Tokyo   80000
+
+形状: (4, 4)
+列名: Index(['name', 'age', 'city', 'salary'], dtype='object')
+索引: RangeIndex(start=0, stop=4, step=1)
+数据类型:
+ name      object
+ age        int64
+ city     object
+ salary    int64
+dtype: object
+前3行:
+      name  age      city  salary
+0    Alice   25  New York   50000
+1      Bob   30    London   60000
+2  Charlie   35     Paris   70000
+描述性统计:
+              age        salary
+count   4.000000      4.000000
+mean   32.500000  65000.000000
+std     6.454972  12909.944487
+min    25.000000  50000.000000
+25%    28.750000  57500.000000
+50%    32.500000  65000.000000
+75%    36.250000  72500.000000
+max    40.000000  80000.000000
+
+# 来自 2.4 节
+选择单列: 0      Alice
+1        Bob
+2    Charlie
+3      David
+Name: name, dtype: object
+复合条件筛选:
+      name  age   city  salary
+2  Charlie   35  Paris   70000
+3    David   40  Tokyo   80000
+
+# 来自 2.5/2.6 节
+按城市分组平均薪资:
+ city
+London      60000.0
+New York    50000.0
+Paris       70000.0
+Tokyo       80000.0
+Name: salary, dtype: float64
+内连接:
+    id     name  salary
+0   1    Alice   50000
+1   2      Bob   60000
+2   3  Charlie   70000
+外连接（示例）:
+    id     name   salary
+0   1    Alice  50000.0
+1   2      Bob  60000.0
+2   3  Charlie  70000.0
+3   4    David      NaN
+4   5      NaN  90000.0
+{% endhighlight %}
+
+### Matplotlib 输出
+
+由于图像以窗口/内嵌方式呈现，这里给出典型效果说明：
+- 线图：标题“正弦函数”，蓝色实线，带网格与图例 label=sin(x)
+- 散点图：100 个点，透明度约 0.6，均匀分布在坐标系
+- 多子图：2x2 布局，分别为 sin、cos、随机散点、柱状
+- 柱状图：四类水果的高度柱，顶部有数值标注
+- 饼图：五个扇区，带百分比注记，圆形
+- 直方图：30 箱的正态分布直方图，浅蓝色，带网格

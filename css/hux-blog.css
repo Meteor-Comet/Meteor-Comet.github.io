@@ -553,6 +553,287 @@ pre.highlight {
 .highlighter-rouge .highlight .lineno {
   text-align: right;
   border-radius: 0px;
+  color: #6a9955;
+  font-size: 12px;
+  padding-right: 8px;
+  user-select: none;
+}
+
+/* 专门针对 bash 代码的样式 */
+.highlighter-rouge .highlight.bash {
+  margin-bottom: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.highlighter-rouge .highlight.bash .lineno {
+  color: #6a9955;
+  font-size: 12px;
+  padding-right: 8px;
+  user-select: none;
+}
+.highlight.bash,
+pre.highlight.bash {
+  background: #1e1e1e;
+  color: #d4d4d4;
+  border: 1px solid #3c3c3c;
+  border-radius: 6px;
+  padding: 16px;
+  margin: 16px 0;
+  overflow-x: auto;
+}
+
+.highlight.bash pre {
+  background: #1e1e1e;
+  margin: 0;
+  padding: 0;
+}
+
+.highlight.bash .hll {
+  background: #1e1e1e;
+}
+
+.highlight.bash .c {
+  color: #6a9955;
+  font-style: italic;
+}
+
+.highlight.bash .err {
+  color: #f44747;
+  background-color: #1e0010;
+}
+
+.highlight.bash .k {
+  color: #c586c0;
+}
+
+.highlight.bash .l {
+  color: #ce9178;
+}
+
+.highlight.bash .n {
+  color: #d4d4d4;
+}
+
+.highlight.bash .o {
+  color: #d4d4d4;
+}
+
+.highlight.bash .p {
+  color: #d4d4d4;
+}
+
+.highlight.bash .cm {
+  color: #6a9955;
+  font-style: italic;
+}
+
+.highlight.bash .cp {
+  color: #6a9955;
+  font-style: italic;
+}
+
+.highlight.bash .c1 {
+  color: #6a9955;
+  font-style: italic;
+}
+
+.highlight.bash .cs {
+  color: #6a9955;
+  font-style: italic;
+}
+
+.highlight.bash .kc {
+  color: #c586c0;
+}
+
+.highlight.bash .kd {
+  color: #c586c0;
+}
+
+.highlight.bash .kn {
+  color: #c586c0;
+}
+
+.highlight.bash .kp {
+  color: #c586c0;
+}
+
+.highlight.bash .kr {
+  color: #c586c0;
+}
+
+.highlight.bash .kt {
+  color: #569cd6;
+}
+
+.highlight.bash .ld {
+  color: #ce9178;
+}
+
+.highlight.bash .m {
+  color: #b5cea8;
+}
+
+.highlight.bash .s {
+  color: #ce9178;
+}
+
+.highlight.bash .na {
+  color: #9cdcfe;
+}
+
+.highlight.bash .nb {
+  color: #dcdcaa;
+}
+
+.highlight.bash .nc {
+  color: #4ec9b0;
+}
+
+.highlight.bash .no {
+  color: #569cd6;
+}
+
+.highlight.bash .nd {
+  color: #dcdcaa;
+}
+
+.highlight.bash .ni {
+  color: #dcdcaa;
+}
+
+.highlight.bash .ne {
+  color: #dcdcaa;
+}
+
+.highlight.bash .nf {
+  color: #dcdcaa;
+}
+
+.highlight.bash .nl {
+  color: #dcdcaa;
+}
+
+.highlight.bash .nn {
+  color: #4ec9b0;
+}
+
+.highlight.bash .nx {
+  color: #dcdcaa;
+}
+
+.highlight.bash .py {
+  color: #dcdcaa;
+}
+
+.highlight.bash .nt {
+  color: #569cd6;
+}
+
+.highlight.bash .nv {
+  color: #9cdcfe;
+}
+
+.highlight.bash .ow {
+  font-weight: 700;
+  color: #d4d4d4;
+}
+
+.highlight.bash .w {
+  color: #d4d4d4;
+}
+
+.highlight.bash .mf {
+  color: #b5cea8;
+}
+
+.highlight.bash .mh {
+  color: #b5cea8;
+}
+
+.highlight.bash .mi {
+  color: #b5cea8;
+}
+
+.highlight.bash .mo {
+  color: #b5cea8;
+}
+
+.highlight.bash .sb {
+  color: #ce9178;
+}
+
+.highlight.bash .sc {
+  color: #ce9178;
+}
+
+.highlight.bash .sd {
+  color: #ce9178;
+}
+
+.highlight.bash .s2 {
+  color: #ce9178;
+}
+
+.highlight.bash .se {
+  color: #ce9178;
+}
+
+.highlight.bash .sh {
+  color: #ce9178;
+}
+
+.highlight.bash .si {
+  color: #ce9178;
+}
+
+.highlight.bash .sx {
+  color: #ce9178;
+}
+
+.highlight.bash .sr {
+  color: #d7ba7d;
+}
+
+.highlight.bash .s1 {
+  color: #ce9178;
+}
+
+.highlight.bash .ss {
+  color: #d7ba7d;
+}
+
+.highlight.bash .bp {
+  color: #dcdcaa;
+}
+
+.highlight.bash .vc {
+  color: #9cdcfe;
+}
+
+.highlight.bash .vg {
+  color: #9cdcfe;
+}
+
+.highlight.bash .vi {
+  color: #9cdcfe;
+}
+
+.highlight.bash .il {
+  color: #b5cea8;
+}
+
+.highlight.bash .gu {
+  color: #75715e;
+}
+
+.highlight.bash .gd {
+  color: #f44747;
+}
+
+.highlight.bash .gi {
+  color: #6a9955;
 }
 /* Landscape phones and down */
 @media (max-width: 480px) {

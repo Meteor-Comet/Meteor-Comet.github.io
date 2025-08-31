@@ -117,12 +117,12 @@ docker --version
 docker run hello-world
 {% endhighlight %}
 
-【预期输出】
-{% highlight text %}
+**预期输出：**
+```
 Docker version 20.10.21, build baeda1f
 Hello from Docker!
 This message shows that your installation appears to be working correctly.
-{% endhighlight %}
+```
 
 ---
 
@@ -156,8 +156,8 @@ docker rmi -f nginx:latest
 docker image prune -a
 {% endhighlight %}
 
-【预期输出】
-{% highlight text %}
+**预期输出：**
+```
 # docker images
 REPOSITORY   TAG       IMAGE ID       CREATED        SIZE
 nginx        latest    f652ca386ed0   2 weeks ago    141MB
@@ -169,7 +169,7 @@ NAME                           DESCRIPTION                                     S
 nginx                          Official build of Nginx.                       18500     [OK]
 jwilder/nginx-proxy           Automated Nginx reverse proxy for docker c...   2089                 [OK]
 richarvey/nginx-php-fpm       Container running Nginx + PHP-FPM capable o...   820                  [OK]
-{% endhighlight %}
+```
 
 ### 3.2 镜像标签和推送
 {% highlight bash %}
@@ -242,8 +242,8 @@ docker rm <container_id>
 docker container prune  # 删除所有停止的容器
 {% endhighlight %}
 
-【预期输出】
-{% highlight text %}
+**预期输出：**
+```
 # docker ps
 CONTAINER ID   IMAGE     COMMAND                  CREATED         STATUS         PORTS     NAMES
 abc123def456   nginx     "/docker-entrypoint.…"   2 minutes ago   Up 2 minutes   80/tcp    nginx-container
@@ -252,7 +252,7 @@ abc123def456   nginx     "/docker-entrypoint.…"   2 minutes ago   Up 2 minutes
 CONTAINER ID   IMAGE          COMMAND                  CREATED         STATUS                     PORTS     NAMES
 abc123def456   nginx          "/docker-entrypoint.…"   2 minutes ago   Up 2 minutes               80/tcp    nginx-container
 def456ghi789   ubuntu:20.04   "/bin/bash"              5 minutes ago   Exited (0) 3 minutes ago             ubuntu-test
-{% endhighlight %}
+```
 
 ### 4.2 容器高级操作
 {% highlight bash %}
@@ -371,8 +371,8 @@ docker build --no-cache -t myapp:v1.0 .
 docker history myapp:v1.0
 {% endhighlight %}
 
-【预期输出】
-{% highlight text %}
+**预期输出：**
+```
 # docker build -t myapp:v1.0 .
 Sending build context to Docker daemon  2.048kB
 Step 1/8 : FROM python:3.9-slim
@@ -402,7 +402,7 @@ Step 8/8 : CMD ["python", "app.py"]
  ---> bcd890efg123
 Successfully built bcd890efg123
 Successfully tagged myapp:v1.0
-{% endhighlight %}
+```
 
 ---
 
@@ -477,8 +477,8 @@ docker-compose restart web
 docker-compose up --scale web=3
 {% endhighlight %}
 
-【预期输出】
-{% highlight text %}
+**预期输出：**
+```
 # docker-compose up -d
 Creating network "myapp_app-network" ... done
 Creating volume "myapp_postgres_data" ... done
@@ -492,7 +492,7 @@ Creating myapp_web_1   ... done
 myapp_db_1      docker-entrypoint.sh postgres    Up      5432/tcp
 myapp_redis_1   docker-entrypoint.sh redis ...   Up      6379/tcp
 myapp_web_1     python app.py                    Up      0.0.0.0:8080->8080/tcp
-{% endhighlight %}
+```
 
 ### 6.3 高级Compose配置
 {% highlight yaml %}
@@ -556,8 +556,8 @@ docker network rm my-network
 docker network prune  # 删除未使用的网络
 {% endhighlight %}
 
-【预期输出】
-{% highlight text %}
+**预期输出：**
+```
 # docker network ls
 NETWORK ID     NAME      DRIVER    SCOPE
 abc123def456   bridge    bridge    local
@@ -586,7 +586,7 @@ jkl012mno345   my-network bridge    local
         }
     }
 ]
-{% endhighlight %}
+```
 
 ### 7.2 数据卷管理
 {% highlight bash %}
@@ -652,11 +652,11 @@ if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
 {% endhighlight %}
 
-{% highlight text %}
+```
 # requirements.txt
 Flask==2.0.1
 gunicorn==20.1.0
-{% endhighlight %}
+```
 
 {% highlight dockerfile %}
 # Dockerfile
@@ -753,8 +753,8 @@ docker logs myapp
 docker-compose logs web
 {% endhighlight %}
 
-【预期输出】
-{% highlight text %}
+**预期输出：**
+```
 # curl http://localhost:8080/
 {
   "message": "Hello from Docker!",
@@ -765,7 +765,7 @@ docker-compose logs web
 {
   "status": "healthy"
 }
-{% endhighlight %}
+```
 
 ---
 

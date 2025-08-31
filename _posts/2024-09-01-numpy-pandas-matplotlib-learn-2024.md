@@ -80,8 +80,8 @@ random_arr = np.random.rand(3, 3)
 print("随机数组:\n", random_arr)
 {% endhighlight %}
 
-【预期输出】
-{% highlight text %}
+**预期输出：**
+```
 一维数组: [1 2 3 4 5]
 二维数组:
  [[1 2 3]
@@ -97,7 +97,7 @@ print("随机数组:\n", random_arr)
 线性空间数组: [0.   0.25 0.5  0.75 1.  ]
 随机数组:
  [[... 3x3 随机小数 ...]]
-{% endhighlight %}
+```
 
 ### 1.3 数组操作
 {% highlight python %}
@@ -123,8 +123,8 @@ print("布尔掩码:\n", bool_mask)
 print("条件选择:", arr[bool_mask])
 {% endhighlight %}
 
-【预期输出】
-{% highlight text %}
+**预期输出：**
+```
 数组形状: (2, 3)
 数组维度: 2
 数组大小: 6
@@ -140,7 +140,7 @@ print("条件选择:", arr[bool_mask])
  [[False False False]
   [ True  True  True]]
 条件选择: [4 5 6]
-{% endhighlight %}
+```
 
 ### 1.4 数学运算
 {% highlight python %}
@@ -170,8 +170,8 @@ print("逆矩阵:\n", np.linalg.inv(matrix))
 print("特征值:", np.linalg.eigvals(matrix))
 {% endhighlight %}
 
-【预期输出】
-{% highlight text %}
+**预期输出：**
+```
 加法: [ 6  8 10 12]
 乘法: [ 5 12 21 32]
 平方: [ 1  4  9 16]
@@ -190,7 +190,7 @@ print("特征值:", np.linalg.eigvals(matrix))
  [[-2.   1. ]
   [ 1.5 -0.5]]
 特征值: [-0.37228132  5.37228132]
-{% endhighlight %}
+```
 
 ### 1.5 广播机制
 {% highlight python %}
@@ -209,8 +209,8 @@ arr2 = np.array([10, 20, 30])
 print("广播加法:\n", arr1 + arr2)
 {% endhighlight %}
 
-【预期输出】
-{% highlight text %}
+**预期输出：**
+```
 数组 + 标量:
  [[ 3  4  5]
   [ 6  7  8]]
@@ -220,7 +220,7 @@ print("广播加法:\n", arr1 + arr2)
 广播加法:
  [[11 22 33]
   [14 25 36]]
-{% endhighlight %}
+```
 
 ---
 
@@ -263,8 +263,8 @@ print("平均值:", s2.mean())
 print("标准差:", s2.std())
 {% endhighlight %}
 
-【预期输出】
-{% highlight text %}
+**预期输出：**
+```
 Series: 0    1
 1    3
 2    5
@@ -289,7 +289,7 @@ dtype: int64
 求和: 10
 平均值: 2.5
 标准差: 1.2909944487358056
-{% endhighlight %}
+```
 
 ### 2.3 DataFrame操作
 {% highlight python %}
@@ -319,8 +319,8 @@ print("后2行:\n", df.tail(2))
 print("描述性统计:\n", df.describe())
 {% endhighlight %}
 
-【预期输出】
-{% highlight text %}
+**预期输出：**
+```
 DataFrame:
       name  age      city  salary
 0    Alice   25  New York   50000
@@ -357,7 +357,7 @@ min    25.000000  50000.000000
 50%    32.500000  65000.000000
 75%    36.250000  72500.000000
 max    40.000000  80000.000000
-{% endhighlight %}
+```
 
 ### 2.4 数据选择和索引
 {% highlight python %}
@@ -381,8 +381,8 @@ filtered = df[(df['age'] > 30) & (df['salary'] > 60000)]
 print("复合条件筛选:\n", filtered)
 {% endhighlight %}
 
-【预期输出】
-{% highlight text %}
+**预期输出：**
+```
 选择单列: 0      Alice
 1        Bob
 2    Charlie
@@ -415,7 +415,7 @@ Name: 0, dtype: object
       name  age   city  salary
 2  Charlie   35  Paris   70000
 3    David   40  Tokyo   80000
-{% endhighlight %}
+```
 
 ### 2.5 数据处理
 {% highlight python %}
@@ -447,8 +447,8 @@ grouped = df.groupby('city')['salary'].mean()
 print("按城市分组平均薪资:\n", grouped)
 {% endhighlight %}
 
-【预期输出】
-{% highlight text %}
+**预期输出：**
+```
 原始数据:
       A    B     C
 0  1.0  5.0   9.0
@@ -482,7 +482,7 @@ New York    50000.0
 Paris       70000.0
 Tokyo       80000.0
 Name: salary, dtype: float64
-{% endhighlight %}
+```
 
 ### 2.6 数据合并和连接
 {% highlight python %}
@@ -514,8 +514,8 @@ concatenated = pd.concat([df1, df2], axis=1)
 print("连接:\n", concatenated)
 {% endhighlight %}
 
-【预期输出】
-{% highlight text %}
+**预期输出：**
+```
 内连接:
     id     name  salary
 0   1    Alice   50000
@@ -540,7 +540,7 @@ print("连接:\n", concatenated)
 1   2      Bob  2.0  60000.0
 2   3  Charlie  3.0  70000.0
 3   4    David  5.0  90000.0
-{% endhighlight %}
+```
 
 ---
 
@@ -591,10 +591,10 @@ plt.show()
 {% endhighlight %}
 
 【预期输出（图形效果说明）】
-{% highlight text %}
+```
 图1：线图“正弦函数”，蓝色实线，带网格与图例。
 图2：散点图，100 个点，透明度 0.6。
-{% endhighlight %}
+```
 
 ### 3.3 多子图
 {% highlight python %}
@@ -629,9 +629,9 @@ plt.show()
 {% endhighlight %}
 
 【预期输出（图形效果说明）】
-{% highlight text %}
+```
 2x2 子图：左上 sin 曲线，右上 cos 曲线，左下散点，右下柱状图。
-{% endhighlight %}
+```
 
 ### 3.4 统计图表
 {% highlight python %}
@@ -676,9 +676,9 @@ plt.show()
 {% endhighlight %}
 
 【预期输出（图形效果说明）】
-{% highlight text %}
+```
 柱状图带数值标签；饼图为圆形含百分比；直方图 30 个箱，网格可见。
-{% endhighlight %}
+```
 
 ### 3.5 高级可视化
 {% highlight python %}
@@ -728,9 +728,9 @@ plt.show()
 {% endhighlight %}
 
 【预期输出（图形效果说明）】
-{% highlight text %}
+```
 热力图显示 4x4 相关系数矩阵；箱线图 3 组；3D 表面图带颜色映射与colorbar。
-{% endhighlight %}
+```
 
 ---
 
@@ -1342,7 +1342,7 @@ plt.subplots(nrows=1, ncols=1, figsize=None, sharex=False, sharey=False)
 ## 附录B：关键代码输出示例
 
 ### NumPy 输出
-{% highlight text %}
+```
 # 来自 1.2 节
 一维数组: [1 2 3 4 5]
 二维数组:
@@ -1393,10 +1393,10 @@ plt.subplots(nrows=1, ncols=1, figsize=None, sharex=False, sharey=False)
 逆矩阵:
  [[-2.   1. ]
   [ 1.5 -0.5]]
-{% endhighlight %}
+```
 
 ### Pandas 输出
-{% highlight text %}
+```
 # 来自 2.3 节
 DataFrame:
       name  age      city  salary
@@ -1461,7 +1461,7 @@ Name: salary, dtype: float64
 2   3  Charlie  70000.0
 3   4    David      NaN
 4   5      NaN  90000.0
-{% endhighlight %}
+```
 
 ### Matplotlib 输出
 

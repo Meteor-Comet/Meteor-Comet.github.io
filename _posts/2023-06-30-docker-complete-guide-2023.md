@@ -658,7 +658,7 @@ Flask==2.0.1
 gunicorn==20.1.0
 ```
 
-{% highlight dockerfile %}
+```
 # Dockerfile
 FROM python:3.9-slim
 
@@ -674,7 +674,7 @@ EXPOSE 8080
 ENV VERSION=1.0
 
 CMD ["gunicorn", "--bind", "0.0.0.0:8080", "app:app"]
-{% endhighlight %}
+```
 
 {% highlight yaml %}
 # docker-compose.yml
@@ -866,7 +866,7 @@ docker service ps web
 
 # 扩展服务
 docker service scale web=5
-{% endhighlight %}
+```
 
 ### 10.2 私有镜像仓库
 ```
@@ -879,7 +879,7 @@ docker push localhost:5000/myapp:v1.0
 
 # 从私有仓库拉取
 docker pull localhost:5000/myapp:v1.0
-{% endhighlight %}
+```
 
 ### 10.3 监控和调试
 ```

@@ -83,7 +83,7 @@ Docker是一个开源的容器化平台，允许开发者将应用程序和其�
 ## 2. Docker安装和配置
 
 ### 2.1 安装Docker
-{% highlight bash %}
+```
 # Ubuntu/Debian
 sudo apt update
 sudo apt install docker.io docker-compose
@@ -101,10 +101,10 @@ brew install docker
 
 # Windows
 # 下载 Docker Desktop for Windows
-{% endhighlight %}
+```
 
 ### 2.2 配置Docker
-{% highlight bash %}
+```
 # 将用户添加到docker组（避免每次使用sudo）
 sudo usermod -aG docker $USER
 # 重新登录生效
@@ -115,7 +115,7 @@ bash <(curl -sSL https://xuanyuan.cloud/docker.sh)
 # 验证安装
 docker --version
 docker run hello-world
-{% endhighlight %}
+```
 
 **预期输出：**
 ```
@@ -129,7 +129,7 @@ This message shows that your installation appears to be working correctly.
 ## 3. Docker镜像操作
 
 ### 3.1 镜像基础命令
-{% highlight bash %}
+```
 # 搜索镜像
 docker search nginx
 
@@ -154,7 +154,7 @@ docker rmi -f nginx:latest
 
 # 清理未使用的镜像
 docker image prune -a
-{% endhighlight %}
+```
 
 **预期输出：**
 ```
@@ -172,7 +172,7 @@ richarvey/nginx-php-fpm       Container running Nginx + PHP-FPM capable o...   8
 ```
 
 ### 3.2 镜像标签和推送
-{% highlight bash %}
+```
 # 给镜像打标签
 docker tag nginx:latest my-nginx:v1.0
 docker tag ubuntu:20.04 mycompany/ubuntu:latest
@@ -189,10 +189,10 @@ docker login
 
 # 登出
 docker logout
-{% endhighlight %}
+```
 
 ### 3.3 镜像历史和信息
-{% highlight bash %}
+```
 # 查看镜像构建历史
 docker history nginx:latest
 
@@ -207,14 +207,14 @@ docker load -i nginx.tar
 
 # 查看镜像占用空间
 docker system df
-{% endhighlight %}
+```
 
 ---
 
 ## 4. 容器生命周期管理
 
 ### 4.1 容器基本操作
-{% highlight bash %}
+```
 # 运行容器
 docker run nginx:latest
 docker run -d nginx:latest  # 后台运行
@@ -240,7 +240,7 @@ docker restart <container_id>
 # 删除容器
 docker rm <container_id>
 docker container prune  # 删除所有停止的容器
-{% endhighlight %}
+```
 
 **预期输出：**
 ```
@@ -255,7 +255,7 @@ def456ghi789   ubuntu:20.04   "/bin/bash"              5 minutes ago   Exited (0
 ```
 
 ### 4.2 容器高级操作
-{% highlight bash %}
+```
 # 进入运行中的容器
 docker exec -it <container_id> /bin/bash
 docker exec -it nginx-container /bin/sh
@@ -276,10 +276,10 @@ docker cp <container_id>:/path/in/container/file.txt ./
 
 # 提交容器为镜像
 docker commit <container_id> my-nginx:v1.1
-{% endhighlight %}
+```
 
 ### 4.3 容器端口映射和网络
-{% highlight bash %}
+```
 # 端口映射
 docker run -d -p 8080:80 nginx:latest  # 主机8080端口映射到容器80端口
 docker run -d -p 3000:3000 -p 8080:80 myapp:latest  # 多端口映射
@@ -298,14 +298,14 @@ docker run -d -v nginx_data:/usr/share/nginx/html nginx:latest
 docker network create my-network
 docker run -d --network my-network --name web nginx:latest
 docker run -d --network my-network --name db mysql:8.0
-{% endhighlight %}
+```
 
 ---
 
 ## 5. Dockerfile编写和镜像构建
 
 ### 5.1 Dockerfile基础语法
-{% highlight dockerfile %}
+```
 # 基础镜像
 FROM ubuntu:20.04
 
@@ -336,10 +336,10 @@ ENV FLASK_ENV=production
 
 # 启动命令
 CMD ["python3", "app.py"]
-{% endhighlight %}
+```
 
 ### 5.2 多阶段构建
-{% highlight dockerfile %}
+```
 # 构建阶段
 FROM node:16 AS builder
 WORKDIR /app
@@ -353,10 +353,10 @@ FROM nginx:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
-{% endhighlight %}
+```
 
 ### 5.3 构建镜像
-{% highlight bash %}
+```
 # 构建镜像
 docker build -t myapp:v1.0 .
 docker build -f Dockerfile.prod -t myapp:prod .
@@ -369,7 +369,7 @@ docker build --no-cache -t myapp:v1.0 .
 
 # 查看构建历史
 docker history myapp:v1.0
-{% endhighlight %}
+```
 
 **预期输出：**
 ```
@@ -451,7 +451,7 @@ networks:
 {% endhighlight %}
 
 ### 6.2 Compose命令操作
-{% highlight bash %}
+```
 # 启动服务
 docker-compose up
 docker-compose up -d  # 后台运行
@@ -475,7 +475,7 @@ docker-compose restart web
 
 # 扩展服务实例
 docker-compose up --scale web=3
-{% endhighlight %}
+```
 
 **预期输出：**
 ```
@@ -536,7 +536,7 @@ services:
 ## 7. 网络和存储管理
 
 ### 7.1 Docker网络
-{% highlight bash %}
+```
 # 查看网络列表
 docker network ls
 
@@ -554,7 +554,7 @@ docker network inspect my-network
 # 删除网络
 docker network rm my-network
 docker network prune  # 删除未使用的网络
-{% endhighlight %}
+```
 
 **预期输出：**
 ```
@@ -589,7 +589,7 @@ jkl012mno345   my-network bridge    local
 ```
 
 ### 7.2 数据卷管理
-{% highlight bash %}
+```
 # 创建数据卷
 docker volume create my-data
 
@@ -608,10 +608,10 @@ docker run --rm -v my-data:/data -v $(pwd):/backup ubuntu tar czf /backup/my-dat
 
 # 恢复数据卷
 docker run --rm -v my-data:/data -v $(pwd):/backup ubuntu tar xzf /backup/my-data.tar.gz -C /data
-{% endhighlight %}
+```
 
 ### 7.3 绑定挂载
-{% highlight bash %}
+```
 # 绑定挂载目录
 docker run -d -v /host/path:/container/path nginx:latest
 
@@ -623,7 +623,7 @@ docker run -d -v /host/path:/container/path:ro nginx:latest
 
 # 使用命名卷
 docker run -d -v nginx_data:/usr/share/nginx/html nginx:latest
-{% endhighlight %}
+```
 
 ---
 
@@ -693,7 +693,7 @@ services:
 {% endhighlight %}
 
 ### 8.2 Node.js应用容器化
-{% highlight dockerfile %}
+```
 # Dockerfile
 FROM node:16-alpine
 
@@ -707,7 +707,7 @@ COPY . .
 EXPOSE 3000
 
 CMD ["npm", "start"]
-{% endhighlight %}
+```
 
 {% highlight yaml %}
 # docker-compose.yml
@@ -734,7 +734,7 @@ volumes:
 {% endhighlight %}
 
 ### 8.3 构建和部署
-{% highlight bash %}
+```
 # 构建镜像
 docker build -t myapp:v1.0 .
 
@@ -751,7 +751,7 @@ curl http://localhost:8080/health
 # 查看日志
 docker logs myapp
 docker-compose logs web
-{% endhighlight %}
+```
 
 **预期输出：**
 ```
@@ -772,7 +772,7 @@ docker-compose logs web
 ## 9. 最佳实践和性能优化
 
 ### 9.1 镜像优化
-{% highlight dockerfile %}
+```
 # 多阶段构建优化
 FROM node:16-alpine AS builder
 WORKDIR /app
@@ -795,10 +795,10 @@ README.md
 .env
 .nyc_output
 coverage
-{% endhighlight %}
+```
 
 ### 9.2 安全最佳实践
-{% highlight dockerfile %}
+```
 # 使用非root用户
 FROM node:16-alpine
 RUN addgroup -g 1001 -S nodejs
@@ -811,10 +811,10 @@ RUN apk add --no-cache nginx
 
 # 扫描镜像漏洞
 docker scan myapp:v1.0
-{% endhighlight %}
+```
 
 ### 9.3 性能优化
-{% highlight bash %}
+```
 # 资源限制
 docker run -d \
   --memory=512m \
@@ -828,7 +828,7 @@ docker builder prune
 
 # 监控容器资源
 docker stats
-{% endhighlight %}
+```
 
 ### 9.4 日志管理
 {% highlight yaml %}
@@ -850,7 +850,7 @@ services:
 ## 10. 高级主题
 
 ### 10.1 Docker Swarm集群
-{% highlight bash %}
+```
 # 初始化Swarm
 docker swarm init
 
@@ -869,7 +869,7 @@ docker service scale web=5
 {% endhighlight %}
 
 ### 10.2 私有镜像仓库
-{% highlight bash %}
+```
 # 运行私有仓库
 docker run -d -p 5000:5000 --name registry registry:2
 
@@ -882,7 +882,7 @@ docker pull localhost:5000/myapp:v1.0
 {% endhighlight %}
 
 ### 10.3 监控和调试
-{% highlight bash %}
+```
 # 查看容器详细信息
 docker inspect <container_id>
 
@@ -894,7 +894,7 @@ docker exec -it <container_id> /bin/bash
 
 # 查看容器进程
 docker top <container_id>
-{% endhighlight %}
+```
 
 ---
 

@@ -1,16 +1,3 @@
----
-layout:     post
-title:      "C#核心基础语法详解"
-date:       2025-11-17 08:00:00
-author:     "Comet"
-header-style: text
-tags:
-    - C#
-    - 编程基础
-    - 语法
-    - .NET
----
-
 # C#核心基础语法详解
 
 ## C#简介：能做什么，解决什么问题？
@@ -113,7 +100,7 @@ char symbol = '@';
 // 布尔类型
 bool isCompleted = true;
 bool isRunning = false;
-````
+```
 
 #### 2. 引用类型（Reference Types）
 引用类型存储对数据的引用（内存地址），实际数据存储在堆（Heap）内存中。引用类型包括：
@@ -124,6 +111,99 @@ bool isRunning = false;
 - **接口**：interface
 - **数组**：array
 - **委托**：delegate
+
+除了这些基本的引用类型，C#还提供了丰富的集合类型，用于存储和操作多个数据项：
+
+##### 集合类型（Collections）
+
+###### 1. List<T>（列表）
+List<T>是动态数组，可以根据需要自动调整大小。
+
+```csharp
+// 创建整数列表
+List<int> numbers = new List<int>();
+numbers.Add(1);
+numbers.Add(2);
+numbers.Add(3);
+
+// 创建并初始化字符串列表
+List<string> names = new List<string> { "张三", "李四", "王五" };
+
+// 访问列表元素
+int firstNumber = numbers[0];
+string firstName = names[0];
+
+// 遍历列表
+foreach (string name in names)
+{
+    Console.WriteLine(name);
+}
+```
+
+###### 2. Dictionary<TKey, TValue>（字典/哈希表）
+Dictionary<TKey, TValue>存储键值对，提供快速的键值查找。
+
+```csharp
+// 创建字典
+Dictionary<string, int> ages = new Dictionary<string, int>();
+ages["张三"] = 25;
+ages["李四"] = 30;
+
+// 创建并初始化字典
+Dictionary<string, string> capitals = new Dictionary<string, string>
+{
+    { "中国", "北京" },
+    { "美国", "华盛顿" },
+    { "日本", "东京" }
+};
+
+// 访问字典元素
+int zhangSanAge = ages["张三"];
+string chinaCapital = capitals["中国"];
+
+// 检查键是否存在
+if (ages.ContainsKey("王五"))
+{
+    Console.WriteLine($"王五的年龄是: {ages["王五"]}");
+}
+else
+{
+    Console.WriteLine("未找到王五的信息");
+}
+
+// 遍历字典
+foreach (var kvp in capitals)
+{
+    Console.WriteLine($"{kvp.Key}: {kvp.Value}");
+}
+```
+
+###### 3. 其他常用集合类型
+- **ArrayList**：非泛型动态数组（不推荐在新代码中使用）
+- **Hashtable**：非泛型哈希表（不推荐在新代码中使用）
+- **Queue<T>**：先进先出（FIFO）队列
+- **Stack<T>**：后进先出（LIFO）栈
+- **HashSet<T>**：不包含重复元素的集合
+
+```csharp
+// Queue<T> 示例
+Queue<string> taskQueue = new Queue<string>();
+taskQueue.Enqueue("任务1");
+taskQueue.Enqueue("任务2");
+string nextTask = taskQueue.Dequeue(); // 返回"任务1"
+
+// Stack<T> 示例
+Stack<int> numberStack = new Stack<int>();
+numberStack.Push(1);
+numberStack.Push(2);
+int topNumber = numberStack.Pop(); // 返回2
+
+// HashSet<T> 示例
+HashSet<string> uniqueNames = new HashSet<string>();
+uniqueNames.Add("张三");
+uniqueNames.Add("李四");
+uniqueNames.Add("张三"); // 不会添加重复项
+```
 
 ##### 示例代码：
 ```csharp
@@ -139,7 +219,7 @@ object obj3 = true;
 // 数组类型
 int[] numbers = {1, 2, 3, 4, 5};
 string[] names = {"张三", "李四", "王五"};
-````
+```
 
 ### 值类型与引用类型的区别
 
@@ -154,81 +234,943 @@ string[] names = {"张三", "李四", "王五"};
 
 通过合理使用这些数据类型，我们可以编写出高效、安全且易于维护的C#程序。
 
-## 变量和常量
+## C#运算符详解
 
-在C#中，变量和常量是用来存储数据的容器。理解它们的使用方法是掌握C#编程的基础。
+运算符是用于执行程序代码运算的符号，它们可以对一个或多个操作数进行数学或逻辑运算。C#提供了丰富的运算符来支持各种操作。
 
-### 变量声明和初始化
+### 算术运算符
 
-在C#中，变量必须先声明后使用。声明变量时需要指定其数据类型和名称。
+算术运算符用于执行基本的数学运算：
+
+| 运算符 | 名称 | 示例 | 说明 |
+|--------|------|------|------|
+| + | 加法 | a + b | 两个数相加 |
+| - | 减法 | a - b | 两个数相减 |
+| * | 乘法 | a * b | 两个数相乘 |
+| / | 除法 | a / b | 两个数相除 |
+| % | 取模 | a % b | 返回除法的余数 |
+| ++ | 自增 | a++ | 将变量值加1 |
+| -- | 自减 | a-- | 将变量值减1 |
 
 ```csharp
-// 声明变量但不初始化
-int number;
+int a = 10;
+int b = 3;
 
-// 声明并初始化变量
+// 基本算术运算
+int sum = a + b;        // 13
+int difference = a - b; // 7
+int product = a * b;    // 30
+int quotient = a / b;   // 3 (整数除法)
+int remainder = a % b;  // 1 (取余数)
+
+// 自增和自减
+int x = 5;
+x++; // x现在是6
+x--; // x现在是5
+
+// 前置和后置自增
+int y = 5;
+int result1 = ++y; // 先自增，再赋值，result1 = 6, y = 6
+int z = 5;
+int result2 = z++; // 先赋值，再自增，result2 = 5, z = 6
+```
+
+### 比较运算符
+
+比较运算符用于比较两个值，结果为布尔类型（true或false）：
+
+| 运算符 | 名称 | 示例 | 说明 |
+|--------|------|------|------|
+| == | 等于 | a == b | 检查两个值是否相等 |
+| != | 不等于 | a != b | 检查两个值是否不相等 |
+| > | 大于 | a > b | 检查左边值是否大于右边值 |
+| < | 小于 | a < b | 检查左边值是否小于右边值 |
+| >= | 大于等于 | a >= b | 检查左边值是否大于等于右边值 |
+| <= | 小于等于 | a <= b | 检查左边值是否小于等于右边值 |
+
+```csharp
+int x = 10;
+int y = 20;
+
+bool isEqual = (x == y);        // false
+bool isNotEqual = (x != y);     // true
+bool isGreater = (x > y);       // false
+bool isLess = (x < y);          // true
+bool isGreaterOrEqual = (x >= y); // false
+bool isLessOrEqual = (x <= y);   // true
+```
+
+### 逻辑运算符
+
+逻辑运算符用于组合多个布尔表达式：
+
+| 运算符 | 名称 | 示例 | 说明 |
+|--------|------|------|------|
+| && | 逻辑与 | a && b | 当两个条件都为true时结果为true |
+| \|\| | 逻辑或 | a \|\| b | 当至少一个条件为true时结果为true |
+| ! | 逻辑非 | !a | 取反布尔值 |
+
+```csharp
+bool isSunny = true;
+bool isWarm = false;
+
+// 逻辑与
+bool isGoodWeather = isSunny && isWarm; // false
+
+// 逻辑或
+bool picnicDay = isSunny || isWarm; // true
+
+// 逻辑非
+bool isNotSunny = !isSunny; // false
+
+// 复合逻辑表达式
 int age = 25;
-string name = "张三";
-bool isStudent = true;
-
-// 也可以在声明后再赋值
-int score;
-score = 95;
+bool canDrive = (age >= 18) && (age <= 80); // true
 ```
 
-### 常量
+### 赋值运算符
 
-常量是值在程序执行期间不能改变的变量。使用const关键字声明常量。
+赋值运算符用于给变量赋值：
+
+| 运算符 | 示例 | 等价于 | 说明 |
+|--------|------|--------|------|
+| = | a = b |  | 简单赋值 |
+| += | a += b | a = a + b | 加法赋值 |
+| -= | a -= b | a = a - b | 减法赋值 |
+| *= | a *= b | a = a * b | 乘法赋值 |
+| /= | a /= b | a = a / b | 除法赋值 |
+| %= | a %= b | a = a % b | 取模赋值 |
 
 ```csharp
-// 声明常量
-const double PI = 3.14159;
-const int MAX_USERS = 1000;
-const string COMPANY_NAME = "ABC公司";
+int x = 10;
 
-// 常量必须在声明时初始化，以下代码会报错
-// const int value;
-// value = 10; // 错误！
+x += 5;  // 等价于 x = x + 5; x现在是15
+x -= 3;  // 等价于 x = x - 3; x现在是12
+x *= 2;  // 等价于 x = x * 2; x现在是24
+x /= 4;  // 等价于 x = x / 4; x现在是6
+x %= 4;  // 等价于 x = x % 4; x现在是2
 ```
 
-### 变量命名规则
+### 位运算符
 
-在C#中，变量命名需要遵循以下规则：
+位运算符用于对整数类型的二进制位进行操作：
 
-1. 变量名必须以字母或下划线(_)开头
-2. 变量名可以包含字母、数字和下划线
-3. 变量名不能是C#关键字
-4. 变量名区分大小写
+| 运算符 | 名称 | 示例 | 说明 |
+|--------|------|------|------|
+| & | 按位与 | a & b | 对两个数的每一位执行与操作 |
+| \| | 按位或 | a \| b | 对两个数的每一位执行或操作 |
+| ^ | 按位异或 | a ^ b | 对两个数的每一位执行异或操作 |
+| ~ | 按位取反 | ~a | 对数的每一位执行取反操作 |
+| << | 左移 | a << b | 将数的二进制位向左移动指定位数 |
+| >> | 右移 | a >> b | 将数的二进制位向右移动指定位数 |
 
 ```csharp
-// 正确的变量命名
-int age;
-string userName;
-double _salary;
-int value1;
+int a = 5;  // 二进制: 0101
+int b = 3;  // 二进制: 0011
 
-// 错误的变量命名
-// int 1value;  // 不能以数字开头
-// int class;   // class是关键字
-// int my-age;  // 不能包含连字符
+int andResult = a & b;   // 0001 = 1
+int orResult = a | b;    // 0111 = 7
+int xorResult = a ^ b;   // 0110 = 6
+int notResult = ~a;      // 1010 = -6 (补码表示)
+int leftShift = a << 1;  // 1010 = 10
+int rightShift = a >> 1; // 0010 = 2
 ```
 
-### 隐式类型变量
+### 条件运算符（三元运算符）
 
-C# 3.0引入了var关键字，允许编译器根据初始化值推断变量类型。
+条件运算符是C#中唯一的三元运算符，它根据条件的真假返回两个值中的一个：
 
 ```csharp
-// 编译器会推断number为int类型
-var number = 10;
+// 语法: 条件 ? 值1 : 值2
+int age = 18;
+string status = (age >= 18) ? "成年人" : "未成年人";
 
-// 编译器会推断text为string类型
-var text = "Hello";
-
-// 编译器会推断isTrue为bool类型
-var isTrue = true;
-
-// 使用var时必须在声明时初始化
-// var value; // 错误！
+// 等价于以下if-else语句
+string status2;
+if (age >= 18)
+{
+    status2 = "成年人";
+}
+else
+{
+    status2 = "未成年人";
+}
 ```
 
-通过合理使用变量和常量，我们可以使程序更加清晰、易于维护。
+### 运算符优先级
+
+在复杂的表达式中，运算符按照优先级顺序执行。以下是一些常见运算符的优先级（从高到低）：
+
+1. 括号：()
+2. 自增/自减：++、--
+3. 乘法、除法、取模：*、/、%
+4. 加法、减法：+、-
+5. 比较运算符：<、<=、>、>=
+6. 相等运算符：==、!=
+7. 逻辑与：&&
+8. 逻辑或：||
+9. 条件运算符：? :
+10. 赋值运算符：=、+=、-=、*=、/=、%=
+
+```csharp
+int result = 5 + 3 * 2;        // 11 (先乘法后加法)
+int result2 = (5 + 3) * 2;     // 16 (括号优先)
+bool condition = 5 > 3 && 2 < 4; // true (比较运算符优先于逻辑运算符)
+```
+
+理解并正确使用这些运算符是编写C#程序的基础。在实际编程中，适当使用括号可以提高代码的可读性并确保运算顺序符合预期。
+
+## C#分支语句详解
+
+在程序设计中，分支语句用于根据不同的条件执行不同的代码路径。C#提供了多种分支语句来实现程序的条件执行逻辑。
+
+### if语句
+
+if语句是最基本的条件语句，它根据条件的真假来决定是否执行某段代码。
+
+#### 基本if语句
+
+```csharp
+int age = 18;
+
+// 基本if语句
+if (age >= 18)
+{
+    Console.WriteLine("您已成年");
+}
+```
+
+#### if-else语句
+
+当条件为真时执行一段代码，为假时执行另一段代码。
+
+```csharp
+int age = 16;
+
+// if-else语句
+if (age >= 18)
+{
+    Console.WriteLine("您已成年");
+}
+else
+{
+    Console.WriteLine("您未成年");
+}
+```
+
+#### if-else if-else语句
+
+可以检查多个条件，按顺序执行第一个为真的条件对应的代码块。
+
+```csharp
+int score = 85;
+
+// 多重if-else语句
+if (score >= 90)
+{
+    Console.WriteLine("优秀");
+}
+else if (score >= 80)
+{
+    Console.WriteLine("良好");
+}
+else if (score >= 70)
+{
+    Console.WriteLine("中等");
+}
+else if (score >= 60)
+{
+    Console.WriteLine("及格");
+}
+else
+{
+    Console.WriteLine("不及格");
+}
+```
+
+#### 嵌套if语句
+
+if语句可以嵌套使用，以实现更复杂的条件判断。
+
+```csharp
+int age = 25;
+bool hasLicense = true;
+
+// 嵌套if语句
+if (age >= 18)
+{
+    if (hasLicense)
+    {
+        Console.WriteLine("您可以合法驾驶");
+    }
+    else
+    {
+        Console.WriteLine("您已成年但没有驾照");
+    }
+}
+else
+{
+    Console.WriteLine("您未成年");
+}
+```
+
+### switch语句
+
+switch语句用于根据变量的值执行不同的代码块，是多重条件判断的另一种实现方式。
+
+#### 基本switch语句
+
+```csharp
+int day = 3;
+string dayName;
+
+// 基本switch语句
+switch (day)
+{
+    case 1:
+        dayName = "星期一";
+        break;
+    case 2:
+        dayName = "星期二";
+        break;
+    case 3:
+        dayName = "星期三";
+        break;
+    case 4:
+        dayName = "星期四";
+        break;
+    case 5:
+        dayName = "星期五";
+        break;
+    case 6:
+        dayName = "星期六";
+        break;
+    case 7:
+        dayName = "星期日";
+        break;
+    default:
+        dayName = "无效的日期";
+        break;
+}
+
+Console.WriteLine(dayName);
+```
+
+#### switch语句中的fall through（贯穿）
+
+在某些情况下，可以故意省略break语句来实现贯穿效果。
+
+```csharp
+int score = 85;
+
+// switch语句中的贯穿
+switch (score / 10)
+{
+    case 10:
+    case 9:
+        Console.WriteLine("优秀");
+        break;
+    case 8:
+        Console.WriteLine("良好");
+        break;
+    case 7:
+        Console.WriteLine("中等");
+        break;
+    case 6:
+        Console.WriteLine("及格");
+        break;
+    default:
+        Console.WriteLine("不及格");
+        break;
+}
+```
+
+#### C# 8.0及以后版本的switch表达式
+
+C# 8.0引入了switch表达式，提供了更简洁的语法。
+
+```csharp
+int day = 3;
+
+// switch表达式
+string dayName = day switch
+{
+    1 => "星期一",
+    2 => "星期二",
+    3 => "星期三",
+    4 => "星期四",
+    5 => "星期五",
+    6 => "星期六",
+    7 => "星期日",
+    _ => "无效的日期"  // 相当于default
+};
+
+Console.WriteLine(dayName);
+
+// 带条件的switch表达式
+int score = 85;
+string grade = score switch
+{
+    >= 90 => "优秀",
+    >= 80 => "良好",
+    >= 70 => "中等",
+    >= 60 => "及格",
+    _ => "不及格"
+};
+
+Console.WriteLine(grade);
+```
+
+### 条件运算符（三元运算符）
+
+条件运算符(?:)是if-else语句的简化形式，适用于简单的条件判断。
+
+```csharp
+int age = 18;
+
+// 三元运算符
+string status = (age >= 18) ? "成年人" : "未成年人";
+Console.WriteLine(status);
+
+// 三元运算符嵌套
+int score = 85;
+string grade = score >= 60 ? 
+    (score >= 80 ? 
+        (score >= 90 ? "优秀" : "良好") : 
+        "及格") : 
+    "不及格";
+Console.WriteLine(grade);
+```
+
+### 分支语句的最佳实践
+
+#### 1. 避免深层嵌套
+
+深层嵌套的if语句会降低代码的可读性，应尽量避免。
+
+```csharp
+// 不推荐的深层嵌套
+if (condition1)
+{
+    if (condition2)
+    {
+        if (condition3)
+        {
+            // 执行操作
+        }
+    }
+}
+
+// 推荐的扁平化写法
+if (condition1 && condition2 && condition3)
+{
+    // 执行操作
+}
+
+// 或者提前返回
+if (!condition1)
+    return;
+
+if (!condition2)
+    return;
+
+if (!condition3)
+    return;
+
+// 执行操作
+```
+
+#### 2. 使用卫语句（Guard Clauses）
+
+卫语句是一种编程模式，通过提前返回来减少嵌套层级。
+
+```csharp
+// 不使用卫语句
+void ProcessUser(User user)
+{
+    if (user != null)
+    {
+        if (user.IsActive)
+        {
+            if (user.Age >= 18)
+            {
+                // 处理用户
+            }
+            else
+            {
+                Console.WriteLine("用户未成年");
+            }
+        }
+        else
+        {
+            Console.WriteLine("用户未激活");
+        }
+    }
+    else
+    {
+        Console.WriteLine("用户为空");
+    }
+}
+
+// 使用卫语句
+void ProcessUser(User user)
+{
+    if (user == null)
+    {
+        Console.WriteLine("用户为空");
+        return;
+    }
+
+    if (!user.IsActive)
+    {
+        Console.WriteLine("用户未激活");
+        return;
+    }
+
+    if (user.Age < 18)
+    {
+        Console.WriteLine("用户未成年");
+        return;
+    }
+
+    // 处理用户
+}
+```
+
+#### 3. 合理使用switch语句
+
+当有多个离散值需要判断时，switch语句比多重if-else更清晰。
+
+```csharp
+// 适合使用switch的情况
+string GetDayType(DayOfWeek day)
+{
+    return day switch
+    {
+        DayOfWeek.Saturday or DayOfWeek.Sunday => "周末",
+        DayOfWeek.Monday or DayOfWeek.Tuesday or DayOfWeek.Wednesday or 
+        DayOfWeek.Thursday or DayOfWeek.Friday => "工作日",
+        _ => "未知"
+    };
+}
+```
+
+#### 4. 注意浮点数比较
+
+在进行浮点数比较时，应该使用误差范围而不是直接相等比较。
+
+```csharp
+double a = 0.1 + 0.2;
+double b = 0.3;
+
+// 错误的做法
+if (a == b)
+{
+    Console.WriteLine("相等");
+}
+
+// 正确的做法
+if (Math.Abs(a - b) < 0.0001)
+{
+    Console.WriteLine("近似相等");
+}
+```
+
+分支语句是程序控制流程的基础，合理使用这些语句可以让程序根据不同的条件执行相应的逻辑，实现复杂的业务需求。
+
+## C#函数详解
+
+函数（在C#中也称为方法）是执行特定任务的代码块。函数有助于将复杂的程序分解为更小、更易管理的部分，提高代码的可重用性和可维护性。
+
+### 函数的基本结构
+
+C#中的函数由以下几个部分组成：
+1. 访问修饰符（如public、private等）
+2. 返回类型（函数返回值的类型）
+3. 函数名
+4. 参数列表（括号中的参数）
+5. 函数体（花括号中的代码）
+
+```csharp
+// 函数的基本结构示例
+public int Add(int a, int b)
+{
+    return a + b;
+}
+```
+
+### 函数的定义和调用
+
+#### 无返回值的函数（void类型）
+
+```csharp
+// 定义一个无返回值的函数
+public void SayHello()
+{
+    Console.WriteLine("Hello, World!");
+}
+
+// 调用函数
+SayHello();
+```
+
+#### 有返回值的函数
+
+```csharp
+// 定义一个有返回值的函数
+public int Add(int x, int y)
+{
+    return x + y;
+}
+
+// 调用函数并使用返回值
+int result = Add(5, 3);
+Console.WriteLine($"5 + 3 = {result}");
+```
+
+### 函数参数
+
+#### 1. 值参数
+
+值参数是默认的参数传递方式，函数接收的是实际参数值的副本。
+
+```csharp
+public void ModifyValue(int number)
+{
+    number = 100; // 这个修改不会影响调用方的变量
+    Console.WriteLine($"函数内部: number = {number}");
+}
+
+// 调用示例
+int value = 50;
+ModifyValue(value);
+Console.WriteLine($"函数外部: value = {value}"); // 仍然是50
+```
+
+#### 2. 引用参数（ref）
+
+使用ref关键字可以按引用传递参数，函数可以直接修改调用方的变量。
+
+```csharp
+public void ModifyRefValue(ref int number)
+{
+    number = 100; // 这个修改会影响调用方的变量
+    Console.WriteLine($"函数内部: number = {number}");
+}
+
+// 调用示例
+int value = 50;
+ModifyRefValue(ref value);
+Console.WriteLine($"函数外部: value = {value}"); // 现在是100
+```
+
+#### 3. 输出参数（out）
+
+使用out关键字可以在函数中为参数赋值，并将值返回给调用方。
+
+```csharp
+public void Calculate(int a, int b, out int sum, out int product)
+{
+    sum = a + b;
+    product = a * b;
+}
+
+// 调用示例
+int x = 5, y = 3;
+Calculate(x, y, out int sum, out int product);
+Console.WriteLine($"和: {sum}, 积: {product}");
+```
+
+#### 4. 参数数组（params）
+
+使用params关键字可以传递可变数量的参数。
+
+```csharp
+public int Sum(params int[] numbers)
+{
+    int total = 0;
+    foreach (int number in numbers)
+    {
+        total += number;
+    }
+    return total;
+}
+
+// 调用示例
+int result1 = Sum(1, 2, 3);           // 6
+int result2 = Sum(1, 2, 3, 4, 5);     // 15
+int result3 = Sum(new int[] {1, 2, 3, 4, 5, 6}); // 21
+```
+
+### 函数重载
+
+C#支持函数重载，即可以定义多个同名但参数列表不同的函数。
+
+```csharp
+// 重载的Add函数
+public int Add(int a, int b)
+{
+    return a + b;
+}
+
+public double Add(double a, double b)
+{
+    return a + b;
+}
+
+public int Add(int a, int b, int c)
+{
+    return a + b + c;
+}
+
+// 调用示例
+int result1 = Add(5, 3);        // 调用第一个Add函数
+double result2 = Add(5.5, 3.2); // 调用第二个Add函数
+int result3 = Add(1, 2, 3);     // 调用第三个Add函数
+```
+
+### 默认参数
+
+C#允许为函数参数指定默认值，这样在调用时可以省略这些参数。
+
+```csharp
+public void PrintInfo(string name, int age = 18, string city = "未知")
+{
+    Console.WriteLine($"姓名: {name}, 年龄: {age}, 城市: {city}");
+}
+
+// 调用示例
+PrintInfo("张三");                    // 姓名: 张三, 年龄: 18, 城市: 未知
+PrintInfo("李四", 25);               // 姓名: 李四, 年龄: 25, 城市: 未知
+PrintInfo("王五", 30, "北京");       // 姓名: 王五, 年龄: 30, 城市: 北京
+```
+
+### 命名参数
+
+调用函数时可以使用命名参数，提高代码的可读性。
+
+```csharp
+public void CreateUser(string name, int age, string email, bool isActive = true)
+{
+    Console.WriteLine($"创建用户: {name}, {age}岁, 邮箱: {email}, 激活: {isActive}");
+}
+
+// 调用示例（使用命名参数）
+CreateUser(name: "张三", age: 25, email: "zhangsan@example.com");
+CreateUser(email: "lisi@example.com", name: "李四", age: 30);
+```
+
+### 递归函数
+
+函数可以调用自身，这称为递归。递归在解决某些问题时非常有用。
+
+```csharp
+// 计算阶乘的递归函数
+public int Factorial(int n)
+{
+    if (n <= 1)
+        return 1;
+    else
+        return n * Factorial(n - 1);
+}
+
+// 计算斐波那契数列的递归函数
+public int Fibonacci(int n)
+{
+    if (n <= 1)
+        return n;
+    else
+        return Fibonacci(n - 1) + Fibonacci(n - 2);
+}
+
+// 调用示例
+Console.WriteLine($"5的阶乘: {Factorial(5)}");     // 120
+Console.WriteLine($"第10个斐波那契数: {Fibonacci(10)}"); // 55
+```
+
+### Lambda表达式
+
+Lambda表达式是一种简洁的函数定义方式，常用于简化代码。
+
+```csharp
+// 传统函数定义
+public int Add(int a, int b)
+{
+    return a + b;
+}
+
+// 等价的Lambda表达式
+Func<int, int, int> add = (a, b) => a + b;
+
+// 使用Lambda表达式
+int result = add(5, 3); // 8
+
+// Lambda表达式用于集合操作
+List<int> numbers = new List<int> { 1, 2, 3, 4, 5 };
+List<int> evenNumbers = numbers.Where(n => n % 2 == 0).ToList(); // [2, 4]
+int sum = numbers.Sum(n => n); // 15
+```
+
+### 局部函数
+
+C# 7.0引入了局部函数，允许在函数内部定义函数。
+
+```csharp
+public void ProcessData()
+{
+    // 局部函数
+    int Square(int x) => x * x;
+    
+    int Add(int a, int b) => a + b;
+    
+    // 使用局部函数
+    int result = Add(Square(3), Square(4));
+    Console.WriteLine($"结果: {result}"); // 结果: 25
+}
+```
+
+### 函数最佳实践
+
+#### 1. 函数应该具有单一职责
+
+```csharp
+// 不好的做法 - 一个函数做多件事情
+public void ProcessOrder(Order order)
+{
+    // 验证订单
+    if (order.Items.Count == 0)
+        throw new Exception("订单不能为空");
+    
+    // 计算总价
+    decimal total = 0;
+    foreach (var item in order.Items)
+    {
+        total += item.Price * item.Quantity;
+    }
+    
+    // 保存订单
+    SaveOrder(order);
+}
+
+// 好的做法 - 拆分为多个函数
+public void ProcessOrder(Order order)
+{
+    ValidateOrder(order);
+    CalculateTotal(order);
+    SaveOrder(order);
+}
+
+private void ValidateOrder(Order order)
+{
+    if (order.Items.Count == 0)
+        throw new Exception("订单不能为空");
+}
+
+private void CalculateTotal(Order order)
+{
+    order.Total = order.Items.Sum(item => item.Price * item.Quantity);
+}
+
+private void SaveOrder(Order order)
+{
+    // 保存订单逻辑
+}
+```
+
+#### 2. 函数应该具有良好的命名
+
+```csharp
+// 不好的命名
+public bool Check(int x)
+{
+    return x > 0;
+}
+
+// 好的命名
+public bool IsPositive(int number)
+{
+    return number > 0;
+}
+```
+
+#### 3. 函数应该尽量短小
+
+```csharp
+// 过长的函数
+public void ProcessUserData(User user)
+{
+    // 验证用户数据
+    if (user == null)
+        throw new ArgumentNullException(nameof(user));
+    
+    if (string.IsNullOrEmpty(user.Name))
+        throw new ArgumentException("用户名不能为空");
+    
+    if (user.Age < 0 || user.Age > 150)
+        throw new ArgumentException("年龄必须在0-150之间");
+    
+    // 格式化用户数据
+    user.Name = user.Name.Trim();
+    user.Email = user.Email?.ToLower();
+    
+    // 保存用户数据
+    userRepository.Save(user);
+    
+    // 发送欢迎邮件
+    if (!string.IsNullOrEmpty(user.Email))
+    {
+        emailService.SendWelcomeEmail(user.Email);
+    }
+    
+    // 记录日志
+    logger.Info($"用户 {user.Name} 已创建");
+}
+
+// 拆分为多个小函数
+public void ProcessUserData(User user)
+{
+    ValidateUser(user);
+    FormatUserData(user);
+    SaveUser(user);
+    SendWelcomeEmail(user);
+    LogUserCreation(user);
+}
+
+private void ValidateUser(User user)
+{
+    if (user == null)
+        throw new ArgumentNullException(nameof(user));
+    
+    if (string.IsNullOrEmpty(user.Name))
+        throw new ArgumentException("用户名不能为空");
+    
+    if (user.Age < 0 || user.Age > 150)
+        throw new ArgumentException("年龄必须在0-150之间");
+}
+
+private void FormatUserData(User user)
+{
+    user.Name = user.Name.Trim();
+    user.Email = user.Email?.ToLower();
+}
+
+private void SaveUser(User user)
+{
+    userRepository.Save(user);
+}
+
+private void SendWelcomeEmail(User user)
+{
+    if (!string.IsNullOrEmpty(user.Email))
+    {
+        emailService.SendWelcomeEmail(user.Email);
+    }
+}
+
+private void LogUserCreation(User user)
+{
+    logger.Info($"用户 {user.Name} 已创建");
+}
+```
+
+函数是C#编程的基础构建块，合理使用函数可以让代码更加模块化、可重用和易于维护。通过掌握函数的各种特性和最佳实践，可以编写出高质量的C#程序。

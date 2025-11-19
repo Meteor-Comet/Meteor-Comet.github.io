@@ -468,7 +468,7 @@ Console.WriteLine($"华氏度: {fahrenheit.Temperature}, 摄氏度: {celsius.Tem
 
 #### 转换方法和辅助类
 
-除了强制转换运算符，C#还提供了其他转换方法：
+除了强制转换运算符，C#还提供了其他转换方法，这些方法在处理字符串到数值类型的转换时特别有用：
 
 ```csharp
 // Convert类的使用
@@ -499,6 +499,123 @@ else
     Console.WriteLine($"'{invalidString}' 无法转换为整数");
 }
 ```
+
+##### Parse方法详解
+
+Parse方法用于将字符串转换为指定的数据类型。如果转换成功，返回转换后的值；如果转换失败，则抛出异常。
+
+```csharp
+try
+{
+    string validNumber = "123";
+    int number = int.Parse(validNumber);  // 成功转换为123
+    Console.WriteLine($"Parse成功: {number}");
+    
+    string invalidNumber = "abc";
+    int invalid = int.Parse(invalidNumber);  // 抛出FormatException异常
+}
+catch (FormatException)
+{
+    Console.WriteLine("输入的字符串格式不正确");
+}
+catch (OverflowException)
+{
+    Console.WriteLine("数值超出范围");
+}
+```
+
+Parse方法适用于当你确定字符串可以被正确转换的情况，但在实际应用中，由于用户输入的不确定性，使用Parse方法时必须处理可能的异常。
+
+##### TryParse方法详解
+
+TryParse方法是更安全的转换方法，它不会抛出异常。如果转换成功，返回true并将结果存储在out参数中；如果转换失败，返回false。
+
+```csharp
+// 基本用法
+string input1 = "123";
+string input2 = "abc";
+
+if (int.TryParse(input1, out int result1))
+{
+    Console.WriteLine($"{input1} 转换成功: {result1}");
+}
+else
+{
+    Console.WriteLine($"{input1} 转换失败");
+}
+
+if (int.TryParse(input2, out int result2))
+{
+    Console.WriteLine($"{input2} 转换成功: {result2}");
+}
+else
+{
+    Console.WriteLine($"{input2} 转换失败");
+}
+
+// 处理不同数值类型
+string floatString = "123.45";
+string doubleString = "678.901";
+
+if (float.TryParse(floatString, out float floatResult))
+{
+    Console.WriteLine($"float转换成功: {floatResult}");
+}
+
+if (double.TryParse(doubleString, out double doubleResult))
+{
+    Console.WriteLine($"double转换成功: {doubleResult}");
+}
+```
+
+TryParse方法是处理用户输入的推荐方式，因为它避免了异常处理的开销，并且代码更加清晰易读。
+
+##### Convert类详解
+
+Convert类提供了更广泛的转换功能，可以处理不同类型之间的转换，包括DBNull值的处理：
+
+```csharp
+// 基本转换
+string stringNumber = "123";
+int convertedInt = Convert.ToInt32(stringNumber);
+
+// 处理null值
+string nullString = null;
+try
+{
+    int nullResult = int.Parse(nullString);  // 抛出ArgumentNullException
+}
+catch (ArgumentNullException)
+{
+    Console.WriteLine("Parse无法处理null值");
+}
+
+int convertResult = Convert.ToInt32(nullString);  // 返回0
+Console.WriteLine($"Convert处理null值结果: {convertResult}");
+
+// 处理各种数据类型
+object objInt = 123;
+object objString = "456";
+object objDouble = 789.12;
+
+int intFromObject = Convert.ToInt32(objInt);
+int stringFromObject = Convert.ToInt32(objString);
+int doubleFromObject = Convert.ToInt32(objDouble);
+
+Console.WriteLine($"从int转换: {intFromObject}");
+Console.WriteLine($"从string转换: {stringFromObject}");
+Console.WriteLine($"从double转换: {doubleFromObject}");
+```
+
+##### 三种方法的比较
+
+| 方法 | 异常处理 | 性能 | 适用场景 |
+|------|----------|------|----------|
+| Parse | 抛出异常 | 较快 | 确定转换会成功 |
+| TryParse | 返回bool值 | 中等 | 不确定输入是否有效 |
+| Convert | 处理null值 | 较慢 | 需要处理多种类型或null值 |
+
+在实际开发中，推荐使用TryParse方法处理用户输入，因为它提供了最佳的安全性和性能平衡。
 
 显式转换和强制类型转换是C#中处理类型转换的重要机制，它们允许我们在不同类型之间进行转换，但需要程序员明确意识到可能存在的风险，如数据丢失或溢出。
 

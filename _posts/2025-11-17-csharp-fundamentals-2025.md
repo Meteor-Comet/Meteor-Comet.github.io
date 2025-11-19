@@ -1,3 +1,14 @@
+---
+layout: post
+title: "C#基础语法详解"
+subtitle: "C#基础语法详解"
+date: 2025-11-19 12:00:00
+author: "Comet"
+catalog: true
+tags:
+    - C#
+    - 基础语法
+---
 # C#核心基础语法详解
 
 ## C#简介：能做什么，解决什么问题？

@@ -245,6 +245,263 @@ string[] names = {"张三", "李四", "王五"};
 
 通过合理使用这些数据类型，我们可以编写出高效、安全且易于维护的C#程序。
 
+## C#类型转换详解
+
+在编程过程中，我们经常需要在不同的数据类型之间进行转换。C#提供了多种类型转换机制，理解这些机制对编写高效、安全的代码至关重要。
+
+### 隐式类型转换（Implicit Conversion）
+
+隐式类型转换是由编译器自动执行的转换，不需要程序员显式指定。这种转换是安全的，不会导致数据丢失。
+
+#### 基本原理
+
+隐式转换发生在从较小范围的类型向较大范围的类型转换时。例如，从int到long的转换是安全的，因为long类型的范围比int类型更大，可以容纳int类型的所有可能值。
+
+#### 数值类型间的隐式转换
+
+C#中数值类型的隐式转换遵循一定的规则：
+
+```csharp
+// 整数类型间的隐式转换
+byte b = 100;
+short s = b;     // byte -> short (安全)
+int i = s;       // short -> int (安全)
+long l = i;      // int -> long (安全)
+
+// 有符号到无符号类型的隐式转换（仅在特定情况下）
+sbyte sb = 100;
+short ss = sb;   // sbyte -> short (安全)
+
+// 整数到浮点数的隐式转换
+int intValue = 1000;
+float floatValue = intValue;    // int -> float (可能精度丢失，但仍为隐式)
+double doubleValue = intValue;  // int -> double (安全)
+
+// float到double的隐式转换
+float f = 3.14f;
+double d = f;    // float -> double (安全)
+```
+
+#### 隐式转换的特点
+
+1. **安全性**：隐式转换不会导致数据丢失或溢出
+2. **自动性**：编译器自动处理，无需程序员干预
+3. **方向性**：通常是从"小"类型向"大"类型转换
+
+#### 隐式引用类型转换
+
+除了值类型，引用类型之间也存在隐式转换：
+
+```csharp
+// 对象到object的隐式转换
+string str = "Hello";
+object obj = str;  // string -> object (安全)
+
+// 派生类到基类的隐式转换
+List<int> list = new List<int>();
+IEnumerable<int> enumerable = list;  // List<int> -> IEnumerable<int> (安全)
+```
+
+#### 用户定义的隐式转换
+
+C#允许开发者定义自定义的隐式转换操作符：
+
+```csharp
+public class Celsius
+{
+    public double Temperature { get; set; }
+    
+    public Celsius(double temperature)
+    {
+        Temperature = temperature;
+    }
+    
+    // 定义从Celsius到Fahrenheit的隐式转换
+    public static implicit operator Fahrenheit(Celsius c)
+    {
+        return new Fahrenheit(c.Temperature * 9 / 5 + 32);
+    }
+}
+
+public class Fahrenheit
+{
+    public double Temperature { get; set; }
+    
+    public Fahrenheit(double temperature)
+    {
+        Temperature = temperature;
+    }
+}
+
+// 使用示例
+Celsius celsius = new Celsius(25);
+Fahrenheit fahrenheit = celsius;  // 隐式转换
+Console.WriteLine($"摄氏度: {celsius.Temperature}, 华氏度: {fahrenheit.Temperature}");
+```
+
+隐式转换使代码更加简洁和易读，但需要注意的是，并非所有类型之间都可以进行隐式转换，只有在保证安全的前提下编译器才会自动执行这种转换。
+
+### 显式类型转换（Explicit Conversion）和强制类型转换（Casting）
+
+与隐式转换相对，显式转换需要程序员明确指定转换操作。这类转换可能存在数据丢失的风险，因此必须由程序员显式声明。
+
+#### 基本概念
+
+显式转换（也称为强制类型转换或类型转换）使用强制转换运算符`()来执行。当从较大范围的类型转换为较小范围的类型，或者在不同类型之间转换时，通常需要显式转换。
+
+#### 数值类型间的显式转换
+
+```csharp
+// 从大范围整数类型到小范围整数类型的显式转换
+long longValue = 1000000L;
+int intValue = (int)longValue;     // long -> int (需要显式转换)
+
+// 从浮点数到整数的显式转换
+double doubleValue = 123.456;
+int intFromDouble = (int)doubleValue;  // 会丢失小数部分，结果为123
+
+// 从double到float的显式转换
+double d = 123.456789;
+float f = (float)d;  // 可能精度丢失
+
+// 从decimal到其他数值类型的显式转换
+decimal decimalValue = 123.45m;
+double doubleFromDecimal = (double)decimalValue;
+int intFromDecimal = (int)decimalValue;
+```
+
+#### 显式转换的特点
+
+1. **风险性**：可能导致数据丢失或精度降低
+2. **必要性**：编译器要求必须显式声明
+3. **可控性**：程序员明确知道转换可能发生的问题
+
+#### 溢出检查和unchecked上下文
+
+在进行显式转换时，可能会发生溢出。C#提供了`checked`和`unchecked`关键字来控制溢出检查：
+
+```csharp
+// checked上下文 - 检查溢出并抛出异常
+try
+{
+    int largeNumber = int.MaxValue;
+    long longNumber = largeNumber + 1000000L;
+    int result = checked((int)longNumber);  // 会抛出OverflowException
+}
+catch (OverflowException ex)
+{
+    Console.WriteLine("发生溢出: " + ex.Message);
+}
+
+// unchecked上下文 - 不检查溢出
+int largeNumber = int.MaxValue;
+long longNumber = largeNumber + 1000000L;
+int result = unchecked((int)longNumber);  // 不会抛出异常，但结果可能不正确
+Console.WriteLine($"unchecked转换结果: {result}");
+```
+
+#### 引用类型间的显式转换
+
+引用类型之间也经常需要显式转换，特别是基类到派生类的转换：
+
+```csharp
+// 基类到派生类的显式转换
+object obj = "Hello World";
+string str = (string)obj;  // object -> string (需要显式转换)
+
+// 使用as操作符进行安全转换
+object obj2 = 123;
+string str2 = obj2 as string;  // 不会抛出异常，转换失败时返回null
+if (str2 != null)
+{
+    Console.WriteLine("转换成功: " + str2);
+}
+else
+{
+    Console.WriteLine("转换失败");
+}
+
+// 使用is操作符检查类型兼容性
+if (obj is string)
+{
+    string str3 = (string)obj;  // 安全转换
+    Console.WriteLine("转换后的字符串: " + str3);
+}
+```
+
+#### 用户定义的显式转换
+
+与隐式转换类似，C#允许定义自定义的显式转换操作符：
+
+```csharp
+public class Fahrenheit
+{
+    public double Temperature { get; set; }
+    
+    public Fahrenheit(double temperature)
+    {
+        Temperature = temperature;
+    }
+    
+    // 定义从Fahrenheit到Celsius的显式转换
+    public static explicit operator Celsius(Fahrenheit f)
+    {
+        return new Celsius((f.Temperature - 32) * 5 / 9);
+    }
+}
+
+public class Celsius
+{
+    public double Temperature { get; set; }
+    
+    public Celsius(double temperature)
+    {
+        Temperature = temperature;
+    }
+}
+
+// 使用示例
+Fahrenheit fahrenheit = new Fahrenheit(100);
+Celsius celsius = (Celsius)fahrenheit;  // 必须显式转换
+Console.WriteLine($"华氏度: {fahrenheit.Temperature}, 摄氏度: {celsius.Temperature}");
+```
+
+#### 转换方法和辅助类
+
+除了强制转换运算符，C#还提供了其他转换方法：
+
+```csharp
+// Convert类的使用
+string numberString = "123";
+int convertedInt = Convert.ToInt32(numberString);
+
+// Parse方法的使用
+int parsedInt = int.Parse(numberString);
+
+// TryParse方法的使用（推荐）
+if (int.TryParse(numberString, out int result))
+{
+    Console.WriteLine($"转换成功: {result}");
+}
+else
+{
+    Console.WriteLine("转换失败");
+}
+
+// 处理可能失败的转换
+string invalidString = "abc";
+if (int.TryParse(invalidString, out int invalidResult))
+{
+    Console.WriteLine($"转换成功: {invalidResult}");
+}
+else
+{
+    Console.WriteLine($"'{invalidString}' 无法转换为整数");
+}
+```
+
+显式转换和强制类型转换是C#中处理类型转换的重要机制，它们允许我们在不同类型之间进行转换，但需要程序员明确意识到可能存在的风险，如数据丢失或溢出。
+
 ## C#运算符详解
 
 运算符是用于执行程序代码运算的符号，它们可以对一个或多个操作数进行数学或逻辑运算。C#提供了丰富的运算符来支持各种操作。

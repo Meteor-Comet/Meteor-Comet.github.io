@@ -1559,3 +1559,347 @@ private void LogUserCreation(User user)
 ```
 
 函数是C#编程的基础构建块，合理使用函数可以让代码更加模块化、可重用和易于维护。通过掌握函数的各种特性和最佳实践，可以编写出高质量的C#程序。
+
+## C# Math类详解
+
+Math类是C#中用于执行基本数学运算的静态类，提供了丰富的数学函数，包括三角函数、对数函数、幂函数、舍入函数等。使用Math类可以简化复杂的数学计算。
+
+### Math类的基本数学运算
+
+Math类提供了许多常用的数学运算方法，这些方法都是静态的，可以直接通过类名调用：
+
+```csharp
+using System;
+
+// 基本数学运算
+double abs = Math.Abs(-5.5);        // 绝对值
+double ceil = Math.Ceiling(5.3);    // 向上取整
+double floor = Math.Floor(5.7);     // 向下取整
+double round = Math.Round(5.5);     // 四舍五入
+double truncate = Math.Truncate(5.789); // 截断小数部分
+double max = Math.Max(10, 20);      // 最大值
+double min = Math.Min(10, 20);      // 最小值
+
+// 输出结果
+Console.WriteLine($"Abs(-5.5): {abs}");        // 输出: Abs(-5.5): 5.5
+Console.WriteLine($"Ceiling(5.3): {ceil}");     // 输出: Ceiling(5.3): 6
+Console.WriteLine($"Floor(5.7): {floor}");       // 输出: Floor(5.7): 5
+Console.WriteLine($"Round(5.5): {round}");       // 输出: Round(5.5): 6
+Console.WriteLine($"Truncate(5.789): {truncate}"); // 输出: Truncate(5.789): 5
+Console.WriteLine($"Max(10,20): {max}");         // 输出: Max(10,20): 20
+Console.WriteLine($"Min(10,20): {min}");         // 输出: Min(10,20): 10
+```
+
+### 幂运算和根运算
+
+Math类提供了处理幂运算和根运算的方法：
+
+```csharp
+// 幂运算
+double pow = Math.Pow(2, 3);        // 2的3次方
+double sqrt = Math.Sqrt(16);        // 平方根
+double cbrt = Math.Cbrt(27);        // 立方根 (C# 10+)
+
+// 对数运算
+double log = Math.Log(Math.E);      // 自然对数
+double log10 = Math.Log10(100);     // 常用对数 (以10为底)
+double log2 = Math.Log2(8);         // 以2为底的对数 (C# 10+)
+
+// 输出结果
+Console.WriteLine($"Pow(2,3): {pow}");      // 输出: Pow(2,3): 8
+Console.WriteLine($"Sqrt(16): {sqrt}");     // 输出: Sqrt(16): 4
+Console.WriteLine($"Cbrt(27): {cbrt}");     // 输出: Cbrt(27): 3
+Console.WriteLine($"Log(e): {log}");        // 输出: Log(e): 1
+Console.WriteLine($"Log10(100): {log10}");  // 输出: Log10(100): 2
+Console.WriteLine($"Log2(8): {log2}");      // 输出: Log2(8): 3
+```
+
+### 三角函数
+
+Math类提供了完整的三角函数支持，注意这些函数的参数都是以弧度为单位。在实际应用中，我们通常习惯使用角度，因此需要进行角度与弧度之间的转换：
+
+```csharp
+// 角度与弧度转换的通用公式
+// 弧度 = 角度 * π / 180
+// 角度 = 弧度 * 180 / π
+
+// 定义转换方法（可选，为了代码可读性）
+public static double DegreesToRadians(double degrees)
+{
+    return degrees * Math.PI / 180.0;
+}
+
+public static double RadiansToDegrees(double radians)
+{
+    return radians * 180.0 / Math.PI;
+}
+
+// 直接使用Math类进行转换
+const double angle30 = 30.0;
+const double angle45 = 45.0;
+const double angle60 = 60.0;
+const double angle90 = 90.0;
+
+// 角度转弧度
+double rad30 = angle30 * Math.PI / 180;  // 30度转弧度
+double rad45 = angle45 * Math.PI / 180;  // 45度转弧度
+double rad60 = angle60 * Math.PI / 180;  // 60度转弧度
+double rad90 = angle90 * Math.PI / 180;  // 90度转弧度
+
+// 三角函数计算（使用角度）
+double sin30 = Math.Sin(angle30 * Math.PI / 180);  // sin(30°)
+double cos45 = Math.Cos(angle45 * Math.PI / 180);  // cos(45°)
+double tan60 = Math.Tan(angle60 * Math.PI / 180);  // tan(60°)
+
+// 三角函数计算（使用弧度）
+double sinPiOver6 = Math.Sin(Math.PI / 6);   // sin(π/6) = sin(30°)
+double cosPiOver4 = Math.Cos(Math.PI / 4);   // cos(π/4) = cos(45°)
+double tanPiOver3 = Math.Tan(Math.PI / 3);   // tan(π/3) = tan(60°)
+
+// 反三角函数（结果为弧度）
+double asinValue = Math.Asin(0.5);           // arcsin(0.5) = π/6 弧度
+double acosValue = Math.Acos(0.707106781);   // arccos(0.707106781) ≈ π/4 弧度
+double atanValue = Math.Atan(1.0);           // arctan(1.0) = π/4 弧度
+
+// 将反三角函数结果转换为角度
+double asinDegrees = asinValue * 180 / Math.PI;  // 转换为角度
+double acosDegrees = acosValue * 180 / Math.PI;  // 转换为角度
+double atanDegrees = atanValue * 180 / Math.PI;  // 转换为角度
+
+// 输出结果
+Console.WriteLine($"30度 = {rad30}弧度");
+Console.WriteLine($"45度 = {rad45}弧度");
+Console.WriteLine($"60度 = {rad60}弧度");
+Console.WriteLine($"90度 = {rad90}弧度");
+
+Console.WriteLine($"sin(30°) = {sin30}");
+Console.WriteLine($"cos(45°) = {cos45}");
+Console.WriteLine($"tan(60°) = {tan60}");
+
+Console.WriteLine($"arcsin(0.5) = {asinValue}弧度 = {asinDegrees}度");
+Console.WriteLine($"arccos(0.707106781) = {acosValue}弧度 = {acosDegrees}度");
+Console.WriteLine($"arctan(1.0) = {atanValue}弧度 = {atanDegrees}度");
+```
+
+### 实用的三角函数示例
+
+以下是一些常见的三角函数应用场景：
+
+```csharp
+// 计算直角三角形的边长
+public static void RightTriangleExample()
+{
+    double angle = 30;  // 角度
+    double hypotenuse = 10;  // 斜边长度
+    
+    // 计算对边和邻边长度
+    double opposite = hypotenuse * Math.Sin(angle * Math.PI / 180);
+    double adjacent = hypotenuse * Math.Cos(angle * Math.PI / 180);
+    
+    Console.WriteLine($"角度: {angle}度");
+    Console.WriteLine($"斜边: {hypotenuse}");
+    Console.WriteLine($"对边: {opposite}");
+    Console.WriteLine($"邻边: {adjacent}");
+}
+
+// 计算两点间的角度
+public static double CalculateAngle(double x1, double y1, double x2, double y2)
+{
+    double deltaX = x2 - x1;
+    double deltaY = y2 - y1;
+    
+    // 使用Atan2计算角度（结果为弧度）
+    double angleRadians = Math.Atan2(deltaY, deltaX);
+    
+    // 转换为角度
+    double angleDegrees = angleRadians * 180 / Math.PI;
+    
+    // 确保角度在0-360度范围内
+    if (angleDegrees < 0)
+        angleDegrees += 360;
+    
+    return angleDegrees;
+}
+
+// 坐标旋转
+public static (double newX, double newY) RotatePoint(double x, double y, double angleDegrees)
+{
+    double angleRadians = angleDegrees * Math.PI / 180;
+    double cos = Math.Cos(angleRadians);
+    double sin = Math.Sin(angleRadians);
+    
+    double newX = x * cos - y * sin;
+    double newY = x * sin + y * cos;
+    
+    return (newX, newY);
+}
+
+// 使用示例
+static void TrigonometryExamples()
+{
+    Console.WriteLine("=== 直角三角形示例 ===");
+    RightTriangleExample();
+    
+    Console.WriteLine("\n=== 角度计算示例 ===");
+    double angle = CalculateAngle(0, 0, 1, 1);
+    Console.WriteLine($"从原点到点(1,1)的角度: {angle}度");
+    
+    Console.WriteLine("\n=== 坐标旋转示例 ===");
+    var (newX, newY) = RotatePoint(1, 0, 90);  // 将点(1,0)绕原点旋转90度
+    Console.WriteLine($"点(1,0)绕原点旋转90度后: ({newX}, {newY})");
+}
+```
+
+### Math类的常量
+
+Math类提供了两个重要的数学常量：
+
+```csharp
+// 数学常量
+double pi = Math.PI;                // 圆周率π
+double e = Math.E;                  // 自然对数的底e
+
+// 输出结果
+Console.WriteLine($"π: {pi}");      // 输出: π: 3.141592653589793
+Console.WriteLine($"e: {e}");       // 输出: e: 2.718281828459045
+```
+
+### 随机数生成
+
+虽然Random类更适合生成随机数，但Math类也提供了随机数方法：
+
+```csharp
+// 随机数 (返回0.0到1.0之间的double值)
+double random = Math.Random();
+
+// 生成指定范围的随机数
+int randomInt = (int)(Math.Random() * 100); // 0到99的随机整数
+
+double min = 10.0;
+double max = 20.0;
+double randomRange = min + Math.Random() * (max - min); // min到max之间的随机数
+
+// 输出结果
+Console.WriteLine($"Random: {random}");           // 输出: Random: 0.123456789 (具体值随机)
+Console.WriteLine($"RandomInt: {randomInt}");     // 输出: RandomInt: 45 (具体值随机)
+Console.WriteLine($"RandomRange: {randomRange}"); // 输出: RandomRange: 15.6789 (具体值随机)
+```
+
+### 舍入和精度控制
+
+Math类提供了多种舍入方法来控制数字的精度：
+
+```csharp
+// 舍入方法
+double value = 12.345;
+
+// 四舍五入到指定小数位数
+double rounded1 = Math.Round(value, 2);           // 保留2位小数
+double rounded2 = Math.Round(value, 2, MidpointRounding.AwayFromZero); // 四舍五入
+
+double truncateValue = Math.Truncate(value);      // 截断小数部分
+
+double ceilingValue = Math.Ceiling(value);        // 向上取整
+double floorValue = Math.Floor(value);            // 向下取整
+
+// 输出结果
+Console.WriteLine($"原始值: {value}");                    // 输出: 原始值: 12.345
+Console.WriteLine($"Round(2位小数): {rounded1}");        // 输出: Round(2位小数): 12.34
+Console.WriteLine($"Round(远离零): {rounded2}");         // 输出: Round(远离零): 12.35
+Console.WriteLine($"Truncate: {truncateValue}");          // 输出: Truncate: 12
+Console.WriteLine($"Ceiling: {ceilingValue}");           // 输出: Ceiling: 13
+Console.WriteLine($"Floor: {floorValue}");               // 输出: Floor: 12
+```
+
+### Math类的实际应用示例
+
+以下是一些Math类在实际开发中的应用场景：
+
+```csharp
+using System;
+
+class MathExamples
+{
+    // 计算两点间距离
+    public static double Distance(double x1, double y1, double x2, double y2)
+    {
+        return Math.Sqrt(Math.Pow(x2 - x1, 2) + Math.Pow(y2 - y1, 2));
+    }
+    
+    // 判断是否为素数
+    public static bool IsPrime(int n)
+    {
+        if (n <= 1) return false;
+        if (n <= 3) return true;
+        if (n % 2 == 0 || n % 3 == 0) return false;
+        
+        int sqrt = (int)Math.Sqrt(n);
+        for (int i = 5; i <= sqrt; i += 6)
+        {
+            if (n % i == 0 || n % (i + 2) == 0) return false;
+        }
+        return true;
+    }
+    
+    // 计算圆的面积
+    public static double CircleArea(double radius)
+    {
+        return Math.PI * Math.Pow(radius, 2);
+    }
+    
+    // 计算球的体积
+    public static double SphereVolume(double radius)
+    {
+        return (4.0 / 3.0) * Math.PI * Math.Pow(radius, 3);
+    }
+    
+    // 生成指定范围的随机整数
+    public static int RandomRange(int min, int max)
+    {
+        return (int)(Math.Random() * (max - min + 1)) + min;
+    }
+    
+    static void Main()
+    {
+        // 测试距离计算
+        double distance = Distance(0, 0, 3, 4);
+        Console.WriteLine($"两点间距离: {distance}"); // 输出: 两点间距离: 5
+        
+        // 测试素数判断
+        Console.WriteLine($"17是素数: {IsPrime(17)}"); // 输出: 17是素数: True
+        Console.WriteLine($"18是素数: {IsPrime(18)}"); // 输出: 18是素数: False
+        
+        // 测试圆面积计算
+        double area = CircleArea(5);
+        Console.WriteLine($"半径为5的圆面积: {area}"); // 输出: 半径为5的圆面积: 78.53981633974483
+        
+        // 测试球体积计算
+        double volume = SphereVolume(3);
+        Console.WriteLine($"半径为3的球体积: {volume}"); // 输出: 半径为3的球体积: 113.09733552923254
+        
+        // 测试随机数生成
+        for (int i = 0; i < 5; i++)
+        {
+            int randomNum = RandomRange(1, 10);
+            Console.Write($"{randomNum} "); // 输出: 3 7 1 9 4 (示例，具体值随机)
+        }
+        Console.WriteLine();
+    }
+}
+```
+
+### Math类使用注意事项
+
+1. **静态方法调用**：Math类中的所有方法都是静态的，直接通过类名调用，无需创建实例。
+
+2. **参数单位**：三角函数的参数是弧度而不是角度，需要进行转换时使用`角度 * Math.PI / 180`。
+
+3. **返回类型**：大多数Math方法返回double类型，必要时需要进行类型转换。
+
+4. **精度问题**：浮点数运算可能存在精度问题，在比较时应使用误差范围而不是直接相等比较。
+
+5. **异常处理**：某些方法在无效输入时会返回特殊值（如NaN或Infinity）而不是抛出异常。
+
+6. **性能考虑**：复杂的数学运算可能影响性能，在性能敏感的代码中应考虑优化。
+
+通过合理使用Math类，可以大大简化数学计算的代码编写，提高开发效率和代码可读性。

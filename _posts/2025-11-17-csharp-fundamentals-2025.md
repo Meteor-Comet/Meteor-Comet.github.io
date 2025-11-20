@@ -1967,3 +1967,259 @@ class MathExamples
 | E | - | double | 表示自然对数的底数e的常量 (约2.71828) |
 
 通过合理使用Math类，可以大大简化数学计算的代码编写，提高开发效率和代码可读性。
+
+## C# Random类详解
+
+在编程中，我们经常需要生成随机数，例如游戏开发中的随机事件、抽奖程序、密码生成等场景。C#提供了Random类来生成伪随机数。
+
+### Random类的基本使用
+
+Random类用于生成随机数序列。需要注意的是，Random类生成的是伪随机数，这意味着它们是通过算法计算出来的，看起来是随机的，但实际上是可以预测的。
+
+```csharp
+using System;
+
+// 创建Random对象
+Random random = new Random();
+
+// 生成0到Int32.MaxValue-1之间的随机整数
+int randomInt = random.Next();
+
+// 生成0到指定值之间的随机整数（不包含指定值）
+int randomIntLessThan100 = random.Next(100); // 0到99之间的随机整数
+
+// 生成指定范围内的随机整数（包含最小值，不包含最大值）
+int randomIntInRange = random.Next(10, 20); // 10到19之间的随机整数
+
+// 生成0.0到1.0之间的随机浮点数
+double randomDouble = random.NextDouble();
+
+// 生成指定范围内的随机浮点数
+double min = 5.0;
+double max = 15.0;
+double randomDoubleInRange = random.NextDouble() * (max - min) + min;
+
+// 输出结果
+Console.WriteLine($"随机整数: {randomInt}");
+Console.WriteLine($"0到99之间的随机整数: {randomIntLessThan100}");
+Console.WriteLine($"10到19之间的随机整数: {randomIntInRange}");
+Console.WriteLine($"0.0到1.0之间的随机浮点数: {randomDouble}");
+Console.WriteLine($"5.0到15.0之间的随机浮点数: {randomDoubleInRange}");
+```
+
+### Random类的构造函数
+
+Random类提供了两种构造函数：
+
+1. **无参构造函数**：使用系统时间作为种子值
+2. **有参构造函数**：使用指定的种子值
+
+```csharp
+// 使用系统时间作为种子（推荐用于大多数场景）
+Random random1 = new Random();
+
+// 使用指定种子值（相同种子会产生相同的随机数序列）
+Random random2 = new Random(12345);
+
+// 演示相同种子的效果
+Random r1 = new Random(100);
+Random r2 = new Random(100);
+
+Console.WriteLine("使用相同种子生成的随机数序列:");
+for (int i = 0; i < 5; i++)
+{
+    Console.WriteLine($"r1: {r1.Next(1, 100)}, r2: {r2.Next(1, 100)}");
+}
+```
+
+### Random类常用方法详解
+
+Random类提供了多种生成随机数的方法：
+
+#### Next()方法
+
+```csharp
+Random random = new Random();
+
+// Next() - 返回非负随机整数
+int next1 = random.Next();
+Console.WriteLine($"Next(): {next1}");
+
+// Next(maxValue) - 返回0到maxValue之间的随机整数（不包含maxValue）
+int next2 = random.Next(100);
+Console.WriteLine($"Next(100): {next2}");
+
+// Next(minValue, maxValue) - 返回minValue到maxValue之间的随机整数（包含minValue，不包含maxValue）
+int next3 = random.Next(50, 100);
+Console.WriteLine($"Next(50, 100): {next3}");
+```
+
+#### NextDouble()方法
+
+```csharp
+Random random = new Random();
+
+// NextDouble() - 返回0.0到1.0之间的随机浮点数
+double nextDouble = random.NextDouble();
+Console.WriteLine($"NextDouble(): {nextDouble}");
+
+// 生成指定范围内的随机浮点数
+public static double NextDouble(Random random, double min, double max)
+{
+    return random.NextDouble() * (max - min) + min;
+}
+
+double randomValue = NextDouble(random, 10.5, 20.8);
+Console.WriteLine($"10.5到20.8之间的随机浮点数: {randomValue}");
+```
+
+#### NextBytes()方法
+
+```csharp
+Random random = new Random();
+
+// NextBytes() - 用随机数填充字节数组
+byte[] buffer = new byte[10];
+random.NextBytes(buffer);
+
+Console.WriteLine("随机字节数组:");
+foreach (byte b in buffer)
+{
+    Console.Write($"{b} ");
+}
+Console.WriteLine();
+```
+
+### Random类的实际应用示例
+
+以下是一些Random类在实际开发中的应用场景：
+
+```csharp
+using System;
+using System.Collections.Generic;
+
+class RandomExamples
+{
+    private static Random random = new Random();
+    
+    // 生成随机密码
+    public static string GeneratePassword(int length)
+    {
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+        char[] password = new char[length];
+        
+        for (int i = 0; i < length; i++)
+        {
+            password[i] = chars[random.Next(chars.Length)];
+        }
+        
+        return new string(password);
+    }
+    
+    // 随机打乱数组
+    public static void Shuffle<T>(T[] array)
+    {
+        for (int i = array.Length - 1; i > 0; i--)
+        {
+            int j = random.Next(i + 1);
+            T temp = array[i];
+            array[i] = array[j];
+            array[j] = temp;
+        }
+    }
+    
+    // 从集合中随机选择元素
+    public static T RandomSelect<T>(IList<T> list)
+    {
+        if (list == null || list.Count == 0)
+            throw new ArgumentException("列表不能为空");
+            
+        int index = random.Next(list.Count);
+        return list[index];
+    }
+    
+    // 模拟抛硬币
+    public static string FlipCoin()
+    {
+        return random.Next(2) == 0 ? "正面" : "反面";
+    }
+    
+    // 模拟掷骰子
+    public static int RollDice(int sides = 6)
+    {
+        return random.Next(1, sides + 1);
+    }
+    
+    // 生成随机颜色
+    public static string GenerateRandomColor()
+    {
+        int red = random.Next(256);
+        int green = random.Next(256);
+        int blue = random.Next(256);
+        return $"RGB({red}, {green}, {blue})";
+    }
+    
+    static void Main()
+    {
+        Console.WriteLine($"随机密码: {GeneratePassword(12)}");
+        
+        string[] cards = { "红桃", "方块", "梅花", "黑桃" };
+        Shuffle(cards);
+        Console.WriteLine("洗牌后:");
+        foreach (string card in cards)
+        {
+            Console.Write($"{card} ");
+        }
+        Console.WriteLine();
+        
+        string[] fruits = { "苹果", "香蕉", "橙子", "葡萄", "草莓" };
+        Console.WriteLine($"随机选择的水果: {RandomSelect(fruits)}");
+        
+        Console.WriteLine($"抛硬币结果: {FlipCoin()}");
+        Console.WriteLine($"掷骰子结果: {RollDice()}");
+        Console.WriteLine($"随机颜色: {GenerateRandomColor()}");
+    }
+}
+```
+
+### Random类使用注意事项
+
+1. **线程安全性**：Random类不是线程安全的。在多线程环境中，应为每个线程创建独立的Random实例，或者使用锁机制。
+
+2. **种子值选择**：使用无参构造函数时，系统会使用当前时间作为种子值。如果在短时间内创建多个Random实例，可能会产生相同的随机数序列。
+
+3. **避免频繁创建实例**：不应在循环中频繁创建Random实例，而应复用同一个实例。
+
+```csharp
+// 错误的做法 - 可能产生相同的随机数
+for (int i = 0; i < 10; i++)
+{
+    Random r = new Random();
+    Console.Write(r.Next(1, 100) + " ");
+}
+Console.WriteLine();
+
+// 正确的做法 - 复用同一个实例
+Random random = new Random();
+for (int i = 0; i < 10; i++)
+{
+    Console.Write(random.Next(1, 100) + " ");
+}
+Console.WriteLine();
+```
+
+4. **随机数分布**：NextDouble()方法返回的随机数在0.0到1.0之间是均匀分布的。
+
+5. **安全性考虑**：Random类生成的是伪随机数，不适合用于加密等安全性要求高的场景。对于这类场景，应使用System.Security.Cryptography命名空间中的类。
+
+### Random类常用方法速查表
+
+| 方法 | 参数 | 返回值 | 作用说明 |
+|------|------|--------|----------|
+| Next() | 无 | int | 返回非负随机整数 |
+| Next(maxValue) | int | int | 返回0到maxValue之间的随机整数（不包含maxValue） |
+| Next(minValue, maxValue) | int, int | int | 返回minValue到maxValue之间的随机整数（包含minValue，不包含maxValue） |
+| NextDouble() | 无 | double | 返回0.0到1.0之间的随机浮点数 |
+| NextBytes(buffer) | byte[] | void | 用随机数填充字节数组 |
+
+通过合理使用Random类，可以为应用程序添加随机性，增强用户体验，实现游戏逻辑，进行模拟计算等。

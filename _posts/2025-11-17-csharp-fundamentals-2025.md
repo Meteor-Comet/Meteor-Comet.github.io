@@ -2412,6 +2412,132 @@ else
 }
 ```
 
+### 高级时间解析
+
+除了基本的解析方法，DateTime还支持更复杂的时间解析场景：
+
+```csharp
+// 解析带时区信息的时间字符串
+try
+{
+    // 解析ISO 8601格式的时间
+    DateTime isoDate = DateTime.Parse("2025-11-20T14:30:00");
+    Console.WriteLine($"ISO 8601格式解析: {isoDate}");
+    
+    // 解析带毫秒的时间
+    DateTime millisecondDate = DateTime.Parse("2025-11-20 14:30:00.123");
+    Console.WriteLine($"带毫秒时间解析: {millisecondDate}");
+}
+catch (FormatException ex)
+{
+    Console.WriteLine($"解析带时区信息失败: {ex.Message}");
+}
+
+// 使用特定文化信息解析
+try
+{
+    // 使用美国英语文化信息解析
+    var usCulture = System.Globalization.CultureInfo.GetCultureInfo("en-US");
+    DateTime usDate = DateTime.Parse("11/20/2025", usCulture);
+    Console.WriteLine($"美式日期解析: {usDate}");
+    
+    // 使用英国英语文化信息解析
+    var ukCulture = System.Globalization.CultureInfo.GetCultureInfo("en-GB");
+    DateTime ukDate = DateTime.Parse("20/11/2025", ukCulture);
+    Console.WriteLine($"英式日期解析: {ukDate}");
+}
+catch (FormatException ex)
+{
+    Console.WriteLine($"文化信息解析失败: {ex.Message}");
+}
+
+// 处理多种可能的格式
+public static bool TryParseMultipleFormats(string input, out DateTime result)
+{
+    string[] formats = {
+        "yyyy-MM-dd",
+        "yyyy/MM/dd",
+        "dd-MM-yyyy",
+        "dd/MM/yyyy",
+        "yyyy-MM-dd HH:mm:ss",
+        "yyyy/MM/dd HH:mm:ss",
+        "MM/dd/yyyy",
+        "MMMM dd, yyyy"
+    };
+    
+    return DateTime.TryParseExact(input, formats, null, System.Globalization.DateTimeStyles.None, out result);
+}
+
+// 使用示例
+string[] testDates = { "2025-11-20", "20/11/2025", "11/20/2025", "November 20, 2025" };
+foreach (string testDate in testDates)
+{
+    if (TryParseMultipleFormats(testDate, out DateTime parsedDate))
+    {
+        Console.WriteLine($"多格式解析 '{testDate}' 成功: {parsedDate}");
+    }
+    else
+    {
+        Console.WriteLine($"多格式解析 '{testDate}' 失败");
+    }
+}
+```
+
+### 时间戳处理
+
+在许多应用场景中，特别是与Web API交互时，经常需要处理Unix时间戳。Unix时间戳是从1970年1月1日00:00:00 UTC开始计算的秒数或毫秒数：
+
+```csharp
+// Unix时间戳常量
+public static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+// 将DateTime转换为Unix时间戳（秒）
+public static long ToUnixTimestamp(DateTime dateTime)
+{
+    return (long)(dateTime.ToUniversalTime() - UnixEpoch).TotalSeconds;
+}
+
+// 将DateTime转换为Unix时间戳（毫秒）
+public static long ToUnixTimestampMilliseconds(DateTime dateTime)
+{
+    return (long)(dateTime.ToUniversalTime() - UnixEpoch).TotalMilliseconds;
+}
+
+// 将Unix时间戳（秒）转换为DateTime
+public static DateTime FromUnixTimestamp(long timestamp)
+{
+    return UnixEpoch.AddSeconds(timestamp).ToLocalTime();
+}
+
+// 将Unix时间戳（毫秒）转换为DateTime
+public static DateTime FromUnixTimestampMilliseconds(long timestamp)
+{
+    return UnixEpoch.AddMilliseconds(timestamp).ToLocalTime();
+}
+
+// 使用示例
+DateTime now = DateTime.Now;
+Console.WriteLine($"当前时间: {now}");
+
+// 转换为Unix时间戳
+long unixTimestamp = ToUnixTimestamp(now);
+long unixTimestampMs = ToUnixTimestampMilliseconds(now);
+Console.WriteLine($"Unix时间戳(秒): {unixTimestamp}");
+Console.WriteLine($"Unix时间戳(毫秒): {unixTimestampMs}");
+
+// 从Unix时间戳转换回DateTime
+DateTime fromUnix = FromUnixTimestamp(unixTimestamp);
+DateTime fromUnixMs = FromUnixTimestampMilliseconds(unixTimestampMs);
+Console.WriteLine($"从时间戳转换: {fromUnix}");
+Console.WriteLine($"从毫秒时间戳转换: {fromUnixMs}");
+
+// 处理JavaScript时间戳（毫秒）
+// JavaScript中的Date.now()返回的是毫秒时间戳
+long jsTimestamp = 1758432600000; // 示例时间戳
+DateTime jsDateTime = FromUnixTimestampMilliseconds(jsTimestamp);
+Console.WriteLine($"JavaScript时间戳转换: {jsDateTime}");
+```
+
 ### DateTime的实际应用示例
 
 以下是一些DateTime在实际开发中的应用场景：

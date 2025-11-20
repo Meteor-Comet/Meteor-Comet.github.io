@@ -2710,3 +2710,336 @@ class DateTimeExamples
 | ToLongTimeString() | 无 | string | 将当前DateTime对象的值转换为其等效的长时间字符串表示形式 |
 
 通过合理使用DateTime类，可以方便地处理各种日期和时间相关的操作，满足应用程序中对时间处理的需求。
+
+## C# Array类详解
+
+数组(Array)是C#中最基本的数据结构之一，用于存储相同类型的元素集合。数组在内存中是连续存储的，可以通过索引快速访问元素。C#提供了Array类来操作数组，同时支持多种创建和操作数组的方法。
+
+### Array类的基本概念
+
+在C#中，数组是引用类型，继承自System.Array类。数组一旦创建，其大小就是固定的。数组的索引从0开始，可以通过索引访问和修改数组元素。
+
+### Array的创建和初始化
+
+C#提供了多种创建和初始化数组的方法：
+
+```csharp
+using System;
+
+// 1. 声明数组但不初始化
+int[] numbers1;
+
+// 2. 创建指定大小的数组（元素初始化为默认值）
+int[] numbers2 = new int[5]; // 创建包含5个int元素的数组，所有元素初始化为0
+
+// 3. 创建并初始化数组
+int[] numbers3 = new int[] { 1, 2, 3, 4, 5 };
+int[] numbers4 = { 1, 2, 3, 4, 5 }; // 简化语法
+
+// 4. 创建多维数组
+int[,] matrix = new int[3, 4]; // 3行4列的二维数组
+int[,] matrix2 = { { 1, 2, 3, 4 }, { 5, 6, 7, 8 }, { 9, 10, 11, 12 } };
+
+// 5. 创建交错数组（数组的数组）
+int[][] jaggedArray = new int[3][];
+jaggedArray[0] = new int[] { 1, 2 };
+jaggedArray[1] = new int[] { 3, 4, 5, 6 };
+jaggedArray[2] = new int[] { 7, 8, 9 };
+
+// 6. 使用Array类的静态方法创建数组
+int[] numbers5 = Array.CreateInstance(typeof(int), 5) as int[];
+
+// 输出数组内容
+Console.WriteLine("一维数组:");
+for (int i = 0; i < numbers3.Length; i++)
+{
+    Console.Write(numbers3[i] + " ");
+}
+Console.WriteLine();
+
+Console.WriteLine("二维数组:");
+for (int i = 0; i < matrix2.GetLength(0); i++)
+{
+    for (int j = 0; j < matrix2.GetLength(1); j++)
+    {
+        Console.Write(matrix2[i, j] + "\t");
+    }
+    Console.WriteLine();
+}
+
+Console.WriteLine("交错数组:");
+for (int i = 0; i < jaggedArray.Length; i++)
+{
+    for (int j = 0; j < jaggedArray[i].Length; j++)
+    {
+        Console.Write(jaggedArray[i][j] + " ");
+    }
+    Console.WriteLine();
+}
+```
+
+### Array的常用属性
+
+Array类提供了多个有用的属性来获取数组的信息：
+
+```csharp
+int[] numbers = { 1, 2, 3, 4, 5 };
+int[,] matrix = { { 1, 2, 3 }, { 4, 5, 6 } };
+
+// Length属性 - 获取数组中所有元素的总数
+Console.WriteLine($"一维数组长度: {numbers.Length}");
+Console.WriteLine($"二维数组总元素数: {matrix.Length}");
+
+// Rank属性 - 获取数组的维数
+Console.WriteLine($"一维数组维数: {numbers.Rank}");
+Console.WriteLine($"二维数组维数: {matrix.Rank}");
+
+// GetLength方法 - 获取指定维度的长度
+Console.WriteLine($"二维数组第1维长度: {matrix.GetLength(0)}");
+Console.WriteLine($"二维数组第2维长度: {matrix.GetLength(1)}");
+
+// IsFixedSize属性 - 检查数组是否有固定大小
+Console.WriteLine($"数组是否有固定大小: {numbers.IsFixedSize}");
+
+// IsReadOnly属性 - 检查数组是否为只读
+Console.WriteLine($"数组是否只读: {numbers.IsReadOnly}");
+```
+
+### Array的常用方法
+
+Array类提供了丰富的静态和实例方法来操作数组：
+
+#### 排序和搜索方法
+
+```csharp
+int[] numbers = { 5, 2, 8, 1, 9, 3 };
+string[] names = { "张三", "李四", "王五", "赵六" };
+
+Console.WriteLine("原始数组:");
+Console.WriteLine($"数字: {string.Join(", ", numbers)}");
+Console.WriteLine($"姓名: {string.Join(", ", names)}");
+
+// Sort方法 - 对数组进行排序
+Array.Sort(numbers);
+Array.Sort(names);
+
+Console.WriteLine("排序后:");
+Console.WriteLine($"数字: {string.Join(", ", numbers)}");
+Console.WriteLine($"姓名: {string.Join(", ", names)}");
+
+// 重新初始化数组以演示搜索
+numbers = new int[] { 5, 2, 8, 1, 9, 3 };
+Array.Sort(numbers); // 先排序，因为BinarySearch要求数组已排序
+
+// BinarySearch方法 - 在已排序数组中搜索元素
+int index = Array.BinarySearch(numbers, 8);
+if (index >= 0)
+{
+    Console.WriteLine($"找到元素8，索引为: {index}");
+}
+else
+{
+    Console.WriteLine("未找到元素8");
+}
+
+// IndexOf方法 - 在数组中搜索元素首次出现的索引
+int[] unsortedNumbers = { 5, 2, 8, 1, 9, 3, 8 };
+int firstIndex = Array.IndexOf(unsortedNumbers, 8);
+Console.WriteLine($"元素8首次出现的索引: {firstIndex}");
+
+// LastIndexOf方法 - 在数组中搜索元素最后出现的索引
+int lastIndex = Array.LastIndexOf(unsortedNumbers, 8);
+Console.WriteLine($"元素8最后出现的索引: {lastIndex}");
+```
+
+#### 数组操作方法
+
+```csharp
+int[] sourceArray = { 1, 2, 3, 4, 5 };
+
+// Copy方法 - 复制数组元素
+int[] destinationArray = new int[5];
+Array.Copy(sourceArray, destinationArray, sourceArray.Length);
+Console.WriteLine($"复制后的数组: {string.Join(", ", destinationArray)}");
+
+// CopyTo方法 - 将数组元素复制到另一个数组
+int[] targetArray = new int[5];
+sourceArray.CopyTo(targetArray, 0);
+Console.WriteLine($"CopyTo后的数组: {string.Join(", ", targetArray)}");
+
+// Clone方法 - 创建数组的浅表副本
+int[] clonedArray = (int[])sourceArray.Clone();
+Console.WriteLine($"克隆的数组: {string.Join(", ", clonedArray)}");
+
+// Clear方法 - 将数组元素设置为默认值
+int[] tempArray = { 1, 2, 3, 4, 5 };
+Console.WriteLine($"清除前: {string.Join(", ", tempArray)}");
+Array.Clear(tempArray, 1, 3); // 从索引1开始清除3个元素
+Console.WriteLine($"清除后: {string.Join(", ", tempArray)}");
+
+// Reverse方法 - 反转数组元素
+int[] reverseArray = { 1, 2, 3, 4, 5 };
+Console.WriteLine($"反转前: {string.Join(", ", reverseArray)}");
+Array.Reverse(reverseArray);
+Console.WriteLine($"反转后: {string.Join(", ", reverseArray)}");
+```
+
+### Array的实际应用示例
+
+以下是一些Array在实际开发中的应用场景：
+
+```csharp
+using System;
+using System.Linq;
+
+class ArrayExamples
+{
+    // 查找数组中的最大值和最小值
+    public static (int max, int min) FindMaxMin(int[] array)
+    {
+        if (array == null || array.Length == 0)
+            throw new ArgumentException("数组不能为空");
+            
+        int max = array[0];
+        int min = array[0];
+        
+        for (int i = 1; i < array.Length; i++)
+        {
+            if (array[i] > max)
+                max = array[i];
+            if (array[i] < min)
+                min = array[i];
+        }
+        
+        return (max, min);
+    }
+    
+    // 计算数组元素的平均值
+    public static double CalculateAverage(int[] array)
+    {
+        if (array == null || array.Length == 0)
+            throw new ArgumentException("数组不能为空");
+            
+        long sum = 0;
+        foreach (int value in array)
+        {
+            sum += value;
+        }
+        
+        return (double)sum / array.Length;
+    }
+    
+    // 移除数组中的重复元素
+    public static int[] RemoveDuplicates(int[] array)
+    {
+        if (array == null || array.Length == 0)
+            return new int[0];
+            
+        // 使用Array.Sort和自定义逻辑
+        int[] sortedArray = (int[])array.Clone();
+        Array.Sort(sortedArray);
+        
+        int[] temp = new int[sortedArray.Length];
+        int count = 1;
+        temp[0] = sortedArray[0];
+        
+        for (int i = 1; i < sortedArray.Length; i++)
+        {
+            if (sortedArray[i] != sortedArray[i - 1])
+            {
+                temp[count] = sortedArray[i];
+                count++;
+            }
+        }
+        
+        int[] result = new int[count];
+        Array.Copy(temp, result, count);
+        return result;
+    }
+    
+    // 合并两个数组
+    public static T[] MergeArrays<T>(T[] array1, T[] array2)
+    {
+        T[] result = new T[array1.Length + array2.Length];
+        Array.Copy(array1, 0, result, 0, array1.Length);
+        Array.Copy(array2, 0, result, array1.Length, array2.Length);
+        return result;
+    }
+    
+    static void Main()
+    {
+        // 测试查找最大值和最小值
+        int[] numbers = { 5, 2, 8, 1, 9, 3 };
+        var (max, min) = FindMaxMin(numbers);
+        Console.WriteLine($"数组 {string.Join(", ", numbers)} 中的最大值: {max}, 最小值: {min}");
+        
+        // 测试计算平均值
+        double average = CalculateAverage(numbers);
+        Console.WriteLine($"数组的平均值: {average}");
+        
+        // 测试移除重复元素
+        int[] withDuplicates = { 5, 2, 8, 1, 9, 3, 5, 8, 1 };
+        int[] unique = RemoveDuplicates(withDuplicates);
+        Console.WriteLine($"原数组: {string.Join(", ", withDuplicates)}");
+        Console.WriteLine($"去重后: {string.Join(", ", unique)}");
+        
+        // 测试合并数组
+        int[] arr1 = { 1, 2, 3 };
+        int[] arr2 = { 4, 5, 6 };
+        int[] merged = MergeArrays(arr1, arr2);
+        Console.WriteLine($"合并数组: {string.Join(", ", merged)}");
+    }
+}
+```
+
+### Array使用注意事项
+
+1. **数组大小固定**：数组一旦创建，其大小就不能改变。如果需要动态调整大小，应考虑使用List<T>等集合类。
+
+2. **索引越界检查**：访问数组元素时必须确保索引在有效范围内，否则会抛出IndexOutOfRangeException异常。
+
+3. **性能考虑**：数组是性能最高的集合类型之一，因为它们在内存中连续存储，访问速度快。
+
+4. **多维数组与交错数组**：多维数组是矩形的，而交错数组的每一行可以有不同的长度。
+
+5. **引用类型与值类型**：存储引用类型的数组实际存储的是引用，而存储值类型的数组存储的是实际值。
+
+6. **内存分配**：大型数组会在大对象堆(LOH)上分配，可能影响垃圾回收性能。
+
+### Array类常用属性和方法速查表
+
+#### 常用属性
+
+| 属性 | 类型 | 作用说明 |
+|------|------|----------|
+| Length | int | 获取数组中所有元素的总数 |
+| Rank | int | 获取数组的维数 |
+| IsFixedSize | bool | 获取一个值，该值指示数组是否有固定大小 |
+| IsReadOnly | bool | 获取一个值，该值指示数组是否为只读 |
+| IsSynchronized | bool | 获取一个值，该值指示对数组的访问是否同步（线程安全） |
+| SyncRoot | object | 获取可用于同步对数组的访问的对象 |
+
+#### 常用静态方法
+
+| 方法 | 参数 | 返回值 | 作用说明 |
+|------|------|--------|----------|
+| BinarySearch(Array, object) | Array, object | int | 在已排序的一维数组中搜索指定对象 |
+| Clear(Array, int, int) | Array, int, int | void | 将数组中的元素设置为默认值 |
+| Copy(Array, Array, int) | Array, Array, int | void | 从第一个数组复制指定数量的元素到第二个数组 |
+| CreateInstance(Type, int) | Type, int | Array | 创建指定类型和维度的数组 |
+| IndexOf(Array, object) | Array, object | int | 在一维数组中搜索指定对象，返回首次出现的索引 |
+| LastIndexOf(Array, object) | Array, object | int | 在一维数组中搜索指定对象，返回最后出现的索引 |
+| Reverse(Array) | Array | void | 反转整个一维数组中元素的顺序 |
+| Sort(Array) | Array | void | 对一维数组中的元素进行排序 |
+
+#### 常用实例方法
+
+| 方法 | 参数 | 返回值 | 作用说明 |
+|------|------|--------|----------|
+| Clone() | 无 | object | 创建数组的浅表副本 |
+| CopyTo(Array, int) | Array, int | void | 将当前一维数组的所有元素复制到指定的一维数组中 |
+| GetLength(int) | int | int | 获取指定维度的长度 |
+| GetValue(int) | int | object | 获取一维数组中指定位置的值 |
+| SetValue(object, int) | object, int | void | 设置一维数组中指定位置的值 |
+
+通过合理使用Array类，可以高效地处理各种数据集合操作，满足应用程序中对数据存储和处理的需求。

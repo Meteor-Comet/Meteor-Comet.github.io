@@ -2223,3 +2223,364 @@ Console.WriteLine();
 | NextBytes(buffer) | byte[] | void | 用随机数填充字节数组 |
 
 通过合理使用Random类，可以为应用程序添加随机性，增强用户体验，实现游戏逻辑，进行模拟计算等。
+
+## C# DateTime类详解
+
+在实际开发中，处理日期和时间是一个常见的需求，例如记录用户注册时间、计算时间差、格式化时间显示等。C#提供了DateTime结构来处理日期和时间相关的操作。
+
+### DateTime类的基本概念
+
+DateTime结构表示一个时间点，精确到100纳秒，称为刻度(Ticks)。DateTime的值范围从公元1年1月1日到公元9999年12月31日。
+
+### DateTime的创建和初始化
+
+DateTime可以通过多种方式创建：
+
+```csharp
+using System;
+
+// 1. 使用默认构造函数（创建最小日期值）
+DateTime defaultDate = new DateTime(); // 0001/1/1 0:00:00
+
+// 2. 指定年、月、日
+DateTime date1 = new DateTime(2025, 11, 20);
+
+// 3. 指定年、月、日、时、分、秒
+DateTime date2 = new DateTime(2025, 11, 20, 14, 30, 0);
+
+// 4. 指定年、月、日、时、分、秒和毫秒
+DateTime date3 = new DateTime(2025, 11, 20, 14, 30, 0, 500);
+
+// 5. 使用静态属性获取特殊日期时间
+DateTime now = DateTime.Now;           // 当前本地时间
+DateTime utcNow = DateTime.UtcNow;     // 当前UTC时间
+DateTime today = DateTime.Today;       // 今天的日期，时间为00:00:00
+DateTime min = DateTime.MinValue;      // 最小日期值 0001/1/1 0:00:00
+DateTime max = DateTime.MaxValue;      // 最大日期值 9999/12/31 23:59:59
+
+// 输出结果
+Console.WriteLine($"默认日期: {defaultDate}");
+Console.WriteLine($"指定日期: {date1}");
+Console.WriteLine($"指定日期时间: {date2}");
+Console.WriteLine($"指定日期时间毫秒: {date3}");
+Console.WriteLine($"当前时间: {now}");
+Console.WriteLine($"UTC时间: {utcNow}");
+Console.WriteLine($"今天: {today}");
+Console.WriteLine($"最小日期: {min}");
+Console.WriteLine($"最大日期: {max}");
+```
+
+### DateTime的常用属性
+
+DateTime提供了丰富的属性来获取日期时间的各个组成部分：
+
+```csharp
+DateTime now = DateTime.Now;
+
+Console.WriteLine($"当前时间: {now}");
+Console.WriteLine($"年: {now.Year}");
+Console.WriteLine($"月: {now.Month}");
+Console.WriteLine($"日: {now.Day}");
+Console.WriteLine($"时: {now.Hour}");
+Console.WriteLine($"分: {now.Minute}");
+Console.WriteLine($"秒: {now.Second}");
+Console.WriteLine($"毫秒: {now.Millisecond}");
+Console.WriteLine($"星期: {now.DayOfWeek}");
+Console.WriteLine($"一年中的第几天: {now.DayOfYear}");
+Console.WriteLine($"刻度数: {now.Ticks}");
+Console.WriteLine($"日期部分: {now.Date}");
+Console.WriteLine($"时间部分: {now.TimeOfDay}");
+```
+
+### DateTime的格式化
+
+DateTime可以通过ToString方法进行格式化显示：
+
+```csharp
+DateTime now = DateTime.Now;
+
+// 标准格式
+Console.WriteLine($"默认格式: {now}");
+Console.WriteLine($"短日期: {now.ToShortDateString()}");
+Console.WriteLine($"长日期: {now.ToLongDateString()}");
+Console.WriteLine($"短时间: {now.ToShortTimeString()}");
+Console.WriteLine($"长时间: {now.ToLongTimeString()}");
+
+// 自定义格式
+Console.WriteLine($"自定义格式1: {now:yyyy-MM-dd}");
+Console.WriteLine($"自定义格式2: {now:yyyy年MM月dd日}");
+Console.WriteLine($"自定义格式3: {now:yyyy-MM-dd HH:mm:ss}");
+Console.WriteLine($"自定义格式4: {now:yyyy年MM月dd日 HH时mm分ss秒}");
+
+// 使用ToString方法
+Console.WriteLine($"ToString(""d""): {now.ToString("d")}");
+Console.WriteLine($"ToString(""D""): {now.ToString("D")}");
+Console.WriteLine($"ToString(""f""): {now.ToString("f")}");
+Console.WriteLine($"ToString(""F""): {now.ToString("F")}");
+Console.WriteLine($"ToString(""g""): {now.ToString("g")}");
+Console.WriteLine($"ToString(""G""): {now.ToString("G")}");
+Console.WriteLine($"ToString(""yyyy-MM-dd HH:mm:ss""): {now.ToString("yyyy-MM-dd HH:mm:ss")}");
+```
+
+### DateTime的计算和比较
+
+DateTime支持各种计算和比较操作：
+
+```csharp
+DateTime date1 = new DateTime(2025, 1, 1);
+DateTime date2 = new DateTime(2025, 12, 31);
+
+// 比较操作
+Console.WriteLine($"date1 < date2: {date1 < date2}");
+Console.WriteLine($"date1 > date2: {date1 > date2}");
+Console.WriteLine($"date1 == date2: {date1 == date2}");
+Console.WriteLine($"date1 != date2: {date1 != date2}");
+Console.WriteLine($"date1.CompareTo(date2): {date1.CompareTo(date2)}");
+
+// 计算时间差
+TimeSpan difference = date2 - date1;
+Console.WriteLine($"时间差: {difference}");
+Console.WriteLine($"相差天数: {difference.TotalDays}");
+
+// 添加时间
+DateTime futureDate = date1.AddYears(1);
+DateTime pastDate = date1.AddMonths(-3);
+DateTime nextWeek = date1.AddDays(7);
+DateTime tomorrow = date1.AddHours(24);
+DateTime nextMinute = date1.AddMinutes(1);
+DateTime nextSecond = date1.AddSeconds(1);
+
+Console.WriteLine($"原日期: {date1}");
+Console.WriteLine($"增加1年: {futureDate}");
+Console.WriteLine($"减少3个月: {pastDate}");
+Console.WriteLine($"增加7天: {nextWeek}");
+Console.WriteLine($"增加24小时: {tomorrow}");
+Console.WriteLine($"增加1分钟: {nextMinute}");
+Console.WriteLine($"增加1秒: {nextSecond}");
+```
+
+### DateTime的解析
+
+可以将字符串解析为DateTime对象：
+
+```csharp
+// 使用Parse方法
+try
+{
+    DateTime parsedDate1 = DateTime.Parse("2025-11-20");
+    DateTime parsedDate2 = DateTime.Parse("2025/11/20 14:30:00");
+    DateTime parsedDate3 = DateTime.Parse("November 20, 2025");
+    
+    Console.WriteLine($"解析"2025-11-20": {parsedDate1}");
+    Console.WriteLine($"解析"2025/11/20 14:30:00": {parsedDate2}");
+    Console.WriteLine($"解析"November 20, 2025": {parsedDate3}");
+}
+catch (FormatException ex)
+{
+    Console.WriteLine($"解析失败: {ex.Message}");
+}
+
+// 使用TryParse方法（推荐）
+if (DateTime.TryParse("2025-11-20", out DateTime result1))
+{
+    Console.WriteLine($"TryParse成功: {result1}");
+}
+else
+{
+    Console.WriteLine("TryParse失败");
+}
+
+// 使用ParseExact方法
+try
+{
+    DateTime exactDate = DateTime.ParseExact("2025-11-20 14:30:00", "yyyy-MM-dd HH:mm:ss", null);
+    Console.WriteLine($"ParseExact: {exactDate}");
+}
+catch (FormatException ex)
+{
+    Console.WriteLine($"ParseExact失败: {ex.Message}");
+}
+
+// 使用TryParseExact方法
+if (DateTime.TryParseExact("20/11/2025", "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.None, out DateTime result2))
+{
+    Console.WriteLine($"TryParseExact成功: {result2}");
+}
+else
+{
+    Console.WriteLine("TryParseExact失败");
+}
+```
+
+### DateTime的实际应用示例
+
+以下是一些DateTime在实际开发中的应用场景：
+
+```csharp
+using System;
+
+class DateTimeExamples
+{
+    // 计算年龄
+    public static int CalculateAge(DateTime birthDate)
+    {
+        DateTime today = DateTime.Today;
+        int age = today.Year - birthDate.Year;
+        
+        // 检查是否还没过生日
+        if (birthDate.Date > today.AddYears(-age))
+        {
+            age--;
+        }
+        
+        return age;
+    }
+    
+    // 计算工作日
+    public static int CalculateWorkDays(DateTime startDate, DateTime endDate)
+    {
+        int workDays = 0;
+        DateTime currentDate = startDate;
+        
+        while (currentDate <= endDate)
+        {
+            if (currentDate.DayOfWeek != DayOfWeek.Saturday && 
+                currentDate.DayOfWeek != DayOfWeek.Sunday)
+            {
+                workDays++;
+            }
+            currentDate = currentDate.AddDays(1);
+        }
+        
+        return workDays;
+    }
+    
+    // 格式化时间显示（如：刚刚、几分钟前、几小时前等）
+    public static string FormatTimeAgo(DateTime dateTime)
+    {
+        TimeSpan timeSpan = DateTime.Now - dateTime;
+        
+        if (timeSpan.TotalSeconds < 60)
+        {
+            return "刚刚";
+        }
+        else if (timeSpan.TotalMinutes < 60)
+        {
+            return $"{timeSpan.Minutes}分钟前";
+        }
+        else if (timeSpan.TotalHours < 24)
+        {
+            return $"{timeSpan.Hours}小时前";
+        }
+        else if (timeSpan.TotalDays < 30)
+        {
+            return $"{timeSpan.Days}天前";
+        }
+        else
+        {
+            return dateTime.ToString("yyyy年MM月dd日");
+        }
+    }
+    
+    // 获取指定月份的最后一天
+    public static DateTime GetLastDayOfMonth(int year, int month)
+    {
+        return new DateTime(year, month, 1).AddMonths(1).AddDays(-1);
+    }
+    
+    static void Main()
+    {
+        // 测试计算年龄
+        DateTime birthDate = new DateTime(1990, 5, 15);
+        Console.WriteLine($"出生日期: {birthDate:yyyy年MM月dd日}");
+        Console.WriteLine($"当前年龄: {CalculateAge(birthDate)}岁");
+        
+        // 测试计算工作日
+        DateTime startDate = new DateTime(2025, 11, 1);
+        DateTime endDate = new DateTime(2025, 11, 30);
+        Console.WriteLine($"{startDate:yyyy年MM月dd日}到{endDate:yyyy年MM月dd日}的工作日: {CalculateWorkDays(startDate, endDate)}天");
+        
+        // 测试时间显示格式化
+        DateTime[] testDates = {
+            DateTime.Now.AddSeconds(-30),
+            DateTime.Now.AddMinutes(-15),
+            DateTime.Now.AddHours(-3),
+            DateTime.Now.AddDays(-5),
+            DateTime.Now.AddDays(-45)
+        };
+        
+        foreach (DateTime date in testDates)
+        {
+            Console.WriteLine($"{date:yyyy年MM月dd日 HH:mm} -> {FormatTimeAgo(date)}");
+        }
+        
+        // 测试获取月份最后一天
+        Console.WriteLine($"2025年2月的最后一天: {GetLastDayOfMonth(2025, 2):yyyy年MM月dd日}");
+        Console.WriteLine($"2025年12月的最后一天: {GetLastDayOfMonth(2025, 12):yyyy年MM月dd日}");
+    }
+}
+```
+
+### DateTime使用注意事项
+
+1. **时区问题**：DateTime.Now返回本地时间，DateTime.UtcNow返回UTC时间。在处理跨时区应用时，应明确使用哪种时间。
+
+2. **精度问题**：DateTime的精度是100纳秒，但在某些平台上可能达不到这个精度。
+
+3. **夏令时问题**：在涉及夏令时的地区，需要注意时间计算可能出现的问题。
+
+4. **线程安全性**：DateTime结构是不可变的，因此是线程安全的。
+
+5. **异常处理**：在解析字符串为DateTime时，应使用TryParse或TryParseExact方法，避免异常处理的开销。
+
+6. **性能考虑**：频繁创建DateTime对象可能影响性能，在性能敏感的代码中应考虑优化。
+
+### DateTime类常用属性和方法速查表
+
+#### 常用属性
+
+| 属性 | 类型 | 作用说明 |
+|------|------|----------|
+| Now | DateTime | 获取当前本地日期和时间 |
+| UtcNow | DateTime | 获取当前UTC日期和时间 |
+| Today | DateTime | 获取当前日期，时间为00:00:00 |
+| MinValue | DateTime | 表示DateTime的最小可能值 |
+| MaxValue | DateTime | 表示DateTime的最大可能值 |
+| Year | int | 获取日期的年份部分 |
+| Month | int | 获取日期的月份部分 |
+| Day | int | 获取日期的天数部分 |
+| Hour | int | 获取时间的小时部分 |
+| Minute | int | 获取时间的分钟部分 |
+| Second | int | 获取时间的秒部分 |
+| Millisecond | int | 获取时间的毫秒部分 |
+| DayOfWeek | DayOfWeek | 获取星期几 |
+| DayOfYear | int | 获取一年中的第几天 |
+| Ticks | long | 获取表示日期和时间的刻度数 |
+| Date | DateTime | 获取日期部分 |
+| TimeOfDay | TimeSpan | 获取时间部分 |
+
+#### 常用方法
+
+| 方法 | 参数 | 返回值 | 作用说明 |
+|------|------|--------|----------|
+| Add(TimeSpan) | TimeSpan | DateTime | 在此实例的值上添加指定的时间间隔 |
+| AddDays(double) | double | DateTime | 在此实例的值上添加指定的天数 |
+| AddHours(double) | double | DateTime | 在此实例的值上添加指定的小时数 |
+| AddMinutes(double) | double | DateTime | 在此实例的值上添加指定的分钟数 |
+| AddMonths(int) | int | DateTime | 在此实例的值上添加指定的月数 |
+| AddSeconds(double) | double | DateTime | 在此实例的值上添加指定的秒数 |
+| AddYears(int) | int | DateTime | 在此实例的值上添加指定的年数 |
+| CompareTo(DateTime) | DateTime | int | 将此实例与指定的DateTime对象进行比较 |
+| Equals(DateTime) | DateTime | bool | 返回一个值，该值指示此实例是否等于指定的DateTime实例 |
+| ToString() | 无 | string | 将当前DateTime对象的值转换为其等效的字符串表示形式 |
+| ToString(string) | string | string | 使用指定的格式将当前DateTime对象的值转换为字符串 |
+| Parse(string) | string | DateTime | 将日期和时间的字符串表示形式转换为等效的DateTime |
+| TryParse(string, out DateTime) | string, out DateTime | bool | 将日期和时间的字符串表示形式转换为等效的DateTime，返回是否转换成功 |
+| ParseExact(string, string, IFormatProvider) | string, string, IFormatProvider | DateTime | 使用指定的格式将日期和时间的字符串表示形式转换为等效的DateTime |
+| TryParseExact(string, string, IFormatProvider, DateTimeStyles, out DateTime) | string, string, IFormatProvider, DateTimeStyles, out DateTime | bool | 使用指定的格式将日期和时间的字符串表示形式转换为等效的DateTime，返回是否转换成功 |
+| ToShortDateString() | 无 | string | 将当前DateTime对象的值转换为其等效的短日期字符串表示形式 |
+| ToLongDateString() | 无 | string | 将当前DateTime对象的值转换为其等效的长日期字符串表示形式 |
+| ToShortTimeString() | 无 | string | 将当前DateTime对象的值转换为其等效的短时间字符串表示形式 |
+| ToLongTimeString() | 无 | string | 将当前DateTime对象的值转换为其等效的长时间字符串表示形式 |
+
+通过合理使用DateTime类，可以方便地处理各种日期和时间相关的操作，满足应用程序中对时间处理的需求。

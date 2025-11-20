@@ -1902,4 +1902,68 @@ class MathExamples
 
 6. **性能考虑**：复杂的数学运算可能影响性能，在性能敏感的代码中应考虑优化。
 
+### Math类常用函数速查表
+
+为了方便查阅，下面列出了Math类中常用的函数及其参数和作用：
+
+#### 基本数学运算
+
+| 函数 | 参数 | 返回值 | 作用说明 |
+|------|------|--------|----------|
+| Abs | `double value` | double | 返回指定数字的绝对值 |
+| Abs | `int value` | int | 返回指定数字的绝对值 |
+| Abs | `float value` | float | 返回指定数字的绝对值 |
+| Abs | `long value` | long | 返回指定数字的绝对值 |
+| Max | `double val1, double val2` | double | 返回两个数字中的较大值 |
+| Max | `int val1, int val2` | int | 返回两个数字中的较大值 |
+| Min | `double val1, double val2` | double | 返回两个数字中的较小值 |
+| Min | `int val1, int val2` | int | 返回两个数字中的较小值 |
+| Sign | `double value` | int | 返回指定数字的符号（正数返回1，负数返回-1，零返回0） |
+
+#### 舍入和精度控制
+
+| 函数 | 参数 | 返回值 | 作用说明 |
+|------|------|--------|----------|
+| Ceiling | `double value` | double | 返回大于或等于指定数字的最小整数 |
+| Floor | `double value` | double | 返回小于或等于指定数字的最大整数 |
+| Round | `double value` | double | 将值舍入到最近的整数 |
+| Round | `double value, int digits` | double | 将值舍入到指定的小数位数 |
+| Round | `double value, int digits, MidpointRounding mode` | double | 按指定的舍入方式将值舍入到指定的小数位数 |
+| Truncate | `double value` | double | 将指定数字的小数部分截断 |
+
+#### 幂运算和对数运算
+
+| 函数 | 参数 | 返回值 | 作用说明 |
+|------|------|--------|----------|
+| Pow | `double x, double y` | double | 返回指定数字的指定次幂 (x^y) |
+| Sqrt | `double value` | double | 返回指定数字的平方根 |
+| Cbrt | `double value` | double | 返回指定数字的立方根 (C# 10+) |
+| Exp | `double value` | double | 返回 e 的指定次幂 |
+| Log | `double value` | double | 返回指定数字的自然对数（以 e 为底） |
+| Log | `double value, double base` | double | 返回指定数字在指定底数下的对数 |
+| Log10 | `double value` | double | 返回指定数字的常用对数（以 10 为底） |
+| Log2 | `double value` | double | 返回指定数字的以 2 为底的对数 (C# 10+) |
+
+#### 三角函数
+
+| 函数 | 参数 | 返回值 | 作用说明 |
+|------|------|--------|----------|
+| Sin | `double radians` | double | 返回指定角度的正弦值 |
+| Cos | `double radians` | double | 返回指定角度的余弦值 |
+| Tan | `double radians` | double | 返回指定角度的正切值 |
+| Asin | `double value` | double | 返回指定数字的反正弦值 |
+| Acos | `double value` | double | 返回指定数字的反余弦值 |
+| Atan | `double value` | double | 返回指定数字的反正切值 |
+| Atan2 | `double y, double x` | double | 返回由正切值的商所定义的角度 |
+| Sinh | `double value` | double | 返回指定角度的双曲正弦值 |
+| Cosh | `double value` | double | 返回指定角度的双曲余弦值 |
+| Tanh | `double value` | double | 返回指定角度的双曲正切值 |
+
+#### 其他实用函数
+
+| 函数 | 参数 | 返回值 | 作用说明 |
+|------|------|--------|----------|
+| PI | - | double | 表示圆周率π的常量 (约3.14159) |
+| E | - | double | 表示自然对数的底数e的常量 (约2.71828) |
+
 通过合理使用Math类，可以大大简化数学计算的代码编写，提高开发效率和代码可读性。

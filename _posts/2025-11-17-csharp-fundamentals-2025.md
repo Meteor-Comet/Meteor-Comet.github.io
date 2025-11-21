@@ -1910,61 +1910,47 @@ class MathExamples
 
 | 函数 | 参数 | 返回值 | 作用说明 |
 |------|------|--------|----------|
-| Abs | `double value` | double | 返回指定数字的绝对值 |
-| Abs | `int value` | int | 返回指定数字的绝对值 |
-| Abs | `float value` | float | 返回指定数字的绝对值 |
-| Abs | `long value` | long | 返回指定数字的绝对值 |
-| Max | `double val1, double val2` | double | 返回两个数字中的较大值 |
-| Max | `int val1, int val2` | int | 返回两个数字中的较大值 |
-| Min | `double val1, double val2` | double | 返回两个数字中的较小值 |
-| Min | `int val1, int val2` | int | 返回两个数字中的较小值 |
-| Sign | `double value` | int | 返回指定数字的符号（正数返回1，负数返回-1，零返回0） |
+| Abs | 数值类型 value | 同输入类型 | 返回指定数字的绝对值。支持int、long、float、double等数值类型 |
+| Max | 数值类型 val1, val2 | 同输入类型 | 返回两个数字中的较大值。支持int、long、float、double等数值类型 |
+| Min | 数值类型 val1, val2 | 同输入类型 | 返回两个数字中的较小值。支持int、long、float、double等数值类型 |
+| Sign | double value | int | 返回指定数字的符号（正数返回1，负数返回-1，零返回0） |
 
 #### 舍入和精度控制
 
 | 函数 | 参数 | 返回值 | 作用说明 |
 |------|------|--------|----------|
-| Ceiling | `double value` | double | 返回大于或等于指定数字的最小整数 |
-| Floor | `double value` | double | 返回小于或等于指定数字的最大整数 |
-| Round | `double value` | double | 将值舍入到最近的整数 |
-| Round | `double value, int digits` | double | 将值舍入到指定的小数位数 |
-| Round | `double value, int digits, MidpointRounding mode` | double | 按指定的舍入方式将值舍入到指定的小数位数 |
-| Truncate | `double value` | double | 将指定数字的小数部分截断 |
+| Ceiling | double value | double | 返回大于或等于指定数字的最小整数 |
+| Floor | double value | double | 返回小于或等于指定数字的最大整数 |
+| Round | double value, (int digits), (MidpointRounding mode) | double | 将值舍入到最近的整数或指定小数位数，可指定舍入模式 |
+| Truncate | double value | double | 将指定数字的小数部分截断 |
 
 #### 幂运算和对数运算
 
 | 函数 | 参数 | 返回值 | 作用说明 |
 |------|------|--------|----------|
-| Pow | `double x, double y` | double | 返回指定数字的指定次幂 (x^y) |
-| Sqrt | `double value` | double | 返回指定数字的平方根 |
-| Cbrt | `double value` | double | 返回指定数字的立方根 (C# 10+) |
-| Exp | `double value` | double | 返回 e 的指定次幂 |
-| Log | `double value` | double | 返回指定数字的自然对数（以 e 为底） |
-| Log | `double value, double base` | double | 返回指定数字在指定底数下的对数 |
-| Log10 | `double value` | double | 返回指定数字的常用对数（以 10 为底） |
-| Log2 | `double value` | double | 返回指定数字的以 2 为底的对数 (C# 10+) |
+| Pow | double x, double y | double | 返回x的y次幂 (x^y) |
+| Sqrt | double value | double | 返回指定数字的平方根 |
+| Cbrt | double value | double | 返回指定数字的立方根 (C# 10+) |
+| Exp | double value | double | 返回 e 的指定次幂 |
+| Log | double value, (double base) | double | 返回指定数字的自然对数或指定底数的对数 |
+| Log10 | double value | double | 返回指定数字的常用对数（以10为底） |
+| Log2 | double value | double | 返回指定数字的以2为底的对数 (C# 10+) |
 
 #### 三角函数
 
 | 函数 | 参数 | 返回值 | 作用说明 |
 |------|------|--------|----------|
-| Sin | `double radians` | double | 返回指定角度的正弦值 |
-| Cos | `double radians` | double | 返回指定角度的余弦值 |
-| Tan | `double radians` | double | 返回指定角度的正切值 |
-| Asin | `double value` | double | 返回指定数字的反正弦值 |
-| Acos | `double value` | double | 返回指定数字的反余弦值 |
-| Atan | `double value` | double | 返回指定数字的反正切值 |
-| Atan2 | `double y, double x` | double | 返回由正切值的商所定义的角度 |
-| Sinh | `double value` | double | 返回指定角度的双曲正弦值 |
-| Cosh | `double value` | double | 返回指定角度的双曲余弦值 |
-| Tanh | `double value` | double | 返回指定角度的双曲正切值 |
+| Sin/Cos/Tan | double radians | double | 返回指定弧度的正弦/余弦/正切值 |
+| Asin/Acos/Atan | double value | double | 返回指定数字的反正弦/反余弦/反正切值 |
+| Atan2 | double y, double x | double | 返回由正切值的商所定义的角度 |
+| Sinh/Cosh/Tanh | double value | double | 返回指定角度的双曲正弦/余弦/正切值 |
 
-#### 其他实用函数
+#### 常量
 
-| 函数 | 参数 | 返回值 | 作用说明 |
+| 名称 | 类型 | 值 | 说明 |
 |------|------|--------|----------|
-| PI | - | double | 表示圆周率π的常量 (约3.14159) |
-| E | - | double | 表示自然对数的底数e的常量 (约2.71828) |
+| PI | double | 3.141592653589793 | 圆周率π |
+| E | double | 2.718281828459045 | 自然对数的底数e |
 
 通过合理使用Math类，可以大大简化数学计算的代码编写，提高开发效率和代码可读性。
 
@@ -2216,11 +2202,11 @@ Console.WriteLine();
 
 | 方法 | 参数 | 返回值 | 作用说明 |
 |------|------|--------|----------|
-| Next() | 无 | int | 返回非负随机整数 |
-| Next(maxValue) | int | int | 返回0到maxValue之间的随机整数（不包含maxValue） |
-| Next(minValue, maxValue) | int, int | int | 返回minValue到maxValue之间的随机整数（包含minValue，不包含maxValue） |
-| NextDouble() | 无 | double | 返回0.0到1.0之间的随机浮点数 |
-| NextBytes(buffer) | byte[] | void | 用随机数填充字节数组 |
+| Next | (int maxValue) 或 (int minValue, int maxValue) | int | 生成随机整数。无参返回非负整数，一个参数返回0到maxValue-1的值，两个参数返回minValue到maxValue-1的值 |
+| NextDouble | 无 | double | 返回0.0到1.0之间的随机浮点数 |
+| NextBytes | byte[] buffer | void | 用随机数填充字节数组 |
+| NextInt64 | (long maxValue) 或 (long minValue, long maxValue) | long | 生成随机长整数 (C# 10+) |
+| NextSingle | 无 | float | 返回0.0到1.0之间的随机单精度浮点数 (C# 10+) |
 
 通过合理使用Random类，可以为应用程序添加随机性，增强用户体验，实现游戏逻辑，进行模拟计算等。
 
@@ -2882,6 +2868,14 @@ int[] reverseArray = { 1, 2, 3, 4, 5 };
 Console.WriteLine($"反转前: {string.Join(", ", reverseArray)}");
 Array.Reverse(reverseArray);
 Console.WriteLine($"反转后: {string.Join(", ", reverseArray)}");
+
+// Resize方法 - 调整数组大小（注意：这是Array类的静态方法，但定义在System命名空间中）
+int[] resizeArray = { 1, 2, 3 };
+Console.WriteLine($"调整大小前: {string.Join(", ", resizeArray)} (长度: {resizeArray.Length})");
+Array.Resize(ref resizeArray, 5); // 扩展到5个元素
+Console.WriteLine($"扩展后: {string.Join(", ", resizeArray)} (长度: {resizeArray.Length})");
+Array.Resize(ref resizeArray, 2); // 缩小到2个元素
+Console.WriteLine($"缩小后: {string.Join(", ", resizeArray)} (长度: {resizeArray.Length})");
 ```
 
 ### Array的实际应用示例
@@ -3012,34 +3006,64 @@ class ArrayExamples
 
 | 属性 | 类型 | 作用说明 |
 |------|------|----------|
-| Length | int | 获取数组中所有元素的总数 |
-| Rank | int | 获取数组的维数 |
-| IsFixedSize | bool | 获取一个值，该值指示数组是否有固定大小 |
-| IsReadOnly | bool | 获取一个值，该值指示数组是否为只读 |
-| IsSynchronized | bool | 获取一个值，该值指示对数组的访问是否同步（线程安全） |
-| SyncRoot | object | 获取可用于同步对数组的访问的对象 |
+| Length | int | 获取数组中所有元素的总数。例如：int[] arr = {1,2,3}; int count = arr.Length; // 返回3 |
+| Rank | int | 获取数组的维数。一维数组返回1，二维数组返回2，以此类推 |
+| IsFixedSize | bool | 获取一个值，该值指示数组是否有固定大小。对于所有Array实例，该值始终为true |
+| IsReadOnly | bool | 获取一个值，该值指示数组是否为只读。对于所有Array实例，该值始终为false |
+| IsSynchronized | bool | 获取一个值，该值指示对数组的访问是否同步（线程安全）。对于所有Array实例，该值始终为false |
+| SyncRoot | object | 获取可用于同步对数组的访问的对象。通常用于多线程环境中的同步操作 |
 
 #### 常用静态方法
 
 | 方法 | 参数 | 返回值 | 作用说明 |
 |------|------|--------|----------|
-| BinarySearch(Array, object) | Array, object | int | 在已排序的一维数组中搜索指定对象 |
-| Clear(Array, int, int) | Array, int, int | void | 将数组中的元素设置为默认值 |
-| Copy(Array, Array, int) | Array, Array, int | void | 从第一个数组复制指定数量的元素到第二个数组 |
-| CreateInstance(Type, int) | Type, int | Array | 创建指定类型和维度的数组 |
-| IndexOf(Array, object) | Array, object | int | 在一维数组中搜索指定对象，返回首次出现的索引 |
-| LastIndexOf(Array, object) | Array, object | int | 在一维数组中搜索指定对象，返回最后出现的索引 |
-| Reverse(Array) | Array | void | 反转整个一维数组中元素的顺序 |
-| Sort(Array) | Array | void | 对一维数组中的元素进行排序 |
+| BinarySearch(Array, object) | Array array, object value | int | 在已排序的一维数组中搜索指定对象。如果找到，返回元素索引；否则返回负数。array必须已排序 |
+| BinarySearch(Array, object, IComparer) | Array array, object value, IComparer comparer | int | 使用指定的IComparer接口在已排序的数组中搜索元素 |
+| BinarySearch(Array, int, int, object) | Array array, int index, int length, object value | int | 在数组的指定范围内搜索元素。index是起始索引，length是搜索的元素个数 |
+| Clear(Array, int, int) | Array array, int index, int length | void | 将数组中指定范围的元素设置为该类型默认值。index是起始索引，length是要清除的元素个数 |
+| Copy(Array, Array, int) | Array sourceArray, Array destinationArray, int length | void | 从第一个数组复制指定数量的元素到第二个数组。length是要复制的元素个数 |
+| Copy(Array, int, Array, int, int) | Array sourceArray, int sourceIndex, Array destinationArray, int destinationIndex, int length | void | 从源数组的指定索引开始，复制指定数量的元素到目标数组的指定索引位置 |
+| CreateInstance(Type, int) | Type elementType, int length | Array | 创建指定类型和一维长度的数组。例如：Array.CreateInstance(typeof(int), 5)创建包含5个int元素的数组 |
+| CreateInstance(Type, int[]) | Type elementType, int[] lengths | Array | 创建指定类型和维度长度的多维数组。lengths数组指定每个维度的长度 |
+| CreateInstance(Type, int[], int[]) | Type elementType, int[] lengths, int[] lowerBounds | Array | 创建指定类型、维度长度和下界的多维数组 |
+| IndexOf(Array, object) | Array array, object value | int | 在一维数组中搜索指定对象，返回首次出现的索引。如果未找到，返回-1 |
+| IndexOf(Array, object, int) | Array array, object value, int startIndex | int | 从指定索引开始，在一维数组中搜索指定对象 |
+| IndexOf(Array, object, int, int) | Array array, object value, int startIndex, int count | int | 在数组的指定范围内搜索指定对象。startIndex是起始索引，count是搜索的元素个数 |
+| LastIndexOf(Array, object) | Array array, object value | int | 在一维数组中搜索指定对象，返回最后出现的索引。如果未找到，返回-1 |
+| LastIndexOf(Array, object, int) | Array array, object value, int startIndex | int | 从指定索引开始，反向搜索指定对象 |
+| LastIndexOf(Array, object, int, int) | Array array, object value, int startIndex, int count | int | 在数组的指定范围内反向搜索指定对象 |
+| Reverse(Array) | Array array | void | 反转整个一维数组中元素的顺序 |
+| Reverse(Array, int, int) | Array array, int index, int length | void | 反转数组指定范围内元素的顺序。index是起始索引，length是要反转的元素个数 |
+| Sort(Array) | Array array | void | 对一维数组中的元素进行升序排序 |
+| Sort(Array, Array) | Array keys, Array items | void | 基于第一个数组中的键对两个数组进行排序，第一个数组包含键，第二个数组包含对应的项 |
+| Sort(Array, IComparer) | Array array, IComparer comparer | void | 使用指定的IComparer接口对数组进行排序 |
+| Sort(Array, int, int) | Array array, int index, int length | void | 对数组的指定范围内元素进行排序。index是起始索引，length是要排序的元素个数 |
+| Sort(Array, Array, IComparer) | Array keys, Array items, IComparer comparer | void | 基于第一个数组中的键对两个数组进行排序，并使用指定的IComparer接口 |
+| Sort(Array, Array, int, int) | Array keys, Array items, int index, int length | void | 对两个数组的指定范围内元素进行排序 |
+| Sort(Array, Array, int, int, IComparer) | Array keys, Array items, int index, int length, IComparer comparer | void | 对两个数组的指定范围内元素进行排序，并使用指定的IComparer接口 |
+| Sort(Array, int, int, IComparer) | Array array, int index, int length, IComparer comparer | void | 对数组的指定范围内元素进行排序，并使用指定的IComparer接口 |
+| Resize<T>(ref T[], int) | ref T[] array, int newSize | void | 将数组大小调整为指定大小。这是一个泛型方法，不是Array类的成员，但与数组操作密切相关 |
 
 #### 常用实例方法
 
 | 方法 | 参数 | 返回值 | 作用说明 |
 |------|------|--------|----------|
-| Clone() | 无 | object | 创建数组的浅表副本 |
-| CopyTo(Array, int) | Array, int | void | 将当前一维数组的所有元素复制到指定的一维数组中 |
-| GetLength(int) | int | int | 获取指定维度的长度 |
-| GetValue(int) | int | object | 获取一维数组中指定位置的值 |
-| SetValue(object, int) | object, int | void | 设置一维数组中指定位置的值 |
+| Clone() | 无 | object | 创建数组的浅表副本。对于值类型数组，会复制值；对于引用类型数组，会复制引用但不复制引用的对象 |
+| CopyTo(Array, int) | Array array, int index | void | 将当前一维数组的所有元素复制到指定的一维数组中。index是目标数组中的起始索引 |
+| GetLength(int) | int dimension | int | 获取指定维度的长度。dimension是维度索引，从0开始。对于二维数组，0表示行数，1表示列数 |
+| GetLowerBound(int) | int dimension | int | 获取指定维度的下界。对于C#数组，通常返回0 |
+| GetUpperBound(int) | int dimension | int | 获取指定维度的上界。等于该维度长度减1 |
+| GetValue(int) | int index | object | 获取一维数组中指定位置的值。index是元素索引 |
+| GetValue(int, int) | int index1, int index2 | object | 获取二维数组中指定位置的值。index1是行索引，index2是列索引 |
+| GetValue(int, int, int) | int index1, int index2, int index3 | object | 获取三维数组中指定位置的值 |
+| GetValue(int[]) | int[] indices | object | 获取多维数组中指定位置的值。indices数组包含每个维度的索引 |
+| SetValue(object, int) | object value, int index | void | 设置一维数组中指定位置的值。value是要设置的值，index是元素索引 |
+| SetValue(object, int, int) | object value, int index1, int index2 | void | 设置二维数组中指定位置的值。index1是行索引，index2是列索引 |
+| SetValue(object, int, int, int) | object value, int index1, int index2, int index3 | void | 设置三维数组中指定位置的值 |
+| SetValue(object, int[]) | object value, int[] indices | void | 设置多维数组中指定位置的值。indices数组包含每个维度的索引 |
+
+需要注意的是，Array类本身不直接提供Resize方法。Array.Resize<T>(ref T[] array, int newSize)是一个静态泛型方法，定义在System命名空间中，专门用于调整数组大小。当数组扩展时，新元素被设置为类型的默认值；当数组缩小时，多余的元素会被丢弃。
+
+在实际开发中，如果需要动态调整数组大小，通常建议使用List<T>集合类，它提供了更好的性能和更丰富的功能。但在某些特定场景下，Array.Resize方法仍然很有用。
 
 通过合理使用Array类，可以高效地处理各种数据集合操作，满足应用程序中对数据存储和处理的需求。

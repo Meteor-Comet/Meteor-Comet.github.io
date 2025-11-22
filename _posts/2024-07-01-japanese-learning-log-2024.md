@@ -3,6 +3,7 @@ layout:     post
 title:      "日语学习日志"
 date:       2024-7-1 08:00:00
 author:     "Comet"
+hidden:      true
 header-style: text
 tags:
     - 日语

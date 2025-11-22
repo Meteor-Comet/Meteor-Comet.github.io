@@ -43,23 +43,44 @@ tags:
 - **图形结构**：数据元素之间存在多对多的任意关系
 
 ### 1.3 算法复杂度分析
-- **时间复杂度**：衡量算法执行时间随输入规模增长的变化趋势
-- **空间复杂度**：衡量算法所需存储空间随输入规模增长的变化趋势
+算法复杂度分析是评估算法效率的重要手段，主要包括时间复杂度和空间复杂度两个方面。
 
 #### 1.3.1 时间复杂度表示法
-- **大O记号（Big O Notation）**：表示算法最坏情况下的时间复杂度
-- **Ω记号（Big Omega Notation）**：表示算法最好情况下的时间复杂度
-- **Θ记号（Big Theta Notation）**：表示算法平均情况下的时间复杂度
+时间复杂度是用来描述算法运行时间与输入规模之间关系的度量。我们通常使用大O记号（Big O Notation）来表示算法的最坏情况时间复杂度。
 
-#### 1.3.2 常见时间复杂度
-| 复杂度 | 名称 | 示例 |
-|--------|------|------|
-| O(1) | 常数时间 | 访问数组元素 |
-| O(log n) | 对数时间 | 二分查找 |
-| O(n) | 线性时间 | 遍历数组 |
-| O(n log n) | 线性对数时间 | 快速排序平均情况 |
-| O(n²) | 平方时间 | 冒泡排序 |
-| O(2ⁿ) | 指数时间 | 求解旅行商问题 |
+大O记号描述的是算法运行时间的增长率，而非精确的运行时间。它关注的是当输入规模趋向于无穷大时，算法运行时间的主导项。
+
+除了大O记号之外，还有其他几种常用的复杂度表示法：
+- **Ω记号（Big Omega Notation）**：表示算法最好情况下的时间复杂度，即算法运行时间的下界
+- **Θ记号（Big Theta Notation）**：表示算法平均情况下的时间复杂度，即算法运行时间的紧确界
+
+#### 1.3.2 常见时间复杂度详解
+
+**O(1) - 常数时间复杂度**
+这是最优的时间复杂度，表示算法的执行时间不随输入规模的变化而变化。无论处理多少数据，算法都能在相同的时间内完成。例如访问数组中的某个元素，只需要通过索引直接定位即可，不需要遍历整个数组。
+
+**O(log n) - 对数时间复杂度**
+这种复杂度常见于分治算法中，每次操作都能将问题规模减半。典型的例子是二分查找，每次比较都能排除一半的可能性。随着输入规模的增大，执行时间增长非常缓慢。
+
+**O(n) - 线性时间复杂度**
+算法的执行时间与输入规模成正比。需要遍历所有输入数据一次才能得到结果。例如查找数组中的最大值，需要遍历整个数组。
+
+**O(n log n) - 线性对数时间复杂度**
+这种复杂度常见于高效的排序算法中，如快速排序、归并排序和堆排序。它们通常采用分治策略，将问题分解为更小的子问题。
+
+**O(n²) - 平方时间复杂度**
+这类算法通常涉及嵌套循环，内外两层循环都需要遍历所有数据。典型的例子是冒泡排序和选择排序。当输入规模较大时，执行时间会急剧增长。
+
+**O(2ⁿ) - 指数时间复杂度**
+这类算法的执行时间随着输入规模呈指数级增长，常见于暴力搜索某些组合问题。即使是很小的输入规模，也可能导致无法接受的执行时间。
+
+**O(n!) - 阶乘时间复杂度**
+这是最糟糕的时间复杂度之一，常见于生成所有排列的问题。随着输入规模的增长，执行时间会迅速变得不可行。
+
+#### 1.3.3 空间复杂度分析
+空间复杂度是指算法在运行过程中临时占用存储空间大小的量度。同样使用大O记号来表示。
+
+需要注意的是，空间复杂度通常不包括输入数据本身占用的空间，只计算算法运行过程中额外申请的空间。
 
 ---
 
@@ -1301,16 +1322,682 @@ public class HashTable<K, V> {
 
 ---
 
-## 6. 高级数据结构简介
+## 6. 算法详解
 
-### 6.1 并查集（Disjoint Set）
+### 6.1 排序算法
+
+#### 6.1.1 冒泡排序（Bubble Sort）
+冒泡排序是一种简单的排序算法，它重复地遍历要排序的数列，一次比较两个元素，如果他们的顺序错误就把他们交换过来。遍历数列的工作是重复地进行直到没有再需要交换，也就是说该数列已经排序完成。
+
+```java
+public class BubbleSort {
+    public static void bubbleSort(int[] arr) {
+        int n = arr.length;
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = 0; j < n - i - 1; j++) {
+                if (arr[j] > arr[j + 1]) {
+                    // 交换元素
+                    int temp = arr[j];
+                    arr[j] = arr[j + 1];
+                    arr[j + 1] = temp;
+                }
+            }
+        }
+    }
+}
+```
+
+**时间复杂度：**
+- 最好情况：O(n)（已经排序的情况）
+- 平均情况：O(n²)
+- 最坏情况：O(n²)（逆序排列）
+
+**空间复杂度：** O(1)
+
+#### 6.1.2 选择排序（Selection Sort）
+选择排序是一种简单直观的排序算法。它的工作原理是每一次从待排序的数据元素中选出最小（或最大）的一个元素，存放在序列的起始位置，直到全部待排序的数据元素排完。
+
+```java
+public class SelectionSort {
+    public static void selectionSort(int[] arr) {
+        int n = arr.length;
+        
+        // 选择排序的主要逻辑
+        for (int i = 0; i < n - 1; i++) {
+            // 找到最小元素的索引
+            int minIdx = i;
+            for (int j = i + 1; j < n; j++) {
+                if (arr[j] < arr[minIdx]) {
+                    minIdx = j;
+                }
+            }
+            
+            // 交换找到的最小元素与第一个元素
+            int temp = arr[minIdx];
+            arr[minIdx] = arr[i];
+            arr[i] = temp;
+        }
+    }
+}
+```
+
+**时间复杂度：**
+- 最好情况：O(n²)
+- 平均情况：O(n²)
+- 最坏情况：O(n²)
+
+**空间复杂度：** O(1)
+
+#### 6.1.3 插入排序（Insertion Sort）
+插入排序是一种简单直观的排序算法。它的工作原理是通过构建有序序列，对于未排序数据，在已排序序列中从后向前扫描，找到相应位置并插入。
+
+```java
+public class InsertionSort {
+    public static void insertionSort(int[] arr) {
+        int n = arr.length;
+        for (int i = 1; i < n; ++i) {
+            int key = arr[i];
+            int j = i - 1;
+            
+            // 将大于key的元素向后移动一位
+            while (j >= 0 && arr[j] > key) {
+                arr[j + 1] = arr[j];
+                j = j - 1;
+            }
+            arr[j + 1] = key;
+        }
+    }
+}
+```
+
+**时间复杂度：**
+- 最好情况：O(n)（已经排序的情况）
+- 平均情况：O(n²)
+- 最坏情况：O(n²)（逆序排列）
+
+**空间复杂度：** O(1)
+
+#### 6.1.4 归并排序（Merge Sort）
+归并排序是一种分治算法。它将已有序的子序列合并，得到完全有序的序列；即先使每个子序列有序，再使子序列段间有序。
+
+```java
+public class MergeSort {
+    public static void mergeSort(int[] arr, int l, int r) {
+        if (l < r) {
+            // 找到中点
+            int m = (l + r) / 2;
+            
+            // 递归排序第一和第二部分
+            mergeSort(arr, l, m);
+            mergeSort(arr, m + 1, r);
+            
+            // 合并已排序的部分
+            merge(arr, l, m, r);
+        }
+    }
+    
+    public static void merge(int[] arr, int l, int m, int r) {
+        // 找到两个子数组的大小
+        int n1 = m - l + 1;
+        int n2 = r - m;
+        
+        // 创建临时数组
+        int[] L = new int[n1];
+        int[] R = new int[n2];
+        
+        // 复制数据到临时数组
+        for (int i = 0; i < n1; ++i)
+            L[i] = arr[l + i];
+        for (int j = 0; j < n2; ++j)
+            R[j] = arr[m + 1 + j];
+        
+        // 合并临时数组回到arr[l..r]
+        int i = 0, j = 0;
+        int k = l;
+        while (i < n1 && j < n2) {
+            if (L[i] <= R[j]) {
+                arr[k] = L[i];
+                i++;
+            } else {
+                arr[k] = R[j];
+                j++;
+            }
+            k++;
+        }
+        
+        // 复制L[]的剩余元素
+        while (i < n1) {
+            arr[k] = L[i];
+            i++;
+            k++;
+        }
+        
+        // 复制R[]的剩余元素
+        while (j < n2) {
+            arr[k] = R[j];
+            j++;
+            k++;
+        }
+    }
+}
+```
+
+**时间复杂度：**
+- 最好情况：O(n log n)
+- 平均情况：O(n log n)
+- 最坏情况：O(n log n)
+
+**空间复杂度：** O(n)
+
+#### 6.1.5 快速排序（Quick Sort）
+快速排序是一种分治算法。它选择一个元素作为基准（pivot），将数组分为两部分，一部分小于基准，另一部分大于基准，然后递归地对这两部分进行排序。
+
+```java
+public class QuickSort {
+    public static void quickSort(int[] arr, int low, int high) {
+        if (low < high) {
+            // pi是分区索引，arr[pi]现在在正确位置
+            int pi = partition(arr, low, high);
+            
+            // 分别对基准元素前后两部分进行排序
+            quickSort(arr, low, pi - 1);
+            quickSort(arr, pi + 1, high);
+        }
+    }
+    
+    public static int partition(int[] arr, int low, int high) {
+        int pivot = arr[high];
+        int i = (low - 1); // 较小元素的索引
+        
+        for (int j = low; j < high; j++) {
+            // 如果当前元素小于或等于基准
+            if (arr[j] <= pivot) {
+                i++;
+                
+                // 交换arr[i]和arr[j]
+                int temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+            }
+        }
+        
+        // 交换arr[i+1]和arr[high]（即基准元素）
+        int temp = arr[i + 1];
+        arr[i + 1] = arr[high];
+        arr[high] = temp;
+        
+        return i + 1;
+    }
+}
+```
+
+**时间复杂度：**
+- 最好情况：O(n log n)
+- 平均情况：O(n log n)
+- 最坏情况：O(n²)（每次选的基准都是最大或最小元素）
+
+**空间复杂度：** O(log n)
+
+#### 6.1.6 堆排序（Heap Sort）
+堆排序是一种基于比较的排序算法，利用堆这种数据结构来设计算法。
+
+```java
+public class HeapSort {
+    public static void heapSort(int[] arr) {
+        int n = arr.length;
+        
+        // 构建最大堆（从最后一个非叶子节点开始）
+        for (int i = n / 2 - 1; i >= 0; i--)
+            heapify(arr, n, i);
+        
+        // 一个个从堆顶取出元素
+        for (int i = n - 1; i > 0; i--) {
+            // 将当前最大元素移到末尾
+            int temp = arr[0];
+            arr[0] = arr[i];
+            arr[i] = temp;
+            
+            // 重新调整堆
+            heapify(arr, i, 0);
+        }
+    }
+    
+    public static void heapify(int[] arr, int n, int i) {
+        int largest = i; // 初始化最大为根节点
+        int l = 2 * i + 1; // 左子节点
+        int r = 2 * i + 2; // 右子节点
+        
+        // 如果左子节点大于根节点
+        if (l < n && arr[l] > arr[largest])
+            largest = l;
+        
+        // 如果右子节点大于目前的最大值
+        if (r < n && arr[r] > arr[largest])
+            largest = r;
+        
+        // 如果最大值不是根节点
+        if (largest != i) {
+            int swap = arr[i];
+            arr[i] = arr[largest];
+            arr[largest] = swap;
+            
+            // 递归地调整受影响的子树
+            heapify(arr, n, largest);
+        }
+    }
+}
+```
+
+**时间复杂度：**
+- 最好情况：O(n log n)
+- 平均情况：O(n log n)
+- 最坏情况：O(n log n)
+
+**空间复杂度：** O(1)
+
+### 6.2 贪心算法（Greedy Algorithm）
+贪心算法是一种在每一步选择中都采取在当前状态下最好或最优（即最有利）的选择，从而希望导致结果是最好或最优的算法。
+
+#### 6.2.1 活动选择问题
+活动选择问题是贪心算法的经典应用之一。给定n个活动，每个活动都有开始时间和结束时间，选择最多数量的活动，使得它们在时间上不冲突。
+
+```java
+import java.util.*;
+public class ActivitySelection {
+    // 表示活动的类
+    static class Activity {
+        int start, finish;
+        
+        public Activity(int start, int finish) {
+            this.start = start;
+            this.finish = finish;
+        }
+    }
+    
+    // 按照结束时间排序的比较器
+    static class Compare implements Comparator<Activity> {
+        public int compare(Activity s1, Activity s2) {
+            return s1.finish - s2.finish;
+        }
+    }
+    
+    // 返回最大数量的不冲突活动
+    public static void printMaxActivities(Activity[] activities) {
+        // 按结束时间排序
+        Arrays.sort(activities, new Compare());
+        
+        System.out.println("选择的活动:");
+        
+        // 第一个活动总是被选择
+        int i = 0;
+        System.out.println("(" + activities[i].start + ", " + activities[i].finish + ")");
+        
+        // 考虑其余活动
+        for (int j = 1; j < activities.length; j++) {
+            // 如果这个活动的开始时间大于等于前一个选定活动的结束时间，则选择它
+            if (activities[j].start >= activities[i].finish) {
+                System.out.println("(" + activities[j].start + ", " + activities[j].finish + ")");
+                i = j;
+            }
+        }
+    }
+}
+```
+
+#### 6.2.2 分数背包问题
+分数背包问题也是贪心算法的经典应用。与0/1背包问题不同，我们可以取物品的一部分。
+
+```java
+import java.util.*;
+public class FractionalKnapsack {
+    // 物品类
+    static class Item {
+        int value, weight;
+        double ratio; // 价值密度
+        
+        public Item(int value, int weight) {
+            this.value = value;
+            this.weight = weight;
+            this.ratio = (double) value / weight;
+        }
+    }
+    
+    // 按价值密度降序排序的比较器
+    static class Compare implements Comparator<Item> {
+        public int compare(Item a, Item b) {
+            return Double.compare(b.ratio, a.ratio);
+        }
+    }
+    
+    // 返回最大价值
+    public static double fractionalKnapsack(int W, Item[] items) {
+        // 按价值密度排序
+        Arrays.sort(items, new Compare());
+        
+        int curWeight = 0; // 当前重量
+        double finalValue = 0.0; // 最终价值
+        
+        for (int i = 0; i < items.length; i++) {
+            // 如果可以完全放入
+            if (curWeight + items[i].weight <= W) {
+                curWeight += items[i].weight;
+                finalValue += items[i].value;
+            } 
+            // 如果只能放入一部分
+            else {
+                int remain = W - curWeight;
+                finalValue += items[i].value * ((double) remain / items[i].weight);
+                break;
+            }
+        }
+        
+        return finalValue;
+    }
+}
+```
+
+### 6.3 回溯算法（Backtracking）
+回溯算法是一种通过探索所有可能的候选解来找出所有解的算法。如果候选解被确认不是一个解（或者至少不是最后一个解），回溯算法会通过在上一步进行一些变化来抛弃该解，即"回溯"并尝试其他可能。
+
+#### 6.3.1 N皇后问题
+N皇后问题是回溯算法的经典问题。目标是在N×N的棋盘上放置N个皇后，使得它们互不攻击。
+
+```java
+public class NQueens {
+    final int N = 4;
+    
+    // 打印解决方案
+    void printSolution(int board[][]) {
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++)
+                System.out.print(" " + board[i][j] + " ");
+            System.out.println();
+        }
+    }
+    
+    // 检查是否可以在board[row][col]放置皇后
+    boolean isSafe(int board[][], int row, int col) {
+        int i, j;
+        
+        // 检查当前行左边是否有皇后
+        for (i = 0; i < col; i++)
+            if (board[row][i] == 1)
+                return false;
+        
+        // 检查左上对角线是否有皇后
+        for (i = row, j = col; i >= 0 && j >= 0; i--, j--)
+            if (board[i][j] == 1)
+                return false;
+        
+        // 检查左下对角线是否有皇后
+        for (i = row, j = col; j >= 0 && i < N; i++, j--)
+            if (board[i][j] == 1)
+                return false;
+        
+        return true;
+    }
+    
+    // 使用回溯解决N皇后问题的主要函数
+    boolean solveNQUtil(int board[][], int col) {
+        // 如果所有皇后都被放置，则返回true
+        if (col >= N)
+            return true;
+        
+        // 考虑这一列中的每一行并尝试放置皇后
+        for (int i = 0; i < N; i++) {
+            // 检查是否可以放置皇后
+            if (isSafe(board, i, col)) {
+                // 放置皇后
+                board[i][col] = 1;
+                
+                // 递归放置其余皇后
+                if (solveNQUtil(board, col + 1) == true)
+                    return true;
+                
+                // 如果放置皇后在board[i][col]不能导致解决方案，则移除皇后
+                board[i][col] = 0;
+            }
+        }
+        
+        // 如果皇后不能放置在任何行中，则返回false
+        return false;
+    }
+    
+    // 解决N皇后问题
+    boolean solveNQ() {
+        int[][] board = new int[N][N];
+        
+        if (solveNQUtil(board, 0) == false) {
+            System.out.print("Solution does not exist");
+            return false;
+        }
+        
+        printSolution(board);
+        return true;
+    }
+}
+```
+
+#### 6.3.2 图的着色问题
+图着色问题要求为图的所有顶点着色，使得相邻顶点的颜色不同，且使用的颜色数最少。
+
+```java
+public class GraphColoring {
+    final int V = 4; // 顶点数
+    
+    // 打印解决方案
+    void printSolution(int[] color) {
+        System.out.println("解决方案: ");
+        for (int i = 0; i < V; i++)
+            System.out.println("顶点 " + i + " -> 颜色 " + color[i]);
+    }
+    
+    // 检查分配给v的颜色是否与相邻顶点的颜色相同
+    boolean isSafe(int v, int[][] graph, int[] color, int c) {
+        for (int i = 0; i < V; i++)
+            if (graph[v][i] == 1 && c == color[i])
+                return false;
+        return true;
+    }
+    
+    // 图着色的主要递归函数
+    boolean graphColoringUtil(int[][] graph, int m, int[] color, int v) {
+        // 如果所有顶点都被着色，则返回true
+        if (v == V)
+            return true;
+        
+        // 尝试不同的颜色
+        for (int c = 1; c <= m; c++) {
+            // 检查是否可以分配颜色c到顶点v
+            if (isSafe(v, graph, color, c)) {
+                color[v] = c;
+                
+                // 递归为剩余顶点着色
+                if (graphColoringUtil(graph, m, color, v + 1))
+                    return true;
+                
+                // 如果给顶点v分配颜色c没有导致解决方案，则移除颜色
+                color[v] = 0;
+            }
+        }
+        
+        // 如果不能为该顶点着色，则返回false
+        return false;
+    }
+    
+    // 图着色的主要函数
+    boolean graphColoring(int[][] graph, int m) {
+        int[] color = new int[V];
+        
+        // 调用递归辅助函数解决着色问题
+        if (!graphColoringUtil(graph, m, color, 0)) {
+            System.out.println("解决方案不存在");
+            return false;
+        }
+        
+        // 打印解决方案
+        printSolution(color);
+        return true;
+    }
+}
+```
+
+### 6.4 动态规划（Dynamic Programming）
+动态规划是一种通过把原问题分解为相对简单的子问题的方式求解复杂问题的方法。动态规划常常适用于有重叠子问题和最优子结构性质的问题。
+
+#### 6.4.1 斐波那契数列
+斐波那契数列是动态规划的经典例子，用来演示重叠子问题的概念。
+
+```java
+public class Fibonacci {
+    // 递归方法（效率低）
+    public static int fibRecursive(int n) {
+        if (n <= 1)
+            return n;
+        return fibRecursive(n - 1) + fibRecursive(n - 2);
+    }
+    
+    // 动态规划方法（自底向上）
+    public static int fibDP(int n) {
+        if (n <= 1)
+            return n;
+        
+        int[] dp = new int[n + 1];
+        dp[0] = 0;
+        dp[1] = 1;
+        
+        for (int i = 2; i <= n; i++) {
+            dp[i] = dp[i - 1] + dp[i - 2];
+        }
+        
+        return dp[n];
+    }
+    
+    // 空间优化的动态规划方法
+    public static int fibOptimized(int n) {
+        if (n <= 1)
+            return n;
+        
+        int prev2 = 0;
+        int prev1 = 1;
+        int current = 0;
+        
+        for (int i = 2; i <= n; i++) {
+            current = prev1 + prev2;
+            prev2 = prev1;
+            prev1 = current;
+        }
+        
+        return current;
+    }
+}
+```
+
+#### 6.4.2 0/1背包问题
+0/1背包问题是动态规划的经典应用之一。
+
+```java
+public class Knapsack {
+    // 返回最大价值
+    public static int knapSack(int W, int[] wt, int[] val, int n) {
+        int[][] dp = new int[n + 1][W + 1];
+        
+        // 构建dp表
+        for (int i = 0; i <= n; i++) {
+            for (int w = 0; w <= W; w++) {
+                if (i == 0 || w == 0)
+                    dp[i][w] = 0;
+                else if (wt[i - 1] <= w)
+                    dp[i][w] = Math.max(val[i - 1] + dp[i - 1][w - wt[i - 1]], dp[i - 1][w]);
+                else
+                    dp[i][w] = dp[i - 1][w];
+            }
+        }
+        
+        return dp[n][W];
+    }
+}
+```
+
+#### 6.4.3 最长公共子序列（LCS）
+最长公共子序列问题是寻找两个序列共同拥有的最长子序列。
+
+```java
+public class LCS {
+    // 返回最长公共子序列的长度
+    public static int lcs(String X, String Y, int m, int n) {
+        int[][] dp = new int[m + 1][n + 1];
+        
+        for (int i = 0; i <= m; i++) {
+            for (int j = 0; j <= n; j++) {
+                if (i == 0 || j == 0)
+                    dp[i][j] = 0;
+                else if (X.charAt(i - 1) == Y.charAt(j - 1))
+                    dp[i][j] = dp[i - 1][j - 1] + 1;
+                else
+                    dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+            }
+        }
+        
+        return dp[m][n];
+    }
+    
+    // 打印最长公共子序列
+    public static void printLCS(String X, String Y, int m, int n) {
+        int[][] dp = new int[m + 1][n + 1];
+        
+        // 构建dp表
+        for (int i = 0; i <= m; i++) {
+            for (int j = 0; j <= n; j++) {
+                if (i == 0 || j == 0)
+                    dp[i][j] = 0;
+                else if (X.charAt(i - 1) == Y.charAt(j - 1))
+                    dp[i][j] = dp[i - 1][j - 1] + 1;
+                else
+                    dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+            }
+        }
+        
+        // 通过dp表构造LCS
+        int index = dp[m][n];
+        char[] lcs = new char[index + 1];
+        lcs[index] = '\0'; // 设置终止符
+        
+        int i = m, j = n;
+        while (i > 0 && j > 0) {
+            // 如果当前字符匹配
+            if (X.charAt(i - 1) == Y.charAt(j - 1)) {
+                lcs[index - 1] = X.charAt(i - 1); // 将字符放入结果中
+                i--;
+                j--;
+                index--;
+            }
+            // 否则找出较大的值并向上或向左移动
+            else if (dp[i - 1][j] > dp[i][j - 1])
+                i--;
+            else
+                j--;
+        }
+        
+        System.out.print("LCS of " + X + " and " + Y + " is ");
+        for (int k = 0; k <= dp[m][n]; k++)
+            System.out.print(lcs[k]);
+    }
+}
+```
+
+---
+
+## 7. 高级数据结构简介
+
+### 7.1 并查集（Disjoint Set）
 用于处理不相交集合的合并及查询问题。
 
 **操作：**
 - find：查找元素所属集合
 - union：合并两个集合
 
-### 6.2 线段树（Segment Tree）
+### 7.2 线段树（Segment Tree）
 用于处理区间查询问题的数据结构。
 
 **特点：**
@@ -1318,7 +2005,7 @@ public class HashTable<K, V> {
 - 查询时间复杂度：O(log n)
 - 更新时间复杂度：O(log n)
 
-### 6.3 字典树（Trie）
+### 7.3 字典树（Trie）
 用于高效存储和查找字符串集合的数据结构。
 
 **应用场景：**
@@ -1326,20 +2013,20 @@ public class HashTable<K, V> {
 - 拼写检查
 - IP路由
 
-### 6.4 跳表（Skip List）
+### 7.4 跳表（Skip List）
 一种概率性数据结构，可以在O(log n)时间内完成查找、插入和删除操作。
 
 ---
 
-## 7. 数据结构选择与应用实践
+## 8. 数据结构选择与应用实践
 
-### 7.1 如何选择合适的数据结构
+### 8.1 如何选择合适的数据结构
 1. **考虑操作频率**：哪些操作最频繁？
 2. **考虑时间复杂度**：各项操作的时间要求是什么？
 3. **考虑空间复杂度**：内存使用限制如何？
 4. **考虑实现难度**：团队的技术水平能否支撑？
 
-### 7.2 实际应用场景
+### 8.2 实际应用场景
 - **缓存系统**：哈希表 + 双向链表（LRU Cache）
 - **搜索引擎**：倒排索引（哈希表 + 链表）
 - **社交网络**：图结构

@@ -1213,13 +1213,392 @@ int result = Add(5, 3);
 Console.WriteLine($"5 + 3 = {result}");
 ```
 
-### 函数参数
+### return语句详解
 
-#### 1. 值参数
+return语句用于从函数中返回，并可以返回一个值（对于有返回类型的函数）。理解return语句的各种用法对于编写清晰的代码至关重要。
 
-值参数是默认的参数传递方式，函数接收的是实际参数值的副本。
+#### 1. 基本return语句
 
 ```csharp
+// 返回值的return语句
+public int GetMax(int a, int b)
+{
+    if (a > b)
+        return a;  // 提前返回
+    return b;      // 正常返回
+}
+
+// void函数的return（可选）
+public void ProcessData()
+{
+    if (data == null)
+        return;  // 提前退出，不返回值
+    // 继续处理
+}
+
+// 返回表达式的值
+public int Square(int x)
+{
+    return x * x;  // 返回表达式的结果
+}
+
+// 返回字面量
+public string GetGreeting()
+{
+    return "Hello, World!";
+}
+```
+
+#### 2. 提前返回（Early Return）
+
+提前返回是一种编程模式，通过提前退出函数来减少嵌套层级，提高代码可读性。
+
+```csharp
+// 不使用提前返回（深层嵌套）
+public bool IsValidUser(User user)
+{
+    if (user != null)
+    {
+        if (!string.IsNullOrEmpty(user.Name))
+        {
+            if (user.Age >= 18)
+            {
+                if (user.Email != null && user.Email.Contains("@"))
+                {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+// 使用提前返回（推荐）
+public bool IsValidUser(User user)
+{
+    // 提前返回无效情况
+    if (user == null)
+        return false;
+    
+    if (string.IsNullOrEmpty(user.Name))
+        return false;
+    
+    if (user.Age < 18)
+        return false;
+    
+    if (user.Email == null || !user.Email.Contains("@"))
+        return false;
+    
+    // 所有验证通过
+    return true;
+}
+
+// 提前返回在void函数中的应用
+public void ProcessOrder(Order order)
+{
+    if (order == null)
+        return;  // 提前退出
+    
+    if (order.Items.Count == 0)
+        return;  // 提前退出
+    
+    // 处理订单
+    Console.WriteLine($"处理订单: {order.Id}");
+}
+```
+
+#### 3. 返回多个值
+
+C#提供了多种方式返回多个值：
+
+```csharp
+// 方式1：使用out参数（已介绍）
+
+// 方式2：使用元组（Tuple）- C# 7.0+
+public (int sum, int product) Calculate(int a, int b)
+{
+    return (a + b, a * b);
+}
+
+// 调用示例
+var result = Calculate(5, 3);
+Console.WriteLine($"和: {result.sum}, 积: {result.product}");
+
+// 解构元组
+(int sum, int product) = Calculate(5, 3);
+Console.WriteLine($"和: {sum}, 积: {product}");
+
+// 方式3：使用命名元组
+public (int Sum, int Product) CalculateNamed(int a, int b)
+{
+    return (Sum: a + b, Product: a * b);
+}
+
+// 调用示例
+var result2 = CalculateNamed(5, 3);
+Console.WriteLine($"和: {result2.Sum}, 积: {result2.Product}");
+
+// 方式4：返回自定义类或结构
+public class CalculationResult
+{
+    public int Sum { get; set; }
+    public int Product { get; set; }
+}
+
+public CalculationResult CalculateWithClass(int a, int b)
+{
+    return new CalculationResult
+    {
+        Sum = a + b,
+        Product = a * b
+    };
+}
+
+// 方式5：返回数组或集合
+public int[] GetMinMax(int[] numbers)
+{
+    if (numbers == null || numbers.Length == 0)
+        return new int[0];
+    
+    return new int[] { numbers.Min(), numbers.Max() };
+}
+```
+
+#### 4. 条件返回
+
+```csharp
+// 三元运算符返回
+public string GetStatus(int score)
+{
+    return score >= 60 ? "及格" : "不及格";
+}
+
+// 多个条件返回
+public string GetGrade(int score)
+{
+    if (score >= 90) return "优秀";
+    if (score >= 80) return "良好";
+    if (score >= 70) return "中等";
+    if (score >= 60) return "及格";
+    return "不及格";
+}
+
+// switch表达式返回（C# 8.0+）
+public string GetGradeSwitch(int score) => score switch
+{
+    >= 90 => "优秀",
+    >= 80 => "良好",
+    >= 70 => "中等",
+    >= 60 => "及格",
+    _ => "不及格"
+};
+```
+
+#### 5. 返回null和默认值
+
+```csharp
+// 返回null（引用类型）
+public string FindUser(int id)
+{
+    // 查找用户
+    if (userExists)
+        return user;
+    return null;  // 未找到返回null
+}
+
+// 返回默认值
+public int GetValueOrDefault(int? value)
+{
+    return value ?? 0;  // 如果为null返回0
+}
+
+// 使用default关键字
+public T GetDefault<T>()
+{
+    return default(T);  // 返回类型的默认值
+}
+
+// 调用示例
+int defaultInt = GetDefault<int>();        // 0
+string defaultString = GetDefault<string>(); // null
+bool defaultBool = GetDefault<bool>();     // false
+```
+
+#### 6. 返回集合和数组
+
+```csharp
+// 返回数组
+public int[] GetEvenNumbers(int[] numbers)
+{
+    List<int> evens = new List<int>();
+    foreach (int num in numbers)
+    {
+        if (num % 2 == 0)
+            evens.Add(num);
+    }
+    return evens.ToArray();
+}
+
+// 返回List
+public List<string> GetNames()
+{
+    return new List<string> { "张三", "李四", "王五" };
+}
+
+// 返回IEnumerable（延迟执行）
+public IEnumerable<int> GetNumbers()
+{
+    for (int i = 0; i < 10; i++)
+    {
+        yield return i;  // 使用yield return
+    }
+}
+
+// 调用示例
+foreach (int num in GetNumbers())
+{
+    Console.WriteLine(num);
+}
+```
+
+#### 7. 返回委托和Lambda
+
+```csharp
+// 返回委托
+public Func<int, int> GetMultiplier(int factor)
+{
+    return x => x * factor;
+}
+
+// 调用示例
+var multiplyBy5 = GetMultiplier(5);
+int result = multiplyBy5(10); // 50
+
+// 返回Action
+public Action<string> GetLogger(bool isError)
+{
+    if (isError)
+        return message => Console.WriteLine($"[错误] {message}");
+    else
+        return message => Console.WriteLine($"[信息] {message}");
+}
+```
+
+#### 8. return与异常处理
+
+```csharp
+// return在try-catch中的使用
+public int SafeDivide(int a, int b)
+{
+    try
+    {
+        if (b == 0)
+            throw new DivideByZeroException("除数不能为零");
+        return a / b;
+    }
+    catch (DivideByZeroException)
+    {
+        return 0;  // 发生异常时返回默认值
+    }
+}
+
+// return在finally中的注意事项
+public int ProcessWithFinally()
+{
+    try
+    {
+        return 100;
+    }
+    finally
+    {
+        // finally中的代码会在return之前执行
+        Console.WriteLine("清理资源");
+    }
+    // 注意：finally之后不能有return语句
+}
+```
+
+#### 9. return语句的最佳实践
+
+```csharp
+// 1. 单一返回点 vs 多个返回点
+// 多个返回点（推荐用于简单验证）
+public bool IsValid(string input)
+{
+    if (string.IsNullOrEmpty(input))
+        return false;
+    
+    if (input.Length < 5)
+        return false;
+    
+    return true;
+}
+
+// 单一返回点（适用于复杂逻辑）
+public string ProcessData(string input)
+{
+    string result = null;
+    
+    if (!string.IsNullOrEmpty(input))
+    {
+        result = input.Trim().ToUpper();
+        // 更多处理...
+    }
+    
+    return result;
+}
+
+// 2. 明确返回值类型
+public int? GetNullableInt()
+{
+    // 明确返回可空类型
+    return null;
+}
+
+// 3. 避免在finally中使用return（不推荐）
+public int BadExample()
+{
+    try
+    {
+        return 1;
+    }
+    finally
+    {
+        return 2;  // 这会覆盖try中的返回值，不推荐
+    }
+}
+
+// 4. 使用表达式体成员（C# 6.0+）
+public int Add(int a, int b) => a + b;
+public bool IsEven(int n) => n % 2 == 0;
+public string GetName() => "张三";
+```
+
+#### 10. return语句总结
+
+| 场景 | 语法 | 说明 |
+|------|------|------|
+| 返回值 | `return value;` | 返回指定值 |
+| 提前退出 | `return;` | void函数中提前退出 |
+| 返回null | `return null;` | 返回null值 |
+| 返回默认值 | `return default(T);` | 返回类型默认值 |
+| 返回表达式 | `return a + b;` | 返回表达式结果 |
+| 条件返回 | `return condition ? value1 : value2;` | 三元运算符 |
+| 返回元组 | `return (a, b);` | 返回多个值 |
+| 返回集合 | `return list;` | 返回集合或数组 |
+
+return语句是函数控制流程的关键，合理使用return可以让代码更加清晰、易读和高效。
+
+### 函数参数详解
+
+参数是函数与外部世界交互的桥梁，C#提供了多种参数传递方式，每种方式都有其特定的用途和适用场景。
+
+#### 1. 值参数（Value Parameters）
+
+值参数是默认的参数传递方式，函数接收的是实际参数值的副本。对于值类型，传递的是值的副本；对于引用类型，传递的是引用的副本。
+
+```csharp
+// 值类型参数 - 传递值的副本
 public void ModifyValue(int number)
 {
     number = 100; // 这个修改不会影响调用方的变量
@@ -1230,13 +1609,32 @@ public void ModifyValue(int number)
 int value = 50;
 ModifyValue(value);
 Console.WriteLine($"函数外部: value = {value}"); // 仍然是50
+
+// 引用类型参数 - 传递引用的副本
+public void ModifyArray(int[] arr)
+{
+    arr[0] = 999; // 修改数组元素会影响原数组（因为引用指向同一对象）
+    arr = new int[] { 1, 2, 3 }; // 但重新赋值不会影响原引用
+    Console.WriteLine($"函数内部数组: [{string.Join(", ", arr)}]");
+}
+
+// 调用示例
+int[] numbers = { 10, 20, 30 };
+ModifyArray(numbers);
+Console.WriteLine($"函数外部数组: [{string.Join(", ", numbers)}]"); // [999, 20, 30]
+
+// 值参数的特点
+// - 调用方不需要特殊语法
+// - 函数内部对参数的修改不会影响调用方的变量（引用类型除外，但重新赋值引用不会影响）
+// - 适用于大多数场景
 ```
 
 #### 2. 引用参数（ref）
 
-使用ref关键字可以按引用传递参数，函数可以直接修改调用方的变量。
+使用ref关键字可以按引用传递参数，函数可以直接修改调用方的变量。调用时必须使用ref关键字，且变量必须先初始化。
 
 ```csharp
+// ref参数示例
 public void ModifyRefValue(ref int number)
 {
     number = 100; // 这个修改会影响调用方的变量
@@ -1245,32 +1643,87 @@ public void ModifyRefValue(ref int number)
 
 // 调用示例
 int value = 50;
-ModifyRefValue(ref value);
+ModifyRefValue(ref value); // 必须使用ref关键字
 Console.WriteLine($"函数外部: value = {value}"); // 现在是100
+
+// ref参数用于交换两个变量的值
+public void Swap(ref int a, ref int b)
+{
+    int temp = a;
+    a = b;
+    b = temp;
+}
+
+// 调用示例
+int x = 10, y = 20;
+Console.WriteLine($"交换前: x = {x}, y = {y}");
+Swap(ref x, ref y);
+Console.WriteLine($"交换后: x = {x}, y = {y}"); // x = 20, y = 10
+
+// ref参数的特点
+// - 调用方和函数定义都必须使用ref关键字
+// - 变量必须先初始化才能作为ref参数传递
+// - 函数内部对参数的修改会直接影响调用方的变量
+// - 适用于需要函数修改调用方变量的场景
 ```
 
 #### 3. 输出参数（out）
 
-使用out关键字可以在函数中为参数赋值，并将值返回给调用方。
+使用out关键字可以在函数中为参数赋值，并将值返回给调用方。out参数必须在函数返回前赋值，调用时变量不需要初始化。
 
 ```csharp
+// out参数示例 - 返回多个值
 public void Calculate(int a, int b, out int sum, out int product)
 {
-    sum = a + b;
-    product = a * b;
+    sum = a + b;      // 必须在返回前赋值
+    product = a * b;  // 必须在返回前赋值
 }
 
 // 调用示例
 int x = 5, y = 3;
-Calculate(x, y, out int sum, out int product);
+Calculate(x, y, out int sum, out int product); // 变量可以在调用时声明
 Console.WriteLine($"和: {sum}, 积: {product}");
+
+// 或者先声明变量
+int result1, result2;
+Calculate(x, y, out result1, out result2);
+Console.WriteLine($"和: {result1}, 积: {result2}");
+
+// out参数用于TryParse模式
+public bool TryDivide(int dividend, int divisor, out double result)
+{
+    if (divisor == 0)
+    {
+        result = 0; // 即使失败也要赋值
+        return false;
+    }
+    result = (double)dividend / divisor;
+    return true;
+}
+
+// 调用示例
+if (TryDivide(10, 3, out double quotient))
+{
+    Console.WriteLine($"除法结果: {quotient}");
+}
+else
+{
+    Console.WriteLine("除法失败");
+}
+
+// out参数的特点
+// - 调用方和函数定义都必须使用out关键字
+// - 变量不需要初始化就可以作为out参数传递
+// - 函数必须在返回前为out参数赋值
+// - 适用于需要返回多个值的场景，特别是TryParse模式
 ```
 
 #### 4. 参数数组（params）
 
-使用params关键字可以传递可变数量的参数。
+使用params关键字可以传递可变数量的参数。params参数必须是参数列表中的最后一个参数，且只能有一个params参数。
 
 ```csharp
+// params参数示例
 public int Sum(params int[] numbers)
 {
     int total = 0;
@@ -1281,10 +1734,171 @@ public int Sum(params int[] numbers)
     return total;
 }
 
+// 调用示例 - 多种方式
+int result1 = Sum(1, 2, 3);           // 6 - 直接传递多个参数
+int result2 = Sum(1, 2, 3, 4, 5);     // 15 - 传递任意数量的参数
+int result3 = Sum(new int[] {1, 2, 3, 4, 5, 6}); // 21 - 传递数组
+int result4 = Sum();                   // 0 - 可以不传参数
+
+// params参数与其他参数结合
+public void PrintInfo(string title, params object[] values)
+{
+    Console.Write($"{title}: ");
+    foreach (var value in values)
+    {
+        Console.Write($"{value} ");
+    }
+    Console.WriteLine();
+}
+
 // 调用示例
-int result1 = Sum(1, 2, 3);           // 6
-int result2 = Sum(1, 2, 3, 4, 5);     // 15
-int result3 = Sum(new int[] {1, 2, 3, 4, 5, 6}); // 21
+PrintInfo("数字", 1, 2, 3, 4, 5);
+PrintInfo("信息", "姓名", "张三", "年龄", 25);
+
+// params参数的特点
+// - 必须是参数列表中的最后一个参数
+// - 只能有一个params参数
+// - 可以传递0个或多个参数
+// - 适用于参数数量不确定的场景
+```
+
+#### 5. 可选参数和默认值
+
+C#允许为参数指定默认值，这样在调用时可以省略这些参数。有默认值的参数必须放在没有默认值的参数之后。
+
+```csharp
+// 默认参数示例
+public void PrintInfo(string name, int age = 18, string city = "未知")
+{
+    Console.WriteLine($"姓名: {name}, 年龄: {age}, 城市: {city}");
+}
+
+// 调用示例
+PrintInfo("张三");                    // 姓名: 张三, 年龄: 18, 城市: 未知
+PrintInfo("李四", 25);               // 姓名: 李四, 年龄: 25, 城市: 未知
+PrintInfo("王五", 30, "北京");       // 姓名: 王五, 年龄: 30, 城市: 北京
+
+// 默认参数必须是编译时常量
+public void SetTimeout(int milliseconds = 1000) // 正确
+{
+    // ...
+}
+
+// 默认参数与params结合
+public void Log(string message, bool isError = false, params object[] args)
+{
+    string prefix = isError ? "[错误]" : "[信息]";
+    Console.WriteLine($"{prefix} {message}", args);
+}
+
+// 调用示例
+Log("用户登录成功");
+Log("发生错误", true, "数据库连接失败");
+Log("处理完成", false, "共处理", 100, "条记录");
+
+// 默认参数的特点
+// - 默认值必须是编译时常量
+// - 有默认值的参数必须放在没有默认值的参数之后
+// - 调用时可以省略有默认值的参数
+// - 适用于参数有常用默认值的场景
+```
+
+#### 6. 命名参数
+
+调用函数时可以使用命名参数，提高代码的可读性，并且可以改变参数的传递顺序。
+
+```csharp
+// 函数定义
+public void CreateUser(string name, int age, string email, bool isActive = true)
+{
+    Console.WriteLine($"创建用户: {name}, {age}岁, 邮箱: {email}, 激活: {isActive}");
+}
+
+// 使用命名参数
+CreateUser(name: "张三", age: 25, email: "zhangsan@example.com");
+CreateUser(email: "lisi@example.com", name: "李四", age: 30); // 可以改变顺序
+CreateUser("王五", 28, "wangwu@example.com", isActive: false); // 混合使用位置参数和命名参数
+
+// 命名参数与默认参数结合
+public void SendEmail(string to, string subject, string body = "", bool isHtml = false)
+{
+    Console.WriteLine($"发送邮件到: {to}");
+    Console.WriteLine($"主题: {subject}");
+    Console.WriteLine($"内容: {body}");
+    Console.WriteLine($"HTML格式: {isHtml}");
+}
+
+// 调用示例 - 只指定需要的参数
+SendEmail(to: "user@example.com", subject: "测试邮件");
+SendEmail(to: "user@example.com", subject: "HTML邮件", isHtml: true);
+SendEmail("user@example.com", "主题", "内容", true); // 也可以不使用命名参数
+
+// 命名参数的特点
+// - 提高代码可读性
+// - 可以改变参数传递顺序
+// - 必须放在位置参数之后（如果混合使用）
+// - 适用于参数较多或参数含义不明显的场景
+```
+
+#### 7. 参数传递方式对比
+
+| 参数类型 | 关键字 | 调用语法 | 变量初始化 | 函数内赋值 | 适用场景 |
+|---------|--------|---------|-----------|-----------|---------|
+| 值参数 | 无 | `Func(value)` | 需要 | 可选 | 大多数场景 |
+| ref参数 | ref | `Func(ref value)` | 需要 | 可选 | 需要修改调用方变量 |
+| out参数 | out | `Func(out value)` | 不需要 | 必须 | 返回多个值，TryParse模式 |
+| params参数 | params | `Func(1, 2, 3)` | - | - | 参数数量不确定 |
+| 默认参数 | = | `Func()` | - | - | 参数有常用默认值 |
+| 命名参数 | : | `Func(name: value)` | - | - | 提高可读性 |
+
+#### 8. 参数验证和异常处理
+
+```csharp
+// 参数验证示例
+public double Divide(double dividend, double divisor)
+{
+    // 参数验证
+    if (double.IsNaN(dividend) || double.IsNaN(divisor))
+    {
+        throw new ArgumentException("参数不能为NaN");
+    }
+    
+    if (divisor == 0)
+    {
+        throw new DivideByZeroException("除数不能为零");
+    }
+    
+    return dividend / divisor;
+}
+
+// 使用nameof获取参数名（C# 6.0+）
+public void SetAge(int age)
+{
+    if (age < 0 || age > 150)
+    {
+        throw new ArgumentOutOfRangeException(nameof(age), "年龄必须在0-150之间");
+    }
+    // ...
+}
+
+// 参数验证的最佳实践
+public void ProcessUser(string name, int age, string email)
+{
+    // 使用ArgumentNullException检查null
+    if (string.IsNullOrWhiteSpace(name))
+        throw new ArgumentNullException(nameof(name), "姓名不能为空");
+    
+    // 使用ArgumentException检查无效值
+    if (age < 0 || age > 150)
+        throw new ArgumentException("年龄必须在0-150之间", nameof(age));
+    
+    // 使用ArgumentOutOfRangeException检查范围
+    if (string.IsNullOrWhiteSpace(email))
+        throw new ArgumentException("邮箱不能为空", nameof(email));
+    
+    // 处理逻辑
+    Console.WriteLine($"处理用户: {name}, {age}岁, {email}");
+}
 ```
 
 ### 函数重载

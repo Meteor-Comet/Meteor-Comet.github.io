@@ -5080,3 +5080,510 @@ int value2 = newList.Get(0); // 无拆箱
 5. 在性能敏感的代码中，直接使用具体类型而不是object
 
 通过深入理解Object类、装箱和拆箱机制，可以编写出更高效、更类型安全的C#代码。在实际开发中，应优先使用泛型来避免装箱和拆箱带来的性能开销。
+
+## C# ArrayList类详解
+
+ArrayList是C#中一个非泛型的动态数组集合类，位于System.Collections命名空间中。虽然现在推荐使用泛型集合List<T>，但了解ArrayList仍然有助于理解集合的基本概念和C#的发展历程。
+
+### ArrayList的基本概念
+
+ArrayList是一个可以动态调整大小的数组，可以存储任意类型的对象（object类型）。它是C# 1.0时代的主要集合类，在C# 2.0引入泛型后，逐渐被List<T>取代。
+
+#### 为什么需要ArrayList？
+
+在泛型出现之前，ArrayList提供了以下优势：
+1. **动态大小**：可以根据需要自动调整容量
+2. **类型灵活**：可以存储任意类型的对象
+3. **丰富的操作**：提供了添加、删除、查找、排序等方法
+
+#### ArrayList的局限性
+
+1. **类型不安全**：存储的是object类型，需要类型转换
+2. **性能开销**：值类型会进行装箱，读取时需要拆箱
+3. **运行时错误**：类型转换错误只能在运行时发现
+
+### ArrayList的创建和初始化
+
+```csharp
+using System.Collections;
+
+// 1. 使用默认构造函数创建空ArrayList
+ArrayList list1 = new ArrayList();
+
+// 2. 指定初始容量创建ArrayList
+ArrayList list2 = new ArrayList(10); // 初始容量为10
+
+// 3. 使用集合初始化器创建并初始化
+ArrayList list3 = new ArrayList { 1, 2, 3, "Hello", true };
+
+// 4. 从其他集合创建ArrayList
+int[] array = { 1, 2, 3, 4, 5 };
+ArrayList list4 = new ArrayList(array);
+
+// 5. 使用AddRange方法初始化
+ArrayList list5 = new ArrayList();
+list5.AddRange(new int[] { 1, 2, 3, 4, 5 });
+list5.AddRange(new string[] { "A", "B", "C" });
+
+Console.WriteLine($"list3的元素数: {list3.Count}");
+Console.WriteLine($"list4的元素数: {list4.Count}");
+```
+
+### ArrayList的常用属性
+
+```csharp
+ArrayList list = new ArrayList { 1, 2, 3, 4, 5 };
+
+// Count属性 - 获取ArrayList中实际包含的元素数量
+Console.WriteLine($"元素数量: {list.Count}"); // 5
+
+// Capacity属性 - 获取或设置ArrayList的容量（内部数组的大小）
+Console.WriteLine($"当前容量: {list.Capacity}"); // 可能是8或更大
+
+// 设置容量
+list.Capacity = 20;
+Console.WriteLine($"设置后的容量: {list.Capacity}"); // 20
+
+// IsFixedSize属性 - 检查ArrayList是否有固定大小
+Console.WriteLine($"是否有固定大小: {list.IsFixedSize}"); // false
+
+// IsReadOnly属性 - 检查ArrayList是否为只读
+Console.WriteLine($"是否只读: {list.IsReadOnly}"); // false
+
+// IsSynchronized属性 - 检查对ArrayList的访问是否同步（线程安全）
+Console.WriteLine($"是否同步: {list.IsSynchronized}"); // false
+```
+
+### ArrayList的常用方法
+
+#### 添加元素
+
+```csharp
+ArrayList list = new ArrayList();
+
+// Add方法 - 在末尾添加单个元素
+list.Add(100);
+list.Add("Hello");
+list.Add(true);
+list.Add(3.14);
+
+Console.WriteLine($"添加后元素数: {list.Count}");
+
+// AddRange方法 - 添加多个元素（从集合）
+list.AddRange(new int[] { 1, 2, 3 });
+list.AddRange(new string[] { "A", "B", "C" });
+
+Console.WriteLine($"AddRange后元素数: {list.Count}");
+
+// Insert方法 - 在指定索引位置插入元素
+list.Insert(0, "First"); // 在索引0处插入
+list.Insert(2, "Middle"); // 在索引2处插入
+
+// InsertRange方法 - 在指定位置插入多个元素
+list.InsertRange(1, new int[] { 10, 20, 30 });
+
+// 输出所有元素
+foreach (var item in list)
+{
+    Console.Write($"{item} ");
+}
+Console.WriteLine();
+```
+
+#### 访问和修改元素
+
+```csharp
+ArrayList list = new ArrayList { 10, 20, 30, 40, 50 };
+
+// 通过索引访问元素（需要类型转换）
+int first = (int)list[0]; // 拆箱
+string second = list[1] as string; // 如果类型不匹配返回null
+
+// 通过索引修改元素
+list[0] = 100; // 如果原来是值类型，新值会装箱
+list[1] = "New Value";
+
+// 遍历ArrayList
+for (int i = 0; i < list.Count; i++)
+{
+    Console.WriteLine($"索引 {i}: {list[i]}");
+}
+
+// 使用foreach遍历
+foreach (object item in list)
+{
+    Console.WriteLine($"元素: {item}");
+}
+```
+
+#### 查找元素
+
+```csharp
+ArrayList list = new ArrayList { 10, 20, 30, 20, 40, 20 };
+
+// IndexOf方法 - 查找元素首次出现的索引
+int index1 = list.IndexOf(20); // 返回1
+int index2 = list.IndexOf(100); // 返回-1（未找到）
+
+// LastIndexOf方法 - 查找元素最后出现的索引
+int lastIndex = list.LastIndexOf(20); // 返回5
+
+// Contains方法 - 检查是否包含指定元素
+bool contains = list.Contains(30); // true
+bool notContains = list.Contains(100); // false
+
+// BinarySearch方法 - 二分查找（要求列表已排序）
+ArrayList sortedList = new ArrayList { 10, 20, 30, 40, 50 };
+int binaryIndex = sortedList.BinarySearch(30); // 返回2
+int notFound = sortedList.BinarySearch(25); // 返回负数
+
+Console.WriteLine($"IndexOf(20): {index1}");
+Console.WriteLine($"LastIndexOf(20): {lastIndex}");
+Console.WriteLine($"Contains(30): {contains}");
+```
+
+#### 删除元素
+
+```csharp
+ArrayList list = new ArrayList { 10, 20, 30, 40, 50, 20 };
+
+// Remove方法 - 删除首次出现的指定元素
+list.Remove(20); // 删除第一个20
+Console.WriteLine($"Remove后: [{string.Join(", ", list.ToArray())}]");
+
+// RemoveAt方法 - 删除指定索引的元素
+list.RemoveAt(0); // 删除索引0的元素
+Console.WriteLine($"RemoveAt后: [{string.Join(", ", list.ToArray())}]");
+
+// RemoveRange方法 - 删除指定范围的元素
+ArrayList list2 = new ArrayList { 10, 20, 30, 40, 50 };
+list2.RemoveRange(1, 2); // 从索引1开始删除2个元素
+Console.WriteLine($"RemoveRange后: [{string.Join(", ", list2.ToArray())}]");
+
+// Clear方法 - 清空所有元素
+list2.Clear();
+Console.WriteLine($"Clear后元素数: {list2.Count}"); // 0
+```
+
+#### 排序和反转
+
+```csharp
+ArrayList list = new ArrayList { 50, 20, 30, 10, 40 };
+
+// Sort方法 - 对ArrayList进行排序
+Console.WriteLine($"排序前: [{string.Join(", ", list.ToArray())}]");
+list.Sort();
+Console.WriteLine($"排序后: [{string.Join(", ", list.ToArray())}]");
+
+// 注意：Sort要求所有元素实现IComparable接口
+// 如果元素类型不同，排序可能会失败
+
+// Reverse方法 - 反转ArrayList中元素的顺序
+ArrayList list2 = new ArrayList { 1, 2, 3, 4, 5 };
+list2.Reverse();
+Console.WriteLine($"反转后: [{string.Join(", ", list2.ToArray())}]");
+
+// 使用自定义比较器排序
+ArrayList list3 = new ArrayList { "apple", "banana", "cherry", "date" };
+list3.Sort(new CaseInsensitiveComparer()); // 不区分大小写排序
+Console.WriteLine($"自定义排序后: [{string.Join(", ", list3.ToArray())}]");
+```
+
+#### 复制和转换
+
+```csharp
+ArrayList list = new ArrayList { 10, 20, 30, 40, 50 };
+
+// Clone方法 - 创建ArrayList的浅表副本
+ArrayList cloned = (ArrayList)list.Clone();
+Console.WriteLine($"原列表: [{string.Join(", ", list.ToArray())}]");
+Console.WriteLine($"克隆列表: [{string.Join(", ", cloned.ToArray())}]");
+
+// ToArray方法 - 将ArrayList转换为数组
+object[] array = list.ToArray();
+int[] intArray = list.Cast<int>().ToArray(); // 使用LINQ转换类型
+
+// CopyTo方法 - 复制到数组
+int[] targetArray = new int[list.Count];
+list.CopyTo(targetArray);
+Console.WriteLine($"复制到数组: [{string.Join(", ", targetArray)}]");
+
+// GetRange方法 - 获取指定范围的元素（返回新的ArrayList）
+ArrayList range = list.GetRange(1, 3); // 从索引1开始，获取3个元素
+Console.WriteLine($"范围元素: [{string.Join(", ", range.ToArray())}]");
+```
+
+### ArrayList的类型转换和装箱拆箱
+
+由于ArrayList存储的是object类型，值类型会进行装箱，读取时需要拆箱：
+
+```csharp
+ArrayList list = new ArrayList();
+
+// 值类型装箱
+int number = 100;
+list.Add(number); // 装箱：int转换为object
+
+// 读取时需要拆箱
+int value = (int)list[0]; // 拆箱：object转换为int
+
+// 类型转换错误会在运行时抛出异常
+try
+{
+    string str = (string)list[0]; // 抛出InvalidCastException
+}
+catch (InvalidCastException ex)
+{
+    Console.WriteLine($"类型转换错误: {ex.Message}");
+}
+
+// 使用as运算符进行安全转换
+string safeStr = list[0] as string; // 返回null，不会抛出异常
+if (safeStr != null)
+{
+    Console.WriteLine($"转换成功: {safeStr}");
+}
+else
+{
+    Console.WriteLine("转换失败，返回null");
+}
+
+// 使用is运算符检查类型
+if (list[0] is int)
+{
+    int intValue = (int)list[0];
+    Console.WriteLine($"是int类型: {intValue}");
+}
+```
+
+### ArrayList的实际应用示例
+
+```csharp
+using System;
+using System.Collections;
+
+class ArrayListExamples
+{
+    // 存储混合类型的数据
+    public static void MixedTypeExample()
+    {
+        ArrayList mixedList = new ArrayList();
+        mixedList.Add(100);           // int
+        mixedList.Add("Hello");      // string
+        mixedList.Add(3.14);         // double
+        mixedList.Add(true);         // bool
+        mixedList.Add(DateTime.Now);  // DateTime
+        
+        Console.WriteLine("混合类型列表:");
+        foreach (var item in mixedList)
+        {
+            Console.WriteLine($"类型: {item.GetType().Name}, 值: {item}");
+        }
+    }
+    
+    // 动态添加和删除元素
+    public static void DynamicOperations()
+    {
+        ArrayList list = new ArrayList();
+        
+        // 动态添加
+        for (int i = 0; i < 10; i++)
+        {
+            list.Add(i * i);
+        }
+        
+        Console.WriteLine($"添加后元素数: {list.Count}");
+        
+        // 动态删除
+        while (list.Count > 5)
+        {
+            list.RemoveAt(list.Count - 1);
+        }
+        
+        Console.WriteLine($"删除后元素数: {list.Count}");
+        Console.WriteLine($"剩余元素: [{string.Join(", ", list.ToArray())}]");
+    }
+    
+    // 查找和过滤
+    public static void FindAndFilter()
+    {
+        ArrayList numbers = new ArrayList { 10, 20, 30, 40, 50, 20, 30 };
+        
+        // 查找所有20的索引
+        ArrayList indices = new ArrayList();
+        int index = -1;
+        while ((index = numbers.IndexOf(20, index + 1)) != -1)
+        {
+            indices.Add(index);
+        }
+        
+        Console.WriteLine($"元素20出现的索引: [{string.Join(", ", indices.ToArray())}]");
+        
+        // 过滤大于30的元素
+        ArrayList filtered = new ArrayList();
+        foreach (int num in numbers)
+        {
+            if (num > 30)
+            {
+                filtered.Add(num);
+            }
+        }
+        
+        Console.WriteLine($"大于30的元素: [{string.Join(", ", filtered.ToArray())}]");
+    }
+    
+    // 排序和搜索
+    public static void SortAndSearch()
+    {
+        ArrayList numbers = new ArrayList { 50, 20, 30, 10, 40 };
+        
+        // 排序
+        numbers.Sort();
+        Console.WriteLine($"排序后: [{string.Join(", ", numbers.ToArray())}]");
+        
+        // 二分查找
+        int searchValue = 30;
+        int index = numbers.BinarySearch(searchValue);
+        if (index >= 0)
+        {
+            Console.WriteLine($"找到 {searchValue}，索引: {index}");
+        }
+        else
+        {
+            Console.WriteLine($"未找到 {searchValue}");
+        }
+    }
+    
+    // 合并两个ArrayList
+    public static ArrayList Merge(ArrayList list1, ArrayList list2)
+    {
+        ArrayList merged = new ArrayList(list1);
+        merged.AddRange(list2);
+        return merged;
+    }
+    
+    static void Main()
+    {
+        Console.WriteLine("=== 混合类型示例 ===");
+        MixedTypeExample();
+        
+        Console.WriteLine("\n=== 动态操作示例 ===");
+        DynamicOperations();
+        
+        Console.WriteLine("\n=== 查找和过滤示例 ===");
+        FindAndFilter();
+        
+        Console.WriteLine("\n=== 排序和搜索示例 ===");
+        SortAndSearch();
+        
+        Console.WriteLine("\n=== 合并示例 ===");
+        ArrayList list1 = new ArrayList { 1, 2, 3 };
+        ArrayList list2 = new ArrayList { 4, 5, 6 };
+        ArrayList merged = Merge(list1, list2);
+        Console.WriteLine($"合并结果: [{string.Join(", ", merged.ToArray())}]");
+    }
+}
+```
+
+### ArrayList vs List<T> 对比
+
+| 特性 | ArrayList | List<T> |
+|------|-----------|---------|
+| 类型安全 | 否（存储object） | 是（存储指定类型T） |
+| 装箱拆箱 | 值类型会装箱拆箱 | 无装箱拆箱 |
+| 性能 | 较慢（装箱拆箱开销） | 较快 |
+| 编译时类型检查 | 否 | 是 |
+| 代码可读性 | 较差 | 较好 |
+| 推荐使用 | 不推荐（遗留代码） | 推荐 |
+
+### ArrayList使用注意事项
+
+1. **类型安全问题**：
+   - ArrayList存储的是object类型，需要类型转换
+   - 类型转换错误只能在运行时发现
+   - 建议使用List<T>获得编译时类型检查
+
+2. **性能问题**：
+   - 值类型会进行装箱，读取时需要拆箱
+   - 装箱和拆箱会带来性能开销
+   - 对于值类型，List<T>性能更好
+
+3. **容量管理**：
+   - ArrayList会自动扩容，但频繁扩容会影响性能
+   - 如果知道大概容量，可以在创建时指定初始容量
+
+4. **线程安全**：
+   - ArrayList不是线程安全的
+   - 多线程环境下需要使用同步机制或使用线程安全的集合
+
+5. **排序限制**：
+   - Sort方法要求元素实现IComparable接口
+   - 混合类型无法排序
+
+### ArrayList类常用属性和方法速查表
+
+#### 常用属性
+
+| 属性 | 类型 | 作用说明 |
+|------|------|----------|
+| Count | int | 获取ArrayList中实际包含的元素数量 |
+| Capacity | int | 获取或设置ArrayList的容量（内部数组的大小）。容量总是大于或等于Count |
+| IsFixedSize | bool | 获取一个值，该值指示ArrayList是否有固定大小。对于ArrayList，始终返回false |
+| IsReadOnly | bool | 获取一个值，该值指示ArrayList是否为只读。对于ArrayList，始终返回false |
+| IsSynchronized | bool | 获取一个值，该值指示对ArrayList的访问是否同步（线程安全）。对于ArrayList，始终返回false |
+| SyncRoot | object | 获取可用于同步对ArrayList的访问的对象 |
+
+#### 常用方法
+
+| 方法 | 参数 | 返回值 | 作用说明 |
+|------|------|--------|----------|
+| Add(object) | object value | int | 在ArrayList末尾添加元素，返回添加位置的索引 |
+| AddRange(ICollection) | ICollection c | void | 将集合中的元素添加到ArrayList末尾 |
+| Insert(int, object) | int index, object value | void | 在指定索引位置插入元素 |
+| InsertRange(int, ICollection) | int index, ICollection c | void | 在指定索引位置插入集合中的元素 |
+| Remove(object) | object obj | void | 删除首次出现的指定元素 |
+| RemoveAt(int) | int index | void | 删除指定索引的元素 |
+| RemoveRange(int, int) | int index, int count | void | 从指定索引开始删除指定数量的元素 |
+| Clear() | 无 | void | 清空ArrayList中的所有元素 |
+| Contains(object) | object item | bool | 检查ArrayList是否包含指定元素 |
+| IndexOf(object) | object value | int | 查找元素首次出现的索引，未找到返回-1 |
+| IndexOf(object, int) | object value, int startIndex | int | 从指定索引开始查找元素 |
+| LastIndexOf(object) | object value | int | 查找元素最后出现的索引 |
+| BinarySearch(object) | object value | int | 在已排序的ArrayList中使用二分查找，返回索引或负数 |
+| Sort() | 无 | void | 对ArrayList进行排序（要求元素实现IComparable） |
+| Sort(IComparer) | IComparer comparer | void | 使用指定的比较器对ArrayList进行排序 |
+| Reverse() | 无 | void | 反转ArrayList中元素的顺序 |
+| ToArray() | 无 | object[] | 将ArrayList转换为object数组 |
+| CopyTo(Array) | Array array | void | 将ArrayList的元素复制到数组中 |
+| CopyTo(Array, int) | Array array, int index | void | 从指定索引开始复制到数组 |
+| GetRange(int, int) | int index, int count | ArrayList | 返回包含指定范围元素的新ArrayList |
+| Clone() | 无 | object | 创建ArrayList的浅表副本 |
+| TrimToSize() | 无 | void | 将容量设置为实际元素数量，释放多余内存 |
+
+### 何时使用ArrayList？
+
+虽然现在推荐使用List<T>，但在以下情况下可能仍需要使用ArrayList：
+
+1. **遗留代码维护**：维护使用ArrayList的旧代码
+2. **需要存储混合类型**：虽然不推荐，但如果确实需要存储不同类型且无法使用泛型
+3. **学习目的**：理解集合的基本概念和C#的发展历程
+
+### 迁移到List<T>的建议
+
+如果现有代码使用ArrayList，建议迁移到List<T>：
+
+```csharp
+// 旧代码（使用ArrayList）
+ArrayList oldList = new ArrayList();
+oldList.Add(100);
+oldList.Add(200);
+int value = (int)oldList[0]; // 需要拆箱
+
+// 新代码（使用List<T>）
+List<int> newList = new List<int>();
+newList.Add(100);
+newList.Add(200);
+int value2 = newList[0]; // 无拆箱，类型安全
+```
+
+通过了解ArrayList，可以更好地理解C#集合的发展历程，以及为什么泛型集合（如List<T>）是更好的选择。在实际开发中，应优先使用List<T>等泛型集合来获得更好的类型安全性和性能。

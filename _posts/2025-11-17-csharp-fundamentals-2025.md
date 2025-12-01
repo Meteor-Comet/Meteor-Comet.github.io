@@ -3067,3 +3067,607 @@ class ArrayExamples
 在实际开发中，如果需要动态调整数组大小，通常建议使用List<T>集合类，它提供了更好的性能和更丰富的功能。但在某些特定场景下，Array.Resize方法仍然很有用。
 
 通过合理使用Array类，可以高效地处理各种数据集合操作，满足应用程序中对数据存储和处理的需求。
+
+## C# String类详解
+
+字符串(String)是C#中最常用的数据类型之一，用于存储和处理文本数据。C#中的字符串是System.String类的别名，提供了丰富的字符串操作方法。理解字符串的特性和使用方法对于编写高效的C#程序至关重要。
+
+### String类的基本概念
+
+在C#中，字符串是引用类型，但具有值类型的某些特性。字符串是不可变的(immutable)，这意味着一旦创建，字符串的内容就不能被修改。任何看似修改字符串的操作实际上都会创建一个新的字符串对象。
+
+#### 字符串的不可变性
+
+```csharp
+string str = "Hello";
+str = str + " World"; // 这里不是修改原字符串，而是创建了一个新字符串
+
+// 演示不可变性
+string original = "Hello";
+string modified = original;
+modified = modified + " World";
+Console.WriteLine($"原字符串: {original}"); // 输出: 原字符串: Hello
+Console.WriteLine($"修改后的字符串: {modified}"); // 输出: 修改后的字符串: Hello World
+```
+
+### String的创建和初始化
+
+C#提供了多种创建和初始化字符串的方法：
+
+```csharp
+using System;
+
+// 1. 使用字符串字面量
+string str1 = "Hello, World!";
+string str2 = "C#编程";
+
+// 2. 使用String构造函数
+string str3 = new string('A', 5); // 创建包含5个'A'字符的字符串: "AAAAA"
+char[] chars = { 'H', 'e', 'l', 'l', 'o' };
+string str4 = new string(chars); // "Hello"
+
+// 3. 使用字符串插值（String Interpolation）
+string name = "张三";
+int age = 25;
+string str5 = $"姓名: {name}, 年龄: {age}"; // "姓名: 张三, 年龄: 25"
+
+// 4. 使用String.Format方法
+string str6 = String.Format("姓名: {0}, 年龄: {1}", name, age);
+
+// 5. 使用字符串连接
+string str7 = "Hello" + " " + "World"; // "Hello World"
+
+// 6. 使用@符号创建逐字字符串（Verbatim String）
+string path1 = "C:\\Users\\Documents\\file.txt"; // 需要转义
+string path2 = @"C:\Users\Documents\file.txt"; // 不需要转义
+string multiline = @"第一行
+第二行
+第三行";
+
+// 7. 空字符串和null
+string empty1 = ""; // 空字符串
+string empty2 = String.Empty; // 空字符串（推荐）
+string nullString = null; // null引用
+
+// 输出结果
+Console.WriteLine($"str1: {str1}");
+Console.WriteLine($"str3: {str3}");
+Console.WriteLine($"str5: {str5}");
+Console.WriteLine($"path2: {path2}");
+```
+
+### String的常用属性
+
+String类提供了多个有用的属性来获取字符串的信息：
+
+```csharp
+string text = "Hello, World!";
+
+// Length属性 - 获取字符串的字符数
+Console.WriteLine($"字符串长度: {text.Length}"); // 输出: 13
+
+// 检查字符串是否为空或null
+string empty = "";
+string nullStr = null;
+
+Console.WriteLine($"empty是否为空: {String.IsNullOrEmpty(empty)}"); // true
+Console.WriteLine($"nullStr是否为null或空: {String.IsNullOrEmpty(nullStr)}"); // true
+Console.WriteLine($"empty是否为空白: {String.IsNullOrWhiteSpace(empty)}"); // true
+Console.WriteLine($"text是否为空白: {String.IsNullOrWhiteSpace("   ")}"); // true
+
+// 访问字符串中的字符（通过索引）
+char firstChar = text[0]; // 'H'
+char lastChar = text[text.Length - 1]; // '!'
+Console.WriteLine($"第一个字符: {firstChar}");
+Console.WriteLine($"最后一个字符: {lastChar}");
+```
+
+### String的常用方法
+
+String类提供了丰富的实例方法和静态方法来操作字符串：
+
+#### 字符串查找方法
+
+```csharp
+string text = "Hello, World! Hello, C#!";
+
+// IndexOf方法 - 查找子字符串首次出现的位置
+int index1 = text.IndexOf("Hello"); // 0
+int index2 = text.IndexOf("World"); // 7
+int index3 = text.IndexOf("Java"); // -1 (未找到)
+
+// LastIndexOf方法 - 查找子字符串最后出现的位置
+int lastIndex = text.LastIndexOf("Hello"); // 14
+
+// Contains方法 - 检查字符串是否包含子字符串
+bool contains = text.Contains("World"); // true
+
+// StartsWith方法 - 检查字符串是否以指定子字符串开头
+bool startsWith = text.StartsWith("Hello"); // true
+
+// EndsWith方法 - 检查字符串是否以指定子字符串结尾
+bool endsWith = text.EndsWith("!"); // true
+
+Console.WriteLine($"IndexOf('Hello'): {index1}");
+Console.WriteLine($"LastIndexOf('Hello'): {lastIndex}");
+Console.WriteLine($"Contains('World'): {contains}");
+```
+
+#### 字符串截取和分割方法
+
+```csharp
+string text = "Hello, World, C#, Programming";
+
+// Substring方法 - 截取子字符串
+string sub1 = text.Substring(0, 5); // "Hello" (从索引0开始，长度为5)
+string sub2 = text.Substring(7); // "World, C#, Programming" (从索引7到末尾)
+
+// Split方法 - 分割字符串
+string[] parts1 = text.Split(','); // 按逗号分割
+string[] parts2 = text.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries); // 按多个字符分割并移除空项
+
+Console.WriteLine($"Substring(0, 5): {sub1}");
+Console.WriteLine($"Split结果:");
+foreach (string part in parts1)
+{
+    Console.WriteLine($"  - {part.Trim()}"); // Trim()移除首尾空白
+}
+
+// 使用Split的重载方法
+string data = "张三|25|北京|工程师";
+string[] fields = data.Split('|');
+Console.WriteLine($"姓名: {fields[0]}, 年龄: {fields[1]}, 城市: {fields[2]}, 职业: {fields[3]}");
+```
+
+#### 字符串替换方法
+
+```csharp
+string text = "Hello, World! Hello, C#!";
+
+// Replace方法 - 替换字符串
+string replaced1 = text.Replace("Hello", "Hi"); // "Hi, World! Hi, C#!"
+string replaced2 = text.Replace("World", "Universe"); // "Hello, Universe! Hello, C#!"
+
+// 替换单个字符
+string replaced3 = text.Replace('o', 'O'); // "HellO, WOrld! HellO, C#!"
+
+Console.WriteLine($"替换'Hello'为'Hi': {replaced1}");
+Console.WriteLine($"替换'o'为'O': {replaced3}");
+
+// 移除字符串
+string removed = text.Remove(5, 2); // 从索引5开始移除2个字符: "Hello World! Hello, C#!"
+Console.WriteLine($"移除字符后: {removed}");
+```
+
+#### 字符串大小写转换方法
+
+```csharp
+string text = "Hello, World!";
+
+// ToUpper方法 - 转换为大写
+string upper = text.ToUpper(); // "HELLO, WORLD!"
+
+// ToLower方法 - 转换为小写
+string lower = text.ToLower(); // "hello, world!"
+
+Console.WriteLine($"大写: {upper}");
+Console.WriteLine($"小写: {lower}");
+```
+
+#### 字符串格式化方法
+
+```csharp
+string name = "张三";
+int age = 25;
+double salary = 8500.50;
+
+// 使用字符串插值（推荐）
+string formatted1 = $"姓名: {name}, 年龄: {age}, 薪资: {salary:C}";
+
+// 使用String.Format方法
+string formatted2 = String.Format("姓名: {0}, 年龄: {1}, 薪资: {2:C}", name, age, salary);
+
+// 使用ToString方法格式化
+string formatted3 = $"薪资: {salary:F2}"; // 保留2位小数
+string formatted4 = $"百分比: {0.25:P}"; // 25.00%
+string formatted5 = $"十六进制: {255:X}"; // FF
+
+Console.WriteLine(formatted1);
+Console.WriteLine(formatted2);
+Console.WriteLine(formatted3);
+Console.WriteLine(formatted4);
+Console.WriteLine(formatted5);
+```
+
+#### 字符串连接方法
+
+```csharp
+string[] words = { "Hello", "World", "C#", "Programming" };
+
+// 使用+运算符连接
+string joined1 = words[0] + " " + words[1]; // "Hello World"
+
+// 使用String.Concat方法
+string joined2 = String.Concat(words); // "HelloWorldC#Programming"
+
+// 使用String.Join方法（推荐）
+string joined3 = String.Join(" ", words); // "Hello World C# Programming"
+string joined4 = String.Join(", ", words); // "Hello, World, C#, Programming"
+
+Console.WriteLine($"Join结果: {joined3}");
+Console.WriteLine($"Join结果(逗号分隔): {joined4}");
+```
+
+#### 字符串修剪方法
+
+```csharp
+string text = "   Hello, World!   ";
+
+// Trim方法 - 移除首尾空白字符
+string trimmed = text.Trim(); // "Hello, World!"
+
+// TrimStart方法 - 移除开头空白字符
+string trimmedStart = text.TrimStart(); // "Hello, World!   "
+
+// TrimEnd方法 - 移除结尾空白字符
+string trimmedEnd = text.TrimEnd(); // "   Hello, World!"
+
+// Trim方法可以指定要移除的字符
+string text2 = "***Hello, World!***";
+string trimmed2 = text2.Trim('*'); // "Hello, World!"
+
+Console.WriteLine($"Trim结果: '{trimmed}'");
+Console.WriteLine($"Trim('*')结果: '{trimmed2}'");
+```
+
+### StringBuilder类
+
+当需要频繁修改字符串时，使用StringBuilder类可以获得更好的性能，因为它不会每次都创建新的字符串对象。
+
+```csharp
+using System.Text;
+
+// 创建StringBuilder对象
+StringBuilder sb = new StringBuilder();
+
+// Append方法 - 追加字符串
+sb.Append("Hello");
+sb.Append(" ");
+sb.Append("World");
+
+// AppendLine方法 - 追加字符串并换行
+sb.AppendLine();
+sb.AppendLine("C# Programming");
+
+// AppendFormat方法 - 追加格式化字符串
+sb.AppendFormat("姓名: {0}, 年龄: {1}", "张三", 25);
+
+// Insert方法 - 在指定位置插入字符串
+sb.Insert(0, "开始: ");
+
+// Remove方法 - 移除指定范围的字符
+sb.Remove(0, 4); // 移除前4个字符
+
+// Replace方法 - 替换字符串
+sb.Replace("World", "Universe");
+
+// Clear方法 - 清空内容
+// sb.Clear();
+
+// ToString方法 - 转换为字符串
+string result = sb.ToString();
+Console.WriteLine(result);
+
+// StringBuilder的容量管理
+StringBuilder sb2 = new StringBuilder(100); // 指定初始容量
+StringBuilder sb3 = new StringBuilder("初始内容", 100); // 指定初始内容和容量
+
+// 获取和设置容量
+Console.WriteLine($"当前长度: {sb2.Length}, 容量: {sb2.Capacity}");
+sb2.EnsureCapacity(200); // 确保容量至少为200
+```
+
+### 字符串比较
+
+C#提供了多种字符串比较方法，每种方法适用于不同的场景：
+
+```csharp
+string str1 = "Hello";
+string str2 = "hello";
+string str3 = "Hello";
+
+// == 运算符和 Equals方法 - 区分大小写的比较
+bool equal1 = (str1 == str2); // false
+bool equal2 = str1.Equals(str2); // false
+bool equal3 = str1.Equals(str3); // true
+
+// String.Equals静态方法
+bool equal4 = String.Equals(str1, str2); // false
+bool equal5 = String.Equals(str1, str2, StringComparison.OrdinalIgnoreCase); // true (忽略大小写)
+
+// CompareTo方法 - 比较字符串（返回负数、0或正数）
+int compare1 = str1.CompareTo(str2); // 负数（str1 < str2）
+int compare2 = str1.CompareTo(str3); // 0 (相等)
+
+// String.Compare静态方法
+int compare3 = String.Compare(str1, str2); // 负数
+int compare4 = String.Compare(str1, str2, StringComparison.OrdinalIgnoreCase); // 0 (忽略大小写)
+
+// StringComparison枚举的常用值
+// Ordinal: 区分大小写的序数比较（最快）
+// OrdinalIgnoreCase: 不区分大小写的序数比较
+// CurrentCulture: 使用当前文化信息比较
+// InvariantCulture: 使用固定文化信息比较
+
+Console.WriteLine($"str1 == str2: {equal1}");
+Console.WriteLine($"CompareTo结果: {compare1}");
+```
+
+### 字符串的实际应用示例
+
+以下是一些String在实际开发中的应用场景：
+
+```csharp
+using System;
+using System.Text;
+using System.Text.RegularExpressions;
+
+class StringExamples
+{
+    // 验证邮箱格式
+    public static bool IsValidEmail(string email)
+    {
+        if (String.IsNullOrWhiteSpace(email))
+            return false;
+        
+        // 简单的邮箱验证（实际应用中应使用更严格的验证）
+        return email.Contains("@") && 
+               email.Contains(".") && 
+               email.IndexOf("@") < email.LastIndexOf(".");
+    }
+    
+    // 提取字符串中的数字
+    public static string ExtractNumbers(string input)
+    {
+        if (String.IsNullOrEmpty(input))
+            return "";
+        
+        StringBuilder numbers = new StringBuilder();
+        foreach (char c in input)
+        {
+            if (Char.IsDigit(c))
+            {
+                numbers.Append(c);
+            }
+        }
+        return numbers.ToString();
+    }
+    
+    // 反转字符串
+    public static string ReverseString(string input)
+    {
+        if (String.IsNullOrEmpty(input))
+            return input;
+        
+        char[] chars = input.ToCharArray();
+        Array.Reverse(chars);
+        return new string(chars);
+    }
+    
+    // 统计字符串中单词的数量
+    public static int CountWords(string text)
+    {
+        if (String.IsNullOrWhiteSpace(text))
+            return 0;
+        
+        string[] words = text.Split(new char[] { ' ', '\t', '\n', '\r' }, 
+                                    StringSplitOptions.RemoveEmptyEntries);
+        return words.Length;
+    }
+    
+    // 首字母大写
+    public static string CapitalizeFirstLetter(string input)
+    {
+        if (String.IsNullOrEmpty(input))
+            return input;
+        
+        return Char.ToUpper(input[0]) + input.Substring(1).ToLower();
+    }
+    
+    // 移除HTML标签
+    public static string RemoveHtmlTags(string html)
+    {
+        if (String.IsNullOrEmpty(html))
+            return html;
+        
+        // 简单的HTML标签移除（实际应用中应使用更完善的方法）
+        return Regex.Replace(html, "<.*?>", String.Empty);
+    }
+    
+    // 格式化手机号码（添加分隔符）
+    public static string FormatPhoneNumber(string phone)
+    {
+        if (String.IsNullOrEmpty(phone) || phone.Length != 11)
+            return phone;
+        
+        return $"{phone.Substring(0, 3)}-{phone.Substring(3, 4)}-{phone.Substring(7)}";
+    }
+    
+    // 检查字符串是否为回文
+    public static bool IsPalindrome(string input)
+    {
+        if (String.IsNullOrEmpty(input))
+            return false;
+        
+        string cleaned = input.Replace(" ", "").ToLower();
+        string reversed = ReverseString(cleaned);
+        return cleaned == reversed;
+    }
+    
+    static void Main()
+    {
+        // 测试邮箱验证
+        Console.WriteLine($"'test@example.com' 是否为有效邮箱: {IsValidEmail("test@example.com")}");
+        Console.WriteLine($"'invalid-email' 是否为有效邮箱: {IsValidEmail("invalid-email")}");
+        
+        // 测试提取数字
+        string textWithNumbers = "我有3个苹果和5个橙子";
+        Console.WriteLine($"从'{textWithNumbers}'中提取数字: {ExtractNumbers(textWithNumbers)}");
+        
+        // 测试反转字符串
+        Console.WriteLine($"'Hello'反转后: {ReverseString("Hello")}");
+        
+        // 测试统计单词
+        string sentence = "C# 是一门强大的编程语言";
+        Console.WriteLine($"'{sentence}'中的单词数: {CountWords(sentence)}");
+        
+        // 测试首字母大写
+        Console.WriteLine($"'hello world'首字母大写: {CapitalizeFirstLetter("hello world")}");
+        
+        // 测试格式化手机号
+        Console.WriteLine($"格式化手机号: {FormatPhoneNumber("13812345678")}");
+        
+        // 测试回文检查
+        Console.WriteLine($"'level'是否为回文: {IsPalindrome("level")}");
+        Console.WriteLine($"'hello'是否为回文: {IsPalindrome("hello")}");
+    }
+}
+```
+
+### 字符串与性能优化
+
+由于字符串的不可变性，频繁的字符串操作可能影响性能。以下是一些优化建议：
+
+```csharp
+// 1. 使用StringBuilder进行大量字符串拼接
+// 不推荐的做法
+string result = "";
+for (int i = 0; i < 1000; i++)
+{
+    result += i.ToString(); // 每次都会创建新字符串
+}
+
+// 推荐的做法
+StringBuilder sb = new StringBuilder();
+for (int i = 0; i < 1000; i++)
+{
+    sb.Append(i.ToString());
+}
+string result2 = sb.ToString();
+
+// 2. 使用String.Join代替循环拼接
+string[] items = new string[1000];
+for (int i = 0; i < 1000; i++)
+{
+    items[i] = i.ToString();
+}
+string joined = String.Join("", items); // 比循环拼接更高效
+
+// 3. 使用字符串插值代替String.Format（C# 6.0+）
+string name = "张三";
+int age = 25;
+// 推荐
+string msg1 = $"姓名: {name}, 年龄: {age}";
+// 不推荐（较旧的方式）
+string msg2 = String.Format("姓名: {0}, 年龄: {1}", name, age);
+```
+
+### String使用注意事项
+
+1. **字符串不可变性**：字符串一旦创建就不能修改，任何修改操作都会创建新字符串。对于频繁修改的场景，应使用StringBuilder。
+
+2. **null和空字符串的区别**：
+   - `null`表示没有引用任何字符串对象
+   - `""`或`String.Empty`表示引用了一个空字符串对象
+   - 使用`String.IsNullOrEmpty()`或`String.IsNullOrWhiteSpace()`进行检查
+
+3. **字符串比较**：
+   - 使用`==`运算符进行引用比较（对于字符串，实际上是比较值）
+   - 使用`String.Equals()`进行值比较
+   - 使用`String.Compare()`进行排序比较
+   - 根据场景选择合适的`StringComparison`选项
+
+4. **性能考虑**：
+   - 避免在循环中进行字符串拼接，使用StringBuilder
+   - 使用字符串插值代替String.Format（C# 6.0+）
+   - 对于大量字符串操作，考虑使用StringBuilder
+
+5. **内存管理**：
+   - 字符串是引用类型，存储在堆上
+   - 字符串字面量会被字符串池（String Pool）缓存，相同内容的字符串可能共享同一引用
+
+6. **字符编码**：
+   - C#中的字符串使用UTF-16编码
+   - 处理不同编码时，需要使用`Encoding`类进行转换
+
+### String类常用属性和方法速查表
+
+#### 常用属性
+
+| 属性 | 类型 | 作用说明 |
+|------|------|----------|
+| Length | int | 获取字符串中的字符数。例如：`string str = "Hello"; int len = str.Length; // 返回5` |
+| Chars[int] | char | 获取字符串中指定位置的字符。例如：`char c = str[0]; // 获取第一个字符` |
+
+#### 常用静态方法
+
+| 方法 | 参数 | 返回值 | 作用说明 |
+|------|------|--------|----------|
+| Compare(string, string) | string strA, string strB | int | 比较两个字符串，返回负数、0或正数。负数表示strA < strB，0表示相等，正数表示strA > strB |
+| Compare(string, string, StringComparison) | string strA, string strB, StringComparison comparisonType | int | 使用指定的比较规则比较两个字符串 |
+| Concat(params string[]) | params string[] values | string | 连接多个字符串。例如：`String.Concat("Hello", " ", "World")` 返回 "Hello World" |
+| Format(string, params object[]) | string format, params object[] args | string | 格式化字符串。例如：`String.Format("{0} is {1} years old", "John", 25)` |
+| Join(string, string[]) | string separator, string[] value | string | 使用指定分隔符连接字符串数组。例如：`String.Join(", ", new[]{"a", "b", "c"})` 返回 "a, b, c" |
+| IsNullOrEmpty(string) | string value | bool | 检查字符串是否为null或空字符串 |
+| IsNullOrWhiteSpace(string) | string value | bool | 检查字符串是否为null、空字符串或只包含空白字符 |
+| Empty | string | string | 表示空字符串的静态字段，等同于"" |
+
+#### 常用实例方法
+
+| 方法 | 参数 | 返回值 | 作用说明 |
+|------|------|--------|----------|
+| Contains(string) | string value | bool | 检查字符串是否包含指定的子字符串 |
+| EndsWith(string) | string value | bool | 检查字符串是否以指定的子字符串结尾 |
+| StartsWith(string) | string value | bool | 检查字符串是否以指定的子字符串开头 |
+| IndexOf(string) | string value | int | 返回指定子字符串首次出现的索引位置，如果未找到返回-1 |
+| IndexOf(string, int) | string value, int startIndex | int | 从指定索引开始搜索子字符串 |
+| LastIndexOf(string) | string value | int | 返回指定子字符串最后出现的索引位置 |
+| Substring(int) | int startIndex | string | 从指定索引开始截取到字符串末尾的子字符串 |
+| Substring(int, int) | int startIndex, int length | string | 从指定索引开始截取指定长度的子字符串 |
+| Replace(string, string) | string oldValue, string newValue | string | 将字符串中所有出现的指定子字符串替换为新的子字符串 |
+| Replace(char, char) | char oldChar, char newChar | string | 将字符串中所有出现的指定字符替换为新的字符 |
+| Split(params char[]) | params char[] separator | string[] | 根据指定的分隔符将字符串分割为字符串数组 |
+| Split(char[], StringSplitOptions) | char[] separator, StringSplitOptions options | string[] | 根据指定的分隔符和选项分割字符串 |
+| ToLower() | 无 | string | 将字符串转换为小写 |
+| ToUpper() | 无 | string | 将字符串转换为大写 |
+| Trim() | 无 | string | 移除字符串首尾的空白字符 |
+| Trim(params char[]) | params char[] trimChars | string | 移除字符串首尾的指定字符 |
+| TrimStart() | 无 | string | 移除字符串开头的空白字符 |
+| TrimEnd() | 无 | string | 移除字符串结尾的空白字符 |
+| Remove(int) | int startIndex | string | 从指定索引开始移除到字符串末尾的所有字符 |
+| Remove(int, int) | int startIndex, int count | string | 从指定索引开始移除指定数量的字符 |
+| Insert(int, string) | int startIndex, string value | string | 在指定索引位置插入字符串 |
+| PadLeft(int) | int totalWidth | string | 在字符串左侧填充空白字符，使总长度达到指定值 |
+| PadRight(int) | int totalWidth | string | 在字符串右侧填充空白字符，使总长度达到指定值 |
+| Equals(string) | string value | bool | 检查字符串是否与指定字符串相等 |
+| Equals(string, StringComparison) | string value, StringComparison comparisonType | bool | 使用指定的比较规则检查字符串是否相等 |
+| CompareTo(string) | string strB | int | 比较当前字符串与指定字符串，返回负数、0或正数 |
+| ToCharArray() | 无 | char[] | 将字符串转换为字符数组 |
+| ToString() | 无 | string | 返回字符串本身（因为已经是字符串） |
+
+### StringBuilder类常用方法速查表
+
+| 方法 | 参数 | 返回值 | 作用说明 |
+|------|------|--------|----------|
+| Append(string) | string value | StringBuilder | 在StringBuilder末尾追加字符串，返回当前StringBuilder实例以支持链式调用 |
+| AppendLine() | 无 | StringBuilder | 追加换行符 |
+| AppendLine(string) | string value | StringBuilder | 追加字符串并换行 |
+| AppendFormat(string, params object[]) | string format, params object[] args | StringBuilder | 追加格式化字符串 |
+| Insert(int, string) | int index, string value | StringBuilder | 在指定索引位置插入字符串 |
+| Remove(int, int) | int startIndex, int length | StringBuilder | 从指定索引开始移除指定长度的字符 |
+| Replace(string, string) | string oldValue, string newValue | StringBuilder | 替换字符串中所有出现的指定子字符串 |
+| Clear() | 无 | StringBuilder | 清空StringBuilder的内容 |
+| ToString() | 无 | string | 将StringBuilder转换为字符串 |
+| EnsureCapacity(int) | int capacity | int | 确保容量至少为指定值 |
+
+通过合理使用String类和StringBuilder类，可以高效地处理各种文本操作，满足应用程序中对字符串处理的需求。在实际开发中，应根据具体场景选择合适的字符串操作方法，并注意性能优化。

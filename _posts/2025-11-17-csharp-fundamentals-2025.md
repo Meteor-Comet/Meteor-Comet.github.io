@@ -3671,3 +3671,798 @@ string msg2 = String.Format("姓名: {0}, 年龄: {1}", name, age);
 | EnsureCapacity(int) | int capacity | int | 确保容量至少为指定值 |
 
 通过合理使用String类和StringBuilder类，可以高效地处理各种文本操作，满足应用程序中对字符串处理的需求。在实际开发中，应根据具体场景选择合适的字符串操作方法，并注意性能优化。
+
+## C# Object类详解
+
+Object类是C#中所有类型的基类，在C#类型系统中占据核心地位。理解Object类的特性和用法对于深入理解C#的类型系统、继承机制以及类型转换至关重要。
+
+### Object类的基本概念
+
+在C#中，`object`是`System.Object`类的别名，所有类型（包括值类型和引用类型）都直接或间接继承自Object类。这意味着任何类型的变量都可以赋值给object类型的变量。
+
+#### Object在类型系统中的地位
+
+```csharp
+// Object是所有类型的基类
+object obj1 = 100;           // int类型可以赋值给object
+object obj2 = "Hello";       // string类型可以赋值给object
+object obj3 = true;          // bool类型可以赋值给object
+object obj4 = new List<int>(); // 引用类型可以赋值给object
+
+// 值类型和引用类型都可以转换为object
+int number = 42;
+string text = "C#";
+DateTime date = DateTime.Now;
+
+object o1 = number;  // 值类型装箱为object
+object o2 = text;    // 引用类型直接赋值
+object o3 = date;    // 值类型装箱为object
+
+Console.WriteLine($"obj1类型: {obj1.GetType()}");
+Console.WriteLine($"obj2类型: {obj2.GetType()}");
+Console.WriteLine($"obj3类型: {obj3.GetType()}");
+```
+
+#### 为什么需要Object类？
+
+1. **统一类型系统**：Object类为所有类型提供了统一的基类，使得C#具有统一的类型系统。
+
+2. **多态支持**：通过Object类型可以实现多态，编写能够处理任意类型的通用代码。
+
+3. **集合存储**：在泛型出现之前，Object类型用于在集合中存储不同类型的数据。
+
+4. **反射支持**：Object类提供了GetType()方法，支持运行时类型检查。
+
+### Object类的常用方法
+
+Object类提供了几个重要的虚方法，这些方法可以被派生类重写：
+
+#### ToString()方法
+
+ToString()方法返回对象的字符串表示。默认实现返回类型的完全限定名。
+
+```csharp
+// 默认的ToString()实现
+object obj = new object();
+Console.WriteLine(obj.ToString()); // 输出: System.Object
+
+// 值类型的ToString()
+int number = 42;
+Console.WriteLine(number.ToString()); // 输出: 42
+
+// 引用类型的ToString()
+string text = "Hello";
+Console.WriteLine(text.ToString()); // 输出: Hello
+
+// 自定义类型的ToString()
+public class Person
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+    
+    public override string ToString()
+    {
+        return $"姓名: {Name}, 年龄: {Age}";
+    }
+}
+
+Person person = new Person { Name = "张三", Age = 25 };
+Console.WriteLine(person.ToString()); // 输出: 姓名: 张三, 年龄: 25
+```
+
+#### Equals()方法
+
+Equals()方法用于比较两个对象是否相等。Object类提供了两个版本的Equals方法：
+
+```csharp
+// 实例方法 Equals(object obj)
+object obj1 = "Hello";
+object obj2 = "Hello";
+object obj3 = "World";
+
+bool equal1 = obj1.Equals(obj2); // true (字符串值相等)
+bool equal2 = obj1.Equals(obj3); // false
+
+// 静态方法 Equals(object objA, object objB)
+bool equal3 = Object.Equals(obj1, obj2); // true
+bool equal4 = Object.Equals(obj1, null); // false
+bool equal5 = Object.Equals(null, null); // true (两个null相等)
+
+// 值类型的Equals()比较
+int a = 100;
+int b = 100;
+int c = 200;
+Console.WriteLine($"a.Equals(b): {a.Equals(b)}"); // true
+Console.WriteLine($"a.Equals(c): {a.Equals(c)}"); // false
+
+// 引用类型的Equals()默认比较引用
+Person p1 = new Person { Name = "张三", Age = 25 };
+Person p2 = new Person { Name = "张三", Age = 25 };
+Person p3 = p1;
+
+Console.WriteLine($"p1.Equals(p2): {p1.Equals(p2)}"); // false (不同对象，引用不同)
+Console.WriteLine($"p1.Equals(p3): {p1.Equals(p3)}"); // true (同一对象)
+
+// 重写Equals()方法实现值比较
+public class Person
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+    
+    public override bool Equals(object obj)
+    {
+        if (obj == null || GetType() != obj.GetType())
+            return false;
+        
+        Person other = (Person)obj;
+        return Name == other.Name && Age == other.Age;
+    }
+    
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Name, Age);
+    }
+}
+```
+
+#### GetHashCode()方法
+
+GetHashCode()方法返回对象的哈希码，用于在哈希表等数据结构中快速查找对象。
+
+```csharp
+// 默认的GetHashCode()实现
+object obj1 = new object();
+object obj2 = new object();
+Console.WriteLine($"obj1的哈希码: {obj1.GetHashCode()}");
+Console.WriteLine($"obj2的哈希码: {obj2.GetHashCode()}");
+
+// 相同对象的哈希码相同
+object obj3 = obj1;
+Console.WriteLine($"obj1和obj3的哈希码相同: {obj1.GetHashCode() == obj3.GetHashCode()}"); // true
+
+// 字符串的哈希码基于内容
+string str1 = "Hello";
+string str2 = "Hello";
+Console.WriteLine($"相同内容的字符串哈希码相同: {str1.GetHashCode() == str2.GetHashCode()}"); // true
+
+// 值类型的哈希码基于值
+int num1 = 100;
+int num2 = 100;
+Console.WriteLine($"相同值的整数哈希码相同: {num1.GetHashCode() == num2.GetHashCode()}"); // true
+
+// 重写GetHashCode()的示例
+public class Person
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+    
+    public override int GetHashCode()
+    {
+        // 使用HashCode.Combine (C# 7.3+)
+        return HashCode.Combine(Name, Age);
+        
+        // 或者使用传统方式
+        // int hash = 17;
+        // hash = hash * 23 + (Name?.GetHashCode() ?? 0);
+        // hash = hash * 23 + Age.GetHashCode();
+        // return hash;
+    }
+}
+```
+
+#### GetType()方法
+
+GetType()方法返回对象的运行时类型信息，返回Type对象。
+
+```csharp
+// 获取对象的类型
+object obj1 = 100;
+object obj2 = "Hello";
+object obj3 = new List<int>();
+
+Type type1 = obj1.GetType();
+Type type2 = obj2.GetType();
+Type type3 = obj3.GetType();
+
+Console.WriteLine($"obj1的类型: {type1.Name}"); // Int32
+Console.WriteLine($"obj2的类型: {type2.Name}"); // String
+Console.WriteLine($"obj3的类型: {type3.Name}"); // List`1
+
+// 使用typeof运算符比较类型
+if (obj1.GetType() == typeof(int))
+{
+    Console.WriteLine("obj1是int类型");
+}
+
+// 获取类型的完全限定名
+Console.WriteLine($"完全限定名: {type1.FullName}"); // System.Int32
+Console.WriteLine($"命名空间: {type1.Namespace}"); // System
+```
+
+#### ReferenceEquals()方法
+
+ReferenceEquals()是静态方法，用于比较两个对象的引用是否指向同一个对象。
+
+```csharp
+// ReferenceEquals比较引用
+object obj1 = new object();
+object obj2 = new object();
+object obj3 = obj1;
+
+Console.WriteLine($"obj1和obj2引用相同: {Object.ReferenceEquals(obj1, obj2)}"); // false
+Console.WriteLine($"obj1和obj3引用相同: {Object.ReferenceEquals(obj1, obj3)}"); // true
+
+// 字符串的特殊情况（字符串驻留）
+string str1 = "Hello";
+string str2 = "Hello";
+string str3 = new string("Hello".ToCharArray());
+
+Console.WriteLine($"str1和str2引用相同: {Object.ReferenceEquals(str1, str2)}"); // true (字符串驻留)
+Console.WriteLine($"str1和str3引用相同: {Object.ReferenceEquals(str1, str3)}"); // false
+
+// null比较
+Console.WriteLine($"null和null引用相同: {Object.ReferenceEquals(null, null)}"); // true
+```
+
+### Object的运算和比较
+
+#### 相等性比较
+
+C#提供了多种方式比较对象的相等性：
+
+```csharp
+// 1. == 运算符
+int a = 100;
+int b = 100;
+Console.WriteLine($"a == b: {a == b}"); // true (值类型比较值)
+
+string s1 = "Hello";
+string s2 = "Hello";
+Console.WriteLine($"s1 == s2: {s1 == s2}"); // true (字符串重载了==，比较值)
+
+Person p1 = new Person { Name = "张三", Age = 25 };
+Person p2 = new Person { Name = "张三", Age = 25 };
+Console.WriteLine($"p1 == p2: {p1 == p2}"); // false (引用类型默认比较引用)
+
+// 2. Equals()方法
+Console.WriteLine($"a.Equals(b): {a.Equals(b)}"); // true
+Console.WriteLine($"s1.Equals(s2): {s1.Equals(s2)}"); // true
+Console.WriteLine($"p1.Equals(p2): {p1.Equals(p2)}"); // 取决于是否重写了Equals
+
+// 3. Object.ReferenceEquals()方法
+Console.WriteLine($"ReferenceEquals(p1, p2): {Object.ReferenceEquals(p1, p2)}"); // false
+```
+
+#### 类型比较
+
+```csharp
+// 使用is运算符进行类型检查
+object obj = "Hello";
+
+if (obj is string)
+{
+    Console.WriteLine("obj是string类型");
+}
+
+if (obj is int)
+{
+    Console.WriteLine("obj是int类型");
+}
+
+// 使用is运算符进行模式匹配 (C# 7.0+)
+if (obj is string str)
+{
+    Console.WriteLine($"转换后的字符串: {str}");
+}
+
+// 使用as运算符进行安全类型转换
+string text = obj as string;
+if (text != null)
+{
+    Console.WriteLine($"转换成功: {text}");
+}
+
+int? number = obj as int?;
+if (number == null)
+{
+    Console.WriteLine("转换失败，返回null");
+}
+```
+
+### Object的类型转换
+
+#### 向上转型（隐式转换）
+
+值类型和引用类型都可以隐式转换为object类型，这个过程对于值类型来说就是装箱。
+
+```csharp
+// 值类型向上转型（装箱）
+int number = 42;
+object obj1 = number; // 隐式装箱
+
+// 引用类型向上转型
+string text = "Hello";
+object obj2 = text; // 直接赋值，无装箱
+
+// 自定义类型向上转型
+Person person = new Person { Name = "张三", Age = 25 };
+object obj3 = person; // 直接赋值
+```
+
+#### 向下转型（显式转换）
+
+从object类型转换回具体类型需要显式转换。
+
+```csharp
+// 使用强制类型转换
+object obj = 100;
+int number = (int)obj; // 显式拆箱
+
+object obj2 = "Hello";
+string text = (string)obj2; // 显式转换
+
+// 转换失败会抛出InvalidCastException
+try
+{
+    object obj3 = "Hello";
+    int num = (int)obj3; // 抛出异常
+}
+catch (InvalidCastException ex)
+{
+    Console.WriteLine($"转换失败: {ex.Message}");
+}
+
+// 使用as运算符进行安全转换（不会抛出异常）
+object obj4 = "Hello";
+string str = obj4 as string; // 成功，返回"Hello"
+
+object obj5 = 100;
+string str2 = obj5 as string; // 失败，返回null（因为int不能转换为string）
+
+// 使用is运算符检查类型后再转换
+object obj6 = 100;
+if (obj6 is int)
+{
+    int num = (int)obj6; // 安全转换
+    Console.WriteLine($"转换成功: {num}");
+}
+```
+
+### 装箱和拆箱详解
+
+装箱和拆箱是C#类型系统中的重要概念，理解它们对于编写高性能代码至关重要。
+
+#### 什么是装箱（Boxing）？
+
+装箱是将值类型转换为object类型或接口类型的过程。装箱时，值类型的值会被复制到堆上，并创建一个对象引用来包装这个值。
+
+```csharp
+// 装箱示例
+int number = 42;
+object obj = number; // 装箱：值类型转换为引用类型
+
+// 装箱的过程：
+// 1. 在堆上分配内存
+// 2. 将值类型的值复制到堆上
+// 3. 返回对象引用
+
+// 验证装箱
+Console.WriteLine($"number的类型: {number.GetType()}"); // System.Int32
+Console.WriteLine($"obj的类型: {obj.GetType()}"); // System.Int32
+Console.WriteLine($"number的值: {number}"); // 42
+Console.WriteLine($"obj的值: {obj}"); // 42
+
+// 多个值类型的装箱
+int i = 100;
+double d = 3.14;
+bool b = true;
+DateTime dt = DateTime.Now;
+
+object o1 = i;  // 装箱
+object o2 = d;  // 装箱
+object o3 = b;  // 装箱
+object o4 = dt; // 装箱
+```
+
+#### 什么是拆箱（Unboxing）？
+
+拆箱是将object类型或接口类型转换回值类型的过程。拆箱时，需要显式指定目标类型，并且只能拆箱到原始的值类型。
+
+```csharp
+// 拆箱示例
+object obj = 42; // 装箱
+int number = (int)obj; // 拆箱：引用类型转换回值类型
+
+// 拆箱的过程：
+// 1. 检查对象引用是否为null
+// 2. 检查对象是否为指定值类型的装箱实例
+// 3. 将堆上的值复制回栈上的值类型变量
+
+// 正确的拆箱
+object obj1 = 100;
+int num1 = (int)obj1; // 正确：拆箱到原始类型
+
+// 错误的拆箱会抛出异常
+object obj2 = 100;
+try
+{
+    long num2 = (long)obj2; // 错误：不能拆箱到不同的类型
+}
+catch (InvalidCastException ex)
+{
+    Console.WriteLine($"拆箱失败: {ex.Message}");
+}
+
+// 正确的拆箱方式
+object obj3 = 100;
+if (obj3 is int)
+{
+    int num3 = (int)obj3; // 安全拆箱
+    Console.WriteLine($"拆箱成功: {num3}");
+}
+```
+
+#### 装箱和拆箱的性能影响
+
+装箱和拆箱会带来性能开销，应尽量避免在性能敏感的代码中使用。
+
+```csharp
+// 性能测试：避免装箱
+void PerformanceTest()
+{
+    // 不好的做法：频繁装箱
+    int sum1 = 0;
+    for (int i = 0; i < 1000000; i++)
+    {
+        object obj = i; // 装箱
+        sum1 += (int)obj; // 拆箱
+    }
+    
+    // 好的做法：避免装箱
+    int sum2 = 0;
+    for (int i = 0; i < 1000000; i++)
+    {
+        sum2 += i; // 直接操作值类型
+    }
+}
+
+// 集合中的装箱问题
+// ArrayList会进行装箱（不推荐）
+ArrayList list1 = new ArrayList();
+list1.Add(1);    // 装箱
+list1.Add(2);    // 装箱
+int value1 = (int)list1[0]; // 拆箱
+
+// List<T>不会装箱（推荐）
+List<int> list2 = new List<int>();
+list2.Add(1);    // 无装箱
+list2.Add(2);    // 无装箱
+int value2 = list2[0]; // 无拆箱
+```
+
+#### 装箱和拆箱的最佳实践
+
+```csharp
+// 1. 使用泛型集合代替非泛型集合
+// 不推荐
+ArrayList list = new ArrayList();
+list.Add(100); // 装箱
+
+// 推荐
+List<int> genericList = new List<int>();
+genericList.Add(100); // 无装箱
+
+// 2. 使用泛型方法
+// 不推荐
+public void Process(object obj)
+{
+    if (obj is int)
+    {
+        int value = (int)obj; // 拆箱
+        // 处理value
+    }
+}
+
+// 推荐
+public void Process<T>(T value)
+{
+    // 直接使用value，无装箱拆箱
+}
+
+// 3. 避免在接口中使用值类型
+// 不推荐：值类型实现接口会导致装箱
+int number = 42;
+IComparable comparable = number; // 装箱
+
+// 4. 使用Nullable<T>代替object存储值类型
+// 不推荐
+object obj = GetNullableInt(); // 可能装箱
+
+// 推荐
+int? nullableInt = GetNullableInt(); // 无装箱
+```
+
+### Object的实际应用示例
+
+以下是一些Object在实际开发中的应用场景：
+
+```csharp
+using System;
+using System.Collections;
+
+class ObjectExamples
+{
+    // 通用方法：处理任意类型的对象
+    public static void ProcessObject(object obj)
+    {
+        if (obj == null)
+        {
+            Console.WriteLine("对象为null");
+            return;
+        }
+        
+        Type type = obj.GetType();
+        Console.WriteLine($"对象类型: {type.Name}");
+        Console.WriteLine($"对象值: {obj}");
+        
+        // 根据类型进行不同处理
+        if (obj is int)
+        {
+            int value = (int)obj;
+            Console.WriteLine($"这是一个整数: {value * 2}");
+        }
+        else if (obj is string)
+        {
+            string text = (string)obj;
+            Console.WriteLine($"这是一个字符串，长度: {text.Length}");
+        }
+        else if (obj is Person)
+        {
+            Person person = (Person)obj;
+            Console.WriteLine($"这是一个Person对象: {person.Name}");
+        }
+    }
+    
+    // 使用模式匹配处理对象 (C# 7.0+)
+    public static void ProcessObjectWithPatternMatching(object obj)
+    {
+        switch (obj)
+        {
+            case int i:
+                Console.WriteLine($"整数: {i}");
+                break;
+            case string s:
+                Console.WriteLine($"字符串: {s}");
+                break;
+            case Person p:
+                Console.WriteLine($"Person: {p.Name}, {p.Age}岁");
+                break;
+            case null:
+                Console.WriteLine("对象为null");
+                break;
+            default:
+                Console.WriteLine($"未知类型: {obj.GetType().Name}");
+                break;
+        }
+    }
+    
+    // 深拷贝对象（使用序列化）
+    public static T DeepClone<T>(T obj) where T : class
+    {
+        if (obj == null)
+            return null;
+        
+        // 这里只是示例，实际应使用序列化库
+        // 例如：使用System.Text.Json或Newtonsoft.Json
+        return obj; // 简化示例
+    }
+    
+    // 比较两个对象是否相等
+    public static bool AreEqual(object obj1, object obj2)
+    {
+        // 处理null情况
+        if (obj1 == null && obj2 == null)
+            return true;
+        
+        if (obj1 == null || obj2 == null)
+            return false;
+        
+        // 使用Equals方法
+        return obj1.Equals(obj2);
+    }
+    
+    // 获取对象的哈希码（用于字典等）
+    public static int GetObjectHashCode(object obj)
+    {
+        if (obj == null)
+            return 0;
+        
+        return obj.GetHashCode();
+    }
+    
+    // 类型安全的转换辅助方法
+    public static T SafeCast<T>(object obj) where T : class
+    {
+        return obj as T;
+    }
+    
+    public static T SafeCastValue<T>(object obj) where T : struct
+    {
+        if (obj is T)
+            return (T)obj;
+        return default(T);
+    }
+    
+    static void Main()
+    {
+        // 测试ProcessObject
+        ProcessObject(100);
+        ProcessObject("Hello");
+        ProcessObject(new Person { Name = "张三", Age = 25 });
+        ProcessObject(null);
+        
+        Console.WriteLine();
+        
+        // 测试模式匹配
+        ProcessObjectWithPatternMatching(42);
+        ProcessObjectWithPatternMatching("World");
+        ProcessObjectWithPatternMatching(new Person { Name = "李四", Age = 30 });
+        
+        Console.WriteLine();
+        
+        // 测试相等性比较
+        int a = 100, b = 100;
+        Console.WriteLine($"AreEqual(100, 100): {AreEqual(a, b)}");
+        
+        string s1 = "Hello", s2 = "Hello";
+        Console.WriteLine($"AreEqual('Hello', 'Hello'): {AreEqual(s1, s2)}");
+        
+        Person p1 = new Person { Name = "张三", Age = 25 };
+        Person p2 = new Person { Name = "张三", Age = 25 };
+        Console.WriteLine($"AreEqual(p1, p2): {AreEqual(p1, p2)}");
+    }
+}
+
+// 辅助类
+public class Person
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+    
+    public override bool Equals(object obj)
+    {
+        if (obj == null || GetType() != obj.GetType())
+            return false;
+        
+        Person other = (Person)obj;
+        return Name == other.Name && Age == other.Age;
+    }
+    
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Name, Age);
+    }
+    
+    public override string ToString()
+    {
+        return $"Person(姓名: {Name}, 年龄: {Age})";
+    }
+}
+```
+
+### Object与泛型
+
+在C# 2.0引入泛型之前，Object类型被广泛用于创建通用集合和方法。现在应优先使用泛型。
+
+```csharp
+// 旧方式：使用Object（不推荐）
+public class ObjectList
+{
+    private ArrayList list = new ArrayList();
+    
+    public void Add(object item)
+    {
+        list.Add(item); // 值类型会装箱
+    }
+    
+    public object Get(int index)
+    {
+        return list[index]; // 需要拆箱
+    }
+}
+
+// 新方式：使用泛型（推荐）
+public class GenericList<T>
+{
+    private List<T> list = new List<T>();
+    
+    public void Add(T item)
+    {
+        list.Add(item); // 无装箱
+    }
+    
+    public T Get(int index)
+    {
+        return list[index]; // 无拆箱
+    }
+}
+
+// 使用示例
+ObjectList oldList = new ObjectList();
+oldList.Add(100); // 装箱
+int value1 = (int)oldList.Get(0); // 拆箱
+
+GenericList<int> newList = new GenericList<int>();
+newList.Add(100); // 无装箱
+int value2 = newList.Get(0); // 无拆箱
+```
+
+### Object使用注意事项
+
+1. **性能考虑**：
+   - 避免在性能敏感的代码中频繁使用装箱和拆箱
+   - 优先使用泛型集合（List<T>）而不是非泛型集合（ArrayList）
+   - 使用泛型方法代替Object参数的方法
+
+2. **类型安全**：
+   - 使用as运算符进行安全类型转换，避免InvalidCastException
+   - 使用is运算符检查类型后再进行转换
+   - 在C# 7.0+中使用模式匹配简化类型检查
+
+3. **Equals()和GetHashCode()的重写规则**：
+   - 如果重写了Equals()，必须同时重写GetHashCode()
+   - 相等的对象必须具有相同的哈希码
+   - GetHashCode()应该在对象的生命周期内保持不变
+
+4. **null处理**：
+   - 使用Object.ReferenceEquals()比较null更明确
+   - 使用null条件运算符（?.）安全访问对象成员
+   - 使用null合并运算符（??）提供默认值
+
+5. **ToString()的重写**：
+   - 为自定义类型重写ToString()提供有意义的字符串表示
+   - ToString()应该返回可读的、描述性的字符串
+
+### Object类常用方法速查表
+
+#### 实例方法
+
+| 方法 | 参数 | 返回值 | 作用说明 |
+|------|------|--------|----------|
+| ToString() | 无 | string | 返回对象的字符串表示。默认返回类型的完全限定名，建议为自定义类型重写此方法 |
+| Equals(object) | object obj | bool | 比较当前对象与指定对象是否相等。值类型比较值，引用类型默认比较引用。可以重写以实现值比较 |
+| GetHashCode() | 无 | int | 返回对象的哈希码。如果重写了Equals()，必须同时重写GetHashCode()。相等的对象必须具有相同的哈希码 |
+| GetType() | 无 | Type | 返回对象的运行时类型信息。返回Type对象，可用于反射操作 |
+
+#### 静态方法
+
+| 方法 | 参数 | 返回值 | 作用说明 |
+|------|------|--------|----------|
+| Equals(object, object) | object objA, object objB | bool | 比较两个对象是否相等。如果两个参数都为null，返回true；如果只有一个为null，返回false；否则调用objA.Equals(objB) |
+| ReferenceEquals(object, object) | object objA, object objB | bool | 比较两个对象的引用是否指向同一个对象。这是唯一可靠的方式来判断两个引用是否指向同一对象实例 |
+
+### 装箱和拆箱总结
+
+#### 装箱（Boxing）
+
+- **定义**：将值类型转换为object类型或接口类型
+- **过程**：在堆上分配内存，复制值类型的值，返回对象引用
+- **性能影响**：会分配堆内存，有性能开销
+- **何时发生**：值类型赋值给object、接口类型，或作为object参数传递
+
+#### 拆箱（Unboxing）
+
+- **定义**：将object类型或接口类型转换回值类型
+- **过程**：检查对象是否为指定类型的装箱实例，将堆上的值复制回栈
+- **性能影响**：需要类型检查，有性能开销
+- **注意事项**：只能拆箱到原始的值类型，否则会抛出InvalidCastException
+
+#### 避免装箱和拆箱的最佳实践
+
+1. 使用泛型集合（List<T>、Dictionary<TKey, TValue>等）代替非泛型集合
+2. 使用泛型方法代替Object参数的方法
+3. 避免值类型实现接口（如果可能）
+4. 使用Nullable<T>代替object存储可空值类型
+5. 在性能敏感的代码中，直接使用具体类型而不是object
+
+通过深入理解Object类、装箱和拆箱机制，可以编写出更高效、更类型安全的C#代码。在实际开发中，应优先使用泛型来避免装箱和拆箱带来的性能开销。

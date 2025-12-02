@@ -5587,3 +5587,585 @@ int value2 = newList[0]; // 无拆箱，类型安全
 ```
 
 通过了解ArrayList，可以更好地理解C#集合的发展历程，以及为什么泛型集合（如List<T>）是更好的选择。在实际开发中，应优先使用List<T>等泛型集合来获得更好的类型安全性和性能。
+
+## C# List<T>类详解
+
+List<T>是C#中最常用的泛型集合类，位于System.Collections.Generic命名空间中。它提供了类型安全的动态数组功能，是ArrayList的泛型替代品，也是现代C#开发中推荐使用的集合类型。
+
+### List<T>的基本概念
+
+List<T>是一个泛型动态数组，可以存储指定类型T的元素。与ArrayList相比，List<T>具有以下优势：
+
+1. **类型安全**：编译时进行类型检查，避免运行时类型错误
+2. **性能优异**：值类型无需装箱拆箱，性能更好
+3. **代码清晰**：类型明确，代码更易读易维护
+4. **IntelliSense支持**：IDE可以提供更好的代码提示
+
+#### 为什么使用List<T>？
+
+```csharp
+// ArrayList的问题
+ArrayList list1 = new ArrayList();
+list1.Add(100);
+list1.Add("Hello"); // 可以添加不同类型，但类型不安全
+int value = (int)list1[0]; // 需要类型转换，可能出错
+
+// List<T>的优势
+List<int> list2 = new List<int>();
+list2.Add(100);
+// list2.Add("Hello"); // 编译错误，类型安全
+int value2 = list2[0]; // 无需类型转换，直接使用
+```
+
+### List<T>的创建和初始化
+
+```csharp
+using System.Collections.Generic;
+
+// 1. 使用默认构造函数创建空List
+List<int> list1 = new List<int>();
+
+// 2. 指定初始容量创建List（性能优化）
+List<int> list2 = new List<int>(100); // 初始容量为100
+
+// 3. 使用集合初始化器创建并初始化
+List<int> list3 = new List<int> { 1, 2, 3, 4, 5 };
+List<string> list4 = new List<string> { "Apple", "Banana", "Cherry" };
+
+// 4. 从数组创建List
+int[] array = { 1, 2, 3, 4, 5 };
+List<int> list5 = new List<int>(array);
+
+// 5. 从其他集合创建List
+List<int> list6 = new List<int>(list3);
+
+// 6. 使用var关键字（类型推断）
+var list7 = new List<string> { "A", "B", "C" };
+
+// 7. 使用AddRange方法初始化
+List<int> list8 = new List<int>();
+list8.AddRange(new int[] { 1, 2, 3, 4, 5 });
+
+Console.WriteLine($"list3的元素数: {list3.Count}");
+Console.WriteLine($"list4的元素数: {list4.Count}");
+```
+
+### List<T>的常用属性
+
+```csharp
+List<int> list = new List<int> { 1, 2, 3, 4, 5 };
+
+// Count属性 - 获取List中实际包含的元素数量
+Console.WriteLine($"元素数量: {list.Count}"); // 5
+
+// Capacity属性 - 获取或设置List的容量（内部数组的大小）
+Console.WriteLine($"当前容量: {list.Capacity}"); // 可能是8或更大
+
+// 设置容量（如果知道大概数量，可以提前设置以提高性能）
+list.Capacity = 20;
+Console.WriteLine($"设置后的容量: {list.Capacity}"); // 20
+
+// 注意：Capacity总是 >= Count
+```
+
+### List<T>的常用方法
+
+#### 添加元素
+
+```csharp
+List<int> list = new List<int>();
+
+// Add方法 - 在末尾添加单个元素
+list.Add(10);
+list.Add(20);
+list.Add(30);
+
+Console.WriteLine($"添加后元素数: {list.Count}");
+
+// AddRange方法 - 添加多个元素（从集合）
+list.AddRange(new int[] { 40, 50, 60 });
+list.AddRange(new List<int> { 70, 80, 90 });
+
+Console.WriteLine($"AddRange后元素数: {list.Count}");
+
+// Insert方法 - 在指定索引位置插入元素
+list.Insert(0, 5); // 在索引0处插入5
+list.Insert(2, 15); // 在索引2处插入15
+
+// InsertRange方法 - 在指定位置插入多个元素
+list.InsertRange(1, new int[] { 11, 12, 13 });
+
+// 输出所有元素
+Console.WriteLine($"列表内容: [{string.Join(", ", list)}]");
+```
+
+#### 访问和修改元素
+
+```csharp
+List<int> list = new List<int> { 10, 20, 30, 40, 50 };
+
+// 通过索引访问元素（类型安全，无需转换）
+int first = list[0]; // 10
+int second = list[1]; // 20
+
+// 通过索引修改元素
+list[0] = 100;
+list[1] = 200;
+
+// 遍历List - 使用for循环
+for (int i = 0; i < list.Count; i++)
+{
+    Console.WriteLine($"索引 {i}: {list[i]}");
+}
+
+// 遍历List - 使用foreach（推荐）
+foreach (int item in list)
+{
+    Console.WriteLine($"元素: {item}");
+}
+
+// 遍历List - 使用LINQ
+list.ForEach(item => Console.WriteLine($"LINQ遍历: {item}"));
+
+// 获取最后一个元素
+int last = list[list.Count - 1];
+
+// 获取第一个元素
+int first2 = list[0];
+```
+
+#### 查找元素
+
+```csharp
+List<int> list = new List<int> { 10, 20, 30, 20, 40, 20 };
+
+// IndexOf方法 - 查找元素首次出现的索引
+int index1 = list.IndexOf(20); // 返回1
+int index2 = list.IndexOf(100); // 返回-1（未找到）
+
+// IndexOf重载 - 从指定位置开始查找
+int index3 = list.IndexOf(20, 2); // 从索引2开始查找，返回3
+
+// LastIndexOf方法 - 查找元素最后出现的索引
+int lastIndex = list.LastIndexOf(20); // 返回5
+
+// Contains方法 - 检查是否包含指定元素
+bool contains = list.Contains(30); // true
+bool notContains = list.Contains(100); // false
+
+// Find方法 - 查找第一个满足条件的元素
+int found = list.Find(x => x > 25); // 返回30（第一个大于25的元素）
+
+// FindLast方法 - 查找最后一个满足条件的元素
+int foundLast = list.FindLast(x => x > 25); // 返回40
+
+// FindAll方法 - 查找所有满足条件的元素
+List<int> foundAll = list.FindAll(x => x > 25); // 返回[30, 40]
+
+// FindIndex方法 - 查找第一个满足条件的元素的索引
+int foundIndex = list.FindIndex(x => x > 25); // 返回2
+
+// FindLastIndex方法 - 查找最后一个满足条件的元素的索引
+int foundLastIndex = list.FindLastIndex(x => x > 25); // 返回4
+
+// Exists方法 - 检查是否存在满足条件的元素
+bool exists = list.Exists(x => x > 50); // false
+
+Console.WriteLine($"IndexOf(20): {index1}");
+Console.WriteLine($"Contains(30): {contains}");
+Console.WriteLine($"Find(>25): {found}");
+```
+
+#### 删除元素
+
+```csharp
+List<int> list = new List<int> { 10, 20, 30, 40, 50, 20 };
+
+// Remove方法 - 删除首次出现的指定元素
+bool removed = list.Remove(20); // 返回true，删除第一个20
+Console.WriteLine($"Remove后: [{string.Join(", ", list)}]");
+
+// RemoveAt方法 - 删除指定索引的元素
+list.RemoveAt(0); // 删除索引0的元素
+Console.WriteLine($"RemoveAt后: [{string.Join(", ", list)}]");
+
+// RemoveRange方法 - 删除指定范围的元素
+List<int> list2 = new List<int> { 10, 20, 30, 40, 50 };
+list2.RemoveRange(1, 2); // 从索引1开始删除2个元素
+Console.WriteLine($"RemoveRange后: [{string.Join(", ", list2)}]");
+
+// RemoveAll方法 - 删除所有满足条件的元素
+List<int> list3 = new List<int> { 10, 20, 30, 40, 50 };
+int removedCount = list3.RemoveAll(x => x > 25); // 删除所有大于25的元素
+Console.WriteLine($"RemoveAll删除了{removedCount}个元素: [{string.Join(", ", list3)}]");
+
+// Clear方法 - 清空所有元素
+list3.Clear();
+Console.WriteLine($"Clear后元素数: {list3.Count}"); // 0
+```
+
+#### 排序和反转
+
+```csharp
+List<int> list = new List<int> { 50, 20, 30, 10, 40 };
+
+// Sort方法 - 对List进行排序（升序）
+Console.WriteLine($"排序前: [{string.Join(", ", list)}]");
+list.Sort();
+Console.WriteLine($"排序后: [{string.Join(", ", list)}]");
+
+// Sort重载 - 使用自定义比较器排序（降序）
+list.Sort((x, y) => y.CompareTo(x)); // 降序排序
+Console.WriteLine($"降序排序: [{string.Join(", ", list)}]");
+
+// Sort重载 - 使用Comparison委托
+list.Sort(CompareNumbers);
+Console.WriteLine($"自定义排序: [{string.Join(", ", list)}]");
+
+// Reverse方法 - 反转List中元素的顺序
+List<int> list2 = new List<int> { 1, 2, 3, 4, 5 };
+list2.Reverse();
+Console.WriteLine($"反转后: [{string.Join(", ", list2)}]");
+
+// 字符串列表排序
+List<string> names = new List<string> { "张三", "李四", "王五", "赵六" };
+names.Sort();
+Console.WriteLine($"字符串排序: [{string.Join(", ", names)}]");
+
+// 自定义对象排序
+List<Person> people = new List<Person>
+{
+    new Person { Name = "张三", Age = 25 },
+    new Person { Name = "李四", Age = 30 },
+    new Person { Name = "王五", Age = 20 }
+};
+
+people.Sort((p1, p2) => p1.Age.CompareTo(p2.Age)); // 按年龄排序
+Console.WriteLine("按年龄排序:");
+foreach (var person in people)
+{
+    Console.WriteLine($"  {person.Name}: {person.Age}岁");
+}
+
+// 辅助方法
+static int CompareNumbers(int x, int y)
+{
+    return x.CompareTo(y);
+}
+```
+
+#### 转换和复制
+
+```csharp
+List<int> list = new List<int> { 10, 20, 30, 40, 50 };
+
+// ToArray方法 - 将List转换为数组
+int[] array = list.ToArray();
+Console.WriteLine($"转换为数组: [{string.Join(", ", array)}]");
+
+// CopyTo方法 - 复制到数组
+int[] targetArray = new int[list.Count];
+list.CopyTo(targetArray);
+Console.WriteLine($"复制到数组: [{string.Join(", ", targetArray)}]");
+
+// CopyTo重载 - 从指定索引开始复制
+int[] targetArray2 = new int[10];
+list.CopyTo(targetArray2, 2); // 从索引2开始复制
+Console.WriteLine($"从索引2复制: [{string.Join(", ", targetArray2)}]");
+
+// GetRange方法 - 获取指定范围的元素（返回新的List）
+List<int> range = list.GetRange(1, 3); // 从索引1开始，获取3个元素
+Console.WriteLine($"范围元素: [{string.Join(", ", range)}]");
+
+// ConvertAll方法 - 将List中的元素转换为另一种类型
+List<string> stringList = list.ConvertAll(x => x.ToString());
+Console.WriteLine($"转换为字符串: [{string.Join(", ", stringList)}]");
+
+// 使用LINQ进行转换
+List<double> doubleList = list.Select(x => (double)x).ToList();
+Console.WriteLine($"转换为double: [{string.Join(", ", doubleList)}]");
+```
+
+### List<T>与LINQ
+
+List<T>与LINQ完美集成，提供了强大的查询和操作能力：
+
+```csharp
+List<int> numbers = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+
+// Where - 过滤元素
+List<int> evens = numbers.Where(x => x % 2 == 0).ToList();
+Console.WriteLine($"偶数: [{string.Join(", ", evens)}]");
+
+// Select - 投影转换
+List<string> strings = numbers.Select(x => $"数字{x}").ToList();
+Console.WriteLine($"转换后: [{string.Join(", ", strings)}]");
+
+// OrderBy / OrderByDescending - 排序
+List<int> sorted = numbers.OrderByDescending(x => x).ToList();
+Console.WriteLine($"降序: [{string.Join(", ", sorted)}]");
+
+// First / Last - 获取第一个/最后一个元素
+int first = numbers.First();
+int last = numbers.Last();
+int firstEven = numbers.First(x => x % 2 == 0);
+
+// Any / All - 检查条件
+bool hasEven = numbers.Any(x => x % 2 == 0); // true
+bool allPositive = numbers.All(x => x > 0); // true
+
+// Count - 计数
+int evenCount = numbers.Count(x => x % 2 == 0); // 5
+
+// Sum / Average / Max / Min - 聚合操作
+int sum = numbers.Sum(); // 55
+double average = numbers.Average(); // 5.5
+int max = numbers.Max(); // 10
+int min = numbers.Min(); // 1
+
+// Distinct - 去重
+List<int> withDuplicates = new List<int> { 1, 2, 2, 3, 3, 3, 4 };
+List<int> distinct = withDuplicates.Distinct().ToList();
+Console.WriteLine($"去重后: [{string.Join(", ", distinct)}]");
+
+// GroupBy - 分组
+var grouped = numbers.GroupBy(x => x % 2 == 0 ? "偶数" : "奇数");
+foreach (var group in grouped)
+{
+    Console.WriteLine($"{group.Key}: [{string.Join(", ", group)}]");
+}
+```
+
+### List<T>的实际应用示例
+
+```csharp
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+class ListExamples
+{
+    // 学生成绩管理
+    public static void StudentGradeExample()
+    {
+        List<Student> students = new List<Student>
+        {
+            new Student { Name = "张三", Score = 85 },
+            new Student { Name = "李四", Score = 92 },
+            new Student { Name = "王五", Score = 78 },
+            new Student { Name = "赵六", Score = 96 },
+            new Student { Name = "孙七", Score = 88 }
+        };
+        
+        // 按分数排序
+        students.Sort((s1, s2) => s2.Score.CompareTo(s1.Score));
+        
+        Console.WriteLine("学生成绩排名:");
+        for (int i = 0; i < students.Count; i++)
+        {
+            Console.WriteLine($"{i + 1}. {students[i].Name}: {students[i].Score}分");
+        }
+        
+        // 计算平均分
+        double average = students.Average(s => s.Score);
+        Console.WriteLine($"平均分: {average:F2}");
+        
+        // 查找高分学生（>=90）
+        List<Student> highScorers = students.Where(s => s.Score >= 90).ToList();
+        Console.WriteLine($"高分学生: {string.Join(", ", highScorers.Select(s => s.Name))}");
+    }
+    
+    // 分页功能
+    public static List<T> GetPage<T>(List<T> list, int pageNumber, int pageSize)
+    {
+        int skip = (pageNumber - 1) * pageSize;
+        return list.Skip(skip).Take(pageSize).ToList();
+    }
+    
+    // 去重并保持顺序
+    public static List<T> RemoveDuplicates<T>(List<T> list)
+    {
+        return list.Distinct().ToList();
+    }
+    
+    // 合并两个List
+    public static List<T> Merge<T>(List<T> list1, List<T> list2)
+    {
+        List<T> merged = new List<T>(list1);
+        merged.AddRange(list2);
+        return merged;
+    }
+    
+    // 查找和替换
+    public static void FindAndReplace<T>(List<T> list, T oldValue, T newValue)
+    {
+        int index = list.IndexOf(oldValue);
+        while (index != -1)
+        {
+            list[index] = newValue;
+            index = list.IndexOf(oldValue, index + 1);
+        }
+    }
+    
+    // 批量操作
+    public static void BatchProcess(List<int> numbers)
+    {
+        // 过滤、转换、聚合
+        var result = numbers
+            .Where(x => x > 0)
+            .Select(x => x * 2)
+            .Where(x => x > 10)
+            .OrderByDescending(x => x)
+            .ToList();
+        
+        Console.WriteLine($"处理结果: [{string.Join(", ", result)}]");
+    }
+    
+    static void Main()
+    {
+        Console.WriteLine("=== 学生成绩示例 ===");
+        StudentGradeExample();
+        
+        Console.WriteLine("\n=== 分页示例 ===");
+        List<int> numbers = Enumerable.Range(1, 20).ToList();
+        List<int> page1 = GetPage(numbers, 1, 5);
+        Console.WriteLine($"第1页: [{string.Join(", ", page1)}]");
+        
+        Console.WriteLine("\n=== 去重示例 ===");
+        List<int> withDupes = new List<int> { 1, 2, 2, 3, 3, 3, 4 };
+        List<int> unique = RemoveDuplicates(withDupes);
+        Console.WriteLine($"去重后: [{string.Join(", ", unique)}]");
+        
+        Console.WriteLine("\n=== 批量处理示例 ===");
+        List<int> data = new List<int> { -5, 2, 8, 15, 3, 20, -10 };
+        BatchProcess(data);
+    }
+}
+
+// 辅助类
+class Student
+{
+    public string Name { get; set; }
+    public int Score { get; set; }
+}
+```
+
+### List<T>的性能优化
+
+```csharp
+// 1. 指定初始容量（如果知道大概数量）
+List<int> list1 = new List<int>(1000); // 避免频繁扩容
+
+// 2. 使用Capacity属性优化
+List<int> list2 = new List<int>();
+list2.Capacity = 1000; // 提前设置容量
+
+// 3. 使用TrimExcess方法释放多余内存
+List<int> list3 = new List<int>(1000);
+// ... 添加元素
+list3.TrimExcess(); // 将容量减少到实际元素数量
+
+// 4. 批量操作优于逐个操作
+// 不推荐
+List<int> list4 = new List<int>();
+for (int i = 0; i < 1000; i++)
+{
+    list4.Add(i); // 可能多次扩容
+}
+
+// 推荐
+List<int> list5 = new List<int>(1000);
+for (int i = 0; i < 1000; i++)
+{
+    list5.Add(i); // 只需一次分配
+}
+
+// 或者使用AddRange
+List<int> list6 = new List<int>();
+list6.AddRange(Enumerable.Range(0, 1000));
+```
+
+### List<T>使用注意事项
+
+1. **类型安全**：
+   - List<T>是类型安全的，编译时检查类型
+   - 不能添加不兼容类型的元素
+
+2. **性能考虑**：
+   - 如果知道大概容量，指定初始容量可以提高性能
+   - 频繁插入/删除中间元素时，考虑使用LinkedList<T>
+   - 只读场景考虑使用IReadOnlyList<T>
+
+3. **线程安全**：
+   - List<T>不是线程安全的
+   - 多线程环境下需要使用锁或线程安全的集合
+
+4. **空值处理**：
+   - 对于引用类型T，可以存储null
+   - 对于值类型T，不能存储null（除非使用Nullable<T>）
+
+5. **容量管理**：
+   - Capacity会自动增长，但频繁扩容会影响性能
+   - 使用TrimExcess可以释放多余内存
+
+### List<T>类常用属性和方法速查表
+
+#### 常用属性
+
+| 属性 | 类型 | 作用说明 |
+|------|------|----------|
+| Count | int | 获取List中实际包含的元素数量 |
+| Capacity | int | 获取或设置List的容量（内部数组的大小）。容量总是大于或等于Count |
+| Item[int] | T | 获取或设置指定索引处的元素。这是索引器，可以通过list[index]访问 |
+
+#### 常用方法
+
+| 方法 | 参数 | 返回值 | 作用说明 |
+|------|------|--------|----------|
+| Add(T) | T item | void | 在List末尾添加元素 |
+| AddRange(IEnumerable<T>) | IEnumerable<T> collection | void | 将集合中的元素添加到List末尾 |
+| Insert(int, T) | int index, T item | void | 在指定索引位置插入元素 |
+| InsertRange(int, IEnumerable<T>) | int index, IEnumerable<T> collection | void | 在指定索引位置插入集合中的元素 |
+| Remove(T) | T item | bool | 删除首次出现的指定元素，返回是否成功 |
+| RemoveAt(int) | int index | void | 删除指定索引的元素 |
+| RemoveRange(int, int) | int index, int count | void | 从指定索引开始删除指定数量的元素 |
+| RemoveAll(Predicate<T>) | Predicate<T> match | int | 删除所有满足条件的元素，返回删除的数量 |
+| Clear() | 无 | void | 清空List中的所有元素 |
+| Contains(T) | T item | bool | 检查List是否包含指定元素 |
+| IndexOf(T) | T item | int | 查找元素首次出现的索引，未找到返回-1 |
+| IndexOf(T, int) | T item, int index | int | 从指定索引开始查找元素 |
+| LastIndexOf(T) | T item | int | 查找元素最后出现的索引 |
+| BinarySearch(T) | T item | int | 在已排序的List中使用二分查找 |
+| Sort() | 无 | void | 对List进行排序（要求T实现IComparable） |
+| Sort(Comparison<T>) | Comparison<T> comparison | void | 使用指定的比较委托对List进行排序 |
+| Sort(IComparer<T>) | IComparer<T> comparer | void | 使用指定的比较器对List进行排序 |
+| Reverse() | 无 | void | 反转List中元素的顺序 |
+| ToArray() | 无 | T[] | 将List转换为数组 |
+| CopyTo(T[]) | T[] array | void | 将List的元素复制到数组中 |
+| CopyTo(T[], int) | T[] array, int arrayIndex | void | 从指定索引开始复制到数组 |
+| GetRange(int, int) | int index, int count | List<T> | 返回包含指定范围元素的新List |
+| Find(Predicate<T>) | Predicate<T> match | T | 查找第一个满足条件的元素 |
+| FindLast(Predicate<T>) | Predicate<T> match | T | 查找最后一个满足条件的元素 |
+| FindAll(Predicate<T>) | Predicate<T> match | List<T> | 查找所有满足条件的元素 |
+| FindIndex(Predicate<T>) | Predicate<T> match | int | 查找第一个满足条件的元素的索引 |
+| FindLastIndex(Predicate<T>) | Predicate<T> match | int | 查找最后一个满足条件的元素的索引 |
+| Exists(Predicate<T>) | Predicate<T> match | bool | 检查是否存在满足条件的元素 |
+| TrueForAll(Predicate<T>) | Predicate<T> match | bool | 检查是否所有元素都满足条件 |
+| ForEach(Action<T>) | Action<T> action | void | 对每个元素执行指定操作 |
+| ConvertAll<TOutput>(Converter<T, TOutput>) | Converter<T, TOutput> converter | List<TOutput> | 将List中的元素转换为另一种类型 |
+| TrimExcess() | 无 | void | 将容量减少到实际元素数量（如果容量大于Count的90%） |
+
+### List<T>与其他集合类的选择
+
+| 场景 | 推荐集合 | 说明 |
+|------|---------|------|
+| 动态数组，频繁随机访问 | List<T> | 最常用 |
+| 频繁在开头/中间插入删除 | LinkedList<T> | 链表结构 |
+| 需要唯一元素 | HashSet<T> | 哈希集合 |
+| 需要排序且唯一 | SortedSet<T> | 有序集合 |
+| 键值对存储 | Dictionary<TKey, TValue> | 字典 |
+| 先进先出 | Queue<T> | 队列 |
+| 后进先出 | Stack<T> | 栈 |
+| 只读访问 | IReadOnlyList<T> | 只读列表 |
+
+List<T>是C#开发中最重要和最常用的集合类之一。通过熟练掌握List<T>的各种方法和特性，可以高效地处理各种数据集合操作，编写出类型安全、性能优异的C#代码。

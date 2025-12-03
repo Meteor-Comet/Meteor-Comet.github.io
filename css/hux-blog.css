@@ -1980,7 +1980,7 @@ img::-moz-selection {
 .back-to-top {
   position: fixed;
   bottom: 30px;
-  right: 30px;
+  left: 30px;
   width: 40px;
   height: 40px;
   background-color: #0085a1;
@@ -2010,7 +2010,7 @@ img::-moz-selection {
 @media only screen and (max-width: 768px) {
   .back-to-top {
     bottom: 20px;
-    right: 20px;
+    left: 20px;
     width: 35px;
     height: 35px;
     font-size: 16px;

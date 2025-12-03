@@ -212,51 +212,88 @@
             scrollOffset: 0,
             scrollThreshold: .2,
             begin: null,
-            end: null,
+            end: function() {
+                // 在onePageNav滚动动画完成后执行目录滚动逻辑
+                var activeItem = $('.catalog-body .active');
+                if (activeItem.length > 0) {
+                    var $catalogBody = $('.catalog-body');
+                    var itemTop = activeItem.position().top;
+                    var containerHeight = $catalogBody.height();
+                    var itemHeight = activeItem.height();
+                    var targetScroll = itemTop - containerHeight / 2 + itemHeight / 2;
+                    
+                    $catalogBody.stop(true, true).animate({
+                        scrollTop: targetScroll
+                    }, 300);
+                }
+            },
             scrollChange: null,
             padding: 80
         });
         
         // 添加目录点击事件，实现目录同步滚动
-        // 右侧目录点击时的滚动
-        $('.catalog-body a').on('click', function(e) {
-            var $this = $(this);
-            var $parent = $this.parent();
-            var $catalogBody = $('.catalog-body');
-            
-            // 计算目标滚动位置，使点击的目录项居中
-            var itemTop = $parent.position().top;
-            var containerHeight = $catalogBody.height();
-            var itemHeight = $parent.height();
-            var targetScroll = itemTop - containerHeight / 2 + itemHeight / 2;
-            
-            // 执行目录滚动动画
-            $catalogBody.stop(true, true).animate({
-                scrollTop: targetScroll
-            }, 300);
-        });
+        // 使用事件委托确保所有目录项都能正确绑定事件
+        // 右侧目录项点击事件已由onePageNav处理，这里不再重复处理
+        // 目录滚动逻辑将在onePageNav的end回调中执行
+        
         
         // 文章内目录点击时的右侧目录同步滚动
-        $('.post-container ol li a').on('click', function(e) {
-            var $this = $(this);
-            var href = $this.attr('href');
+        $(document).on('click', '.post-container a[href^="#"]', function(e) {
+            var href = $(this).attr('href');
             
             // 找到右侧目录中对应的链接
             var $targetLink = $('.catalog-body a[href="' + href + '"]');
+            
             if ($targetLink.length > 0) {
-                var $parent = $targetLink.parent();
-                var $catalogBody = $('.catalog-body');
+                // 标记即将进行滚动，用于后续的滚动事件监听
+                window.__isCatalogClick = true;
                 
-                // 计算目标滚动位置，使对应的目录项居中
-                var itemTop = $parent.position().top;
-                var containerHeight = $catalogBody.height();
-                var itemHeight = $parent.height();
-                var targetScroll = itemTop - containerHeight / 2 + itemHeight / 2;
+                // 清除之前的定时器
+                if (window.__catalogScrollTimer) {
+                    clearTimeout(window.__catalogScrollTimer);
+                }
                 
-                // 执行目录滚动动画
-                $catalogBody.stop(true, true).animate({
-                    scrollTop: targetScroll
+                // 300ms后检查高亮项是否需要滚动
+                window.__catalogScrollTimer = setTimeout(function() {
+                    var activeItem = $('.catalog-body .active');
+                    if (activeItem.length > 0) {
+                        var $catalogBody = $('.catalog-body');
+                        var itemTop = activeItem.position().top;
+                        var containerHeight = $catalogBody.height();
+                        var itemHeight = activeItem.height();
+                        var targetScroll = itemTop - containerHeight / 2 + itemHeight / 2;
+                        
+                        $catalogBody.stop(true, true).animate({
+                            scrollTop: targetScroll
+                        }, 300);
+                    }
+                    
+                    // 重置标记
+                    window.__isCatalogClick = false;
                 }, 300);
+            }
+        });
+        
+        // 页面滚动事件监听，用于处理文章内目录点击后的目录滚动
+        var scrollTimeout;
+        $(window).on('scroll', function() {
+            // 如果是由点击目录项引起的滚动，并且滚动已经停止
+            if (window.__isCatalogClick) {
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(function() {
+                    var activeItem = $('.catalog-body .active');
+                    if (activeItem.length > 0) {
+                        var $catalogBody = $('.catalog-body');
+                        var itemTop = activeItem.position().top;
+                        var containerHeight = $catalogBody.height();
+                        var itemHeight = activeItem.height();
+                        var targetScroll = itemTop - containerHeight / 2 + itemHeight / 2;
+                        
+                        $catalogBody.stop(true, true).animate({
+                            scrollTop: targetScroll
+                        }, 300);
+                    }
+                }, 200);
             }
         });
     });

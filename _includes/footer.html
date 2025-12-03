@@ -203,26 +203,6 @@
      * Fork by Hux to support padding
      */
     async("{{ '/js/jquery.nav.js' | prepend: site.baseurl }}", function () {
-        // 只在点击目录项跳转时滚动目录
-        $('.catalog-body').on('click', 'li a', function() {
-            var $currentListItem = $(this).parent('li');
-            var $sideCatalog = $('.side-catalog');
-            
-            // 计算当前点击项的位置
-            var itemTop = $currentListItem.position().top;
-            var catalogHeight = $sideCatalog.height();
-            var itemHeight = $currentListItem.outerHeight();
-            
-            // 计算目标滚动位置，使点击项居中
-            var targetScroll = $sideCatalog.scrollTop() + itemTop - (catalogHeight / 2) + (itemHeight / 2);
-            
-            // 平滑滚动目录到目标位置
-            $sideCatalog.animate({
-                scrollTop: targetScroll
-            }, 300, 'swing');
-        });
-        
-        // 初始化目录导航功能（只保留高亮效果）
         $('.catalog-body').onePageNav({
             currentClass: "active",
             changeHash: !1,
@@ -233,7 +213,7 @@
             scrollThreshold: .2,
             begin: null,
             end: null,
-            scrollChange: null, // 禁用自动滚动回调
+            scrollChange: null,
             padding: 80
         });
     });

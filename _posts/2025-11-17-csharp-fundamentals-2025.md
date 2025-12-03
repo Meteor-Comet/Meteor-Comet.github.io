@@ -3061,6 +3061,342 @@ Console.WriteLine($"增加1秒: {nextSecond}");
 // 输出: 增加1秒: 2025/1/1 0:00:01
 ```
 
+#### 时间直接相加相减计算
+
+DateTime支持与TimeSpan直接进行加减运算，这是处理时间间隔最灵活的方式：
+
+```csharp
+DateTime date1 = new DateTime(2025, 1, 1, 10, 30, 0);
+DateTime date2 = new DateTime(2025, 1, 1, 14, 45, 30);
+
+// 1. DateTime与TimeSpan相加
+TimeSpan span1 = new TimeSpan(2, 15, 30); // 2小时15分30秒
+DateTime result1 = date1 + span1;
+Console.WriteLine($"原时间: {date1}");
+// 输出: 原时间: 2025/1/1 10:30:00
+
+Console.WriteLine($"加上2小时15分30秒: {result1}");
+// 输出: 加上2小时15分30秒: 2025/1/1 12:45:30
+
+// 2. DateTime与TimeSpan相减
+TimeSpan span2 = new TimeSpan(1, 30, 0); // 1小时30分钟
+DateTime result2 = date1 - span2;
+Console.WriteLine($"减去1小时30分钟: {result2}");
+// 输出: 减去1小时30分钟: 2025/1/1 9:00:00
+
+// 3. 两个DateTime相减得到TimeSpan
+TimeSpan difference = date2 - date1;
+Console.WriteLine($"时间差: {difference}");
+// 输出: 时间差: 04:15:30 (4小时15分30秒)
+
+// 4. 使用TimeSpan.FromXXX方法创建时间间隔
+DateTime baseDate = new DateTime(2025, 1, 1, 12, 0, 0);
+
+// 使用FromDays添加天数
+DateTime afterDays = baseDate + TimeSpan.FromDays(5);
+Console.WriteLine($"5天后: {afterDays}");
+// 输出: 5天后: 2025/1/6 12:00:00
+
+// 使用FromHours添加小时
+DateTime afterHours = baseDate + TimeSpan.FromHours(3.5);
+Console.WriteLine($"3.5小时后: {afterHours}");
+// 输出: 3.5小时后: 2025/1/1 15:30:00
+
+// 使用FromMinutes添加分钟
+DateTime afterMinutes = baseDate + TimeSpan.FromMinutes(90);
+Console.WriteLine($"90分钟后: {afterMinutes}");
+// 输出: 90分钟后: 2025/1/1 13:30:00
+
+// 使用FromSeconds添加秒
+DateTime afterSeconds = baseDate + TimeSpan.FromSeconds(3600);
+Console.WriteLine($"3600秒后: {afterSeconds}");
+// 输出: 3600秒后: 2025/1/1 13:00:00
+
+// 使用FromMilliseconds添加毫秒
+DateTime afterMs = baseDate + TimeSpan.FromMilliseconds(1500);
+Console.WriteLine($"1500毫秒后: {afterMs}");
+// 输出: 1500毫秒后: 2025/1/1 12:00:01
+
+// 使用FromTicks添加刻度
+DateTime afterTicks = baseDate + TimeSpan.FromTicks(10000000); // 1秒 = 10,000,000刻度
+Console.WriteLine($"10000000刻度后: {afterTicks}");
+// 输出: 10000000刻度后: 2025/1/1 12:00:01
+
+// 5. 组合使用多个TimeSpan
+TimeSpan span3 = new TimeSpan(1, 2, 3, 4, 500); // 1天2小时3分4秒500毫秒
+DateTime result3 = baseDate + span3;
+Console.WriteLine($"加上1天2小时3分4秒500毫秒: {result3}");
+// 输出: 加上1天2小时3分4秒500毫秒: 2025/1/2 14:03:04
+
+// 6. 负数TimeSpan表示向前推时间
+TimeSpan negativeSpan = new TimeSpan(-2, -30, 0); // -2小时30分钟
+DateTime result4 = baseDate + negativeSpan;
+Console.WriteLine($"减去2小时30分钟: {result4}");
+// 输出: 减去2小时30分钟: 2025/1/1 9:30:00
+
+// 7. 计算两个日期之间的完整时间差
+DateTime start = new DateTime(2025, 1, 1, 8, 0, 0);
+DateTime end = new DateTime(2025, 1, 3, 14, 30, 45);
+TimeSpan totalDiff = end - start;
+Console.WriteLine($"总时间差: {totalDiff}");
+// 输出: 总时间差: 2.06:30:45 (2天6小时30分45秒)
+
+Console.WriteLine($"总天数: {totalDiff.TotalDays}");
+// 输出: 总天数: 2.2713541666666666
+
+Console.WriteLine($"总小时数: {totalDiff.TotalHours}");
+// 输出: 总小时数: 54.5125
+
+Console.WriteLine($"总分钟数: {totalDiff.TotalMinutes}");
+// 输出: 总分钟数: 3270.75
+
+Console.WriteLine($"总秒数: {totalDiff.TotalSeconds}");
+// 输出: 总秒数: 196245
+```
+
+### TimeSpan类详解
+
+TimeSpan表示一个时间间隔，可以表示正数或负数的时间段。它是处理时间差、时间计算的重要类型。
+
+#### TimeSpan的基本概念
+
+TimeSpan可以表示从几纳秒到几百万天的时间间隔，精度为100纳秒（1个刻度）。
+
+```csharp
+// TimeSpan的内部表示
+// TimeSpan使用以下组件表示时间间隔：
+// - Days: 天数部分
+// - Hours: 小时部分（0-23）
+// - Minutes: 分钟部分（0-59）
+// - Seconds: 秒部分（0-59）
+// - Milliseconds: 毫秒部分（0-999）
+// - Ticks: 总刻度数（1秒 = 10,000,000刻度）
+```
+
+#### TimeSpan的创建和初始化
+
+```csharp
+// 1. 使用构造函数创建TimeSpan
+TimeSpan ts1 = new TimeSpan(1, 2, 3); // 1小时2分3秒
+TimeSpan ts2 = new TimeSpan(1, 2, 3, 4); // 1天2小时3分4秒
+TimeSpan ts3 = new TimeSpan(1, 2, 3, 4, 500); // 1天2小时3分4秒500毫秒
+TimeSpan ts4 = new TimeSpan(100000000); // 使用刻度数创建（100000000刻度 = 10秒）
+
+Console.WriteLine($"ts1: {ts1}"); // 输出: ts1: 01:02:03
+Console.WriteLine($"ts2: {ts2}"); // 输出: ts2: 1.02:03:04
+Console.WriteLine($"ts3: {ts3}"); // 输出: ts3: 1.02:03:04.5000000
+Console.WriteLine($"ts4: {ts4}"); // 输出: ts4: 00:00:10
+
+// 2. 使用静态方法创建TimeSpan
+TimeSpan fromDays = TimeSpan.FromDays(2.5); // 2.5天
+TimeSpan fromHours = TimeSpan.FromHours(12.5); // 12.5小时
+TimeSpan fromMinutes = TimeSpan.FromMinutes(90); // 90分钟
+TimeSpan fromSeconds = TimeSpan.FromSeconds(3600); // 3600秒 = 1小时
+TimeSpan fromMs = TimeSpan.FromMilliseconds(1500); // 1500毫秒 = 1.5秒
+TimeSpan fromTicks = TimeSpan.FromTicks(100000000); // 100000000刻度 = 10秒
+
+Console.WriteLine($"FromDays(2.5): {fromDays}"); // 输出: FromDays(2.5): 2.12:00:00
+Console.WriteLine($"FromHours(12.5): {fromHours}"); // 输出: FromHours(12.5): 12:30:00
+Console.WriteLine($"FromMinutes(90): {fromMinutes}"); // 输出: FromMinutes(90): 01:30:00
+Console.WriteLine($"FromSeconds(3600): {fromSeconds}"); // 输出: FromSeconds(3600): 01:00:00
+Console.WriteLine($"FromMilliseconds(1500): {fromMs}"); // 输出: FromMilliseconds(1500): 00:00:01.5000000
+Console.WriteLine($"FromTicks(100000000): {fromTicks}"); // 输出: FromTicks(100000000): 00:00:10
+
+// 3. 使用静态属性获取常用TimeSpan值
+TimeSpan zero = TimeSpan.Zero; // 零时间间隔
+TimeSpan max = TimeSpan.MaxValue; // 最大时间间隔
+TimeSpan min = TimeSpan.MinValue; // 最小时间间隔（负数）
+
+Console.WriteLine($"Zero: {zero}"); // 输出: Zero: 00:00:00
+Console.WriteLine($"MaxValue: {max}"); // 输出: MaxValue: 10675199.02:48:05.4775807
+Console.WriteLine($"MinValue: {min}"); // 输出: MinValue: -10675199.02:48:05.4775808
+```
+
+#### TimeSpan的常用属性
+
+```csharp
+TimeSpan ts = new TimeSpan(2, 3, 45, 30, 500); // 2天3小时45分30秒500毫秒
+
+// 获取各个时间组件
+Console.WriteLine($"Days: {ts.Days}"); // 输出: Days: 2
+Console.WriteLine($"Hours: {ts.Hours}"); // 输出: Hours: 3
+Console.WriteLine($"Minutes: {ts.Minutes}"); // 输出: Minutes: 45
+Console.WriteLine($"Seconds: {ts.Seconds}"); // 输出: Seconds: 30
+Console.WriteLine($"Milliseconds: {ts.Milliseconds}"); // 输出: Milliseconds: 500
+Console.WriteLine($"Ticks: {ts.Ticks}"); // 输出: Ticks: 1887305000000
+
+// 获取总时间（以不同单位表示）
+Console.WriteLine($"TotalDays: {ts.TotalDays}"); // 输出: TotalDays: 2.1566041666666667
+Console.WriteLine($"TotalHours: {ts.TotalHours}"); // 输出: TotalHours: 51.7585
+Console.WriteLine($"TotalMinutes: {ts.TotalMinutes}"); // 输出: TotalMinutes: 3105.5083333333333
+Console.WriteLine($"TotalSeconds: {ts.TotalSeconds}"); // 输出: TotalSeconds: 186330.5
+Console.WriteLine($"TotalMilliseconds: {ts.TotalMilliseconds}"); // 输出: TotalMilliseconds: 186330500
+
+// 其他属性
+Console.WriteLine($"是否为负数: {ts < TimeSpan.Zero}"); // 输出: 是否为负数: False
+```
+
+#### TimeSpan的运算操作
+
+```csharp
+TimeSpan ts1 = new TimeSpan(2, 30, 0); // 2小时30分钟
+TimeSpan ts2 = new TimeSpan(1, 15, 0); // 1小时15分钟
+
+// 1. TimeSpan相加
+TimeSpan sum = ts1 + ts2;
+Console.WriteLine($"ts1 + ts2: {sum}"); // 输出: ts1 + ts2: 03:45:00
+
+// 2. TimeSpan相减
+TimeSpan diff = ts1 - ts2;
+Console.WriteLine($"ts1 - ts2: {diff}"); // 输出: ts1 - ts2: 01:15:00
+
+// 3. TimeSpan乘以数值
+TimeSpan multiplied = ts1 * 2;
+Console.WriteLine($"ts1 * 2: {multiplied}"); // 输出: ts1 * 2: 05:00:00
+
+// 4. TimeSpan除以数值
+TimeSpan divided = ts1 / 2;
+Console.WriteLine($"ts1 / 2: {divided}"); // 输出: ts1 / 2: 01:15:00
+
+// 5. 两个TimeSpan相除（得到倍数）
+double ratio = ts1 / ts2;
+Console.WriteLine($"ts1 / ts2 (倍数): {ratio}"); // 输出: ts1 / ts2 (倍数): 2
+
+// 6. TimeSpan取反
+TimeSpan negated = -ts1;
+Console.WriteLine($"-ts1: {negated}"); // 输出: -ts1: -02:30:00
+
+// 7. TimeSpan比较
+Console.WriteLine($"ts1 > ts2: {ts1 > ts2}"); // 输出: ts1 > ts2: True
+Console.WriteLine($"ts1 < ts2: {ts1 < ts2}"); // 输出: ts1 < ts2: False
+Console.WriteLine($"ts1 == ts2: {ts1 == ts2}"); // 输出: ts1 == ts2: False
+Console.WriteLine($"ts1 != ts2: {ts1 != ts2}"); // 输出: ts1 != ts2: True
+```
+
+#### TimeSpan的常用方法
+
+```csharp
+TimeSpan ts1 = new TimeSpan(2, 30, 45);
+TimeSpan ts2 = new TimeSpan(1, 15, 30);
+
+// 1. Add方法 - 添加另一个TimeSpan
+TimeSpan added = ts1.Add(ts2);
+Console.WriteLine($"ts1.Add(ts2): {added}"); // 输出: ts1.Add(ts2): 03:46:15
+
+// 2. Subtract方法 - 减去另一个TimeSpan
+TimeSpan subtracted = ts1.Subtract(ts2);
+Console.WriteLine($"ts1.Subtract(ts2): {subtracted}"); // 输出: ts1.Subtract(ts2): 01:15:15
+
+// 3. Negate方法 - 取反
+TimeSpan negated = ts1.Negate();
+Console.WriteLine($"ts1.Negate(): {negated}"); // 输出: ts1.Negate(): -02:30:45
+
+// 4. Duration方法 - 获取绝对值
+TimeSpan negative = new TimeSpan(-2, -30, -45);
+TimeSpan duration = negative.Duration();
+Console.WriteLine($"Duration(): {duration}"); // 输出: Duration(): 02:30:45
+
+// 5. CompareTo方法 - 比较两个TimeSpan
+int compare = ts1.CompareTo(ts2);
+Console.WriteLine($"ts1.CompareTo(ts2): {compare}"); // 输出: ts1.CompareTo(ts2): 1 (正数表示ts1 > ts2)
+
+// 6. Equals方法 - 判断是否相等
+bool equal = ts1.Equals(ts2);
+Console.WriteLine($"ts1.Equals(ts2): {equal}"); // 输出: ts1.Equals(ts2): False
+
+// 7. ToString方法 - 转换为字符串
+string str = ts1.ToString();
+Console.WriteLine($"ToString(): {str}"); // 输出: ToString(): 02:30:45
+
+// 8. ToString格式化
+string formatted1 = ts1.ToString(@"d\.hh\:mm\:ss");
+Console.WriteLine($"格式化1: {formatted1}"); // 输出: 格式化1: 0.02:30:45
+
+string formatted2 = ts1.ToString(@"hh\:mm\:ss");
+Console.WriteLine($"格式化2: {formatted2}"); // 输出: 格式化2: 02:30:45
+```
+
+#### TimeSpan的实际应用示例
+
+```csharp
+// 1. 计算程序执行时间
+DateTime startTime = DateTime.Now;
+// 模拟一些操作
+System.Threading.Thread.Sleep(1500); // 休眠1.5秒
+DateTime endTime = DateTime.Now;
+TimeSpan elapsed = endTime - startTime;
+Console.WriteLine($"程序执行时间: {elapsed.TotalMilliseconds}毫秒");
+// 输出: 程序执行时间: 1500.1234毫秒 (实际值可能略有不同)
+
+// 2. 计算剩余时间
+DateTime deadline = new DateTime(2025, 12, 31, 23, 59, 59);
+DateTime now = DateTime.Now;
+TimeSpan remaining = deadline - now;
+Console.WriteLine($"距离截止日期还有: {remaining.Days}天 {remaining.Hours}小时");
+// 输出: 距离截止日期还有: 42天 12小时 (实际值取决于当前时间)
+
+// 3. 计算工作时间
+TimeSpan workStart = new TimeSpan(9, 0, 0); // 9:00
+TimeSpan workEnd = new TimeSpan(18, 0, 0); // 18:00
+TimeSpan workDuration = workEnd - workStart;
+Console.WriteLine($"工作时间: {workDuration.TotalHours}小时");
+// 输出: 工作时间: 9小时
+
+// 4. 计算平均时间
+TimeSpan[] durations = {
+    new TimeSpan(2, 30, 0),
+    new TimeSpan(3, 15, 0),
+    new TimeSpan(2, 45, 0)
+};
+TimeSpan total = TimeSpan.Zero;
+foreach (var duration in durations)
+{
+    total += duration;
+}
+TimeSpan average = TimeSpan.FromTicks(total.Ticks / durations.Length);
+Console.WriteLine($"平均时间: {average}");
+// 输出: 平均时间: 02:50:00
+
+// 5. 格式化时间间隔显示
+TimeSpan interval = new TimeSpan(2, 3, 45, 30);
+string formatted = $"{interval.Days}天{interval.Hours}小时{interval.Minutes}分钟{interval.Seconds}秒";
+Console.WriteLine($"格式化显示: {formatted}");
+// 输出: 格式化显示: 2天3小时45分钟30秒
+
+// 6. 判断时间间隔是否在范围内
+TimeSpan minInterval = new TimeSpan(0, 5, 0); // 最少5分钟
+TimeSpan maxInterval = new TimeSpan(1, 0, 0); // 最多1小时
+TimeSpan checkInterval = new TimeSpan(0, 30, 0); // 30分钟
+
+bool inRange = checkInterval >= minInterval && checkInterval <= maxInterval;
+Console.WriteLine($"30分钟是否在5分钟到1小时之间: {inRange}");
+// 输出: 30分钟是否在5分钟到1小时之间: True
+```
+
+#### TimeSpan的格式化字符串
+
+TimeSpan支持自定义格式化字符串：
+
+```csharp
+TimeSpan ts = new TimeSpan(2, 3, 45, 30, 500);
+
+// 标准格式
+Console.WriteLine($"默认格式: {ts}"); // 输出: 默认格式: 2.03:45:30.5000000
+Console.WriteLine($"c格式: {ts.ToString("c")}"); // 输出: c格式: 2.03:45:30.5000000
+Console.WriteLine($"g格式: {ts.ToString("g")}"); // 输出: g格式: 2:3:45:30.5
+Console.WriteLine($"G格式: {ts.ToString("G")}"); // 输出: G格式: 2:03:45:30.5000000
+
+// 自定义格式
+Console.WriteLine($@"d\.hh\:mm\:ss: {ts.ToString(@"d\.hh\:mm\:ss")}");
+// 输出: d\.hh\:mm\:ss: 2.03:45:30
+
+Console.WriteLine($@"hh\:mm\:ss: {ts.ToString(@"hh\:mm\:ss")}");
+// 输出: hh\:mm\:ss: 03:45:30
+
+Console.WriteLine($@"d天hh小时mm分钟: {ts.ToString(@"d天hh小时mm分钟")}");
+// 输出: d天hh小时mm分钟: 2天03小时45分钟
+```
+
 ### DateTime的解析
 
 可以将字符串解析为DateTime对象：

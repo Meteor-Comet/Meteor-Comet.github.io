@@ -26,7 +26,7 @@ tags:
 11. [C# String类详解](#c-string类详解)
 12. [C# Object类详解](#c-object类详解)
 13. [C# ArrayList类详解](#c-arraylist类详解)
-14. [C# List<T>类详解](#c-listt类详解)
+14. [C# List<T>类详解](#c-list类详解)
 
 ## C#简介：能做什么，解决什么问题？
 
@@ -5441,8 +5441,7 @@ public class Person
     {
         return $"Person(姓名: {Name}, 年龄: {Age})";
     }
-}
-```
+}```
 
 ### Object与泛型
 
@@ -6068,7 +6067,7 @@ int value2 = newList[0]; // 无拆箱，类型安全
 
 通过了解ArrayList，可以更好地理解C#集合的发展历程，以及为什么泛型集合（如List<T>）是更好的选择。在实际开发中，应优先使用List<T>等泛型集合来获得更好的类型安全性和性能。
 
-## C# List<T>类详解
+## C# List类详解
 
 List<T>是C#中最常用的泛型集合类，位于System.Collections.Generic命名空间中。它提供了类型安全的动态数组功能，是ArrayList的泛型替代品，也是现代C#开发中推荐使用的集合类型。
 

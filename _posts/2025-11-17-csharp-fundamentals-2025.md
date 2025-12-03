@@ -2028,6 +2028,81 @@ Action<int, int, int> printSum = (a, b, c) => Console.WriteLine($"Sum: {a + b + 
 printSum(1, 2, 3);
 ```
 
+### Predicate委托
+
+`Predicate`是C#中预定义的泛型委托，专门用于表示返回bool值的方法，通常用于条件判断。`Predicate`委托只接受一个输入参数，并始终返回bool类型。
+
+```csharp
+// Predicate委托示例
+
+// 检查整数是否为正数
+Predicate<int> isPositive = (x) => x > 0;
+bool result1 = isPositive(5);  // 结果为true
+bool result2 = isPositive(-3); // 结果为false
+
+// 检查字符串是否为空或 null
+Predicate<string> isNullOrEmpty = (str) => string.IsNullOrEmpty(str);
+bool result3 = isNullOrEmpty("");     // 结果为true
+bool result4 = isNullOrEmpty("Hello"); // 结果为false
+
+// 检查列表是否包含元素
+Predicate<List<int>> hasElements = (list) => list != null && list.Count > 0;
+List<int> numbers = new List<int> { 1, 2, 3 };
+bool result5 = hasElements(numbers); // 结果为true
+```
+
+#### Predicate的常见应用
+
+1. **数组和集合的筛选**
+
+```csharp
+// 使用Predicate筛选数组
+int[] numbers = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+
+// 筛选偶数
+Predicate<int> isEven = (x) => x % 2 == 0;
+int[] evenNumbers = Array.FindAll(numbers, isEven);
+
+// 输出结果
+Console.WriteLine("偶数: " + string.Join(", ", evenNumbers)); // 输出: 偶数: 2, 4, 6, 8, 10
+
+// 筛选大于5的数
+Predicate<int> isGreaterThan5 = (x) => x > 5;
+int[] greaterThan5 = Array.FindAll(numbers, isGreaterThan5);
+Console.WriteLine("大于5的数: " + string.Join(", ", greaterThan5)); // 输出: 大于5的数: 6, 7, 8, 9, 10
+```
+
+2. **对象集合的条件查询**
+
+```csharp
+// 定义Person类
+public class Person
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+}
+
+// 创建Person对象列表
+List<Person> people = new List<Person>
+{
+    new Person { Name = "Alice", Age = 25 },
+    new Person { Name = "Bob", Age = 30 },
+    new Person { Name = "Charlie", Age = 35 },
+    new Person { Name = "David", Age = 20 }
+};
+
+// 查找年龄大于等于30的人
+Predicate<Person> isAdult = (p) => p.Age >= 30;
+Person[] adults = Array.FindAll(people.ToArray(), isAdult);
+
+// 输出结果
+Console.WriteLine("年龄大于等于30的人:");
+foreach (Person person in adults)
+{
+    Console.WriteLine($"  {person.Name}, {person.Age}岁");
+}
+```
+
 ### Func与Action的应用场景
 
 #### 1. 作为参数传递给其他方法

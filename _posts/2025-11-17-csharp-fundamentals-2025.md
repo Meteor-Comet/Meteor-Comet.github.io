@@ -1945,6 +1945,144 @@ double result2 = Add(5.5, 3.2); // 调用第二个Add函数
 int result3 = Add(1, 2, 3);     // 调用第三个Add函数
 ```
 
+### 匿名函数与Lambda表达式
+
+C#支持匿名函数，即没有名称的函数。匿名函数可以使用`delegate`关键字定义，或者使用更简洁的Lambda表达式语法。
+
+#### 1. 使用delegate关键字的匿名函数
+
+```csharp
+// 定义一个接受两个int参数并返回int的匿名函数
+Func<int, int, int> addDelegate = delegate(int a, int b)
+{
+    return a + b;
+};
+
+// 调用匿名函数
+int result = addDelegate(5, 3); // 结果为8
+```
+
+#### 2. Lambda表达式
+
+Lambda表达式提供了一种更简洁的方式来编写匿名函数，语法为：`(parameters) => expression`或`(parameters) => { statements }`。
+
+```csharp
+// 简单的Lambda表达式（单行）
+Func<int, int, int> addLambda = (a, b) => a + b;
+int sum = addLambda(5, 3); // 结果为8
+
+// 多行Lambda表达式
+Func<int, int, int> multiplyLambda = (a, b) =>
+{
+    Console.WriteLine($"Multiplying {a} and {b}");
+    return a * b;
+};
+int product = multiplyLambda(4, 6); // 结果为24
+```
+
+### Func委托
+
+`Func`是C#中预定义的泛型委托，用于表示具有返回值的方法。`Func`委托可以接受0到16个输入参数，并始终有一个返回类型（最后一个类型参数）。
+
+```csharp
+// Func委托示例
+
+// 无参数，返回string
+Func<string> getGreeting = () => "Hello, World!";
+string greeting = getGreeting();
+
+// 一个参数，返回bool
+Func<int, bool> isEven = (x) => x % 2 == 0;
+bool result1 = isEven(4); // 结果为true
+
+// 两个参数，返回int
+Func<int, int, int> subtract = (a, b) => a - b;
+int result2 = subtract(10, 3); // 结果为7
+
+// 三个参数，返回string
+Func<int, int, int, string> formatSum = (a, b, c) => $"{a} + {b} + {c} = {a + b + c}";
+string message = formatSum(1, 2, 3); // 结果为"1 + 2 + 3 = 6"
+```
+
+### Action委托
+
+`Action`是C#中预定义的泛型委托，用于表示没有返回值（void）的方法。`Action`委托可以接受0到16个输入参数。
+
+```csharp
+// Action委托示例
+
+// 无参数
+Action printMessage = () => Console.WriteLine("Hello from Action!");
+printMessage();
+
+// 一个参数
+Action<string> greet = (name) => Console.WriteLine($"Hello, {name}!");
+greet("Alice");
+
+// 两个参数
+Action<string, int> displayInfo = (name, age) => Console.WriteLine($"Name: {name}, Age: {age}");
+displayInfo("Bob", 30);
+
+// 三个参数
+Action<int, int, int> printSum = (a, b, c) => Console.WriteLine($"Sum: {a + b + c}");
+printSum(1, 2, 3);
+```
+
+### Func与Action的应用场景
+
+#### 1. 作为参数传递给其他方法
+
+```csharp
+// 使用Func作为参数
+public int ProcessNumbers(int a, int b, Func<int, int, int> operation)
+{
+    return operation(a, b);
+}
+
+// 使用Action作为参数
+public void ProcessData(string data, Action<string> processAction)
+{
+    Console.WriteLine($"Processing: {data}");
+    processAction(data);
+}
+
+// 调用示例
+int result = ProcessNumbers(5, 3, (x, y) => x * y); // 使用Lambda表达式作为参数
+ProcessData("Sample data", (data) => Console.WriteLine($"Processed: {data.ToUpper()}"));
+```
+
+#### 2. 实现回调功能
+
+```csharp
+public void LongRunningOperation(Action<string> callback)
+{
+    // 模拟长时间运行的操作
+    Thread.Sleep(2000);
+    
+    // 操作完成后调用回调
+    callback("Operation completed successfully!");
+}
+
+// 调用示例
+LongRunningOperation((message) => Console.WriteLine(message));
+```
+
+#### 3. 配合LINQ使用
+
+```csharp
+List<int> numbers = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+
+// 使用Func作为LINQ方法的参数
+var evenNumbers = numbers.Where(n => n % 2 == 0);
+var squaredNumbers = numbers.Select(n => n * n);
+var sumOfSquares = numbers.Where(n => n % 2 == 0).Sum(n => n * n);
+
+// 输出结果
+Console.WriteLine("Even numbers: " + string.Join(", ", evenNumbers));
+Console.WriteLine("Squared numbers: " + string.Join(", ", squaredNumbers));
+Console.WriteLine("Sum of squares of even numbers: " + sumOfSquares);
+```
+
 ### 默认参数
 
 C#允许为函数参数指定默认值，这样在调用时可以省略这些参数。

@@ -87,7 +87,11 @@ jQuery(document).ready(function($) {
     
     // Show/hide button based on scroll position
     $(window).on('scroll', function() {
-        if ($(window).scrollTop() > 300) {
+        // 调试信息
+        console.log('滚动位置:', $(window).scrollTop());
+        
+        // 简化条件，只要滚动超过100像素就显示按钮
+        if ($(window).scrollTop() > 100) {
             $backToTop.addClass('visible');
         } else {
             $backToTop.removeClass('visible');
@@ -99,4 +103,7 @@ jQuery(document).ready(function($) {
         e.preventDefault();
         $('html, body').animate({ scrollTop: 0 }, 800);
     });
+    
+    // 初始化时检查一次滚动位置
+    $(window).trigger('scroll');
 });

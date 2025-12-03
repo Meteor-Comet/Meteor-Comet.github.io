@@ -214,21 +214,54 @@
             begin: null,
             end: null,
             scrollChange: function($currentListItem) {
-                // 目录自动滚动功能：当高亮项变化时，使当前项在目录中居中显示
-                var $sideCatalog = $('.side-catalog');
-                var itemTop = $currentListItem.position().top + $currentListItem.parent().position().top;
-                var catalogHeight = $sideCatalog.height();
-                var itemHeight = $currentListItem.height();
-                var scrollTop = itemTop - catalogHeight / 2 + itemHeight / 2;
-                
-                // 使用animate方法滚动目录容器，使当前项居中
-                $sideCatalog.animate({
-                    scrollTop: scrollTop
-                }, 300);
+                // 目录自动滚动功能：确保高亮项始终居中显示
+                centerActiveCatalogItem();
             },
             padding: 80
         });
     });
+    
+    // 防抖函数，避免频繁触发滚动事件
+    function debounce(func, wait) {
+        var timeout;
+        return function executedFunction(...args) {
+            var later = function() {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+    
+    // 使高亮的目录项居中显示
+    function centerActiveCatalogItem() {
+        var $activeItem = $('.side-catalog .active');
+        if ($activeItem.length === 0) return;
+        
+        var $sideCatalog = $('.side-catalog');
+        var $catalogBody = $('.catalog-body');
+        
+        // 获取高亮项在catalog-body中的位置
+        var itemTop = $activeItem.position().top;
+        
+        // 获取当前滚动位置
+        var currentScroll = $sideCatalog.scrollTop();
+        
+        // 计算目标滚动位置
+        var catalogHeight = $sideCatalog.height();
+        var itemHeight = $activeItem.outerHeight();
+        var targetScroll = currentScroll + itemTop - (catalogHeight / 2) + (itemHeight / 2);
+        
+        // 平滑滚动到目标位置
+        $sideCatalog.stop(true, true).animate({
+            scrollTop: targetScroll
+        }, 200);
+    }
+    
+    // 监听页面滚动事件，确保高亮项始终可见（带防抖）
+    var debouncedCenter = debounce(centerActiveCatalogItem, 100);
+    $(window).on('scroll', debouncedCenter);
 </script>
 {% endunless %}
 

@@ -296,6 +296,23 @@
                 }, 200);
             }
         });
+        
+        // 手动定位滚动按钮点击事件
+        $(document).on('click', '.catalog-locate', function(e) {
+            e.preventDefault();
+            var activeItem = $('.catalog-body .active');
+            if (activeItem.length > 0) {
+                var $catalogBody = $('.catalog-body');
+                var itemTop = activeItem.position().top;
+                var containerHeight = $catalogBody.height();
+                var itemHeight = activeItem.height();
+                var targetScroll = itemTop - containerHeight / 2 + itemHeight / 2;
+                
+                $catalogBody.stop(true, true).animate({
+                    scrollTop: targetScroll
+                }, 300);
+            }
+        });
     });
 </script>
 {% endunless %}

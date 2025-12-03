@@ -213,7 +213,20 @@
             scrollThreshold: .2,
             begin: null,
             end: null,
-            scrollChange: null,
+            scrollChange: function($currentListItem) {
+                // 目录自动滚动到当前高亮项
+                var catalogBody = $('.catalog-body');
+                var itemTop = $currentListItem.position().top;
+                var bodyHeight = catalogBody.height();
+                var scrollTop = catalogBody.scrollTop();
+                
+                // 确保当前项在可见区域内
+                if (itemTop < 0 || itemTop > bodyHeight) {
+                    catalogBody.animate({
+                        scrollTop: scrollTop + itemTop - bodyHeight / 2 + $currentListItem.height() / 2
+                    }, 300);
+                }
+            },
             padding: 80
         });
     });

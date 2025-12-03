@@ -214,18 +214,13 @@
             begin: null,
             end: null,
             scrollChange: function($currentListItem) {
-                // 目录自动滚动到当前高亮项
-                var catalogBody = $('.catalog-body');
-                var itemTop = $currentListItem.position().top;
-                var bodyHeight = catalogBody.height();
-                var scrollTop = catalogBody.scrollTop();
-                
-                // 确保当前项在可见区域内
-                if (itemTop < 0 || itemTop > bodyHeight) {
-                    catalogBody.animate({
-                        scrollTop: scrollTop + itemTop - bodyHeight / 2 + $currentListItem.height() / 2
-                    }, 300);
-                }
+                // 使用原生scrollIntoView方法实现目录自动滚动到可见区域
+                // 配置参数：behavior设为smooth实现平滑滚动，block设为center使元素居中显示
+                $currentListItem[0].scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center',
+                    inline: 'nearest'
+                });
             },
             padding: 80
         });

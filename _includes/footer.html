@@ -203,6 +203,26 @@
      * Fork by Hux to support padding
      */
     async("{{ '/js/jquery.nav.js' | prepend: site.baseurl }}", function () {
+        // 只在点击目录项跳转时滚动目录
+        $('.catalog-body').on('click', 'li a', function() {
+            var $currentListItem = $(this).parent('li');
+            var $sideCatalog = $('.side-catalog');
+            
+            // 计算当前点击项的位置
+            var itemTop = $currentListItem.position().top;
+            var catalogHeight = $sideCatalog.height();
+            var itemHeight = $currentListItem.outerHeight();
+            
+            // 计算目标滚动位置，使点击项居中
+            var targetScroll = $sideCatalog.scrollTop() + itemTop - (catalogHeight / 2) + (itemHeight / 2);
+            
+            // 平滑滚动目录到目标位置
+            $sideCatalog.animate({
+                scrollTop: targetScroll
+            }, 300, 'swing');
+        });
+        
+        // 初始化目录导航功能（只保留高亮效果）
         $('.catalog-body').onePageNav({
             currentClass: "active",
             changeHash: !1,
@@ -213,55 +233,10 @@
             scrollThreshold: .2,
             begin: null,
             end: null,
-            scrollChange: function($currentListItem) {
-                // 目录自动滚动功能：确保高亮项始终居中显示
-                centerActiveCatalogItem();
-            },
+            scrollChange: null, // 禁用自动滚动回调
             padding: 80
         });
     });
-    
-    // 防抖函数，避免频繁触发滚动事件
-    function debounce(func, wait) {
-        var timeout;
-        return function executedFunction(...args) {
-            var later = function() {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    }
-    
-    // 使高亮的目录项居中显示
-    function centerActiveCatalogItem() {
-        var $activeItem = $('.side-catalog .active');
-        if ($activeItem.length === 0) return;
-        
-        var $sideCatalog = $('.side-catalog');
-        var $catalogBody = $('.catalog-body');
-        
-        // 获取高亮项在catalog-body中的位置
-        var itemTop = $activeItem.position().top;
-        
-        // 获取当前滚动位置
-        var currentScroll = $sideCatalog.scrollTop();
-        
-        // 计算目标滚动位置
-        var catalogHeight = $sideCatalog.height();
-        var itemHeight = $activeItem.outerHeight();
-        var targetScroll = currentScroll + itemTop - (catalogHeight / 2) + (itemHeight / 2);
-        
-        // 平滑滚动到目标位置
-        $sideCatalog.stop(true, true).animate({
-            scrollTop: targetScroll
-        }, 200);
-    }
-    
-    // 监听页面滚动事件，确保高亮项始终可见（带防抖）
-    var debouncedCenter = debounce(centerActiveCatalogItem, 100);
-    $(window).on('scroll', debouncedCenter);
 </script>
 {% endunless %}
 

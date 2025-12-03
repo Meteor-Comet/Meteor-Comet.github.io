@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "C#基础语法详解"
-subtitle: "C#基础语法详解"
+subtitle: "类/对象/方法/枚举/结构体"
 date: 2025-11-19 12:00:00
 author: "Comet"
 catalog: true
@@ -10,6 +10,23 @@ tags:
     - 基础语法
 ---
 # C#核心基础语法详解
+
+## 目录
+
+1. [C#简介：能做什么，解决什么问题？](#c简介：能做什么，解决什么问题？)
+2. [C#数据类型详解](#c数据类型详解)
+3. [C#类型转换详解](#c类型转换详解)
+4. [C#运算符详解](#c运算符详解)
+5. [C#分支语句详解](#c分支语句详解)
+6. [C#函数详解](#c函数详解)
+7. [C# Math类详解](#c-math类详解)
+8. [C# Random类详解](#c-random类详解)
+9. [C# DateTime类详解](#c-datetime类详解)
+10. [C# Array类详解](#c-array类详解)
+11. [C# String类详解](#c-string类详解)
+12. [C# Object类详解](#c-object类详解)
+13. [C# ArrayList类详解](#c-arraylist类详解)
+14. [C# List<T>类详解](#c-listt类详解)
 
 ## C#简介：能做什么，解决什么问题？
 

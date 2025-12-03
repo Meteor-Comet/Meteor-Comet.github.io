@@ -81,4 +81,22 @@ jQuery(document).ready(function($) {
                 }
             });
     }
+
+    // Back to Top Button
+    var $backToTop = $('#back-to-top');
+    
+    // Show/hide button based on scroll position
+    $(window).on('scroll', function() {
+        if ($(window).scrollTop() > 300) {
+            $backToTop.addClass('visible');
+        } else {
+            $backToTop.removeClass('visible');
+        }
+    });
+    
+    // Smooth scroll to top when button is clicked
+    $backToTop.on('click', function(e) {
+        e.preventDefault();
+        $('html, body').animate({ scrollTop: 0 }, 800);
+    });
 });

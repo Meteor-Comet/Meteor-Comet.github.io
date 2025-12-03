@@ -1989,8 +1989,8 @@ img::-moz-selection {
   border-radius: 50%;
   font-size: 18px;
   cursor: pointer;
-  opacity: 0;
-  visibility: hidden;
+  opacity: 1;
+  visibility: visible;
   transition: opacity 0.3s ease, visibility 0.3s ease, background-color 0.3s ease;
   z-index: 9999;
   display: flex;

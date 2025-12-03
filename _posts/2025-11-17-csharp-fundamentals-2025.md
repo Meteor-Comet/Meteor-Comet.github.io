@@ -26,7 +26,7 @@ tags:
 11. [C# String类详解](#c-string类详解)
 12. [C# Object类详解](#c-object类详解)
 13. [C# ArrayList类详解](#c-arraylist类详解)
-14. [C# List<T>类详解](#c-list类详解)
+14. [C# List类详解](#c-list类详解)
 
 ## C#简介：能做什么，解决什么问题？
 

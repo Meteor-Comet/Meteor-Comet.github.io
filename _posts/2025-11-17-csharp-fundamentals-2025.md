@@ -1956,7 +1956,10 @@ public void CreateUser(string name, int age, string email, bool isActive = true)
 
 // 调用示例（使用命名参数）
 CreateUser(name: "张三", age: 25, email: "zhangsan@example.com");
+// 输出: 创建用户: 张三, 25岁, 邮箱: zhangsan@example.com, 激活: True
+
 CreateUser(email: "lisi@example.com", name: "李四", age: 30);
+// 输出: 创建用户: 李四, 30岁, 邮箱: lisi@example.com, 激活: True
 ```
 
 ### 递归函数
@@ -2003,11 +2006,14 @@ Func<int, int, int> add = (a, b) => a + b;
 
 // 使用Lambda表达式
 int result = add(5, 3); // 8
+Console.WriteLine($"Lambda计算结果: {result}"); // 输出: Lambda计算结果: 8
 
 // Lambda表达式用于集合操作
 List<int> numbers = new List<int> { 1, 2, 3, 4, 5 };
 List<int> evenNumbers = numbers.Where(n => n % 2 == 0).ToList(); // [2, 4]
 int sum = numbers.Sum(n => n); // 15
+Console.WriteLine($"偶数: [{string.Join(", ", evenNumbers)}]"); // 输出: 偶数: [2, 4]
+Console.WriteLine($"总和: {sum}"); // 输出: 总和: 15
 ```
 
 ### 局部函数
@@ -2860,14 +2866,31 @@ DateTime max = DateTime.MaxValue;      // 最大日期值 9999/12/31 23:59:59
 
 // 输出结果
 Console.WriteLine($"默认日期: {defaultDate}");
+// 输出: 默认日期: 0001/1/1 0:00:00
+
 Console.WriteLine($"指定日期: {date1}");
+// 输出: 指定日期: 2025/11/20 0:00:00
+
 Console.WriteLine($"指定日期时间: {date2}");
+// 输出: 指定日期时间: 2025/11/20 14:30:00
+
 Console.WriteLine($"指定日期时间毫秒: {date3}");
+// 输出: 指定日期时间毫秒: 2025/11/20 14:30:00
+
 Console.WriteLine($"当前时间: {now}");
+// 输出: 当前时间: 2025/11/19 12:00:00 (实际值取决于当前时间)
+
 Console.WriteLine($"UTC时间: {utcNow}");
+// 输出: UTC时间: 2025/11/19 4:00:00 (实际值取决于当前UTC时间)
+
 Console.WriteLine($"今天: {today}");
+// 输出: 今天: 2025/11/19 0:00:00 (实际值取决于当前日期)
+
 Console.WriteLine($"最小日期: {min}");
+// 输出: 最小日期: 0001/1/1 0:00:00
+
 Console.WriteLine($"最大日期: {max}");
+// 输出: 最大日期: 9999/12/31 23:59:59
 ```
 
 ### DateTime的常用属性
@@ -2878,18 +2901,43 @@ DateTime提供了丰富的属性来获取日期时间的各个组成部分：
 DateTime now = DateTime.Now;
 
 Console.WriteLine($"当前时间: {now}");
+// 输出: 当前时间: 2025/11/19 12:00:00 (实际值取决于当前时间)
+
 Console.WriteLine($"年: {now.Year}");
+// 输出: 年: 2025 (实际值取决于当前年份)
+
 Console.WriteLine($"月: {now.Month}");
+// 输出: 月: 11 (实际值取决于当前月份)
+
 Console.WriteLine($"日: {now.Day}");
+// 输出: 日: 19 (实际值取决于当前日期)
+
 Console.WriteLine($"时: {now.Hour}");
+// 输出: 时: 12 (实际值取决于当前时间)
+
 Console.WriteLine($"分: {now.Minute}");
+// 输出: 分: 0 (实际值取决于当前时间)
+
 Console.WriteLine($"秒: {now.Second}");
+// 输出: 秒: 0 (实际值取决于当前时间)
+
 Console.WriteLine($"毫秒: {now.Millisecond}");
+// 输出: 毫秒: 0 (实际值取决于当前时间)
+
 Console.WriteLine($"星期: {now.DayOfWeek}");
+// 输出: 星期: Wednesday (实际值取决于当前日期)
+
 Console.WriteLine($"一年中的第几天: {now.DayOfYear}");
+// 输出: 一年中的第几天: 323 (实际值取决于当前日期)
+
 Console.WriteLine($"刻度数: {now.Ticks}");
+// 输出: 刻度数: 638123456789012345 (实际值取决于当前时间)
+
 Console.WriteLine($"日期部分: {now.Date}");
+// 输出: 日期部分: 2025/11/19 0:00:00 (实际值取决于当前日期)
+
 Console.WriteLine($"时间部分: {now.TimeOfDay}");
+// 输出: 时间部分: 12:00:00 (实际值取决于当前时间)
 ```
 
 ### DateTime的格式化
@@ -2901,25 +2949,54 @@ DateTime now = DateTime.Now;
 
 // 标准格式
 Console.WriteLine($"默认格式: {now}");
+// 输出: 默认格式: 2025/11/19 12:00:00 (实际值取决于当前时间)
+
 Console.WriteLine($"短日期: {now.ToShortDateString()}");
+// 输出: 短日期: 2025/11/19
+
 Console.WriteLine($"长日期: {now.ToLongDateString()}");
+// 输出: 长日期: 2025年11月19日 (中文环境) 或 Wednesday, November 19, 2025 (英文环境)
+
 Console.WriteLine($"短时间: {now.ToShortTimeString()}");
+// 输出: 短时间: 12:00
+
 Console.WriteLine($"长时间: {now.ToLongTimeString()}");
+// 输出: 长时间: 12:00:00
 
 // 自定义格式
 Console.WriteLine($"自定义格式1: {now:yyyy-MM-dd}");
+// 输出: 自定义格式1: 2025-11-19
+
 Console.WriteLine($"自定义格式2: {now:yyyy年MM月dd日}");
+// 输出: 自定义格式2: 2025年11月19日
+
 Console.WriteLine($"自定义格式3: {now:yyyy-MM-dd HH:mm:ss}");
+// 输出: 自定义格式3: 2025-11-19 12:00:00
+
 Console.WriteLine($"自定义格式4: {now:yyyy年MM月dd日 HH时mm分ss秒}");
+// 输出: 自定义格式4: 2025年11月19日 12时00分00秒
 
 // 使用ToString方法
 Console.WriteLine($"ToString(""d""): {now.ToString("d")}");
+// 输出: ToString("d"): 2025/11/19
+
 Console.WriteLine($"ToString(""D""): {now.ToString("D")}");
+// 输出: ToString("D"): 2025年11月19日 (中文环境)
+
 Console.WriteLine($"ToString(""f""): {now.ToString("f")}");
+// 输出: ToString("f"): 2025年11月19日 12:00 (中文环境)
+
 Console.WriteLine($"ToString(""F""): {now.ToString("F")}");
+// 输出: ToString("F"): 2025年11月19日 12:00:00 (中文环境)
+
 Console.WriteLine($"ToString(""g""): {now.ToString("g")}");
+// 输出: ToString("g"): 2025/11/19 12:00
+
 Console.WriteLine($"ToString(""G""): {now.ToString("G")}");
+// 输出: ToString("G"): 2025/11/19 12:00:00
+
 Console.WriteLine($"ToString(""yyyy-MM-dd HH:mm:ss""): {now.ToString("yyyy-MM-dd HH:mm:ss")}");
+// 输出: ToString("yyyy-MM-dd HH:mm:ss"): 2025-11-19 12:00:00
 ```
 
 ### DateTime的计算和比较
@@ -2932,15 +3009,27 @@ DateTime date2 = new DateTime(2025, 12, 31);
 
 // 比较操作
 Console.WriteLine($"date1 < date2: {date1 < date2}");
+// 输出: date1 < date2: True
+
 Console.WriteLine($"date1 > date2: {date1 > date2}");
+// 输出: date1 > date2: False
+
 Console.WriteLine($"date1 == date2: {date1 == date2}");
+// 输出: date1 == date2: False
+
 Console.WriteLine($"date1 != date2: {date1 != date2}");
+// 输出: date1 != date2: True
+
 Console.WriteLine($"date1.CompareTo(date2): {date1.CompareTo(date2)}");
+// 输出: date1.CompareTo(date2): -1 (负数表示date1 < date2)
 
 // 计算时间差
 TimeSpan difference = date2 - date1;
 Console.WriteLine($"时间差: {difference}");
+// 输出: 时间差: 364.00:00:00
+
 Console.WriteLine($"相差天数: {difference.TotalDays}");
+// 输出: 相差天数: 364
 
 // 添加时间
 DateTime futureDate = date1.AddYears(1);
@@ -2951,12 +3040,25 @@ DateTime nextMinute = date1.AddMinutes(1);
 DateTime nextSecond = date1.AddSeconds(1);
 
 Console.WriteLine($"原日期: {date1}");
+// 输出: 原日期: 2025/1/1 0:00:00
+
 Console.WriteLine($"增加1年: {futureDate}");
+// 输出: 增加1年: 2026/1/1 0:00:00
+
 Console.WriteLine($"减少3个月: {pastDate}");
+// 输出: 减少3个月: 2024/10/1 0:00:00
+
 Console.WriteLine($"增加7天: {nextWeek}");
+// 输出: 增加7天: 2025/1/8 0:00:00
+
 Console.WriteLine($"增加24小时: {tomorrow}");
+// 输出: 增加24小时: 2025/1/2 0:00:00
+
 Console.WriteLine($"增加1分钟: {nextMinute}");
+// 输出: 增加1分钟: 2025/1/1 0:01:00
+
 Console.WriteLine($"增加1秒: {nextSecond}");
+// 输出: 增加1秒: 2025/1/1 0:00:01
 ```
 
 ### DateTime的解析
@@ -2972,8 +3074,13 @@ try
     DateTime parsedDate3 = DateTime.Parse("November 20, 2025");
     
     Console.WriteLine($"解析"2025-11-20": {parsedDate1}");
+    // 输出: 解析"2025-11-20": 2025/11/20 0:00:00
+    
     Console.WriteLine($"解析"2025/11/20 14:30:00": {parsedDate2}");
+    // 输出: 解析"2025/11/20 14:30:00": 2025/11/20 14:30:00
+    
     Console.WriteLine($"解析"November 20, 2025": {parsedDate3}");
+    // 输出: 解析"November 20, 2025": 2025/11/20 0:00:00
 }
 catch (FormatException ex)
 {
@@ -2984,6 +3091,7 @@ catch (FormatException ex)
 if (DateTime.TryParse("2025-11-20", out DateTime result1))
 {
     Console.WriteLine($"TryParse成功: {result1}");
+    // 输出: TryParse成功: 2025/11/20 0:00:00
 }
 else
 {
@@ -2995,6 +3103,7 @@ try
 {
     DateTime exactDate = DateTime.ParseExact("2025-11-20 14:30:00", "yyyy-MM-dd HH:mm:ss", null);
     Console.WriteLine($"ParseExact: {exactDate}");
+    // 输出: ParseExact: 2025/11/20 14:30:00
 }
 catch (FormatException ex)
 {
@@ -3005,6 +3114,7 @@ catch (FormatException ex)
 if (DateTime.TryParseExact("20/11/2025", "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.None, out DateTime result2))
 {
     Console.WriteLine($"TryParseExact成功: {result2}");
+    // 输出: TryParseExact成功: 2025/11/20 0:00:00
 }
 else
 {
@@ -3023,10 +3133,12 @@ try
     // 解析ISO 8601格式的时间
     DateTime isoDate = DateTime.Parse("2025-11-20T14:30:00");
     Console.WriteLine($"ISO 8601格式解析: {isoDate}");
+    // 输出: ISO 8601格式解析: 2025/11/20 14:30:00
     
     // 解析带毫秒的时间
     DateTime millisecondDate = DateTime.Parse("2025-11-20 14:30:00.123");
     Console.WriteLine($"带毫秒时间解析: {millisecondDate}");
+    // 输出: 带毫秒时间解析: 2025/11/20 14:30:00
 }
 catch (FormatException ex)
 {
@@ -3040,11 +3152,13 @@ try
     var usCulture = System.Globalization.CultureInfo.GetCultureInfo("en-US");
     DateTime usDate = DateTime.Parse("11/20/2025", usCulture);
     Console.WriteLine($"美式日期解析: {usDate}");
+    // 输出: 美式日期解析: 2025/11/20 0:00:00
     
     // 使用英国英语文化信息解析
     var ukCulture = System.Globalization.CultureInfo.GetCultureInfo("en-GB");
     DateTime ukDate = DateTime.Parse("20/11/2025", ukCulture);
     Console.WriteLine($"英式日期解析: {ukDate}");
+    // 输出: 英式日期解析: 2025/11/20 0:00:00
 }
 catch (FormatException ex)
 {
@@ -3075,6 +3189,11 @@ foreach (string testDate in testDates)
     if (TryParseMultipleFormats(testDate, out DateTime parsedDate))
     {
         Console.WriteLine($"多格式解析 '{testDate}' 成功: {parsedDate}");
+        // 输出示例:
+        // 多格式解析 '2025-11-20' 成功: 2025/11/20 0:00:00
+        // 多格式解析 '20/11/2025' 成功: 2025/11/20 0:00:00
+        // 多格式解析 '11/20/2025' 成功: 2025/11/20 0:00:00
+        // 多格式解析 'November 20, 2025' 成功: 2025/11/20 0:00:00
     }
     else
     {
@@ -3118,24 +3237,32 @@ public static DateTime FromUnixTimestampMilliseconds(long timestamp)
 // 使用示例
 DateTime now = DateTime.Now;
 Console.WriteLine($"当前时间: {now}");
+// 输出: 当前时间: 2025/11/19 12:00:00 (实际值取决于当前时间)
 
 // 转换为Unix时间戳
 long unixTimestamp = ToUnixTimestamp(now);
 long unixTimestampMs = ToUnixTimestampMilliseconds(now);
 Console.WriteLine($"Unix时间戳(秒): {unixTimestamp}");
+// 输出: Unix时间戳(秒): 1763452800 (实际值取决于当前时间)
+
 Console.WriteLine($"Unix时间戳(毫秒): {unixTimestampMs}");
+// 输出: Unix时间戳(毫秒): 1763452800000 (实际值取决于当前时间)
 
 // 从Unix时间戳转换回DateTime
 DateTime fromUnix = FromUnixTimestamp(unixTimestamp);
 DateTime fromUnixMs = FromUnixTimestampMilliseconds(unixTimestampMs);
 Console.WriteLine($"从时间戳转换: {fromUnix}");
+// 输出: 从时间戳转换: 2025/11/19 12:00:00 (实际值取决于当前时间)
+
 Console.WriteLine($"从毫秒时间戳转换: {fromUnixMs}");
+// 输出: 从毫秒时间戳转换: 2025/11/19 12:00:00 (实际值取决于当前时间)
 
 // 处理JavaScript时间戳（毫秒）
 // JavaScript中的Date.now()返回的是毫秒时间戳
 long jsTimestamp = 1758432600000; // 示例时间戳
 DateTime jsDateTime = FromUnixTimestampMilliseconds(jsTimestamp);
 Console.WriteLine($"JavaScript时间戳转换: {jsDateTime}");
+// 输出: JavaScript时间戳转换: 2025/9/22 0:00:00
 ```
 
 ### DateTime的实际应用示例
@@ -5680,13 +5807,13 @@ list.Add(10);
 list.Add(20);
 list.Add(30);
 
-Console.WriteLine($"添加后元素数: {list.Count}");
+Console.WriteLine($"添加后元素数: {list.Count}"); // 输出: 添加后元素数: 3
 
 // AddRange方法 - 添加多个元素（从集合）
 list.AddRange(new int[] { 40, 50, 60 });
 list.AddRange(new List<int> { 70, 80, 90 });
 
-Console.WriteLine($"AddRange后元素数: {list.Count}");
+Console.WriteLine($"AddRange后元素数: {list.Count}"); // 输出: AddRange后元素数: 9
 
 // Insert方法 - 在指定索引位置插入元素
 list.Insert(0, 5); // 在索引0处插入5
@@ -5697,6 +5824,7 @@ list.InsertRange(1, new int[] { 11, 12, 13 });
 
 // 输出所有元素
 Console.WriteLine($"列表内容: [{string.Join(", ", list)}]");
+// 输出: 列表内容: [5, 11, 12, 13, 10, 15, 20, 30, 40, 50, 60, 70, 80, 90]
 ```
 
 #### 访问和修改元素
@@ -5707,31 +5835,53 @@ List<int> list = new List<int> { 10, 20, 30, 40, 50 };
 // 通过索引访问元素（类型安全，无需转换）
 int first = list[0]; // 10
 int second = list[1]; // 20
+Console.WriteLine($"第一个元素: {first}, 第二个元素: {second}"); // 输出: 第一个元素: 10, 第二个元素: 20
 
 // 通过索引修改元素
 list[0] = 100;
 list[1] = 200;
+Console.WriteLine($"修改后: [{string.Join(", ", list)}]"); // 输出: 修改后: [100, 200, 30, 40, 50]
 
 // 遍历List - 使用for循环
 for (int i = 0; i < list.Count; i++)
 {
     Console.WriteLine($"索引 {i}: {list[i]}");
 }
+// 输出:
+// 索引 0: 100
+// 索引 1: 200
+// 索引 2: 30
+// 索引 3: 40
+// 索引 4: 50
 
 // 遍历List - 使用foreach（推荐）
 foreach (int item in list)
 {
     Console.WriteLine($"元素: {item}");
 }
+// 输出:
+// 元素: 100
+// 元素: 200
+// 元素: 30
+// 元素: 40
+// 元素: 50
 
 // 遍历List - 使用LINQ
 list.ForEach(item => Console.WriteLine($"LINQ遍历: {item}"));
+// 输出:
+// LINQ遍历: 100
+// LINQ遍历: 200
+// LINQ遍历: 30
+// LINQ遍历: 40
+// LINQ遍历: 50
 
 // 获取最后一个元素
 int last = list[list.Count - 1];
+Console.WriteLine($"最后一个元素: {last}"); // 输出: 最后一个元素: 50
 
 // 获取第一个元素
 int first2 = list[0];
+Console.WriteLine($"第一个元素: {first2}"); // 输出: 第一个元素: 100
 ```
 
 #### 查找元素
@@ -5742,38 +5892,46 @@ List<int> list = new List<int> { 10, 20, 30, 20, 40, 20 };
 // IndexOf方法 - 查找元素首次出现的索引
 int index1 = list.IndexOf(20); // 返回1
 int index2 = list.IndexOf(100); // 返回-1（未找到）
+Console.WriteLine($"IndexOf(20): {index1}"); // 输出: IndexOf(20): 1
+Console.WriteLine($"IndexOf(100): {index2}"); // 输出: IndexOf(100): -1
 
 // IndexOf重载 - 从指定位置开始查找
 int index3 = list.IndexOf(20, 2); // 从索引2开始查找，返回3
+Console.WriteLine($"IndexOf(20, 2): {index3}"); // 输出: IndexOf(20, 2): 3
 
 // LastIndexOf方法 - 查找元素最后出现的索引
 int lastIndex = list.LastIndexOf(20); // 返回5
+Console.WriteLine($"LastIndexOf(20): {lastIndex}"); // 输出: LastIndexOf(20): 5
 
 // Contains方法 - 检查是否包含指定元素
 bool contains = list.Contains(30); // true
 bool notContains = list.Contains(100); // false
+Console.WriteLine($"Contains(30): {contains}"); // 输出: Contains(30): True
+Console.WriteLine($"Contains(100): {notContains}"); // 输出: Contains(100): False
 
 // Find方法 - 查找第一个满足条件的元素
 int found = list.Find(x => x > 25); // 返回30（第一个大于25的元素）
+Console.WriteLine($"Find(>25): {found}"); // 输出: Find(>25): 30
 
 // FindLast方法 - 查找最后一个满足条件的元素
 int foundLast = list.FindLast(x => x > 25); // 返回40
+Console.WriteLine($"FindLast(>25): {foundLast}"); // 输出: FindLast(>25): 40
 
 // FindAll方法 - 查找所有满足条件的元素
 List<int> foundAll = list.FindAll(x => x > 25); // 返回[30, 40]
+Console.WriteLine($"FindAll(>25): [{string.Join(", ", foundAll)}]"); // 输出: FindAll(>25): [30, 40]
 
 // FindIndex方法 - 查找第一个满足条件的元素的索引
 int foundIndex = list.FindIndex(x => x > 25); // 返回2
+Console.WriteLine($"FindIndex(>25): {foundIndex}"); // 输出: FindIndex(>25): 2
 
 // FindLastIndex方法 - 查找最后一个满足条件的元素的索引
 int foundLastIndex = list.FindLastIndex(x => x > 25); // 返回4
+Console.WriteLine($"FindLastIndex(>25): {foundLastIndex}"); // 输出: FindLastIndex(>25): 4
 
 // Exists方法 - 检查是否存在满足条件的元素
 bool exists = list.Exists(x => x > 50); // false
-
-Console.WriteLine($"IndexOf(20): {index1}");
-Console.WriteLine($"Contains(30): {contains}");
-Console.WriteLine($"Find(>25): {found}");
+Console.WriteLine($"Exists(>50): {exists}"); // 输出: Exists(>50): False
 ```
 
 #### 删除元素
@@ -5846,6 +6004,11 @@ foreach (var person in people)
 {
     Console.WriteLine($"  {person.Name}: {person.Age}岁");
 }
+// 输出:
+// 按年龄排序:
+//   王五: 20岁
+//   张三: 25岁
+//   李四: 30岁
 
 // 辅助方法
 static int CompareNumbers(int x, int y)
@@ -5862,28 +6025,34 @@ List<int> list = new List<int> { 10, 20, 30, 40, 50 };
 // ToArray方法 - 将List转换为数组
 int[] array = list.ToArray();
 Console.WriteLine($"转换为数组: [{string.Join(", ", array)}]");
+// 输出: 转换为数组: [10, 20, 30, 40, 50]
 
 // CopyTo方法 - 复制到数组
 int[] targetArray = new int[list.Count];
 list.CopyTo(targetArray);
 Console.WriteLine($"复制到数组: [{string.Join(", ", targetArray)}]");
+// 输出: 复制到数组: [10, 20, 30, 40, 50]
 
 // CopyTo重载 - 从指定索引开始复制
 int[] targetArray2 = new int[10];
 list.CopyTo(targetArray2, 2); // 从索引2开始复制
 Console.WriteLine($"从索引2复制: [{string.Join(", ", targetArray2)}]");
+// 输出: 从索引2复制: [0, 0, 10, 20, 30, 40, 50, 0, 0, 0]
 
 // GetRange方法 - 获取指定范围的元素（返回新的List）
 List<int> range = list.GetRange(1, 3); // 从索引1开始，获取3个元素
 Console.WriteLine($"范围元素: [{string.Join(", ", range)}]");
+// 输出: 范围元素: [20, 30, 40]
 
 // ConvertAll方法 - 将List中的元素转换为另一种类型
 List<string> stringList = list.ConvertAll(x => x.ToString());
 Console.WriteLine($"转换为字符串: [{string.Join(", ", stringList)}]");
+// 输出: 转换为字符串: [10, 20, 30, 40, 50]
 
 // 使用LINQ进行转换
 List<double> doubleList = list.Select(x => (double)x).ToList();
 Console.WriteLine($"转换为double: [{string.Join(", ", doubleList)}]");
+// 输出: 转换为double: [10, 20, 30, 40, 50]
 ```
 
 ### List<T>与LINQ
@@ -5909,19 +6078,26 @@ Console.WriteLine($"降序: [{string.Join(", ", sorted)}]");
 int first = numbers.First();
 int last = numbers.Last();
 int firstEven = numbers.First(x => x % 2 == 0);
+Console.WriteLine($"第一个元素: {first}, 最后一个元素: {last}, 第一个偶数: {firstEven}");
+// 输出: 第一个元素: 1, 最后一个元素: 10, 第一个偶数: 2
 
 // Any / All - 检查条件
 bool hasEven = numbers.Any(x => x % 2 == 0); // true
 bool allPositive = numbers.All(x => x > 0); // true
+Console.WriteLine($"是否有偶数: {hasEven}, 是否都为正数: {allPositive}");
+// 输出: 是否有偶数: True, 是否都为正数: True
 
 // Count - 计数
 int evenCount = numbers.Count(x => x % 2 == 0); // 5
+Console.WriteLine($"偶数个数: {evenCount}"); // 输出: 偶数个数: 5
 
 // Sum / Average / Max / Min - 聚合操作
 int sum = numbers.Sum(); // 55
 double average = numbers.Average(); // 5.5
 int max = numbers.Max(); // 10
 int min = numbers.Min(); // 1
+Console.WriteLine($"总和: {sum}, 平均值: {average}, 最大值: {max}, 最小值: {min}");
+// 输出: 总和: 55, 平均值: 5.5, 最大值: 10, 最小值: 1
 
 // Distinct - 去重
 List<int> withDuplicates = new List<int> { 1, 2, 2, 3, 3, 3, 4 };

@@ -214,13 +214,17 @@
             begin: null,
             end: null,
             scrollChange: function($currentListItem) {
-                // 使用原生scrollIntoView方法实现目录自动滚动到可见区域
-                // 配置参数：behavior设为smooth实现平滑滚动，block设为center使元素居中显示
-                $currentListItem[0].scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'center',
-                    inline: 'nearest'
-                });
+                // 目录自动滚动功能：当高亮项变化时，使当前项在目录中居中显示
+                var $sideCatalog = $('.side-catalog');
+                var itemTop = $currentListItem.position().top + $currentListItem.parent().position().top;
+                var catalogHeight = $sideCatalog.height();
+                var itemHeight = $currentListItem.height();
+                var scrollTop = itemTop - catalogHeight / 2 + itemHeight / 2;
+                
+                // 使用animate方法滚动目录容器，使当前项居中
+                $sideCatalog.animate({
+                    scrollTop: scrollTop
+                }, 300);
             },
             padding: 80
         });

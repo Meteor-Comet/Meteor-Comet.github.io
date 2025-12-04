@@ -262,6 +262,147 @@ string[] names = {"张三", "李四", "王五"};
 
 通过合理使用这些数据类型，我们可以编写出高效、安全且易于维护的C#程序。
 
+### 结构体（struct）详解
+
+结构体是C#中的值类型，用于表示具有多个相关字段的数据结构。结构体适用于表示轻量级的、经常使用的小数据结构。
+
+#### 结构体的定义
+
+结构体使用`struct`关键字定义，包含字段、属性、方法和构造函数等成员。
+
+```csharp
+// 定义一个表示点的结构体
+struct Point
+{
+    // 字段
+    public int X;
+    public int Y;
+    
+    // 构造函数
+    public Point(int x, int y)
+    {
+        X = x;
+        Y = y;
+    }
+    
+    // 方法
+    public double DistanceFromOrigin()
+    {
+        return Math.Sqrt(X * X + Y * Y);
+    }
+    
+    // 重写ToString方法
+    public override string ToString()
+    {
+        return $"({X}, {Y})";
+    }
+}
+```
+
+#### 结构体的特点
+
+1. **值类型**：结构体实例存储在栈上，具有值类型的特点
+2. **不可继承**：结构体不能作为基类，但可以实现接口
+3. **默认构造函数**：结构体总是有一个默认的无参数构造函数，不能删除
+4. **性能优势**：对于小数据结构，结构体比类具有更好的性能
+5. **不支持null**：除非使用可空类型（如`Point?`）
+
+#### 结构体的使用示例
+
+```csharp
+// 创建结构体实例
+Point p1 = new Point(3, 4);
+Point p2 = new Point(5, 12);
+
+// 访问字段
+Console.WriteLine($"p1的坐标: ({p1.X}, {p1.Y})");
+
+// 调用方法
+double distance = p1.DistanceFromOrigin();
+Console.WriteLine($"p1到原点的距离: {distance}");
+
+// 结构体赋值（值复制）
+Point p3 = p1;
+p3.X = 10;
+Console.WriteLine($"p1: {p1}"); // 输出: (3, 4)
+Console.WriteLine($"p3: {p3}"); // 输出: (10, 4)
+```
+
+### 枚举（enum）详解
+
+枚举是C#中的值类型，用于定义命名的整数常量集合。枚举可以提高代码的可读性和可维护性。
+
+#### 枚举的定义
+
+枚举使用`enum`关键字定义，可以指定基础整数类型（默认为int）。
+
+```csharp
+// 定义一个表示星期的枚举
+enum DayOfWeek
+{
+    Monday,
+    Tuesday,
+    Wednesday,
+    Thursday,
+    Friday,
+    Saturday,
+    Sunday
+}
+
+// 定义一个指定基础类型的枚举
+enum Month : byte
+{
+    January = 1,
+    February,
+    March,
+    April,
+    May,
+    June,
+    July,
+    August,
+    September,
+    October,
+    November,
+    December
+}
+```
+
+#### 枚举的特点
+
+1. **值类型**：枚举实例存储在栈上，具有值类型的特点
+2. **整数常量**：枚举的每个成员都是整数常量，默认从0开始递增
+3. **基础类型**：可以使用byte、sbyte、short、ushort、int、uint、long或ulong作为基础类型
+4. **命名常量**：枚举成员必须是唯一的命名常量
+5. **可转换性**：可以与基础整数类型相互转换
+
+#### 枚举的使用示例
+
+```csharp
+// 使用枚举
+DayOfWeek today = DayOfWeek.Monday;
+Console.WriteLine($"今天是: {today}");
+
+// 枚举比较
+if (today == DayOfWeek.Monday)
+{
+    Console.WriteLine("今天是工作日的第一天");
+}
+
+// 枚举转换为整数
+int dayValue = (int)today;
+Console.WriteLine($"Monday的值: {dayValue}"); // 输出: 0
+
+// 整数转换为枚举
+DayOfWeek anotherDay = (DayOfWeek)2;
+Console.WriteLine($"值为2的枚举成员: {anotherDay}"); // 输出: Wednesday
+
+// 使用指定值的枚举
+Month currentMonth = Month.December;
+Console.WriteLine($"当前月份: {currentMonth}"); // 输出: December
+int monthValue = (int)currentMonth;
+Console.WriteLine($"December的值: {monthValue}"); // 输出: 12
+```
+
 ## <a id="type-conversion"></a>C#类型转换详解
 
 在编程过程中，我们经常需要在不同的数据类型之间进行转换。C#提供了多种类型转换机制，理解这些机制对编写高效、安全的代码至关重要。

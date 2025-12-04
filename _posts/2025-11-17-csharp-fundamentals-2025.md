@@ -15,10 +15,17 @@ tags:
 
 1. [C#简介：能做什么，解决什么问题？](#intro)
 2. [C#数据类型详解](#data-types)
+   - [结构体（struct）详解](#struct-detail)
+   - [枚举（enum）详解](#enum-detail)
 3. [C#类型转换详解](#type-conversion)
 4. [C#运算符详解](#operators)
 5. [C#分支语句详解](#branch-statements)
 6. [C#函数详解](#functions)
+   - [匿名函数与Lambda表达式](#anonymous-function)
+   - [Func委托](#func-delegate)
+   - [Action委托](#action-delegate)
+   - [Predicate委托](#predicate-delegate)
+   - [Func与Action的应用场景](#func-action-application)
 7. [C# Math类详解](#math-class)
 8. [C# Random类详解](#random-class)
 9. [C# DateTime类详解](#datetime-class)
@@ -262,7 +269,7 @@ string[] names = {"张三", "李四", "王五"};
 
 通过合理使用这些数据类型，我们可以编写出高效、安全且易于维护的C#程序。
 
-### 结构体（struct）详解
+### <a id="struct-detail"></a>结构体（struct）详解
 
 结构体是C#中的值类型，用于表示具有多个相关字段的数据结构。结构体适用于表示轻量级的、经常使用的小数据结构。
 
@@ -328,7 +335,7 @@ Console.WriteLine($"p1: {p1}"); // 输出: (3, 4)
 Console.WriteLine($"p3: {p3}"); // 输出: (10, 4)
 ```
 
-### 枚举（enum）详解
+### <a id="enum-detail"></a>枚举（enum）详解
 
 枚举是C#中的值类型，用于定义命名的整数常量集合。枚举可以提高代码的可读性和可维护性。
 
@@ -2086,7 +2093,7 @@ double result2 = Add(5.5, 3.2); // 调用第二个Add函数
 int result3 = Add(1, 2, 3);     // 调用第三个Add函数
 ```
 
-### 匿名函数与Lambda表达式
+### <a id="anonymous-function"></a>匿名函数与Lambda表达式
 
 C#支持匿名函数，即没有名称的函数。匿名函数可以使用`delegate`关键字定义，或者使用更简洁的Lambda表达式语法。
 
@@ -2121,7 +2128,7 @@ Func<int, int, int> multiplyLambda = (a, b) =>
 int product = multiplyLambda(4, 6); // 结果为24
 ```
 
-### Func委托
+### <a id="func-delegate"></a>Func委托
 
 `Func`是C#中预定义的泛型委托，用于表示具有返回值的方法。`Func`委托可以接受0到16个输入参数，并始终有一个返回类型（最后一个类型参数）。
 
@@ -2145,7 +2152,7 @@ Func<int, int, int, string> formatSum = (a, b, c) => $"{a} + {b} + {c} = {a + b 
 string message = formatSum(1, 2, 3); // 结果为"1 + 2 + 3 = 6"
 ```
 
-### Action委托
+### <a id="action-delegate"></a>Action委托
 
 `Action`是C#中预定义的泛型委托，用于表示没有返回值（void）的方法。`Action`委托可以接受0到16个输入参数。
 
@@ -2169,7 +2176,7 @@ Action<int, int, int> printSum = (a, b, c) => Console.WriteLine($"Sum: {a + b + 
 printSum(1, 2, 3);
 ```
 
-### Predicate委托
+### <a id="predicate-delegate"></a>Predicate委托
 
 `Predicate`是C#中预定义的泛型委托，专门用于表示返回bool值的方法，通常用于条件判断。`Predicate`委托只接受一个输入参数，并始终返回bool类型。
 
@@ -2244,7 +2251,7 @@ foreach (Person person in adults)
 }
 ```
 
-### Func与Action的应用场景
+### <a id="func-action-application"></a>Func与Action的应用场景
 
 #### 1. 作为参数传递给其他方法
 

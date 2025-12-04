@@ -181,7 +181,21 @@
         // appending
         a.each(function () {
             n = $(this).prop('tagName').toLowerCase();
-            i = "#" + $(this).prop('id');
+            // 检查是否有直接的id属性
+            if ($(this).prop('id')) {
+                i = "#" + $(this).prop('id');
+            } 
+            // 否则检查是否包含<a id="..."></a>子元素
+            else {
+                var $a = $(this).find('a[id]');
+                if ($a.length > 0) {
+                    i = "#" + $a.prop('id');
+                }
+                // 如果都没有，使用自动生成的id（基于文本内容）
+                else {
+                    i = "#" + $(this).text().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+                }
+            }
             t = $(this).text();
             c = $('<a href="' + i + '" rel="nofollow">' + t + '</a>');
             l = $('<li class="' + n + '_nav"></li>').append(c);

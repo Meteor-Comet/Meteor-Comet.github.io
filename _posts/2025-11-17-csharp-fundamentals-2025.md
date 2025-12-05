@@ -26,7 +26,13 @@ tags:
    - [Action委托](#action-delegate)
    - [Predicate委托](#predicate-delegate)
    - [Func与Action的应用场景](#func-action-application)
-7. [C# Math类详解](#math-class)
+7. [C#类详解](#class-detail)
+   - [类的定义与结构](#class-definition)
+   - [属性与访问器（get/set）](#properties-getset)
+   - [类的继承与多态](#class-inheritance)
+   - [抽象类与接口](#abstract-interface)
+   - [静态类与单例模式](#static-singleton)
+8. [C# Math类详解](#math-class)
 8. [C# Random类详解](#random-class)
 9. [C# DateTime类详解](#datetime-class)
 10. [C# Array类详解](#array-class)
@@ -3018,6 +3024,596 @@ private void LogUserCreation(User user)
 ```
 
 函数是C#编程的基础构建块，合理使用函数可以让代码更加模块化、可重用和易于维护。通过掌握函数的各种特性和最佳实践，可以编写出高质量的C#程序。
+
+## <a id="class-detail"></a>C#类详解
+
+类（Class）是C#面向对象编程的核心概念，是一种用户定义的数据类型，封装了数据（字段）和操作这些数据的方法。通过类，可以创建对象（实例），实现数据的封装、继承和多态等面向对象特性。
+
+### <a id="class-definition"></a>类的定义与结构
+
+在C#中，类使用`class`关键字定义，包含字段、属性、方法、构造函数、事件等成员。
+
+#### 类的基本语法
+
+```csharp
+// 命名空间声明
+namespace MyNamespace
+{
+    // 类的定义
+    public class Person
+    {
+        // 字段（成员变量）
+        private string _name;
+        private int _age;
+        
+        // 构造函数
+        public Person(string name, int age)
+        {
+            _name = name;
+            _age = age;
+        }
+        
+        // 方法
+        public void Greet()
+        {
+            Console.WriteLine($"Hello, my name is {_name} and I'm {_age} years old.");
+        }
+    }
+}
+```
+
+#### 类的访问修饰符
+
+类和类成员可以使用访问修饰符控制其可见性：
+
+| 修饰符 | 说明 |
+|--------|------|
+| public | 公共的，可以在任何地方访问 |
+| private | 私有的，只能在类内部访问 |
+| protected | 受保护的，只能在类内部和派生类中访问 |
+| internal | 内部的，只能在同一程序集中访问 |
+| protected internal | 受保护内部的，只能在同一程序集或派生类中访问 |
+| private protected | 私有受保护的，只能在同一程序集的派生类中访问（C# 7.2+） |
+
+#### 创建和使用对象
+
+```csharp
+// 创建对象
+Person person1 = new Person("张三", 25);
+
+// 调用方法
+person1.Greet(); // 输出: Hello, my name is 张三 and I'm 25 years old.
+
+// 使用对象初始化器（C# 3.0+）
+Person person2 = new Person("李四", 30)
+{
+    // 可以在这里设置属性
+};
+```
+
+### <a id="properties-getset"></a>属性与访问器（get/set）
+
+属性是类的成员，用于封装字段，提供对字段的安全访问。属性通过访问器（getter和setter）控制如何获取和设置字段的值。
+
+#### 属性的基本语法
+
+```csharp
+public class Person
+{
+    // 私有字段
+    private string _name;
+    private int _age;
+    
+    // 公共属性
+    public string Name
+    {
+        get { return _name; }  // getter
+        set { _name = value; } // setter
+    }
+    
+    public int Age
+    {
+        get { return _age; }
+        set
+        {
+            // 在setter中可以添加验证逻辑
+            if (value > 0 && value < 150)
+            {
+                _age = value;
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException("年龄必须在0到150之间");
+            }
+        }
+    }
+}
+```
+
+#### 自动属性（Auto-implemented Properties）
+
+C# 3.0引入了自动属性，简化了属性的声明：
+
+```csharp
+public class Person
+{
+    // 自动属性 - 编译器会自动生成私有字段
+    public string Name { get; set; }
+    public int Age { get; set; }
+    
+    // 只读自动属性
+    public DateTime CreatedAt { get; private set; }
+    
+    // 构造函数
+    public Person()
+    {
+        CreatedAt = DateTime.Now;
+    }
+}
+```
+
+#### 只读和只写属性
+
+```csharp
+public class Person
+{
+    private string _ssn; // 社会安全号码，只能设置一次
+    private string _id;   // 唯一标识符，只能获取
+    
+    // 只写属性（很少使用）
+    public string SSN
+    {
+        set { _ssn = value; }
+    }
+    
+    // 只读属性
+    public string Id
+    {
+        get { return _id; }
+    }
+    
+    public Person()
+    {
+        _id = Guid.NewGuid().ToString(); // 生成唯一ID
+    }
+}
+```
+
+#### 属性的高级特性
+
+##### 1. 计算属性
+
+计算属性不存储数据，而是根据其他字段或属性的值计算结果：
+
+```csharp
+public class Rectangle
+{
+    public double Width { get; set; }
+    public double Height { get; set; }
+    
+    // 计算属性 - 面积
+    public double Area
+    {
+        get { return Width * Height; }
+    }
+    
+    // 计算属性 - 周长
+    public double Perimeter
+    {
+        get { return 2 * (Width + Height); }
+    }
+}
+```
+
+##### 2. 延迟加载属性
+
+延迟加载属性在首次访问时才计算或加载数据：
+
+```csharp
+public class Product
+{
+    private List<Review> _reviews;
+    
+    // 延迟加载的评论列表
+    public List<Review> Reviews
+    {
+        get
+        {
+            if (_reviews == null)
+            {
+                // 首次访问时从数据库加载数据
+                _reviews = LoadReviewsFromDatabase();
+            }
+            return _reviews;
+        }
+    }
+    
+    private List<Review> LoadReviewsFromDatabase()
+    {
+        // 模拟从数据库加载数据
+        return new List<Review>
+        {
+            new Review { Rating = 5, Comment = "优秀的产品" },
+            new Review { Rating = 4, Comment = "良好的产品" }
+        };
+    }
+}
+```
+
+##### 3. 表达式主体属性（Expression-bodied Properties）
+
+C# 6.0引入了表达式主体属性，简化了属性的定义：
+
+```csharp
+public class Rectangle
+{
+    public double Width { get; set; }
+    public double Height { get; set; }
+    
+    // 表达式主体的计算属性
+    public double Area => Width * Height;
+    public double Perimeter => 2 * (Width + Height);
+}
+```
+
+##### 4. 索引器（Indexers）
+
+索引器允许类或结构体像数组一样被索引访问：
+
+```csharp
+public class EmployeeCollection
+{
+    private List<Employee> _employees = new List<Employee>();
+    
+    // 索引器 - 按ID访问员工
+    public Employee this[int id]
+    {
+        get { return _employees.FirstOrDefault(e => e.Id == id); }
+    }
+    
+    // 索引器 - 按姓名访问员工
+    public Employee this[string name]
+    {
+        get { return _employees.FirstOrDefault(e => e.Name == name); }
+    }
+    
+    public void Add(Employee employee)
+    {
+        _employees.Add(employee);
+    }
+}
+```
+
+使用索引器：
+
+```csharp
+EmployeeCollection employees = new EmployeeCollection();
+employees.Add(new Employee { Id = 1, Name = "张三" });
+employees.Add(new Employee { Id = 2, Name = "李四" });
+
+// 使用索引器访问
+Employee employee1 = employees[1]; // 按ID访问
+Employee employee2 = employees["李四"]; // 按姓名访问
+```
+
+### <a id="class-inheritance"></a>类的继承与多态
+
+继承是面向对象编程的重要特性，允许创建一个新类（派生类）继承现有类（基类）的属性和方法。
+
+#### 继承的基本语法
+
+```csharp
+// 基类
+public class Animal
+{
+    public string Name { get; set; }
+    
+    public Animal(string name)
+    {
+        Name = name;
+    }
+    
+    // 虚方法 - 可以在派生类中重写
+    public virtual void MakeSound()
+    {
+        Console.WriteLine($"{Name} makes a sound.");
+    }
+}
+
+// 派生类 - 使用冒号(:)继承基类
+public class Dog : Animal
+{
+    public Dog(string name) : base(name) { }
+    
+    // 重写虚方法
+    public override void MakeSound()
+    {
+        Console.WriteLine($"{Name} barks: Woof! Woof!");
+    }
+}
+
+// 另一个派生类
+public class Cat : Animal
+{
+    public Cat(string name) : base(name) { }
+    
+    public override void MakeSound()
+    {
+        Console.WriteLine($"{Name} meows: Meow! Meow!");
+    }
+}
+```
+
+#### 多态的实现
+
+多态允许使用基类类型的变量引用派生类的对象，并根据实际对象类型调用相应的方法：
+
+```csharp
+// 创建对象
+Animal myAnimal = new Animal("Generic Animal");
+Animal myDog = new Dog("Buddy");
+Animal myCat = new Cat("Whiskers");
+
+// 调用方法 - 多态行为
+myAnimal.MakeSound(); // 输出: Generic Animal makes a sound.
+myDog.MakeSound();    // 输出: Buddy barks: Woof! Woof!
+myCat.MakeSound();    // 输出: Whiskers meows: Meow! Meow!
+
+// 类型转换
+if (myDog is Dog dog)
+{
+    // 安全转换为Dog类型
+    dog.WagTail(); // 调用Dog类特有的方法
+}
+
+Dog anotherDog = myDog as Dog; // 另一种安全转换方式
+if (anotherDog != null)
+{
+    anotherDog.WagTail();
+}
+```
+
+#### 密封类（Sealed Classes）
+
+密封类使用`sealed`关键字修饰，不能被继承：
+
+```csharp
+public sealed class FinalClass
+{
+    // 类的成员
+}
+
+// 错误：不能继承密封类
+// public class DerivedClass : FinalClass { }
+```
+
+### <a id="abstract-interface"></a>抽象类与接口
+
+#### 抽象类
+
+抽象类使用`abstract`关键字修饰，不能直接实例化，通常作为基类使用。抽象类可以包含抽象方法（没有实现的方法），派生类必须实现这些方法。
+
+```csharp
+// 抽象基类
+public abstract class Shape
+{
+    public string Name { get; set; }
+    
+    public Shape(string name)
+    {
+        Name = name;
+    }
+    
+    // 抽象方法 - 必须在派生类中实现
+    public abstract double CalculateArea();
+    
+    // 普通方法
+    public void Display()
+    {
+        Console.WriteLine($"Shape: {Name}, Area: {CalculateArea()}");
+    }
+}
+
+// 派生类实现抽象方法
+public class Circle : Shape
+{
+    public double Radius { get; set; }
+    
+    public Circle(string name, double radius) : base(name)
+    {
+        Radius = radius;
+    }
+    
+    public override double CalculateArea()
+    {
+        return Math.PI * Radius * Radius;
+    }
+}
+
+public class Rectangle : Shape
+{
+    public double Width { get; set; }
+    public double Height { get; set; }
+    
+    public Rectangle(string name, double width, double height) : base(name)
+    {
+        Width = width;
+        Height = height;
+    }
+    
+    public override double CalculateArea()
+    {
+        return Width * Height;
+    }
+}
+```
+
+#### 接口
+
+接口使用`interface`关键字定义，是一种约定，指定了类或结构体必须实现的成员。接口只包含方法、属性、事件或索引器的声明，没有实现。
+
+```csharp
+// 接口定义
+public interface IDrawable
+{
+    // 接口方法声明
+    void Draw();
+    
+    // 接口属性声明
+    string Color { get; set; }
+}
+
+// 类实现接口
+public class Circle : IDrawable
+{
+    public string Color { get; set; }
+    public double Radius { get; set; }
+    
+    public Circle(string color, double radius)
+    {
+        Color = color;
+        Radius = radius;
+    }
+    
+    // 实现接口方法
+    public void Draw()
+    {
+        Console.WriteLine($"Drawing a {Color} circle with radius {Radius}");
+    }
+}
+
+// 结构体实现接口
+public struct Rectangle : IDrawable
+{
+    public string Color { get; set; }
+    public double Width { get; set; }
+    public double Height { get; set; }
+    
+    public Rectangle(string color, double width, double height)
+    {
+        Color = color;
+        Width = width;
+        Height = height;
+    }
+    
+    public void Draw()
+    {
+        Console.WriteLine($"Drawing a {Color} rectangle with width {Width} and height {Height}");
+    }
+}
+```
+
+#### 接口与抽象类的区别
+
+| 特性 | 抽象类 | 接口 |
+|------|--------|------|
+| 实现 | 可以包含实现 | 不能包含实现（C# 8.0以前） |
+| 构造函数 | 可以有构造函数 | 不能有构造函数 |
+| 字段 | 可以包含字段 | 不能包含字段 |
+| 继承 | 只能继承一个抽象类 | 可以实现多个接口 |
+| 访问修饰符 | 可以使用任何访问修饰符 | 成员默认为public（不能显式指定） |
+| 版本控制 | 难以扩展（添加新成员会破坏现有实现） | 易于扩展（C# 8.0支持默认实现） |
+
+### <a id="static-singleton"></a>静态类与单例模式
+
+#### 静态类
+
+静态类使用`static`关键字修饰，不能实例化，所有成员都是静态的。静态类通常用于包含工具方法或扩展方法。
+
+```csharp
+public static class MathUtilities
+{
+    // 静态字段
+    public static readonly double PI = 3.141592653589793;
+    
+    // 静态方法
+    public static double CalculateCircleArea(double radius)
+    {
+        return PI * radius * radius;
+    }
+    
+    public static double CalculateRectangleArea(double width, double height)
+    {
+        return width * height;
+    }
+}
+
+// 使用静态类
+double circleArea = MathUtilities.CalculateCircleArea(5);
+double rectangleArea = MathUtilities.CalculateRectangleArea(4, 6);
+```
+
+#### 单例模式
+
+单例模式确保一个类只有一个实例，并提供一个全局访问点。
+
+```csharp
+// 线程安全的单例模式实现
+public sealed class Singleton
+{
+    // 私有静态字段，保存唯一实例
+    private static readonly Singleton _instance = new Singleton();
+    
+    // 静态构造函数，由CLR保证线程安全
+    static Singleton() { }
+    
+    // 私有构造函数，防止外部实例化
+    private Singleton() { }
+    
+    // 公共静态属性，提供全局访问点
+    public static Singleton Instance
+    {
+        get { return _instance; }
+    }
+    
+    // 单例类的成员
+    public void DoSomething()
+    {
+        Console.WriteLine("Singleton instance is doing something.");
+    }
+}
+
+// 使用单例
+Singleton.Instance.DoSomething();
+```
+
+#### 延迟初始化的单例模式
+
+```csharp
+public sealed class LazySingleton
+{
+    // 使用Lazy<T>实现延迟初始化
+    private static readonly Lazy<LazySingleton> _lazyInstance = new Lazy<LazySingleton>(() => new LazySingleton());
+    
+    private LazySingleton() { }
+    
+    public static LazySingleton Instance
+    {
+        get { return _lazyInstance.Value; }
+    }
+    
+    public void DoSomething()
+    {
+        Console.WriteLine("Lazy singleton instance is doing something.");
+    }
+}
+```
+
+### 类的最佳实践
+
+1. **封装数据**：使用属性而不是公共字段来封装数据
+2. **单一职责原则**：一个类应该只有一个改变的理由
+3. **继承层次简洁**：避免过深的继承层次（一般不超过3-4层）
+4. **接口优先**：优先使用接口而不是抽象类，提高灵活性
+5. **命名规范**：
+   - 类名使用PascalCase（首字母大写）
+   - 字段名使用驼峰命名法，私有字段前缀加下划线
+   - 方法名使用PascalCase
+   - 属性名使用PascalCase
+6. **使用自动属性**：对于简单的属性，使用自动属性提高代码简洁性
+7. **实现IDisposable接口**：对于使用非托管资源的类，实现IDisposable接口进行资源清理
+
+类是C#面向对象编程的核心，通过掌握类的各种特性和最佳实践，可以编写出结构清晰、易于维护和扩展的高质量C#程序。
 
 ## <a id="math-class"></a>C# Math类详解
 
@@ -8224,19 +8820,5 @@ Dictionary<string, int> caseInsensitiveDict = new Dictionary<string, int>(String
 | Remove(TKey) | TKey key | bool | 删除指定键对应的键值对，如果键存在则返回true，否则返回false |
 | Clear() | 无 | void | 清空Dictionary中的所有键值对 |
 | GetEnumerator() | 无 | IEnumerator<KeyValuePair<TKey, TValue>> | 返回用于遍历Dictionary的枚举器 |
-
-## HashSet<T> vs Dictionary<TKey, TValue> 对比
-
-| 特性 | HashSet<T> | Dictionary<TKey, TValue> |
-|------|------------|--------------------------|
-| 数据结构 | 哈希表 | 哈希表 |
-| 存储内容 | 唯一元素集合 | 键值对集合 |
-| 键的概念 | 元素本身作为键 | 显式定义键 |
-| 元素唯一性 | 保证唯一 | 键保证唯一，值可以重复 |
-| 查找操作 | Contains(T) | TryGetValue(TKey, out TValue) |
-| 插入操作 | Add(T) 返回bool | Add(TKey, TValue) 可能抛出异常 |
-| 遍历顺序 | 无序 | 无序 |
-| 适用场景 | 需要快速检查元素是否存在、去重 | 需要通过键快速查找值、存储键值对数据 |
-| 内存占用 | 中等 | 较高（需要存储键和值） |
 
 通过了解和掌握HashSet<T>和Dictionary<TKey, TValue>，可以在C#开发中根据不同的场景选择合适的集合类，提高代码的性能和可读性。

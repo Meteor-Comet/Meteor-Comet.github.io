@@ -31,7 +31,7 @@ tags:
    - [属性与访问器（get/set）](#properties-getset)
    - [类的继承与多态](#class-inheritance)
    - [抽象类与接口](#abstract-interface)
-   - [静态类与单例模式](#static-singleton)
+   - [静态类](#static-class)
 8. [C# Math类详解](#math-class)
 8. [C# Random类详解](#random-class)
 9. [C# DateTime类详解](#datetime-class)
@@ -2102,22 +2102,28 @@ double result2 = Add(5.5, 3.2); // 调用第二个Add函数
 int result3 = Add(1, 2, 3);     // 调用第三个Add函数
 ```
 
-### <a id="anonymous-function"></a>匿名函数与Lambda表达式
+### <a id="anonymous-function"></a>匿名函数与Lambda表达式（基础概念）
 
-C#支持匿名函数（Anonymous Functions），即没有显式名称的函数。匿名函数主要用于简化代码，特别是在需要临时使用一个小函数的场景中。C#提供了两种创建匿名函数的方式：使用`delegate`关键字的传统匿名函数，以及更简洁的Lambda表达式。
+C#支持匿名函数（Anonymous Functions），即没有显式名称的函数。匿名函数主要用于简化代码，特别是在需要临时使用一个小函数的场景中。
 
-#### 1. 匿名函数的基本概念
+**注意**：关于匿名函数、Lambda表达式、Func委托、Action委托和Predicate委托的详细用法和高级特性，请参考[C#进阶教程](./2025-12-03-csharp-advanced-2025.md)中的"C#委托与Lambda表达式进阶"章节。
 
-匿名函数是一种没有名称的函数定义，它可以作为参数传递给其他方法，或者赋值给委托类型的变量。匿名函数的主要特点是：
+#### 1. 基本Lambda表达式语法
 
-- 没有函数名称
-- 可以访问定义它的上下文变量（闭包特性）
-- 通常用于一次性使用的场景
-- 可以直接内联到代码中，提高代码可读性
+Lambda表达式是定义匿名函数的简洁方式，使用`=>`操作符分隔参数和表达式：
 
-#### 2. 使用delegate关键字的传统匿名函数
+```csharp
+// 基本语法：(参数) => 表达式
+Func<int, int> square = x => x * x;
+int result = square(5); // 结果为25
 
-在C# 2.0中引入的传统匿名函数使用`delegate`关键字定义，语法如下：
+// 多行Lambda
+Func<int, int, int> multiply = (a, b) =>
+{
+    Console.WriteLine($"计算 {a} × {b}");
+    return a * b;
+};
+```
 
 ```csharp
 // 语法格式
@@ -2309,19 +2315,16 @@ button.Click();
 | 目标类型 | 必须是委托类型 | 可以是委托类型或表达式树类型 |
 | 可读性 | 较低 | 较高 |
 
-### <a id="func-delegate"></a>Func委托
+### <a id="func-delegate"></a>Func委托（基础概念）
 
-`Func`是C#中预定义的泛型委托，用于表示具有返回值的方法。`Func`委托可以接受0到16个输入参数，并始终有一个返回类型（最后一个类型参数）。
+`Func`是C#中预定义的泛型委托，用于表示具有返回值的方法。
+
+**注意**：关于Func委托的详细用法和高级特性，请参考[C#进阶教程](./2025-12-03-csharp-advanced-2025.md)中的"Func委托详解"章节。
 
 ```csharp
-// Func委托示例
-
-// 无参数，返回string
-Func<string> getGreeting = () => "Hello, World!";
-string greeting = getGreeting();
-
-// 一个参数，返回bool
-Func<int, bool> isEven = (x) => x % 2 == 0;
+// 简单示例：将整数转换为字符串
+Func<int, string> convertToString = x => x.ToString();
+string result = convertToString(123); // 结果为"123"
 bool result1 = isEven(4); // 结果为true
 
 // 两个参数，返回int
@@ -2333,23 +2336,16 @@ Func<int, int, int, string> formatSum = (a, b, c) => $"{a} + {b} + {c} = {a + b 
 string message = formatSum(1, 2, 3); // 结果为"1 + 2 + 3 = 6"
 ```
 
-### <a id="action-delegate"></a>Action委托
+### <a id="action-delegate"></a>Action委托（基础概念）
 
-`Action`是C#中预定义的泛型委托，用于表示没有返回值（void）的方法。`Action`委托可以接受0到16个输入参数。
+`Action`是C#中预定义的泛型委托，用于表示没有返回值（void）的方法。
+
+**注意**：关于Action委托的详细用法和高级特性，请参考[C#进阶教程](./2025-12-03-csharp-advanced-2025.md)中的"Action委托详解"章节。
 
 ```csharp
-// Action委托示例
-
-// 无参数
-Action printMessage = () => Console.WriteLine("Hello from Action!");
-printMessage();
-
-// 一个参数
-Action<string> greet = (name) => Console.WriteLine($"Hello, {name}!");
-greet("Alice");
-
-// 两个参数
-Action<string, int> displayInfo = (name, age) => Console.WriteLine($"Name: {name}, Age: {age}");
+// 简单示例：打印消息
+Action<string> printMessage = message => Console.WriteLine(message);
+printMessage("Hello, World!"); // 输出: Hello, World!
 displayInfo("Bob", 30);
 
 // 三个参数
@@ -2357,21 +2353,16 @@ Action<int, int, int> printSum = (a, b, c) => Console.WriteLine($"Sum: {a + b + 
 printSum(1, 2, 3);
 ```
 
-### <a id="predicate-delegate"></a>Predicate委托
+### <a id="predicate-delegate"></a>Predicate委托（基础概念）
 
-`Predicate`是C#中预定义的泛型委托，专门用于表示返回bool值的方法，通常用于条件判断。`Predicate`委托只接受一个输入参数，并始终返回bool类型。
+`Predicate`是C#中预定义的泛型委托，专门用于表示返回bool值的方法，通常用于条件判断。
+
+**注意**：关于Predicate委托的详细用法和高级特性，请参考[C#进阶教程](./2025-12-03-csharp-advanced-2025.md)中的"Predicate委托详解"章节。
 
 ```csharp
-// Predicate委托示例
-
-// 检查整数是否为正数
-Predicate<int> isPositive = (x) => x > 0;
-bool result1 = isPositive(5);  // 结果为true
-bool result2 = isPositive(-3); // 结果为false
-
-// 检查字符串是否为空或 null
-Predicate<string> isNullOrEmpty = (str) => string.IsNullOrEmpty(str);
-bool result3 = isNullOrEmpty("");     // 结果为true
+// 简单示例：检查数字是否为偶数
+Predicate<int> isEven = number => number % 2 == 0;
+bool result = isEven(4); // 结果为true
 bool result4 = isNullOrEmpty("Hello"); // 结果为false
 
 // 检查列表是否包含元素
@@ -2434,49 +2425,19 @@ foreach (Person person in adults)
 
 ### <a id="func-action-application"></a>Func与Action的应用场景
 
-`Func`和`Action`是C#中预定义的泛型委托，它们在现代C#编程中被广泛使用，特别是在函数式编程和LINQ查询中。这两个委托类型极大地简化了代码，提高了代码的可读性和可维护性。
+`Func`和`Action`是C#中预定义的泛型委托，它们在现代C#编程中被广泛使用，特别是在函数式编程和LINQ查询中。
 
-#### 1. Func与Action的基本对比
+**注意**：关于Func与Action的详细应用场景，请参考[C#进阶教程](./2025-12-03-csharp-advanced-2025.md)中的"委托与Lambda表达式进阶"章节。
 
-| 特性 | Func<TResult> | Action<T> |
-|------|---------------|-----------|
-| 返回值 | 必须有返回值（最后一个类型参数） | 无返回值（void） |
-| 参数数量 | 0-16个输入参数 | 0-16个输入参数 |
-| 典型用途 | 数据转换、计算、条件判断 | 操作执行、事件处理、副作用操作 |
-| 示例 | `Func<int, string> convertToString` | `Action<string> printMessage` |
-
-#### 2. 作为参数传递给其他方法
-
-将`Func`和`Action`作为参数传递给其他方法是它们最常见的用途之一。这种方式可以使方法更加灵活，允许调用者自定义方法的行为。
-
-**示例1：通用数据处理**
 ```csharp
-// 使用Func作为参数：将输入数据转换为指定类型
-public TResult TransformData<TSource, TResult>(TSource input, Func<TSource, TResult> transformer)
-{
-    return transformer(input);
-}
+// 简单示例：使用Func进行数据转换
+Func<int, string> convertToString = x => x.ToString();
+string result = convertToString(123); // 结果为"123"
 
-// 使用Action作为参数：对数据执行特定操作
-public void PerformAction<T>(T data, Action<T> action)
-{
-    Console.WriteLine($"Processing data: {data}");
-    action(data);
-}
-
-// 调用示例
-string result1 = TransformData(123, x => x.ToString("X")); // 将整数转换为十六进制字符串
-Console.WriteLine(result1); // 输出: 7B
-
-PerformAction("Hello", x => Console.WriteLine(x.ToUpper())); // 输出: HELLO
+// 简单示例：使用Action执行操作
+Action<string> printMessage = message => Console.WriteLine(message);
+printMessage("Hello, World!"); // 输出: Hello, World!
 ```
-
-**示例2：条件验证**
-```csharp
-// 使用Func进行条件验证
-public bool ValidateInput(string input, Func<string, bool> validator)
-{
-    return validator(input);
 }
 
 // 调用示例
@@ -3515,9 +3476,7 @@ public struct Rectangle : IDrawable
 | 访问修饰符 | 可以使用任何访问修饰符 | 成员默认为public（不能显式指定） |
 | 版本控制 | 难以扩展（添加新成员会破坏现有实现） | 易于扩展（C# 8.0支持默认实现） |
 
-### <a id="static-singleton"></a>静态类与单例模式
-
-#### 静态类
+### <a id="static-class"></a>静态类
 
 静态类使用`static`关键字修饰，不能实例化，所有成员都是静态的。静态类通常用于包含工具方法或扩展方法。
 
@@ -3544,61 +3503,19 @@ double circleArea = MathUtilities.CalculateCircleArea(5);
 double rectangleArea = MathUtilities.CalculateRectangleArea(4, 6);
 ```
 
-#### 单例模式
+静态类的特点：
+1. 不能使用`new`关键字实例化
+2. 所有成员（字段、属性、方法、事件等）都必须是静态的
+3. 不能包含实例构造函数，但可以包含静态构造函数
+4. 不能被继承（隐式密封）
+5. 不能实现接口
+6. 只能访问静态成员
 
-单例模式确保一个类只有一个实例，并提供一个全局访问点。
-
-```csharp
-// 线程安全的单例模式实现
-public sealed class Singleton
-{
-    // 私有静态字段，保存唯一实例
-    private static readonly Singleton _instance = new Singleton();
-    
-    // 静态构造函数，由CLR保证线程安全
-    static Singleton() { }
-    
-    // 私有构造函数，防止外部实例化
-    private Singleton() { }
-    
-    // 公共静态属性，提供全局访问点
-    public static Singleton Instance
-    {
-        get { return _instance; }
-    }
-    
-    // 单例类的成员
-    public void DoSomething()
-    {
-        Console.WriteLine("Singleton instance is doing something.");
-    }
-}
-
-// 使用单例
-Singleton.Instance.DoSomething();
-```
-
-#### 延迟初始化的单例模式
-
-```csharp
-public sealed class LazySingleton
-{
-    // 使用Lazy<T>实现延迟初始化
-    private static readonly Lazy<LazySingleton> _lazyInstance = new Lazy<LazySingleton>(() => new LazySingleton());
-    
-    private LazySingleton() { }
-    
-    public static LazySingleton Instance
-    {
-        get { return _lazyInstance.Value; }
-    }
-    
-    public void DoSomething()
-    {
-        Console.WriteLine("Lazy singleton instance is doing something.");
-    }
-}
-```
+静态类的适用场景：
+1. 提供工具方法和辅助函数
+2. 定义扩展方法
+3. 封装常量和只读字段
+4. 实现无状态的功能模块
 
 ### 类的最佳实践
 

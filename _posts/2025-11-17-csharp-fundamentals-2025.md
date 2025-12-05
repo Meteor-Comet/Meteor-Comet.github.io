@@ -34,6 +34,8 @@ tags:
 12. [C# Object类详解](#object-class)
 13. [C# ArrayList类详解](#arraylist-class)
 14. [C# List类详解](#list-class)
+15. [C# HashSet类详解](#hashset-class)
+16. [C# Dictionary类详解](#dictionary-class)
 
 ## <a id="intro"></a>C#简介：能做什么，解决什么问题？
 
@@ -7517,3 +7519,724 @@ list6.AddRange(Enumerable.Range(0, 1000));
 | 只读访问 | IReadOnlyList<T> | 只读列表 |
 
 List<T>是C#开发中最重要和最常用的集合类之一。通过熟练掌握List<T>的各种方法和特性，可以高效地处理各种数据集合操作，编写出类型安全、性能优异的C#代码。
+
+## <a id="hashset-class"></a>C# HashSet类详解
+
+HashSet<T>是C#中一个高性能的泛型集合类，位于System.Collections.Generic命名空间中。它提供了一组唯一的元素，基于哈希表实现，具有快速的插入、删除和查找操作。
+
+### HashSet<T>的基本概念
+
+HashSet<T>是一个不允许重复元素的集合，类似于数学中的集合概念：
+
+1. **唯一性保证**：HashSet<T>中不会包含重复的元素
+2. **无序集合**：元素没有特定的顺序，插入顺序不被保留
+3. **哈希表实现**：基于哈希表的数据结构，提供O(1)时间复杂度的操作
+4. **类型安全**：泛型实现，提供编译时类型检查
+
+#### 为什么使用HashSet<T>？
+
+在以下场景中，HashSet<T>是理想的选择：
+
+```csharp
+// 场景1：需要快速检查元素是否存在
+HashSet<string> uniqueNames = new HashSet<string>();
+// 添加元素不会有重复
+uniqueNames.Add("张三");
+uniqueNames.Add("李四");
+uniqueNames.Add("张三"); // 不会被添加，因为已经存在
+
+// 场景2：需要获取唯一元素集合
+List<string> namesWithDuplicates = new List<string> { "张三", "李四", "张三", "王五", "李四" };
+HashSet<string> uniqueNamesSet = new HashSet<string>(namesWithDuplicates);
+// uniqueNamesSet 现在包含 { "张三", "李四", "王五" }
+```
+
+### HashSet<T>的创建和初始化
+
+HashSet<T>提供了多种创建和初始化方式：
+
+```csharp
+// 方式1：创建空的HashSet
+HashSet<int> numbers1 = new HashSet<int>();
+
+// 方式2：使用初始容量创建
+HashSet<int> numbers2 = new HashSet<int>(100);
+
+// 方式3：使用集合初始化器
+HashSet<string> names1 = new HashSet<string> { "张三", "李四", "王五" };
+
+// 方式4：从现有集合创建
+List<int> numbersList = new List<int> { 1, 2, 3, 2, 4 };
+HashSet<int> numbers3 = new HashSet<int>(numbersList);
+
+// 方式5：使用比较器创建（自定义相等性判断）
+HashSet<string> caseInsensitiveNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+caseInsensitiveNames.Add("张三");
+caseInsensitiveNames.Add("张三"); // 不会被添加，因为忽略大小写
+```
+
+### HashSet<T>的常用属性
+
+HashSet<T>提供了以下常用属性：
+
+```csharp
+HashSet<string> names = new HashSet<string> { "张三", "李四", "王五" };
+
+// Count：获取集合中的元素数量
+int count = names.Count; // 3
+
+// Comparer：获取用于比较集合中元素的相等性比较器
+IEqualityComparer<string> comparer = names.Comparer;
+```
+
+### HashSet<T>的常用方法
+
+HashSet<T>提供了丰富的方法来操作集合：
+
+#### 基本操作
+
+```csharp
+HashSet<int> numbers = new HashSet<int>();
+
+// 添加元素
+numbers.Add(1);
+numbers.Add(2);
+numbers.Add(3);
+
+// 添加多个元素
+numbers.UnionWith(new int[] { 4, 5, 6 });
+
+// 检查元素是否存在
+bool contains3 = numbers.Contains(3); // true
+bool contains7 = numbers.Contains(7); // false
+
+// 删除元素
+bool removed = numbers.Remove(2); // true
+
+// 清空集合
+numbers.Clear();
+```
+
+#### 集合运算
+
+HashSet<T>支持标准的集合运算：
+
+```csharp
+HashSet<int> set1 = new HashSet<int> { 1, 2, 3, 4, 5 };
+HashSet<int> set2 = new HashSet<int> { 3, 4, 5, 6, 7 };
+
+// 交集（Intersection）：获取两个集合都包含的元素
+HashSet<int> intersection = new HashSet<int>(set1);
+intersection.IntersectWith(set2); // { 3, 4, 5 }
+
+// 并集（Union）：获取两个集合的所有元素
+HashSet<int> union = new HashSet<int>(set1);
+union.UnionWith(set2); // { 1, 2, 3, 4, 5, 6, 7 }
+
+// 差集（Difference）：获取set1中有但set2中没有的元素
+HashSet<int> difference = new HashSet<int>(set1);
+difference.ExceptWith(set2); // { 1, 2 }
+
+// 对称差集（Symmetric Difference）：获取两个集合中不相同的元素
+HashSet<int> symmetricDiff = new HashSet<int>(set1);
+symmetricDiff.SymmetricExceptWith(set2); // { 1, 2, 6, 7 }
+```
+
+#### 子集和超集
+
+```csharp
+HashSet<int> subset = new HashSet<int> { 1, 2, 3 };
+HashSet<int> superset = new HashSet<int> { 1, 2, 3, 4, 5 };
+
+// 检查是否是子集
+bool isSubset = subset.IsSubsetOf(superset); // true
+
+// 检查是否是超集
+bool isSuperset = superset.IsSupersetOf(subset); // true
+
+// 检查是否是真子集（不相等）
+bool isProperSubset = subset.IsProperSubsetOf(superset); // true
+
+// 检查是否是真超集（不相等）
+bool isProperSuperset = superset.IsProperSupersetOf(subset); // true
+```
+
+### HashSet<T>与LINQ
+
+HashSet<T>与LINQ完美集成，提供了强大的查询能力：
+
+```csharp
+HashSet<int> numbers = new HashSet<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+
+// 筛选元素
+HashSet<int> evenNumbers = new HashSet<int>(numbers.Where(x => x % 2 == 0));
+
+// 转换元素
+HashSet<string> numberStrings = new HashSet<string>(numbers.Select(x => $"数字{x}"));
+
+// 排序（注意：HashSet本身无序，但可以转换为有序集合）
+List<int> sortedNumbers = numbers.OrderBy(x => x).ToList();
+
+// 分组
+var groupedByParity = numbers.GroupBy(x => x % 2 == 0 ? "偶数" : "奇数");
+```
+
+### HashSet<T>的实际应用示例
+
+#### 示例1：去重和元素检查
+
+```csharp
+public static class UniqueChecker
+{
+    public static HashSet<T> RemoveDuplicates<T>(List<T> items)
+    {
+        return new HashSet<T>(items);
+    }
+    
+    public static bool ContainsDuplicates<T>(List<T> items)
+    {
+        HashSet<T> uniqueItems = new HashSet<T>();
+        foreach (T item in items)
+        {
+            if (!uniqueItems.Add(item))
+            {
+                return true; // 发现重复元素
+            }
+        }
+        return false; // 没有重复元素
+    }
+}
+
+// 使用示例
+List<string> names = new List<string> { "张三", "李四", "张三", "王五" };
+HashSet<string> uniqueNames = UniqueChecker.RemoveDuplicates(names);
+bool hasDuplicates = UniqueChecker.ContainsDuplicates(names);
+```
+
+#### 示例2：集合运算
+
+```csharp
+public static class SetOperations
+{
+    public static HashSet<T> GetIntersection<T>(IEnumerable<T> set1, IEnumerable<T> set2)
+    {
+        HashSet<T> result = new HashSet<T>(set1);
+        result.IntersectWith(set2);
+        return result;
+    }
+    
+    public static HashSet<T> GetUnion<T>(IEnumerable<T> set1, IEnumerable<T> set2)
+    {
+        HashSet<T> result = new HashSet<T>(set1);
+        result.UnionWith(set2);
+        return result;
+    }
+    
+    public static HashSet<T> GetDifference<T>(IEnumerable<T> set1, IEnumerable<T> set2)
+    {
+        HashSet<T> result = new HashSet<T>(set1);
+        result.ExceptWith(set2);
+        return result;
+    }
+}
+
+// 使用示例
+List<int> list1 = new List<int> { 1, 2, 3, 4, 5 };
+List<int> list2 = new List<int> { 3, 4, 5, 6, 7 };
+HashSet<int> intersection = SetOperations.GetIntersection(list1, list2);
+```
+
+### HashSet<T>的性能优化
+
+HashSet<T>的性能主要取决于哈希函数的质量和初始容量的设置：
+
+```csharp
+// 优化1：合理设置初始容量
+HashSet<int> numbers1 = new HashSet<int>(10000); // 避免频繁扩容
+
+// 优化2：使用高效的哈希函数
+// 对于自定义类型，实现GetHashCode和Equals方法
+public class Person
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+    
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Name, Age); // .NET Core 2.1+ 提供的哈希组合方法
+    }
+    
+    public override bool Equals(object obj)
+    {
+        if (obj is Person person)
+        {
+            return Name == person.Name && Age == person.Age;
+        }
+        return false;
+    }
+}
+
+// 优化3：选择合适的比较器
+HashSet<string> caseInsensitiveSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+```
+
+### HashSet<T>使用注意事项
+
+1. **无序性**：HashSet<T>不保证元素的顺序，插入顺序可能与遍历顺序不同
+2. **null值处理**：对于引用类型，可以存储null，但只能有一个null
+3. **线程安全**：HashSet<T>不是线程安全的，多线程环境下需要手动同步
+4. **值类型性能**：对于值类型，HashSet<T>的性能通常比List<T>好，特别是在检查元素存在时
+5. **内存占用**：HashSet<T>的内存占用通常比List<T>大，因为需要存储哈希表结构
+
+### HashSet<T>类常用属性和方法速查表
+
+#### 常用属性
+
+| 属性 | 类型 | 作用说明 |
+|------|------|----------|
+| Count | int | 获取HashSet中实际包含的元素数量 |
+| Comparer | IEqualityComparer<T> | 获取用于比较集合中元素的相等性比较器 |
+
+#### 常用方法
+
+| 方法 | 参数 | 返回值 | 作用说明 |
+|------|------|--------|----------|
+| Add(T) | T item | bool | 添加元素，如果元素不存在则返回true，否则返回false |
+| Contains(T) | T item | bool | 检查HashSet是否包含指定元素 |
+| Remove(T) | T item | bool | 删除元素，如果元素存在则返回true，否则返回false |
+| Clear() | 无 | void | 清空HashSet中的所有元素 |
+| UnionWith(IEnumerable<T>) | IEnumerable<T> other | void | 将指定集合中的元素添加到当前HashSet |
+| IntersectWith(IEnumerable<T>) | IEnumerable<T> other | void | 只保留当前HashSet和指定集合中都存在的元素 |
+| ExceptWith(IEnumerable<T>) | IEnumerable<T> other | void | 从当前HashSet中移除指定集合中的所有元素 |
+| SymmetricExceptWith(IEnumerable<T>) | IEnumerable<T> other | void | 只保留当前HashSet或指定集合中存在的元素（不同时存在的元素） |
+| IsSubsetOf(IEnumerable<T>) | IEnumerable<T> other | bool | 检查当前HashSet是否是指定集合的子集 |
+| IsSupersetOf(IEnumerable<T>) | IEnumerable<T> other | bool | 检查当前HashSet是否是指定集合的超集 |
+| IsProperSubsetOf(IEnumerable<T>) | IEnumerable<T> other | bool | 检查当前HashSet是否是指定集合的真子集 |
+| IsProperSupersetOf(IEnumerable<T>) | IEnumerable<T> other | bool | 检查当前HashSet是否是指定集合的真超集 |
+| Overlaps(IEnumerable<T>) | IEnumerable<T> other | bool | 检查当前HashSet和指定集合是否有共同元素 |
+| SetEquals(IEnumerable<T>) | IEnumerable<T> other | bool | 检查当前HashSet和指定集合是否包含相同的元素 |
+
+## <a id="dictionary-class"></a>C# Dictionary类详解
+
+Dictionary<TKey, TValue>是C#中最常用的键值对集合类，位于System.Collections.Generic命名空间中。它基于哈希表实现，提供了快速的键查找能力。
+
+### Dictionary<TKey, TValue>的基本概念
+
+Dictionary<TKey, TValue>是一个键值对集合，具有以下特点：
+
+1. **键值映射**：每个元素由一个键（Key）和一个值（Value）组成
+2. **键唯一性**：字典中的键必须唯一，不能重复
+3. **快速查找**：基于哈希表实现，提供O(1)时间复杂度的查找操作
+4. **类型安全**：泛型实现，提供编译时类型检查
+5. **无序集合**：元素没有特定的顺序，插入顺序不被保留
+
+#### 为什么使用Dictionary<TKey, TValue>？
+
+在以下场景中，Dictionary<TKey, TValue>是理想的选择：
+
+```csharp
+// 场景1：需要快速通过键查找值
+Dictionary<string, int> studentScores = new Dictionary<string, int>();
+studentScores.Add("张三", 90);
+studentScores.Add("李四", 85);
+studentScores.Add("王五", 95);
+
+// 快速查找分数
+int zhangSanScore = studentScores["张三"]; // 90
+
+// 场景2：需要存储键值对数据
+Dictionary<int, string> monthNames = new Dictionary<int, string>
+{
+    { 1, "一月" },
+    { 2, "二月" },
+    { 3, "三月" }
+};
+
+// 场景3：需要计数和统计
+Dictionary<string, int> wordCount = new Dictionary<string, int>();
+string text = "Hello World Hello C#";
+string[] words = text.Split(' ');
+foreach (string word in words)
+{
+    if (wordCount.ContainsKey(word))
+    {
+        wordCount[word]++;
+    }
+    else
+    {
+        wordCount[word] = 1;
+    }
+}
+```
+
+### Dictionary<TKey, TValue>的创建和初始化
+
+Dictionary<TKey, TValue>提供了多种创建和初始化方式：
+
+```csharp
+// 方式1：创建空的Dictionary
+Dictionary<int, string> dict1 = new Dictionary<int, string>();
+
+// 方式2：使用初始容量创建
+Dictionary<int, string> dict2 = new Dictionary<int, string>(100);
+
+// 方式3：使用集合初始化器
+Dictionary<string, int> studentScores1 = new Dictionary<string, int>
+{
+    { "张三", 90 },
+    { "李四", 85 },
+    { "王五", 95 }
+};
+
+// 方式4：从现有集合创建
+List<KeyValuePair<string, int>> scorePairs = new List<KeyValuePair<string, int>>
+{
+    new KeyValuePair<string, int>("张三", 90),
+    new KeyValuePair<string, int>("李四", 85)
+};
+Dictionary<string, int> studentScores2 = new Dictionary<string, int>(scorePairs);
+
+// 方式5：使用比较器创建（自定义键的比较方式）
+Dictionary<string, int> caseInsensitiveDict = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+caseInsensitiveDict.Add("张三", 90);
+caseInsensitiveDict.Add("张三", 85); // 会抛出异常，因为键不区分大小写
+```
+
+### Dictionary<TKey, TValue>的常用属性
+
+Dictionary<TKey, TValue>提供了以下常用属性：
+
+```csharp
+Dictionary<string, int> studentScores = new Dictionary<string, int>
+{
+    { "张三", 90 },
+    { "李四", 85 },
+    { "王五", 95 }
+};
+
+// Count：获取字典中的键值对数量
+int count = studentScores.Count;
+
+// Comparer：获取用于比较键的相等性比较器
+IEqualityComparer<string> keyComparer = studentScores.Comparer;
+
+// Keys：获取字典中所有键的集合
+ICollection<string> keys = studentScores.Keys;
+
+// Values：获取字典中所有值的集合
+ICollection<int> values = studentScores.Values;
+```
+
+### Dictionary<TKey, TValue>的常用方法
+
+Dictionary<TKey, TValue>提供了丰富的方法来操作键值对：
+
+#### 基本操作
+
+```csharp
+Dictionary<string, int> studentScores = new Dictionary<string, int>();
+
+// 添加键值对
+studentScores.Add("张三", 90);
+
+// 使用索引器添加或修改
+studentScores["李四"] = 85;
+studentScores["张三"] = 95; // 修改现有值
+
+// 检查键是否存在
+bool hasZhangSan = studentScores.ContainsKey("张三");
+bool has90Score = studentScores.ContainsValue(90);
+
+// 获取值（安全方式）
+if (studentScores.TryGetValue("王五", out int wangWuScore))
+{
+    Console.WriteLine($"王五的分数：{wangWuScore}");
+}
+else
+{
+    Console.WriteLine("王五不存在");
+}
+
+// 删除键值对
+studentScores.Remove("李四");
+
+// 清空字典
+studentScores.Clear();
+```
+
+#### 遍历操作
+
+```csharp
+Dictionary<string, int> studentScores = new Dictionary<string, int>
+{
+    { "张三", 90 },
+    { "李四", 85 },
+    { "王五", 95 }
+};
+
+// 遍历所有键值对
+foreach (KeyValuePair<string, int> pair in studentScores)
+{
+    Console.WriteLine($"姓名：{pair.Key}，分数：{pair.Value}");
+}
+
+// 遍历所有键
+foreach (string name in studentScores.Keys)
+{
+    Console.WriteLine($"姓名：{name}");
+}
+
+// 遍历所有值
+foreach (int score in studentScores.Values)
+{
+    Console.WriteLine($"分数：{score}");
+}
+
+// 使用LINQ遍历
+studentScores.ToList().ForEach(pair => 
+    Console.WriteLine($"姓名：{pair.Key}，分数：{pair.Value}")
+);
+```
+
+### Dictionary<TKey, TValue>与LINQ
+
+Dictionary<TKey, TValue>与LINQ完美集成，提供了强大的查询和操作能力：
+
+```csharp
+Dictionary<string, int> studentScores = new Dictionary<string, int>
+{
+    { "张三", 90 },
+    { "李四", 85 },
+    { "王五", 95 },
+    { "赵六", 88 }
+};
+
+// 筛选键值对
+var highScorers = studentScores.Where(pair => pair.Value >= 90);
+
+// 转换键值对
+var studentInfo = studentScores.Select(pair => 
+    new { Name = pair.Key, Grade = pair.Value >= 90 ? "优秀" : "良好" });
+
+// 排序
+var sortedByScore = studentScores.OrderByDescending(pair => pair.Value);
+
+// 分组
+var groupedByScoreRange = studentScores.GroupBy(pair => 
+    pair.Value >= 90 ? "高分" : (pair.Value >= 80 ? "中等" : "低分"));
+
+// 聚合
+int totalScore = studentScores.Sum(pair => pair.Value);
+double averageScore = studentScores.Average(pair => pair.Value);
+int maxScore = studentScores.Max(pair => pair.Value);
+int minScore = studentScores.Min(pair => pair.Value);
+```
+
+### Dictionary<TKey, TValue>的实际应用示例
+
+#### 示例1：学生成绩管理
+
+```csharp
+public class StudentScoreManager
+{
+    private Dictionary<string, int> _studentScores = new Dictionary<string, int>();
+    
+    public void AddStudent(string name, int score)
+    {
+        _studentScores[name] = score;
+    }
+    
+    public bool RemoveStudent(string name)
+    {
+        return _studentScores.Remove(name);
+    }
+    
+    public int? GetScore(string name)
+    {
+        if (_studentScores.TryGetValue(name, out int score))
+        {
+            return score;
+        }
+        return null;
+    }
+    
+    public List<string> GetStudentsByScoreRange(int minScore, int maxScore)
+    {
+        return _studentScores.Where(pair => pair.Value >= minScore && pair.Value <= maxScore)
+                            .Select(pair => pair.Key)
+                            .ToList();
+    }
+    
+    public Dictionary<string, int> GetTopStudents(int topCount)
+    {
+        return _studentScores.OrderByDescending(pair => pair.Value)
+                            .Take(topCount)
+                            .ToDictionary(pair => pair.Key, pair => pair.Value);
+    }
+}
+
+// 使用示例
+StudentScoreManager manager = new StudentScoreManager();
+manager.AddStudent("张三", 90);
+manager.AddStudent("李四", 85);
+manager.AddStudent("王五", 95);
+List<string> highScorers = manager.GetStudentsByScoreRange(90, 100);
+```
+
+#### 示例2：缓存实现
+
+```csharp
+public class SimpleCache<TKey, TValue>
+{
+    private Dictionary<TKey, CacheItem> _cache = new Dictionary<TKey, CacheItem>();
+    private TimeSpan _defaultExpiration;
+    
+    public SimpleCache(TimeSpan defaultExpiration)
+    {
+        _defaultExpiration = defaultExpiration;
+    }
+    
+    private class CacheItem
+    {
+        public TValue Value { get; set; }
+        public DateTime ExpirationTime { get; set; }
+    }
+    
+    public void Add(TKey key, TValue value)
+    {
+        Add(key, value, _defaultExpiration);
+    }
+    
+    public void Add(TKey key, TValue value, TimeSpan expiration)
+    {
+        _cache[key] = new CacheItem
+        {
+            Value = value,
+            ExpirationTime = DateTime.Now + expiration
+        };
+    }
+    
+    public bool TryGetValue(TKey key, out TValue value)
+    {
+        if (_cache.TryGetValue(key, out CacheItem item))
+        {
+            if (item.ExpirationTime > DateTime.Now)
+            {
+                value = item.Value;
+                return true;
+            }
+            else
+            {
+                _cache.Remove(key); // 移除过期项
+            }
+        }
+        value = default;
+        return false;
+    }
+    
+    public void Clear()
+    {
+        _cache.Clear();
+    }
+    
+    public int Count => _cache.Count;
+}
+
+// 使用示例
+SimpleCache<string, string> cache = new SimpleCache<string, string>(TimeSpan.FromMinutes(5));
+cache.Add("user:1", "张三");
+cache.Add("user:2", "李四", TimeSpan.FromHours(1));
+if (cache.TryGetValue("user:1", out string userName))
+{
+    Console.WriteLine($"用户名：{userName}");
+}
+```
+
+### Dictionary<TKey, TValue>的性能优化
+
+Dictionary<TKey, TValue>的性能主要取决于键的哈希函数和初始容量的设置：
+
+```csharp
+// 优化1：合理设置初始容量
+Dictionary<int, string> dict1 = new Dictionary<int, string>(10000); // 避免频繁扩容
+
+// 优化2：使用高效的键类型
+// 推荐使用int、string等内置类型作为键，它们有高效的哈希函数
+// 避免使用复杂对象作为键，如果必须使用，请确保实现高效的GetHashCode和Equals方法
+
+// 优化3：实现高效的哈希函数（自定义键类型）
+public class Product
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    
+    public override int GetHashCode()
+    {
+        return Id.GetHashCode(); // 只使用唯一标识符作为哈希值
+    }
+    
+    public override bool Equals(object obj)
+    {
+        if (obj is Product product)
+        {
+            return Id == product.Id;
+        }
+        return false;
+    }
+}
+
+// 优化4：选择合适的比较器
+Dictionary<string, int> caseInsensitiveDict = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+```
+
+### Dictionary<TKey, TValue>使用注意事项
+
+1. **键的唯一性**：同一个键只能在字典中出现一次，重复添加会抛出ArgumentException
+2. **键的null值**：对于引用类型键，不能为null，否则会抛出ArgumentNullException
+3. **值的null值**：对于引用类型值，可以为null，值类型值不能为null（除非使用Nullable<T>）
+4. **线程安全**：Dictionary<TKey, TValue>不是线程安全的，多线程环境下需要手动同步
+5. **无序性**：Dictionary<TKey, TValue>不保证元素的顺序，插入顺序可能与遍历顺序不同
+6. **性能考虑**：
+   - 当字典大小接近或超过初始容量时，会自动扩容，这会影响性能
+   - 键的哈希函数质量直接影响字典的性能
+   - 使用TryGetValue比先ContainsKey再索引访问更高效
+
+### Dictionary<TKey, TValue>类常用属性和方法速查表
+
+#### 常用属性
+
+| 属性 | 类型 | 作用说明 |
+|------|------|----------|
+| Count | int | 获取Dictionary中实际包含的键值对数量 |
+| Comparer | IEqualityComparer<TKey> | 获取用于比较键的相等性比较器 |
+| Keys | ICollection<TKey> | 获取Dictionary中所有键的集合 |
+| Values | ICollection<TValue> | 获取Dictionary中所有值的集合 |
+| Item[TKey] | TValue | 获取或设置指定键对应的值。这是索引器，可以通过dict[key]访问 |
+
+#### 常用方法
+
+| 方法 | 参数 | 返回值 | 作用说明 |
+|------|------|--------|----------|
+| Add(TKey, TValue) | TKey key, TValue value | void | 添加键值对，如果键已存在则抛出异常 |
+| ContainsKey(TKey) | TKey key | bool | 检查Dictionary是否包含指定键 |
+| ContainsValue(TValue) | TValue value | bool | 检查Dictionary是否包含指定值 |
+| TryGetValue(TKey, out TValue) | TKey key, out TValue value | bool | 尝试获取指定键对应的值，如果键存在则返回true，否则返回false |
+| Remove(TKey) | TKey key | bool | 删除指定键对应的键值对，如果键存在则返回true，否则返回false |
+| Clear() | 无 | void | 清空Dictionary中的所有键值对 |
+| GetEnumerator() | 无 | IEnumerator<KeyValuePair<TKey, TValue>> | 返回用于遍历Dictionary的枚举器 |
+
+## HashSet<T> vs Dictionary<TKey, TValue> 对比
+
+| 特性 | HashSet<T> | Dictionary<TKey, TValue> |
+|------|------------|--------------------------|
+| 数据结构 | 哈希表 | 哈希表 |
+| 存储内容 | 唯一元素集合 | 键值对集合 |
+| 键的概念 | 元素本身作为键 | 显式定义键 |
+| 元素唯一性 | 保证唯一 | 键保证唯一，值可以重复 |
+| 查找操作 | Contains(T) | TryGetValue(TKey, out TValue) |
+| 插入操作 | Add(T) 返回bool | Add(TKey, TValue) 可能抛出异常 |
+| 遍历顺序 | 无序 | 无序 |
+| 适用场景 | 需要快速检查元素是否存在、去重 | 需要通过键快速查找值、存储键值对数据 |
+| 内存占用 | 中等 | 较高（需要存储键和值） |
+
+通过了解和掌握HashSet<T>和Dictionary<TKey, TValue>，可以在C#开发中根据不同的场景选择合适的集合类，提高代码的性能和可读性。

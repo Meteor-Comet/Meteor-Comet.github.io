@@ -8822,8 +8822,6 @@ Dictionary<string, int> caseInsensitiveDict = new Dictionary<string, int>(String
 | Clear() | 无 | void | 清空Dictionary中的所有键值对 |
 | GetEnumerator() | 无 | IEnumerator<KeyValuePair<TKey, TValue>> | 返回用于遍历Dictionary的枚举器 |
 
-```
-
 ## <a id="iterator-detail"></a>C#迭代器详解
 
 迭代器（Iterator）是C#中用于遍历集合或自定义数据结构的一种机制。它允许开发者以统一的方式访问集合中的元素，而无需了解集合的底层实现细节。C#的迭代器主要通过`foreach`循环和`yield`关键字来实现。

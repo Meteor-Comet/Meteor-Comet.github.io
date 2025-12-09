@@ -3664,6 +3664,137 @@ public class Employee : Person
 }
 ```
 
+### 2.4 析构函数详解
+
+析构函数（也称为终结器 Finalizer）用于在对象被垃圾回收前执行清理操作，主要用于释放非托管资源。
+
+#### 2.4.1 析构函数基本语法
+
+```csharp
+~ClassName()
+{
+    // 清理资源的代码
+}
+```
+
+#### 2.4.2 析构函数的特点
+
+- 只能在类中定义，不能在结构中定义
+- 不能有访问修饰符、参数或返回值
+- 每个类最多只能有一个析构函数
+- 不能显式调用析构函数，由垃圾回收器自动调用
+- 不能继承或重载析构函数
+
+#### 2.4.3 析构函数的使用场景
+
+析构函数主要用于释放以下类型的资源：
+
+1. **非托管资源**：如文件句柄、数据库连接、网络套接字等
+2. **COM对象引用**：需要释放的COM互操作引用
+3. **操作系统资源**：如窗口句柄、图形设备上下文等
+
+#### 2.4.4 析构函数示例
+
+```csharp
+public class FileHandler
+{
+    private FileStream _fileStream;
+    
+    public FileHandler(string filePath)
+    {
+        _fileStream = new FileStream(filePath, FileMode.OpenOrCreate);
+        Console.WriteLine("File opened");
+    }
+    
+    public void WriteData(string data)
+    {
+        byte[] bytes = System.Text.Encoding.UTF8.GetBytes(data);
+        _fileStream.Write(bytes, 0, bytes.Length);
+    }
+    
+    // 析构函数
+    ~FileHandler()
+    {
+        // 释放非托管资源
+        if (_fileStream != null)
+        {
+            _fileStream.Dispose();
+            _fileStream = null;
+            Console.WriteLine("File resources released by destructor");
+        }
+    }
+}
+```
+
+#### 2.4.5 析构函数与IDisposable接口
+
+对于需要明确控制资源释放的情况，建议实现IDisposable接口而不是仅依赖析构函数：
+
+```csharp
+public class ResourceManager : IDisposable
+{
+    private bool _disposed = false;
+    private FileStream _fileStream;
+    
+    public ResourceManager(string filePath)
+    {
+        _fileStream = new FileStream(filePath, FileMode.Open);
+    }
+    
+    // 实现IDisposable接口
+    public void Dispose()
+    {
+        Dispose(true);
+        // 告诉垃圾回收器不要调用析构函数
+        GC.SuppressFinalize(this);
+    }
+    
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing)
+            {
+                // 释放托管资源
+                if (_fileStream != null)
+                {
+                    _fileStream.Dispose();
+                    _fileStream = null;
+                }
+            }
+            
+            // 释放非托管资源
+            // ...
+            
+            _disposed = true;
+        }
+    }
+    
+    // 析构函数作为安全网
+    ~ResourceManager()
+    {
+        Dispose(false);
+    }
+}
+```
+
+#### 2.4.6 最佳实践
+
+1. **优先使用IDisposable**：对于需要确定性释放资源的场景，始终实现IDisposable接口
+2. **析构函数作为安全网**：仅在必须处理非托管资源时使用析构函数作为最后的安全保障
+3. **避免长时间阻塞**：析构函数执行时间不应过长，否则会延迟垃圾回收过程
+4. **不要依赖执行时间**：不能确定析构函数何时会被调用，甚至可能不被调用
+5. **使用using语句**：对于实现IDisposable的对象，尽量使用using语句确保资源正确释放
+
+```csharp
+// 使用using语句自动调用Dispose
+using (var manager = new ResourceManager("data.txt"))
+{
+    // 使用资源
+}
+// 离开using块时自动调用manager.Dispose()
+```
+
 ### 3. 成员函数深度解析
 
 #### 3.1 方法签名与重载

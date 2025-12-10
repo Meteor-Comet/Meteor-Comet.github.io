@@ -628,6 +628,7 @@ string message = formatSum(1, 2, 3); // 结果为"1 + 2 + 3 = 6"
 #### Func的高级应用
 
 1. **复杂数据转换**
+
 ```csharp
 // 将Person对象转换为匿名类型
 Func<Person, object> toAnonymousType = p => new { p.Name, AgeGroup = p.Age >= 18 ? "Adult" : "Minor" };
@@ -640,6 +641,7 @@ int result = processNumber(10); // 结果为25
 ```
 
 2. **作为方法返回值**
+
 ```csharp
 // 根据条件返回不同的处理函数
 Func<int, int> GetProcessor(bool useAddition)

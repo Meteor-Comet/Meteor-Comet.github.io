@@ -1,0 +1,67 @@
+<svg width="800" height="500" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景 -->
+  <rect width="800" height="500" fill="#f8f9fa" rx="5" ry="5"/>
+  
+  <!-- Visual Studio界面框架 -->
+  <rect x="50" y="50" width="700" height="400" fill="#ffffff" stroke="#d3d3d3" stroke-width="1" rx="5" ry="5"/>
+  <rect x="50" y="50" width="700" height="30" fill="#0078d7" rx="5 5 0 0" ry="5 5 0 0"/>
+  <text x="65" y="70" font-family="Arial, sans-serif" font-size="14" fill="white" text-anchor="start">Microsoft Visual Studio 2022</text>
+  
+  <!-- 菜单工具栏 -->
+  <rect x="50" y="80" width="700" height="25" fill="#e9ecef" stroke="#d3d3d3" stroke-width="1"/>
+  <text x="60" y="100" font-family="Arial, sans-serif" font-size="12" fill="#333" text-anchor="start">文件 | 编辑 | 视图 | 项目 | 生成 | 调试 | 工具 | 团队 | 窗口 | 帮助</text>
+  
+  <!-- 侧边栏 - 项目创建向导 -->
+  <rect x="50" y="105" width="300" height="345" fill="#f0f2f5" stroke="#d3d3d3" stroke-width="1"/>
+  <rect x="55" y="110" width="290" height="25" fill="#0078d7" rx="2" ry="2"/>
+  <text x="200" y="130" font-family="Arial, sans-serif" font-size="14" fill="white" text-anchor="middle">创建新项目</text>
+  
+  <!-- 项目类型列表 -->
+  <rect x="65" y="145" width="270" height="180" fill="#ffffff" stroke="#d3d3d3" stroke-width="1" rx="2" ry="2"/>
+  <text x="85" y="165" font-family="Arial, sans-serif" font-size="12" fill="#0078d7" text-anchor="start">• Windows 窗体应用 (.NET)</text>
+  <text x="85" y="185" font-family="Arial, sans-serif" font-size="12" fill="#666" text-anchor="start">• ASP.NET Core Web 应用</text>
+  <text x="85" y="205" font-family="Arial, sans-serif" font-size="12" fill="#666" text-anchor="start">• Console 应用 (.NET)</text>
+  <text x="85" y="225" font-family="Arial, sans-serif" font-size="12" fill="#666" text-anchor="start">• Class 库 (.NET)</text>
+  <text x="85" y="245" font-family="Arial, sans-serif" font-size="12" fill="#666" text-anchor="start">• 控制台应用 (.NET Framework)</text>
+  <text x="85" y="265" font-family="Arial, sans-serif" font-size="12" fill="#666" text-anchor="start">• Windows 窗体应用 (.NET Framework)</text>
+  <text x="85" y="285" font-family="Arial, sans-serif" font-size="12" fill="#666" text-anchor="start">• WPF 应用 (.NET)</text>
+  <text x="85" y="305" font-family="Arial, sans-serif" font-size="12" fill="#666" text-anchor="start">• 更多项目类型...</text>
+  
+  <!-- 选择WinForm高亮 -->
+  <rect x="65" y="145" width="270" height="40" fill="#e3f2fd" stroke="#90caf9" stroke-width="1" rx="2" ry="2" opacity="0.5"/>
+  
+  <!-- 下一步按钮 -->
+  <rect x="215" y="340" width="120" height="30" fill="#0078d7" rx="2" ry="2"/>
+  <text x="275" y="360" font-family="Arial, sans-serif" font-size="13" fill="white" text-anchor="middle">下一步 &gt;</text>
+  
+  <!-- 取消按钮 -->
+  <rect x="85" y="340" width="120" height="30" fill="#f0f2f5" stroke="#d3d3d3" stroke-width="1" rx="2" ry="2"/>
+  <text x="145" y="360" font-family="Arial, sans-serif" font-size="13" fill="#333" text-anchor="middle">取消</text>
+  
+  <!-- 预览区域 - WinForm界面预览 -->
+  <rect x="350" y="105" width="395" height="345" fill="#ffffff" stroke="#d3d3d3" stroke-width="1"/>
+  <text x="365" y="125" font-family="Arial, sans-serif" font-size="14" fill="#333" text-anchor="start">项目预览:</text>
+  
+  <!-- WinForm设计器预览 -->
+  <rect x="370" y="140" width="380" height="250" fill="#ffffff" stroke="#d3d3d3" stroke-width="1" rx="2" ry="2"/>
+  <rect x="370" y="140" width="380" height="25" fill="#0078d7" rx="2 2 0 0" ry="2 2 0 0"/>
+  <text x="385" y="158" font-family="Arial, sans-serif" font-size="12" fill="white" text-anchor="start">Form1.cs [设计]</text>
+  
+  <!-- 简单的WinForm设计图 -->
+  <rect x="390" y="170" width="340" height="210" fill="#f0f0f0" stroke="#d3d3d3" stroke-width="1"/>
+  <rect x="450" y="200" width="220" height="30" fill="#ffffff" stroke="#d3d3d3" stroke-width="1" rx="2" ry="2"/>
+  <text x="560" y="220" font-family="Arial, sans-serif" font-size="12" fill="#333" text-anchor="middle">欢迎使用 WinForm 应用程序!</text>
+  <rect x="525" y="250" width="100" height="30" fill="#0078d7" rx="2" ry="2"/>
+  <text x="575" y="270" font-family="Arial, sans-serif" font-size="12" fill="white" text-anchor="middle">确定</text>
+  
+  <!-- 说明文字 -->
+  <text x="400" y="410" font-family="Arial, sans-serif" font-size="12" fill="#333" text-anchor="middle">Windows 窗体应用 (.NET) - 创建基于 Windows 的桌面应用程序的理想选择</text>
+  <text x="400" y="430" font-family="Arial, sans-serif" font-size="12" fill="#333" text-anchor="middle">支持 .NET 5+ 和最新的 C# 特性，提供丰富的控件集和工具支持。</text>
+  
+  <!-- 指示箭头 - 连接项目选择和预览 -->
+  <path d="M300,220 Q325,180 350,220" stroke="#0078d7" stroke-width="2" fill="none" stroke-dasharray="5,3"/>
+  <polygon points="347,215 350,220 343,225" fill="#0078d7"/>
+  
+  <!-- 版权信息 -->
+  <text x="400" y="485" font-family="Arial, sans-serif" font-size="10" fill="#666" text-anchor="middle">WinForm 环境准备 - Visual Studio 2022 创建新项目过程图示</text>
+</svg>

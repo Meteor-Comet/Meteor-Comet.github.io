@@ -2565,10 +2565,16 @@ dataGridView1.Columns["Age"].HeaderText = "年龄";
 
 ![WinForm 高级主题综合指南](/img/in-post/winform-advanced-topics.svg)
 
+文件操作是WinForm应用程序中的常见需求。本章将介绍如何使用文件对话框、同步和异步文件操作，以及流处理技术。
+
 ### 8.1 文件对话框
 
+#### 8.1.1 OpenFileDialog 打开文件对话框
+
+`OpenFileDialog`用于让用户选择要打开的文件。
+
 ```csharp
-// 打开文件对话框
+// 打开文件对话框（同步方式）
 private void btnOpenFile_Click(object sender, EventArgs e)
 {
     OpenFileDialog openFileDialog = new OpenFileDialog
@@ -2576,17 +2582,28 @@ private void btnOpenFile_Click(object sender, EventArgs e)
         Title = "选择文件",
         Filter = "文本文件 (*.txt)|*.txt|所有文件 (*.*)|*.*",
         InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
-        Multiselect = false
+        Multiselect = false,  // 是否允许多选
+        CheckFileExists = true,  // 检查文件是否存在
+        CheckPathExists = true   // 检查路径是否存在
     };
     
     if (openFileDialog.ShowDialog() == DialogResult.OK)
     {
-        // 读取选中的文件
         string filePath = openFileDialog.FileName;
         try
         {
+            // 同步读取文件（会阻塞UI线程）
             string content = File.ReadAllText(filePath, Encoding.UTF8);
             txtContent.Text = content;
+            lblStatus.Text = $"已加载: {Path.GetFileName(filePath)}";
+        }
+        catch (FileNotFoundException)
+        {
+            MessageBox.Show("文件不存在", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            MessageBox.Show("没有访问权限", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         catch (Exception ex)
         {
@@ -2594,12 +2611,35 @@ private void btnOpenFile_Click(object sender, EventArgs e)
         }
     }
 }
+
+// 打开多个文件
+private void btnOpenMultipleFiles_Click(object sender, EventArgs e)
+{
+    OpenFileDialog openFileDialog = new OpenFileDialog
+    {
+        Title = "选择多个文件",
+        Filter = "文本文件 (*.txt)|*.txt|所有文件 (*.*)|*.*",
+        Multiselect = true  // 允许多选
+    };
+    
+    if (openFileDialog.ShowDialog() == DialogResult.OK)
+    {
+        listBoxFiles.Items.Clear();
+        foreach (string filePath in openFileDialog.FileNames)
+        {
+            listBoxFiles.Items.Add(Path.GetFileName(filePath));
+        }
+        lblStatus.Text = $"已选择 {openFileDialog.FileNames.Length} 个文件";
+    }
+}
 ```
 
-### 8.2 保存文件
+#### 8.1.2 SaveFileDialog 保存文件对话框
+
+`SaveFileDialog`用于让用户选择文件保存位置。
 
 ```csharp
-// 保存文件对话框
+// 保存文件对话框（同步方式）
 private void btnSaveFile_Click(object sender, EventArgs e)
 {
     SaveFileDialog saveFileDialog = new SaveFileDialog
@@ -2607,7 +2647,9 @@ private void btnSaveFile_Click(object sender, EventArgs e)
         Title = "保存文件",
         Filter = "文本文件 (*.txt)|*.txt|所有文件 (*.*)|*.*",
         InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
-        DefaultExt = "txt"
+        DefaultExt = "txt",
+        OverwritePrompt = true,  // 覆盖时提示
+        CheckPathExists = true    // 检查路径是否存在
     };
     
     if (saveFileDialog.ShowDialog() == DialogResult.OK)
@@ -2615,8 +2657,14 @@ private void btnSaveFile_Click(object sender, EventArgs e)
         string filePath = saveFileDialog.FileName;
         try
         {
+            // 同步写入文件（会阻塞UI线程）
             File.WriteAllText(filePath, txtContent.Text, Encoding.UTF8);
             MessageBox.Show("文件保存成功！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            lblStatus.Text = $"已保存: {Path.GetFileName(filePath)}";
+        }
+        catch (UnauthorizedAccessException)
+        {
+            MessageBox.Show("没有写入权限", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         catch (Exception ex)
         {
@@ -2626,9 +2674,308 @@ private void btnSaveFile_Click(object sender, EventArgs e)
 }
 ```
 
-## 9. 多线程编程
+#### 8.1.3 FolderBrowserDialog 文件夹浏览对话框
 
-### 9.1 跨线程访问控件
+`FolderBrowserDialog`用于让用户选择文件夹。
+
+```csharp
+// 选择文件夹
+private void btnSelectFolder_Click(object sender, EventArgs e)
+{
+    FolderBrowserDialog folderDialog = new FolderBrowserDialog
+    {
+        Description = "请选择一个文件夹",
+        ShowNewFolderButton = true,  // 显示新建文件夹按钮
+        RootFolder = Environment.SpecialFolder.MyComputer
+    };
+    
+    if (folderDialog.ShowDialog() == DialogResult.OK)
+    {
+        string selectedPath = folderDialog.SelectedPath;
+        txtFolderPath.Text = selectedPath;
+        lblStatus.Text = $"已选择文件夹: {selectedPath}";
+    }
+}
+```
+
+### 8.2 异步文件操作（推荐）
+
+在WinForm应用程序中，**强烈推荐使用异步文件操作**，以避免阻塞UI线程，保持界面响应性。
+
+#### 8.2.1 异步读取文件
+
+```csharp
+// 异步打开文件（推荐方式）
+private async void btnOpenFileAsync_Click(object sender, EventArgs e)
+{
+    OpenFileDialog openFileDialog = new OpenFileDialog
+    {
+        Title = "选择文件",
+        Filter = "文本文件 (*.txt)|*.txt|所有文件 (*.*)|*.*",
+        InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
+    };
+    
+    if (openFileDialog.ShowDialog() == DialogResult.OK)
+    {
+        // 设置UI状态
+        btnOpenFileAsync.Enabled = false;
+        progressBar1.Visible = true;
+        progressBar1.Style = ProgressBarStyle.Marquee;
+        lblStatus.Text = "加载中...";
+        
+        try
+        {
+            // 异步读取文件，不阻塞UI线程
+            string content = await ReadFileAsync(openFileDialog.FileName);
+            
+            // 更新UI（自动返回到UI线程）
+            txtContent.Text = content;
+            lblStatus.Text = $"已加载: {Path.GetFileName(openFileDialog.FileName)} ({content.Length} 字符)";
+        }
+        catch (FileNotFoundException)
+        {
+            MessageBox.Show("文件不存在", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            lblStatus.Text = "文件不存在";
+        }
+        catch (UnauthorizedAccessException)
+        {
+            MessageBox.Show("没有访问权限", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            lblStatus.Text = "访问被拒绝";
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"读取文件失败: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            lblStatus.Text = "加载失败";
+        }
+        finally
+        {
+            btnOpenFileAsync.Enabled = true;
+            progressBar1.Visible = false;
+        }
+    }
+}
+
+// 异步读取文件的辅助方法
+private async Task<string> ReadFileAsync(string filePath)
+{
+    // 方式1：使用File.ReadAllTextAsync（.NET Core/.NET 5+）
+    // return await File.ReadAllTextAsync(filePath, Encoding.UTF8);
+    
+    // 方式2：使用StreamReader（兼容性更好）
+    using (StreamReader reader = new StreamReader(filePath, Encoding.UTF8))
+    {
+        return await reader.ReadToEndAsync();
+    }
+}
+```
+
+#### 8.2.2 异步写入文件
+
+```csharp
+// 异步保存文件（推荐方式）
+private async void btnSaveFileAsync_Click(object sender, EventArgs e)
+{
+    SaveFileDialog saveFileDialog = new SaveFileDialog
+    {
+        Title = "保存文件",
+        Filter = "文本文件 (*.txt)|*.txt|所有文件 (*.*)|*.*",
+        DefaultExt = "txt",
+        OverwritePrompt = true
+    };
+    
+    if (saveFileDialog.ShowDialog() == DialogResult.OK)
+    {
+        btnSaveFileAsync.Enabled = false;
+        lblStatus.Text = "保存中...";
+        
+        try
+        {
+            // 异步写入文件，不阻塞UI线程
+            await WriteFileAsync(saveFileDialog.FileName, txtContent.Text);
+            
+            lblStatus.Text = $"已保存: {Path.GetFileName(saveFileDialog.FileName)}";
+            MessageBox.Show("文件保存成功！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            MessageBox.Show("没有写入权限", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            lblStatus.Text = "保存失败：权限不足";
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"保存文件失败: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            lblStatus.Text = "保存失败";
+        }
+        finally
+        {
+            btnSaveFileAsync.Enabled = true;
+        }
+    }
+}
+
+// 异步写入文件的辅助方法
+private async Task WriteFileAsync(string filePath, string content)
+{
+    // 方式1：使用File.WriteAllTextAsync（.NET Core/.NET 5+）
+    // await File.WriteAllTextAsync(filePath, content, Encoding.UTF8);
+    
+    // 方式2：使用StreamWriter（兼容性更好）
+    using (StreamWriter writer = new StreamWriter(filePath, append: false, Encoding.UTF8))
+    {
+        await writer.WriteAsync(content);
+        await writer.FlushAsync();
+    }
+}
+```
+
+#### 8.2.3 异步文件复制（带进度）
+
+```csharp
+// 异步复制文件并显示进度
+private async void btnCopyFileAsync_Click(object sender, EventArgs e)
+{
+    OpenFileDialog openDialog = new OpenFileDialog
+    {
+        Title = "选择源文件"
+    };
+    
+    if (openDialog.ShowDialog() == DialogResult.OK)
+    {
+        SaveFileDialog saveDialog = new SaveFileDialog
+        {
+            Title = "选择目标位置",
+            FileName = Path.GetFileName(openDialog.FileName)
+        };
+        
+        if (saveDialog.ShowDialog() == DialogResult.OK)
+        {
+            btnCopyFileAsync.Enabled = false;
+            progressBar1.Visible = true;
+            progressBar1.Style = ProgressBarStyle.Continuous;
+            progressBar1.Value = 0;
+            
+            try
+            {
+                // 使用Progress报告进度
+                var progress = new Progress<int>(percent =>
+                {
+                    progressBar1.Value = percent;
+                    lblStatus.Text = $"复制中: {percent}%";
+                });
+                
+                await CopyFileAsync(openDialog.FileName, saveDialog.FileName, progress);
+                
+                lblStatus.Text = "复制完成";
+                MessageBox.Show("文件复制成功！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"复制失败: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                lblStatus.Text = "复制失败";
+            }
+            finally
+            {
+                btnCopyFileAsync.Enabled = true;
+                progressBar1.Visible = false;
+            }
+        }
+    }
+}
+
+// 异步复制文件并报告进度
+private async Task CopyFileAsync(string sourcePath, string destPath, IProgress<int> progress)
+{
+    const int bufferSize = 8192; // 8KB缓冲区
+    
+    using (FileStream sourceStream = new FileStream(sourcePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, true))
+    using (FileStream destStream = new FileStream(destPath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize, true))
+    {
+        long fileLength = sourceStream.Length;
+        byte[] buffer = new byte[bufferSize];
+        long totalBytesRead = 0;
+        int bytesRead;
+        
+        while ((bytesRead = await sourceStream.ReadAsync(buffer, 0, bufferSize)) > 0)
+        {
+            await destStream.WriteAsync(buffer, 0, bytesRead);
+            
+            totalBytesRead += bytesRead;
+            int percent = (int)(totalBytesRead * 100 / fileLength);
+            progress?.Report(percent);
+        }
+        
+        await destStream.FlushAsync();
+    }
+}
+```
+
+### 8.3 流处理（Stream）
+
+对于大文件或需要精细控制的文件操作，可以使用流（Stream）进行处理。
+
+#### 8.3.1 使用FileStream读取大文件
+
+```csharp
+// 使用FileStream读取大文件
+private async Task<string> ReadLargeFileAsync(string filePath)
+{
+    const int bufferSize = 8192;
+    StringBuilder content = new StringBuilder();
+    
+    using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, true))
+    {
+        byte[] buffer = new byte[bufferSize];
+        int bytesRead;
+        
+        while ((bytesRead = await fs.ReadAsync(buffer, 0, bufferSize)) > 0)
+        {
+            string chunk = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+            content.Append(chunk);
+        }
+    }
+    
+    return content.ToString();
+}
+```
+
+#### 8.3.2 使用StreamReader逐行读取
+
+```csharp
+// 逐行读取文件（适合处理大文件）
+private async Task<List<string>> ReadLinesAsync(string filePath)
+{
+    List<string> lines = new List<string>();
+    
+    using (StreamReader reader = new StreamReader(filePath, Encoding.UTF8))
+    {
+        string line;
+        while ((line = await reader.ReadLineAsync()) != null)
+        {
+            lines.Add(line);
+            // 可以在这里处理每一行，避免一次性加载整个文件到内存
+        }
+    }
+    
+    return lines;
+}
+```
+
+### 8.4 文件操作最佳实践
+
+1. **优先使用异步操作**：在WinForm中，始终使用异步文件操作以保持UI响应性
+2. **异常处理**：正确处理`FileNotFoundException`、`UnauthorizedAccessException`等异常
+3. **使用using语句**：确保流和文件句柄正确释放
+4. **进度反馈**：对于大文件操作，使用`IProgress<T>`报告进度
+5. **缓冲区大小**：根据文件大小选择合适的缓冲区（通常8KB-64KB）
+6. **编码指定**：明确指定文件编码（UTF-8推荐），避免乱码问题
+
+## 9. 多线程编程与异步操作
+
+在WinForm应用程序中，长时间运行的操作会阻塞UI线程，导致界面冻结。本章介绍如何在WinForm中正确处理多线程和异步操作。
+
+### 9.1 传统多线程方式
+
+#### 9.1.1 使用Thread和Invoke（传统方式）
 
 ```csharp
 // 使用 Invoke 安全地跨线程访问控件
@@ -2636,10 +2983,12 @@ private void UpdateProgress(int value)
 {
     if (progressBar1.InvokeRequired)
     {
+        // 从非UI线程调用，需要使用Invoke
         progressBar1.Invoke(new Action<int>(UpdateProgress), value);
     }
     else
     {
+        // 在UI线程中，直接更新控件
         progressBar1.Value = value;
         lblProgress.Text = $"进度: {value}%";
     }
@@ -2654,7 +3003,7 @@ private void btnStartTask_Click(object sender, EventArgs e)
     // 创建并启动后台线程
     Thread thread = new Thread(new ThreadStart(DoWork))
     {
-        IsBackground = true
+        IsBackground = true  // 设置为后台线程
     };
     thread.Start();
 }
@@ -2665,11 +3014,11 @@ private void DoWork()
     {
         // 模拟工作
         Thread.Sleep(100);
-        // 更新进度
+        // 更新进度（需要Invoke）
         UpdateProgress(i);
     }
     
-    // 完成后启用按钮
+    // 完成后启用按钮（需要Invoke）
     this.Invoke(new Action(() =>
     {
         btnStartTask.Enabled = true;
@@ -2678,14 +3027,21 @@ private void DoWork()
 }
 ```
 
-### 9.2 使用 BackgroundWorker
+#### 9.2 使用 BackgroundWorker（传统方式）
+
+`BackgroundWorker`是.NET Framework提供的简化多线程操作的组件。
 
 ```csharp
 // 使用 BackgroundWorker 简化多线程操作
 private void btnStartBackgroundWorker_Click(object sender, EventArgs e)
 {
+    // 配置BackgroundWorker
+    backgroundWorker1.WorkerReportsProgress = true;  // 允许报告进度
+    backgroundWorker1.WorkerSupportsCancellation = true;  // 支持取消
+    
     backgroundWorker1.RunWorkerAsync();
     btnStartBackgroundWorker.Enabled = false;
+    btnCancel.Enabled = true;
 }
 
 // 后台工作线程
@@ -2705,37 +3061,292 @@ private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         // 模拟工作
         Thread.Sleep(100);
         
-        // 报告进度
-        worker.ReportProgress(i);
+        // 报告进度（自动返回到UI线程）
+        worker.ReportProgress(i, $"处理中: {i}%");
     }
 }
 
-// 进度更新事件
+// 进度更新事件（在UI线程中执行）
 private void backgroundWorker1_ProgressChanged(object sender, ProgressChangedEventArgs e)
 {
     progressBar2.Value = e.ProgressPercentage;
-    lblProgress2.Text = $"进度: {e.ProgressPercentage}%";
+    lblProgress2.Text = e.UserState?.ToString() ?? $"进度: {e.ProgressPercentage}%";
 }
 
-// 完成事件
+// 完成事件（在UI线程中执行）
 private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
 {
     btnStartBackgroundWorker.Enabled = true;
+    btnCancel.Enabled = false;
     
     if (e.Cancelled)
     {
         MessageBox.Show("任务已取消", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        lblProgress2.Text = "已取消";
     }
     else if (e.Error != null)
     {
         MessageBox.Show("任务出错: " + e.Error.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        lblProgress2.Text = "出错";
     }
     else
     {
         MessageBox.Show("任务完成！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        lblProgress2.Text = "完成";
+    }
+}
+
+// 取消操作
+private void btnCancel_Click(object sender, EventArgs e)
+{
+    if (backgroundWorker1.IsBusy)
+    {
+        backgroundWorker1.CancelAsync();
     }
 }
 ```
+
+### 9.3 现代异步编程方式（推荐）
+
+**强烈推荐使用`async/await`进行异步编程**，这是现代C#开发的标准方式，代码更简洁、更易维护。
+
+#### 9.3.1 使用async/await进行异步操作
+
+```csharp
+// 使用async/await（推荐方式）
+private async void btnStartAsync_Click(object sender, EventArgs e)
+{
+    btnStartAsync.Enabled = false;
+    btnCancelAsync.Enabled = true;
+    progressBar3.Value = 0;
+    lblProgress3.Text = "准备中...";
+    
+    // 创建取消令牌
+    CancellationTokenSource cts = new CancellationTokenSource();
+    _currentCancellationTokenSource = cts;
+    
+    try
+    {
+        // 使用Progress报告进度
+        var progress = new Progress<int>(percent =>
+        {
+            progressBar3.Value = percent;
+            lblProgress3.Text = $"处理中: {percent}%";
+        });
+        
+        // 异步执行任务
+        await DoWorkAsync(progress, cts.Token);
+        
+        lblProgress3.Text = "完成";
+        MessageBox.Show("任务完成！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+    }
+    catch (OperationCanceledException)
+    {
+        lblProgress3.Text = "已取消";
+        MessageBox.Show("任务已取消", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+    }
+    catch (Exception ex)
+    {
+        lblProgress3.Text = "出错";
+        MessageBox.Show($"任务出错: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+    }
+    finally
+    {
+        btnStartAsync.Enabled = true;
+        btnCancelAsync.Enabled = false;
+        cts?.Dispose();
+        _currentCancellationTokenSource = null;
+    }
+}
+
+private CancellationTokenSource _currentCancellationTokenSource;
+
+// 异步工作方法
+private async Task DoWorkAsync(IProgress<int> progress, CancellationToken cancellationToken)
+{
+    for (int i = 0; i <= 100; i++)
+    {
+        // 检查是否取消
+        cancellationToken.ThrowIfCancellationRequested();
+        
+        // 模拟异步工作（不阻塞UI线程）
+        await Task.Delay(100, cancellationToken);
+        
+        // 报告进度（自动返回到UI线程）
+        progress?.Report(i);
+    }
+}
+
+// 取消异步操作
+private void btnCancelAsync_Click(object sender, EventArgs e)
+{
+    _currentCancellationTokenSource?.Cancel();
+}
+```
+
+#### 9.3.2 异步加载数据示例
+
+```csharp
+// 异步加载数据到DataGridView
+private async void btnLoadDataAsync_Click(object sender, EventArgs e)
+{
+    dataGridView1.DataSource = null;
+    lblStatus.Text = "加载中...";
+    btnLoadDataAsync.Enabled = false;
+    
+    try
+    {
+        // 异步加载数据
+        List<User> users = await LoadUsersAsync();
+        
+        // 更新UI（自动返回到UI线程）
+        dataGridView1.DataSource = users;
+        lblStatus.Text = $"已加载 {users.Count} 条记录";
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show($"加载失败: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        lblStatus.Text = "加载失败";
+    }
+    finally
+    {
+        btnLoadDataAsync.Enabled = true;
+    }
+}
+
+// 异步加载用户数据
+private async Task<List<User>> LoadUsersAsync()
+{
+    // 模拟异步数据库查询
+    await Task.Delay(1000);
+    
+    return new List<User>
+    {
+        new User { Id = 1, Name = "张三", Email = "zhangsan@example.com" },
+        new User { Id = 2, Name = "李四", Email = "lisi@example.com" },
+        new User { Id = 3, Name = "王五", Email = "wangwu@example.com" }
+    };
+}
+```
+
+#### 9.3.3 异步网络请求示例
+
+```csharp
+// 异步下载文件
+private async void btnDownloadAsync_Click(object sender, EventArgs e)
+{
+    btnDownloadAsync.Enabled = false;
+    progressBar4.Value = 0;
+    lblStatus.Text = "下载中...";
+    
+    try
+    {
+        using (HttpClient client = new HttpClient())
+        {
+            // 异步下载
+            byte[] data = await client.GetByteArrayAsync("https://example.com/file.zip");
+            
+            // 异步保存
+            await File.WriteAllBytesAsync("downloaded.zip", data);
+            
+            lblStatus.Text = "下载完成";
+            MessageBox.Show("下载完成！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+    }
+    catch (HttpRequestException ex)
+    {
+        MessageBox.Show($"网络错误: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        lblStatus.Text = "网络错误";
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show($"下载失败: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        lblStatus.Text = "下载失败";
+    }
+    finally
+    {
+        btnDownloadAsync.Enabled = true;
+    }
+}
+```
+
+#### 9.3.4 并行处理多个任务
+
+```csharp
+// 并行执行多个异步任务
+private async void btnProcessMultipleAsync_Click(object sender, EventArgs e)
+{
+    btnProcessMultipleAsync.Enabled = false;
+    progressBar5.Value = 0;
+    
+    try
+    {
+        // 并行执行多个任务
+        var tasks = new[]
+        {
+            ProcessTask1Async(),
+            ProcessTask2Async(),
+            ProcessTask3Async()
+        };
+        
+        // 等待所有任务完成
+        await Task.WhenAll(tasks);
+        
+        progressBar5.Value = 100;
+        MessageBox.Show("所有任务完成！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show($"处理失败: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+    }
+    finally
+    {
+        btnProcessMultipleAsync.Enabled = true;
+    }
+}
+
+private async Task ProcessTask1Async()
+{
+    await Task.Delay(1000);
+    // 处理任务1
+}
+
+private async Task ProcessTask2Async()
+{
+    await Task.Delay(1500);
+    // 处理任务2
+}
+
+private async Task ProcessTask3Async()
+{
+    await Task.Delay(2000);
+    // 处理任务3
+}
+```
+
+### 9.4 异步编程最佳实践
+
+1. **优先使用async/await**：比传统Thread和BackgroundWorker更简洁、更安全
+2. **UI线程安全**：`async/await`自动处理UI线程同步，无需手动Invoke
+3. **异常处理**：使用`try-catch`捕获异步操作中的异常
+4. **取消支持**：使用`CancellationToken`支持用户取消长时间运行的操作
+5. **进度报告**：使用`IProgress<T>`报告操作进度
+6. **避免async void**：除了事件处理程序外，使用`async Task`
+7. **资源释放**：使用`using`语句或`finally`块确保资源正确释放
+8. **并行处理**：使用`Task.WhenAll`并行执行多个独立任务
+
+### 9.5 传统方式 vs 现代方式对比
+
+| 特性 | Thread/Invoke | BackgroundWorker | async/await |
+|------|---------------|------------------|-------------|
+| 代码复杂度 | 高 | 中 | 低 |
+| UI线程安全 | 需手动Invoke | 自动处理 | 自动处理 |
+| 异常处理 | 复杂 | 较简单 | 简单 |
+| 取消支持 | 需手动实现 | 内置支持 | 内置支持 |
+| 进度报告 | 需手动实现 | 内置支持 | 使用IProgress |
+| 推荐使用 | ❌ | ⚠️ | ✅ |
+
+**总结**：在现代WinForm开发中，应优先使用`async/await`进行异步编程，它提供了更好的代码可读性、维护性和性能。
 
 ## 10. WinForm 应用程序部署
 
@@ -2761,21 +3372,491 @@ private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerComple
 
 ### 11.1 代码组织
 
-- 使用命名空间合理组织代码
-- 遵循 C# 命名约定
-- 使用三层架构分离业务逻辑和界面
+#### 11.1.1 项目结构
+
+```
+项目名称/
+├── Forms/              # 窗体文件
+│   ├── MainForm.cs
+│   └── SettingsForm.cs
+├── Controls/           # 自定义控件
+│   └── CustomButton.cs
+├── Models/             # 数据模型
+│   └── User.cs
+├── Services/            # 业务逻辑服务
+│   └── DataService.cs
+├── Utils/              # 工具类
+│   └── FileHelper.cs
+└── Resources/          # 资源文件
+    └── Images/
+```
+
+#### 11.1.2 命名约定
+
+```csharp
+// 窗体类：使用Form后缀
+public partial class MainForm : Form { }
+public partial class SettingsForm : Form { }
+
+// 控件命名：使用前缀
+Button btnSubmit;        // btn = button
+TextBox txtUserName;     // txt = textbox
+Label lblStatus;         // lbl = label
+DataGridView dgvUsers;   // dgv = datagridview
+ProgressBar progressBar1;
+
+// 方法命名：使用动词开头
+private void LoadData() { }
+private async Task SaveDataAsync() { }
+private void UpdateUI() { }
+```
+
+#### 11.1.3 三层架构
+
+```csharp
+// 表示层（UI层）
+public partial class MainForm : Form
+{
+    private UserService _userService;
+    
+    public MainForm()
+    {
+        InitializeComponent();
+        _userService = new UserService();
+    }
+    
+    private async void btnLoadUsers_Click(object sender, EventArgs e)
+    {
+        var users = await _userService.GetAllUsersAsync();
+        dataGridView1.DataSource = users;
+    }
+}
+
+// 业务逻辑层（Service层）
+public class UserService
+{
+    private IUserRepository _repository;
+    
+    public UserService()
+    {
+        _repository = new UserRepository();
+    }
+    
+    public async Task<List<User>> GetAllUsersAsync()
+    {
+        return await _repository.GetAllAsync();
+    }
+}
+
+// 数据访问层（Repository层）
+public class UserRepository : IUserRepository
+{
+    public async Task<List<User>> GetAllAsync()
+    {
+        // 数据库访问逻辑
+        await Task.Delay(100);
+        return new List<User>();
+    }
+}
+```
 
 ### 11.2 性能优化
 
-- 避免在 UI 线程执行耗时操作
-- 使用延迟加载技术
-- 合理使用缓存机制
-- 关闭不需要的事件处理程序
+#### 11.2.1 异步操作
+
+```csharp
+// ❌ 错误：同步操作阻塞UI
+private void btnLoad_Click(object sender, EventArgs e)
+{
+    string data = File.ReadAllText("largefile.txt"); // 阻塞UI
+    textBox1.Text = data;
+}
+
+// ✅ 正确：异步操作不阻塞UI
+private async void btnLoad_Click(object sender, EventArgs e)
+{
+    string data = await File.ReadAllTextAsync("largefile.txt"); // 不阻塞
+    textBox1.Text = data;
+}
+```
+
+#### 11.2.2 延迟加载
+
+```csharp
+// 延迟加载数据，只在需要时加载
+private List<User> _users;
+private List<User> Users
+{
+    get
+    {
+        if (_users == null)
+        {
+            _users = LoadUsers();
+        }
+        return _users;
+    }
+}
+```
+
+#### 11.2.3 虚拟化列表
+
+```csharp
+// 对于大量数据，使用虚拟模式
+dataGridView1.VirtualMode = true;
+dataGridView1.RowCount = 100000; // 大量数据
+
+private void dataGridView1_CellValueNeeded(object sender, DataGridViewCellValueEventArgs e)
+{
+    // 只在需要时加载数据
+    e.Value = GetDataForCell(e.RowIndex, e.ColumnIndex);
+}
+```
+
+#### 11.2.4 事件处理优化
+
+```csharp
+// 及时移除不需要的事件处理程序
+private void Form_Load(object sender, EventArgs e)
+{
+    button1.Click += Button1_Click;
+}
+
+private void Form_FormClosing(object sender, FormClosingEventArgs e)
+{
+    button1.Click -= Button1_Click; // 防止内存泄漏
+}
+```
 
 ### 11.3 用户体验设计
 
-- 提供操作反馈
-- 添加快捷键支持
+#### 11.3.1 操作反馈
+
+```csharp
+// 提供视觉反馈
+private async void btnProcess_Click(object sender, EventArgs e)
+{
+    // 禁用按钮，防止重复点击
+    btnProcess.Enabled = false;
+    
+    // 显示进度
+    progressBar1.Visible = true;
+    progressBar1.Style = ProgressBarStyle.Marquee;
+    lblStatus.Text = "处理中...";
+    
+    try
+    {
+        await ProcessDataAsync();
+        lblStatus.Text = "处理完成";
+    }
+    finally
+    {
+        btnProcess.Enabled = true;
+        progressBar1.Visible = false;
+    }
+}
+```
+
+#### 11.3.2 快捷键支持
+
+```csharp
+// 设置快捷键
+private void MainForm_KeyDown(object sender, KeyEventArgs e)
+{
+    // Ctrl+S 保存
+    if (e.Control && e.KeyCode == Keys.S)
+    {
+        btnSave_Click(sender, e);
+        e.Handled = true;
+    }
+    
+    // Ctrl+O 打开
+    if (e.Control && e.KeyCode == Keys.O)
+    {
+        btnOpen_Click(sender, e);
+        e.Handled = true;
+    }
+}
+
+// 在窗体属性中设置
+this.KeyPreview = true; // 允许窗体接收按键事件
+```
+
+#### 11.3.3 输入验证
+
+```csharp
+// 实时验证用户输入
+private void txtEmail_TextChanged(object sender, EventArgs e)
+{
+    string email = txtEmail.Text;
+    bool isValid = IsValidEmail(email);
+    
+    if (isValid)
+    {
+        txtEmail.BackColor = Color.White;
+        lblEmailError.Text = "";
+    }
+    else
+    {
+        txtEmail.BackColor = Color.LightPink;
+        lblEmailError.Text = "邮箱格式不正确";
+    }
+}
+
+private bool IsValidEmail(string email)
+{
+    try
+    {
+        var addr = new System.Net.Mail.MailAddress(email);
+        return addr.Address == email;
+    }
+    catch
+    {
+        return false;
+    }
+}
+```
+
+#### 11.3.4 错误提示
+
+```csharp
+// 友好的错误提示
+private async void btnSave_Click(object sender, EventArgs e)
+{
+    try
+    {
+        await SaveDataAsync();
+        MessageBox.Show("保存成功！", "提示", 
+            MessageBoxButtons.OK, MessageBoxIcon.Information);
+    }
+    catch (UnauthorizedAccessException)
+    {
+        MessageBox.Show("没有写入权限，请检查文件权限设置。", "权限错误", 
+            MessageBoxButtons.OK, MessageBoxIcon.Warning);
+    }
+    catch (IOException ex)
+    {
+        MessageBox.Show($"文件操作失败：{ex.Message}\n\n请检查文件是否被其他程序占用。", "文件错误", 
+            MessageBoxButtons.OK, MessageBoxIcon.Error);
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show($"发生错误：{ex.Message}", "错误", 
+            MessageBoxButtons.OK, MessageBoxIcon.Error);
+    }
+}
+```
+
+### 11.4 异常处理最佳实践
+
+#### 11.4.1 分层异常处理
+
+```csharp
+// UI层：捕获并显示用户友好的错误信息
+private async void btnLoadData_Click(object sender, EventArgs e)
+{
+    try
+    {
+        var data = await _service.LoadDataAsync();
+        DisplayData(data);
+    }
+    catch (NetworkException ex)
+    {
+        MessageBox.Show("网络连接失败，请检查网络设置。", "网络错误", 
+            MessageBoxButtons.OK, MessageBoxIcon.Warning);
+    }
+    catch (DataException ex)
+    {
+        MessageBox.Show("数据加载失败，请稍后重试。", "数据错误", 
+            MessageBoxButtons.OK, MessageBoxIcon.Error);
+    }
+    catch (Exception ex)
+    {
+        // 记录详细错误日志
+        LogError(ex);
+        MessageBox.Show("发生未知错误，请联系技术支持。", "错误", 
+            MessageBoxButtons.OK, MessageBoxIcon.Error);
+    }
+}
+```
+
+#### 11.4.2 全局异常处理
+
+```csharp
+// 在Program.cs中设置全局异常处理
+static class Program
+{
+    [STAThread]
+    static void Main()
+    {
+        Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
+        
+        // 处理未捕获的异常
+        Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+        Application.ThreadException += Application_ThreadException;
+        AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+        
+        Application.Run(new MainForm());
+    }
+    
+    private static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
+    {
+        HandleException(e.Exception);
+    }
+    
+    private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+    {
+        HandleException(e.ExceptionObject as Exception);
+    }
+    
+    private static void HandleException(Exception ex)
+    {
+        // 记录错误日志
+        LogError(ex);
+        
+        // 显示错误提示
+        MessageBox.Show($"应用程序发生错误：{ex.Message}", "错误", 
+            MessageBoxButtons.OK, MessageBoxIcon.Error);
+    }
+}
+```
+
+### 11.5 资源管理
+
+#### 11.5.1 使用using语句
+
+```csharp
+// ✅ 正确：自动释放资源
+using (FileStream fs = new FileStream("file.txt", FileMode.Open))
+{
+    // 使用文件流
+}
+
+// ✅ 正确：异步using
+await using (FileStream fs = new FileStream("file.txt", FileMode.Open))
+{
+    await fs.ReadAsync(buffer, 0, buffer.Length);
+}
+```
+
+#### 11.5.2 实现IDisposable
+
+```csharp
+public class DataService : IDisposable
+{
+    private HttpClient _httpClient;
+    private bool _disposed = false;
+    
+    public DataService()
+    {
+        _httpClient = new HttpClient();
+    }
+    
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+    
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing)
+            {
+                _httpClient?.Dispose();
+            }
+            _disposed = true;
+        }
+    }
+}
+```
+
+### 11.6 代码质量
+
+#### 11.6.1 避免魔法数字
+
+```csharp
+// ❌ 错误：使用魔法数字
+if (progressBar1.Value > 90) { }
+
+// ✅ 正确：使用常量
+private const int PROGRESS_THRESHOLD = 90;
+if (progressBar1.Value > PROGRESS_THRESHOLD) { }
+```
+
+#### 11.6.2 单一职责原则
+
+```csharp
+// ❌ 错误：方法职责过多
+private void ProcessData()
+{
+    // 加载数据
+    // 处理数据
+    // 保存数据
+    // 更新UI
+}
+
+// ✅ 正确：职责分离
+private async void btnProcess_Click(object sender, EventArgs e)
+{
+    var data = await LoadDataAsync();
+    var processed = await ProcessDataAsync(data);
+    await SaveDataAsync(processed);
+    UpdateUI(processed);
+}
+```
+
+#### 11.6.3 代码注释
+
+```csharp
+/// <summary>
+/// 异步加载用户数据
+/// </summary>
+/// <param name="userId">用户ID</param>
+/// <returns>用户信息</returns>
+private async Task<User> LoadUserAsync(int userId)
+{
+    // 实现代码
+}
+```
+
+### 11.7 安全性
+
+#### 11.7.1 输入验证
+
+```csharp
+// 验证用户输入
+private bool ValidateInput(string input)
+{
+    if (string.IsNullOrWhiteSpace(input))
+    {
+        MessageBox.Show("输入不能为空", "验证错误", 
+            MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        return false;
+    }
+    
+    if (input.Length > 100)
+    {
+        MessageBox.Show("输入长度不能超过100个字符", "验证错误", 
+            MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        return false;
+    }
+    
+    return true;
+}
+```
+
+#### 11.7.2 敏感信息处理
+
+```csharp
+// 不要在代码中硬编码敏感信息
+// ❌ 错误
+string connectionString = "Server=localhost;User=admin;Password=123456";
+
+// ✅ 正确：使用配置文件或加密存储
+string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
+```
 - 使用适当的图标和颜色
 - 实现表单验证和错误提示
 

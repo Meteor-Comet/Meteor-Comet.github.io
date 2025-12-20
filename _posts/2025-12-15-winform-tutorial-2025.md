@@ -6557,6 +6557,1675 @@ private void checkBoxChild_CheckedChanged(object sender, EventArgs e)
 }
 ```
 
+## 18. WinForm Items 集合控件完整指南
+
+### 18.1 Items 集合控件文件树结构
+
+WinForm 中涉及 Items 集合的控件及其层次结构如下：
+
+```
+WinForm Items 集合控件
+│
+├── ComboBox (下拉组合框)
+│   └── Items (ComboBox.ObjectCollection)
+│       ├── 添加项: Items.Add(item)
+│       ├── 批量添加: Items.AddRange(items[])
+│       ├── 移除项: Items.Remove(item) / Items.RemoveAt(index)
+│       ├── 清空: Items.Clear()
+│       ├── 查询: Items.Contains(item) / Items.IndexOf(item)
+│       └── 访问: Items[index] / SelectedItem
+│
+├── ListBox (列表框)
+│   └── Items (ListBox.ObjectCollection)
+│       ├── 添加项: Items.Add(item)
+│       ├── 批量添加: Items.AddRange(items[])
+│       ├── 移除项: Items.Remove(item) / Items.RemoveAt(index)
+│       ├── 清空: Items.Clear()
+│       ├── 查询: Items.Contains(item) / Items.IndexOf(item)
+│       ├── 查找: FindString(text) / FindStringExact(text)
+│       └── 访问: Items[index] / SelectedItem / SelectedItems
+│
+├── ListView (列表视图)
+│   ├── Items (ListViewItemCollection)
+│   │   ├── 添加项: Items.Add(item) / Items.Add(text)
+│   │   ├── 插入项: Items.Insert(index, item)
+│   │   ├── 移除项: Items.Remove(item) / Items.RemoveAt(index)
+│   │   ├── 清空: Items.Clear()
+│   │   ├── 查找: FindItemWithText(text)
+│   │   └── 访问: Items[index] / SelectedItems
+│   └── Columns (ColumnHeaderCollection)
+│       ├── 添加列: Columns.Add(text, width) / Columns.Add(columnHeader)
+│       ├── 移除列: Columns.Remove(columnHeader) / Columns.RemoveAt(index)
+│       ├── 清空: Columns.Clear()
+│       └── 访问: Columns[index] / Columns[name]
+│
+├── ToolStrip (工具栏)
+│   └── Items (ToolStripItemCollection)
+│       ├── 添加项: Items.Add(item) / Items.AddRange(items[])
+│       ├── 移除项: Items.Remove(item) / Items.RemoveAt(index)
+│       ├── 清空: Items.Clear()
+│       ├── 插入项: Items.Insert(index, item)
+│       └── 访问: Items[index] / Items[name]
+│
+├── StatusStrip (状态栏)
+│   └── Items (ToolStripItemCollection)
+│       ├── 添加项: Items.Add(item) / Items.AddRange(items[])
+│       ├── 移除项: Items.Remove(item) / Items.RemoveAt(index)
+│       ├── 清空: Items.Clear()
+│       └── 访问: Items[index] / Items[name]
+│
+├── MenuStrip (菜单栏)
+│   └── Items (ToolStripItemCollection)
+│       ├── 添加菜单项: Items.Add(menuItem)
+│       ├── 移除菜单项: Items.Remove(menuItem)
+│       └── DropDownItems (子菜单项集合)
+│           ├── 添加子项: DropDownItems.AddRange(items[])
+│           ├── 移除子项: DropDownItems.Remove(item)
+│           └── 访问: DropDownItems[index]
+│
+├── ContextMenuStrip (上下文菜单)
+│   └── Items (ToolStripItemCollection)
+│       ├── 添加项: Items.Add(item) / Items.AddRange(items[])
+│       ├── 移除项: Items.Remove(item)
+│       └── 访问: Items[index]
+│
+└── DataGridView (数据表格)
+    ├── Rows (DataGridViewRowCollection)
+    │   ├── 添加行: Rows.Add() / Rows.Add(values[])
+    │   ├── 插入行: Rows.Insert(index, row)
+    │   ├── 移除行: Rows.Remove(row) / Rows.RemoveAt(index)
+    │   ├── 清空: Rows.Clear()
+    │   └── 访问: Rows[index] / SelectedRows
+    └── Columns (DataGridViewColumnCollection)
+        ├── 添加列: Columns.Add(column) / Columns.Add(name, headerText)
+        ├── 移除列: Columns.Remove(column) / Columns.RemoveAt(index)
+        ├── 清空: Columns.Clear()
+        └── 访问: Columns[index] / Columns[name]
+```
+
+### 18.2 ComboBox Items 集合操作
+
+#### 18.2.1 文件树结构
+
+```
+ComboBox
+└── Items (ComboBox.ObjectCollection)
+    ├── 单行数据项 (string, object)
+    └── 操作: Add, AddRange, Remove, RemoveAt, Clear, Contains, IndexOf
+```
+
+#### 18.2.2 行列增加方式
+
+```csharp
+// ========== 添加项（行）的方式 ==========
+
+// 方式1: 单个添加字符串
+comboBox1.Items.Add("选项1");
+comboBox1.Items.Add("选项2");
+
+// 方式2: 批量添加数组
+string[] items = { "红色", "蓝色", "绿色", "黄色", "紫色" };
+comboBox1.Items.AddRange(items);
+
+// 方式3: 添加自定义对象
+comboBox1.Items.Add(new { ID = 1, Name = "选项A" });
+comboBox1.DisplayMember = "Name";  // 显示字段
+comboBox1.ValueMember = "ID";      // 值字段
+
+// 方式4: 添加对象列表
+List<Person> persons = new List<Person>
+{
+    new Person { Id = 1, Name = "张三" },
+    new Person { Id = 2, Name = "李四" }
+};
+comboBox1.DataSource = persons;  // 使用数据源绑定
+comboBox1.DisplayMember = "Name";
+comboBox1.ValueMember = "Id";
+
+// 方式5: 插入到指定位置
+comboBox1.Items.Insert(0, "新选项");  // 插入到第一个位置
+```
+
+#### 18.2.3 数据的增删改查
+
+```csharp
+// ========== 增加 (Create) ==========
+private void AddComboBoxItem()
+{
+    // 添加单个项
+    comboBox1.Items.Add("新选项");
+    
+    // 批量添加
+    comboBox1.Items.AddRange(new object[] { "选项A", "选项B", "选项C" });
+    
+    // 添加对象
+    comboBox1.Items.Add(new { ID = 10, Name = "新项目" });
+}
+
+// ========== 查询 (Read) ==========
+private void QueryComboBoxItems()
+{
+    // 获取项总数
+    int count = comboBox1.Items.Count;
+    
+    // 遍历所有项
+    foreach (object item in comboBox1.Items)
+    {
+        Console.WriteLine(item.ToString());
+    }
+    
+    // 检查是否包含指定项
+    bool exists = comboBox1.Items.Contains("选项1");
+    
+    // 获取项的索引
+    int index = comboBox1.Items.IndexOf("选项1");
+    
+    // 获取指定索引的项
+    if (index >= 0 && index < comboBox1.Items.Count)
+    {
+        object item = comboBox1.Items[index];
+    }
+    
+    // 获取当前选中项
+    object selectedItem = comboBox1.SelectedItem;
+    int selectedIndex = comboBox1.SelectedIndex;
+}
+
+// ========== 修改 (Update) ==========
+private void UpdateComboBoxItem()
+{
+    // ComboBox.Items 不支持直接修改，需要先移除再添加
+    int index = comboBox1.Items.IndexOf("旧选项");
+    if (index >= 0)
+    {
+        comboBox1.Items.RemoveAt(index);
+        comboBox1.Items.Insert(index, "新选项");
+    }
+    
+    // 或者使用替换方式
+    if (comboBox1.Items.Contains("旧选项"))
+    {
+        comboBox1.Items[comboBox1.Items.IndexOf("旧选项")] = "新选项";
+    }
+}
+
+// ========== 删除 (Delete) ==========
+private void DeleteComboBoxItem()
+{
+    // 方式1: 根据对象移除
+    comboBox1.Items.Remove("选项1");
+    
+    // 方式2: 根据索引移除
+    if (comboBox1.Items.Count > 0)
+    {
+        comboBox1.Items.RemoveAt(0);  // 移除第一项
+    }
+    
+    // 方式3: 清空所有项
+    comboBox1.Items.Clear();
+    
+    // 方式4: 移除当前选中项
+    if (comboBox1.SelectedIndex >= 0)
+    {
+        comboBox1.Items.RemoveAt(comboBox1.SelectedIndex);
+    }
+}
+```
+
+### 18.3 ListBox Items 集合操作
+
+#### 18.3.1 文件树结构
+
+```
+ListBox
+└── Items (ListBox.ObjectCollection)
+    ├── 单行数据项 (string, object)
+    ├── SelectedItems (多选集合)
+    └── 操作: Add, AddRange, Remove, RemoveAt, Clear, Contains, IndexOf, SetSelected
+```
+
+#### 18.3.2 行列增加方式
+
+```csharp
+// ========== 添加项（行）的方式 ==========
+
+// 方式1: 单个添加
+listBox1.Items.Add("项目1");
+listBox1.Items.Add("项目2");
+
+// 方式2: 批量添加数组
+listBox1.Items.AddRange(new object[] { "项目1", "项目2", "项目3", "项目4", "项目5" });
+
+// 方式3: 添加对象
+listBox1.Items.Add(new Person { Id = 1, Name = "张三" });
+
+// 方式4: 使用数据源绑定
+List<string> items = new List<string> { "选项A", "选项B", "选项C" };
+listBox1.DataSource = items;
+
+// 方式5: 插入到指定位置
+listBox1.Items.Insert(0, "新项目");  // 插入到第一个位置
+```
+
+#### 18.3.3 数据的增删改查
+
+```csharp
+// ========== 增加 (Create) ==========
+private void AddListBoxItem()
+{
+    // 添加单个项
+    listBox1.Items.Add("新项目");
+    
+    // 批量添加
+    listBox1.Items.AddRange(new object[] { "项目A", "项目B", "项目C" });
+    
+    // 插入到指定位置
+    listBox1.Items.Insert(0, "插入的项目");
+}
+
+// ========== 查询 (Read) ==========
+private void QueryListBoxItems()
+{
+    // 获取项总数
+    int count = listBox1.Items.Count;
+    
+    // 遍历所有项
+    for (int i = 0; i < listBox1.Items.Count; i++)
+    {
+        Console.WriteLine($"索引 {i}: {listBox1.Items[i]}");
+    }
+    
+    // 使用 foreach 遍历
+    foreach (object item in listBox1.Items)
+    {
+        Console.WriteLine(item.ToString());
+    }
+    
+    // 检查是否包含指定项
+    bool exists = listBox1.Items.Contains("项目1");
+    
+    // 获取项的索引
+    int index = listBox1.Items.IndexOf("项目1");
+    
+    // 查找包含指定文本的项
+    int foundIndex = listBox1.FindString("项目");
+    int foundExactIndex = listBox1.FindStringExact("项目1");
+    
+    // 获取当前选中项（单选模式）
+    if (listBox1.SelectedIndex >= 0)
+    {
+        object selectedItem = listBox1.SelectedItem;
+        int selectedIndex = listBox1.SelectedIndex;
+    }
+    
+    // 获取所有选中项（多选模式）
+    if (listBox1.SelectionMode == SelectionMode.MultiSimple || 
+        listBox1.SelectionMode == SelectionMode.MultiExtended)
+    {
+        foreach (object item in listBox1.SelectedItems)
+        {
+            Console.WriteLine($"选中项: {item}");
+        }
+        
+        foreach (int index in listBox1.SelectedIndices)
+        {
+            Console.WriteLine($"选中索引: {index}");
+        }
+    }
+}
+
+// ========== 修改 (Update) ==========
+private void UpdateListBoxItem()
+{
+    // ListBox.Items 不支持直接修改，需要先移除再添加
+    int index = listBox1.Items.IndexOf("旧项目");
+    if (index >= 0)
+    {
+        listBox1.Items.RemoveAt(index);
+        listBox1.Items.Insert(index, "新项目");
+    }
+    
+    // 或者直接替换
+    if (listBox1.Items.Contains("旧项目"))
+    {
+        int idx = listBox1.Items.IndexOf("旧项目");
+        listBox1.Items[idx] = "新项目";
+    }
+}
+
+// ========== 删除 (Delete) ==========
+private void DeleteListBoxItem()
+{
+    // 方式1: 根据对象移除
+    listBox1.Items.Remove("项目1");
+    
+    // 方式2: 根据索引移除
+    if (listBox1.Items.Count > 0)
+    {
+        listBox1.Items.RemoveAt(0);
+    }
+    
+    // 方式3: 清空所有项
+    listBox1.Items.Clear();
+    
+    // 方式4: 移除所有选中项
+    if (listBox1.SelectedItems.Count > 0)
+    {
+        // 从后往前删除，避免索引变化
+        for (int i = listBox1.SelectedIndices.Count - 1; i >= 0; i--)
+        {
+            int index = listBox1.SelectedIndices[i];
+            listBox1.Items.RemoveAt(index);
+        }
+    }
+    
+    // 方式5: 取消选中所有项
+    listBox1.ClearSelected();
+}
+```
+
+### 18.4 ListView Items 集合操作
+
+#### 18.4.1 文件树结构
+
+```
+ListView
+├── Items (ListViewItemCollection)
+│   ├── ListViewItem (行)
+│   │   └── SubItems (ListViewSubItemCollection) - 子项（列数据）
+│   │       ├── SubItems[0] (主项文本)
+│   │       ├── SubItems[1] (第1列)
+│   │       ├── SubItems[2] (第2列)
+│   │       └── ...
+│   └── 操作: Add, Insert, Remove, RemoveAt, Clear, FindItemWithText
+└── Columns (ColumnHeaderCollection)
+    ├── ColumnHeader (列头)
+    └── 操作: Add, Remove, RemoveAt, Clear
+```
+
+#### 18.4.2 行列增加方式
+
+```csharp
+// ========== 添加列（Columns）的方式 ==========
+
+// 方式1: 添加简单列（文本和宽度）
+listView1.Columns.Add("列名1", 100);
+listView1.Columns.Add("列名2", 150);
+listView1.Columns.Add("列名3", 200);
+
+// 方式2: 添加带对齐方式的列
+ColumnHeader col1 = new ColumnHeader();
+col1.Text = "ID";
+col1.Width = 50;
+col1.TextAlign = HorizontalAlignment.Center;
+listView1.Columns.Add(col1);
+
+// 方式3: 批量添加列
+listView1.Columns.AddRange(new ColumnHeader[]
+{
+    new ColumnHeader { Text = "ID", Width = 50 },
+    new ColumnHeader { Text = "名称", Width = 100 },
+    new ColumnHeader { Text = "描述", Width = 200 },
+    new ColumnHeader { Text = "日期", Width = 120 }
+});
+
+// ========== 添加行（Items）的方式 ==========
+
+// 方式1: 添加简单项（只有主文本）
+listView1.Items.Add("项目1");
+listView1.Items.Add("项目2");
+
+// 方式2: 创建 ListViewItem 并添加子项
+ListViewItem item1 = new ListViewItem("主文本");
+item1.SubItems.Add("子项1");
+item1.SubItems.Add("子项2");
+item1.SubItems.Add("子项3");
+listView1.Items.Add(item1);
+
+// 方式3: 使用字符串数组创建项
+ListViewItem item2 = new ListViewItem(new string[] { "ID", "名称", "描述", "日期" });
+listView1.Items.Add(item2);
+
+// 方式4: 批量添加
+for (int i = 1; i <= 10; i++)
+{
+    ListViewItem item = new ListViewItem(i.ToString());
+    item.SubItems.Add("项目 " + i);
+    item.SubItems.Add("这是项目 " + i + " 的详细描述");
+    item.SubItems.Add(DateTime.Now.AddDays(-i).ToShortDateString());
+    listView1.Items.Add(item);
+}
+
+// 方式5: 插入到指定位置
+ListViewItem newItem = new ListViewItem("新项目");
+newItem.SubItems.Add("子项1");
+listView1.Items.Insert(0, newItem);  // 插入到第一个位置
+```
+
+#### 18.4.3 数据的增删改查
+
+```csharp
+// ========== 增加 (Create) ==========
+private void AddListViewItem()
+{
+    // 添加新行
+    ListViewItem item = new ListViewItem("主文本");
+    item.SubItems.Add("列1数据");
+    item.SubItems.Add("列2数据");
+    item.SubItems.Add("列3数据");
+    listView1.Items.Add(item);
+    
+    // 添加新列
+    listView1.Columns.Add("新列", 100);
+    
+    // 为新列添加数据到现有行
+    foreach (ListViewItem row in listView1.Items)
+    {
+        row.SubItems.Add("新列数据");
+    }
+}
+
+// ========== 查询 (Read) ==========
+private void QueryListViewItems()
+{
+    // 获取行数
+    int rowCount = listView1.Items.Count;
+    
+    // 获取列数
+    int columnCount = listView1.Columns.Count;
+    
+    // 遍历所有行
+    foreach (ListViewItem item in listView1.Items)
+    {
+        // 获取主文本（第一列）
+        string mainText = item.Text;
+        
+        // 遍历所有子项（列）
+        for (int i = 0; i < item.SubItems.Count; i++)
+        {
+            string subItemText = item.SubItems[i].Text;
+            Console.WriteLine($"行 {item.Index}, 列 {i}: {subItemText}");
+        }
+    }
+    
+    // 查找包含指定文本的项
+    ListViewItem foundItem = listView1.FindItemWithText("搜索文本", false, 0, true);
+    
+    // 获取指定行列的数据
+    if (listView1.Items.Count > 0 && listView1.Items[0].SubItems.Count > 1)
+    {
+        string cellValue = listView1.Items[0].SubItems[1].Text;
+    }
+    
+    // 获取选中项
+    if (listView1.SelectedItems.Count > 0)
+    {
+        ListViewItem selectedItem = listView1.SelectedItems[0];
+        string selectedText = selectedItem.Text;
+        
+        // 获取选中项的所有列数据
+        foreach (ListViewItem.ListViewSubItem subItem in selectedItem.SubItems)
+        {
+            Console.WriteLine(subItem.Text);
+        }
+    }
+    
+    // 获取所有选中项
+    foreach (ListViewItem item in listView1.SelectedItems)
+    {
+        Console.WriteLine($"选中项: {item.Text}");
+    }
+}
+
+// ========== 修改 (Update) ==========
+private void UpdateListViewItem()
+{
+    // 修改指定行的数据
+    if (listView1.Items.Count > 0)
+    {
+        ListViewItem item = listView1.Items[0];
+        
+        // 修改主文本
+        item.Text = "新主文本";
+        
+        // 修改子项（列数据）
+        if (item.SubItems.Count > 1)
+        {
+            item.SubItems[1].Text = "新列1数据";
+        }
+        else
+        {
+            item.SubItems.Add("新列1数据");
+        }
+        
+        // 修改指定列的数据
+        int columnIndex = 2;  // 第3列（索引从0开始）
+        if (item.SubItems.Count > columnIndex)
+        {
+            item.SubItems[columnIndex].Text = "更新的数据";
+        }
+    }
+    
+    // 修改列头
+    if (listView1.Columns.Count > 0)
+    {
+        listView1.Columns[0].Text = "新列名";
+        listView1.Columns[0].Width = 150;
+    }
+}
+
+// ========== 删除 (Delete) ==========
+private void DeleteListViewItem()
+{
+    // 方式1: 移除指定项
+    if (listView1.Items.Count > 0)
+    {
+        listView1.Items.Remove(listView1.Items[0]);
+    }
+    
+    // 方式2: 根据索引移除
+    if (listView1.Items.Count > 2)
+    {
+        listView1.Items.RemoveAt(1);  // 移除第二项
+    }
+    
+    // 方式3: 移除选中项
+    if (listView1.SelectedItems.Count > 0)
+    {
+        // 从后往前删除，避免索引变化
+        for (int i = listView1.SelectedItems.Count - 1; i >= 0; i--)
+        {
+            listView1.Items.Remove(listView1.SelectedItems[i]);
+        }
+    }
+    
+    // 方式4: 清空所有项
+    listView1.Items.Clear();
+    
+    // 方式5: 移除指定列
+    if (listView1.Columns.Count > 0)
+    {
+        listView1.Columns.RemoveAt(0);  // 移除第一列
+        
+        // 同时移除所有行中对应的子项
+        foreach (ListViewItem item in listView1.Items)
+        {
+            if (item.SubItems.Count > 0)
+            {
+                item.SubItems.RemoveAt(0);
+            }
+        }
+    }
+    
+    // 方式6: 清空所有列
+    listView1.Columns.Clear();
+    listView1.Items.Clear();
+}
+```
+
+### 18.5 ToolStrip Items 集合操作
+
+#### 18.5.1 文件树结构
+
+```
+ToolStrip
+└── Items (ToolStripItemCollection)
+    ├── ToolStripButton (按钮)
+    ├── ToolStripLabel (标签)
+    ├── ToolStripTextBox (文本框)
+    ├── ToolStripComboBox (下拉框)
+    ├── ToolStripSeparator (分隔符)
+    └── 操作: Add, AddRange, Insert, Remove, RemoveAt, Clear
+```
+
+#### 18.5.2 行列增加方式
+
+```csharp
+// ========== 添加项的方式 ==========
+
+// 方式1: 添加按钮
+ToolStripButton newButton = new ToolStripButton("新建");
+newButton.Image = Properties.Resources.NewIcon;
+newButton.Click += NewButton_Click;
+toolStrip1.Items.Add(newButton);
+
+// 方式2: 批量添加
+ToolStripButton openButton = new ToolStripButton("打开");
+ToolStripButton saveButton = new ToolStripButton("保存");
+ToolStripSeparator separator = new ToolStripSeparator();
+ToolStripButton exitButton = new ToolStripButton("退出");
+
+toolStrip1.Items.AddRange(new ToolStripItem[] 
+{ 
+    openButton, saveButton, separator, exitButton 
+});
+
+// 方式3: 添加文本框
+ToolStripTextBox searchBox = new ToolStripTextBox("searchBox");
+searchBox.Width = 200;
+toolStrip1.Items.Add(searchBox);
+
+// 方式4: 添加下拉框
+ToolStripComboBox fontComboBox = new ToolStripComboBox("fontComboBox");
+fontComboBox.Items.AddRange(new string[] { "宋体", "微软雅黑", "Arial" });
+toolStrip1.Items.Add(fontComboBox);
+
+// 方式5: 插入到指定位置
+ToolStripButton insertButton = new ToolStripButton("插入按钮");
+toolStrip1.Items.Insert(0, insertButton);  // 插入到第一个位置
+```
+
+#### 18.5.3 数据的增删改查
+
+```csharp
+// ========== 增加 (Create) ==========
+private void AddToolStripItem()
+{
+    // 添加按钮
+    ToolStripButton btn = new ToolStripButton("新按钮");
+    toolStrip1.Items.Add(btn);
+    
+    // 添加分隔符
+    toolStrip1.Items.Add(new ToolStripSeparator());
+    
+    // 添加标签
+    ToolStripLabel label = new ToolStripLabel("状态: 就绪");
+    toolStrip1.Items.Add(label);
+}
+
+// ========== 查询 (Read) ==========
+private void QueryToolStripItems()
+{
+    // 获取项总数
+    int count = toolStrip1.Items.Count;
+    
+    // 遍历所有项
+    foreach (ToolStripItem item in toolStrip1.Items)
+    {
+        Console.WriteLine($"项: {item.Text}, 类型: {item.GetType().Name}");
+    }
+    
+    // 根据名称查找项
+    ToolStripItem item = toolStrip1.Items["buttonName"];
+    
+    // 根据索引访问
+    if (toolStrip1.Items.Count > 0)
+    {
+        ToolStripItem firstItem = toolStrip1.Items[0];
+    }
+    
+    // 查找特定类型的项
+    var buttons = toolStrip1.Items.OfType<ToolStripButton>();
+    foreach (ToolStripButton btn in buttons)
+    {
+        Console.WriteLine($"按钮: {btn.Text}");
+    }
+}
+
+// ========== 修改 (Update) ==========
+private void UpdateToolStripItem()
+{
+    // 修改项的属性
+    ToolStripItem item = toolStrip1.Items["buttonName"];
+    if (item != null)
+    {
+        item.Text = "新文本";
+        item.Enabled = true;
+        item.Visible = true;
+    }
+    
+    // 修改按钮的显示样式
+    var button = toolStrip1.Items.OfType<ToolStripButton>().FirstOrDefault();
+    if (button != null)
+    {
+        button.DisplayStyle = ToolStripItemDisplayStyle.ImageAndText;
+    }
+}
+
+// ========== 删除 (Delete) ==========
+private void DeleteToolStripItem()
+{
+    // 方式1: 根据对象移除
+    ToolStripItem item = toolStrip1.Items["buttonName"];
+    if (item != null)
+    {
+        toolStrip1.Items.Remove(item);
+    }
+    
+    // 方式2: 根据索引移除
+    if (toolStrip1.Items.Count > 0)
+    {
+        toolStrip1.Items.RemoveAt(0);
+    }
+    
+    // 方式3: 移除所有按钮
+    var buttons = toolStrip1.Items.OfType<ToolStripButton>().ToList();
+    foreach (var btn in buttons)
+    {
+        toolStrip1.Items.Remove(btn);
+    }
+    
+    // 方式4: 清空所有项
+    toolStrip1.Items.Clear();
+}
+```
+
+### 18.6 StatusStrip Items 集合操作
+
+#### 18.6.1 文件树结构
+
+```
+StatusStrip
+└── Items (ToolStripItemCollection)
+    ├── ToolStripStatusLabel (状态标签)
+    ├── ToolStripProgressBar (进度条)
+    ├── ToolStripDropDownButton (下拉按钮)
+    ├── ToolStripSplitButton (分割按钮)
+    └── 操作: Add, AddRange, Remove, RemoveAt, Clear
+```
+
+#### 18.6.2 行列增加方式
+
+```csharp
+// ========== 添加项的方式 ==========
+
+// 方式1: 添加状态标签
+ToolStripStatusLabel statusLabel = new ToolStripStatusLabel("就绪");
+statusStrip1.Items.Add(statusLabel);
+
+// 方式2: 添加进度条
+ToolStripProgressBar progressBar = new ToolStripProgressBar("progressBar");
+progressBar.Style = ProgressBarStyle.Continuous;
+statusStrip1.Items.Add(progressBar);
+
+// 方式3: 批量添加
+ToolStripStatusLabel label1 = new ToolStripStatusLabel("状态: 正常");
+ToolStripStatusLabel label2 = new ToolStripStatusLabel("连接数: 10");
+label2.Spring = true;  // 自动填充剩余空间
+label2.Alignment = ToolStripItemAlignment.Right;
+
+statusStrip1.Items.AddRange(new ToolStripItem[] { label1, label2 });
+
+// 方式4: 添加带下拉菜单的按钮
+ToolStripDropDownButton statusButton = new ToolStripDropDownButton("状态");
+ToolStripMenuItem onlineItem = new ToolStripMenuItem("在线");
+ToolStripMenuItem offlineItem = new ToolStripMenuItem("离线");
+statusButton.DropDownItems.AddRange(new ToolStripItem[] { onlineItem, offlineItem });
+statusStrip1.Items.Add(statusButton);
+```
+
+#### 18.6.3 数据的增删改查
+
+```csharp
+// ========== 增加 (Create) ==========
+private void AddStatusStripItem()
+{
+    ToolStripStatusLabel label = new ToolStripStatusLabel("新状态");
+    statusStrip1.Items.Add(label);
+}
+
+// ========== 查询 (Read) ==========
+private void QueryStatusStripItems()
+{
+    // 获取项总数
+    int count = statusStrip1.Items.Count;
+    
+    // 遍历所有项
+    foreach (ToolStripItem item in statusStrip1.Items)
+    {
+        Console.WriteLine($"项: {item.Text}");
+    }
+    
+    // 根据名称查找
+    ToolStripItem item = statusStrip1.Items["statusLabel"];
+    
+    // 查找所有标签
+    var labels = statusStrip1.Items.OfType<ToolStripStatusLabel>();
+    foreach (var label in labels)
+    {
+        Console.WriteLine($"标签: {label.Text}");
+    }
+}
+
+// ========== 修改 (Update) ==========
+private void UpdateStatusStripItem()
+{
+    // 更新状态标签文本
+    ToolStripStatusLabel label = statusStrip1.Items.OfType<ToolStripStatusLabel>().FirstOrDefault();
+    if (label != null)
+    {
+        label.Text = "已更新状态";
+    }
+    
+    // 更新进度条
+    ToolStripProgressBar progressBar = statusStrip1.Items.OfType<ToolStripProgressBar>().FirstOrDefault();
+    if (progressBar != null)
+    {
+        progressBar.Value = 50;
+    }
+}
+
+// ========== 删除 (Delete) ==========
+private void DeleteStatusStripItem()
+{
+    // 移除指定项
+    ToolStripItem item = statusStrip1.Items["statusLabel"];
+    if (item != null)
+    {
+        statusStrip1.Items.Remove(item);
+    }
+    
+    // 清空所有项
+    statusStrip1.Items.Clear();
+}
+```
+
+### 18.7 MenuStrip Items 集合操作
+
+#### 18.7.1 文件树结构
+
+```
+MenuStrip
+└── Items (ToolStripItemCollection)
+    └── ToolStripMenuItem (菜单项)
+        ├── Text (菜单文本)
+        ├── DropDownItems (子菜单项集合)
+        │   ├── ToolStripMenuItem (子菜单项)
+        │   ├── ToolStripSeparator (分隔符)
+        │   └── ...
+        └── 操作: Items.Add, DropDownItems.Add, DropDownItems.AddRange
+```
+
+#### 18.7.2 行列增加方式
+
+```csharp
+// ========== 添加主菜单项的方式 ==========
+
+// 方式1: 创建主菜单
+MenuStrip menuStrip = new MenuStrip();
+this.MainMenuStrip = menuStrip;
+this.Controls.Add(menuStrip);
+
+// 方式2: 添加主菜单项
+ToolStripMenuItem fileMenu = new ToolStripMenuItem("文件");
+menuStrip.Items.Add(fileMenu);
+
+// 方式3: 添加子菜单项
+ToolStripMenuItem newItem = new ToolStripMenuItem("新建");
+ToolStripMenuItem openItem = new ToolStripMenuItem("打开");
+ToolStripMenuItem saveItem = new ToolStripMenuItem("保存");
+ToolStripSeparator separator = new ToolStripSeparator();
+ToolStripMenuItem exitItem = new ToolStripMenuItem("退出");
+
+fileMenu.DropDownItems.AddRange(new ToolStripItem[] 
+{ 
+    newItem, openItem, saveItem, separator, exitItem 
+});
+
+// 方式4: 添加多级子菜单
+ToolStripMenuItem recentFilesMenu = new ToolStripMenuItem("最近文件");
+ToolStripMenuItem file1 = new ToolStripMenuItem("文件1.txt");
+ToolStripMenuItem file2 = new ToolStripMenuItem("文件2.txt");
+recentFilesMenu.DropDownItems.AddRange(new ToolStripItem[] { file1, file2 });
+fileMenu.DropDownItems.Insert(3, recentFilesMenu);
+
+// 方式5: 批量创建菜单结构
+private void CreateMenuStructure()
+{
+    // 文件菜单
+    ToolStripMenuItem fileMenu = new ToolStripMenuItem("文件");
+    fileMenu.DropDownItems.Add("新建", null, NewFile_Click, Keys.Control | Keys.N);
+    fileMenu.DropDownItems.Add("打开", null, OpenFile_Click, Keys.Control | Keys.O);
+    fileMenu.DropDownItems.Add("保存", null, SaveFile_Click, Keys.Control | Keys.S);
+    fileMenu.DropDownItems.Add(new ToolStripSeparator());
+    fileMenu.DropDownItems.Add("退出", null, Exit_Click);
+    menuStrip.Items.Add(fileMenu);
+    
+    // 编辑菜单
+    ToolStripMenuItem editMenu = new ToolStripMenuItem("编辑");
+    editMenu.DropDownItems.Add("撤销", null, Undo_Click, Keys.Control | Keys.Z);
+    editMenu.DropDownItems.Add("重做", null, Redo_Click, Keys.Control | Keys.Y);
+    menuStrip.Items.Add(editMenu);
+}
+```
+
+#### 18.7.3 数据的增删改查
+
+```csharp
+// ========== 增加 (Create) ==========
+private void AddMenuStripItem()
+{
+    // 添加主菜单项
+    ToolStripMenuItem newMenu = new ToolStripMenuItem("新菜单");
+    menuStrip.Items.Add(newMenu);
+    
+    // 添加子菜单项
+    ToolStripMenuItem subItem = new ToolStripMenuItem("子项");
+    newMenu.DropDownItems.Add(subItem);
+    
+    // 插入到指定位置
+    ToolStripMenuItem insertMenu = new ToolStripMenuItem("插入菜单");
+    menuStrip.Items.Insert(1, insertMenu);
+}
+
+// ========== 查询 (Read) ==========
+private void QueryMenuStripItems()
+{
+    // 遍历所有主菜单项
+    foreach (ToolStripMenuItem menuItem in menuStrip.Items)
+    {
+        Console.WriteLine($"主菜单: {menuItem.Text}");
+        
+        // 遍历子菜单项
+        foreach (ToolStripItem subItem in menuItem.DropDownItems)
+        {
+            if (subItem is ToolStripMenuItem)
+            {
+                Console.WriteLine($"  子菜单: {subItem.Text}");
+            }
+            else if (subItem is ToolStripSeparator)
+            {
+                Console.WriteLine($"  分隔符");
+            }
+        }
+    }
+    
+    // 根据文本查找菜单项
+    ToolStripMenuItem foundMenu = menuStrip.Items.OfType<ToolStripMenuItem>()
+        .FirstOrDefault(m => m.Text == "文件");
+    
+    if (foundMenu != null)
+    {
+        ToolStripMenuItem foundSubItem = foundMenu.DropDownItems.OfType<ToolStripMenuItem>()
+            .FirstOrDefault(s => s.Text == "新建");
+    }
+}
+
+// ========== 修改 (Update) ==========
+private void UpdateMenuStripItem()
+{
+    // 修改菜单项文本
+    ToolStripMenuItem menuItem = menuStrip.Items["文件"] as ToolStripMenuItem;
+    if (menuItem != null)
+    {
+        menuItem.Text = "文件(F)";
+    }
+    
+    // 修改子菜单项
+    ToolStripMenuItem fileMenu = menuStrip.Items.OfType<ToolStripMenuItem>()
+        .FirstOrDefault(m => m.Text == "文件");
+    if (fileMenu != null)
+    {
+        ToolStripMenuItem newItem = fileMenu.DropDownItems.OfType<ToolStripMenuItem>()
+            .FirstOrDefault(s => s.Text == "新建");
+        if (newItem != null)
+        {
+            newItem.Text = "新建文件";
+            newItem.ShortcutKeys = Keys.Control | Keys.N;
+        }
+    }
+    
+    // 启用/禁用菜单项
+    menuItem.Enabled = true;
+    menuItem.Visible = true;
+}
+
+// ========== 删除 (Delete) ==========
+private void DeleteMenuStripItem()
+{
+    // 移除主菜单项
+    ToolStripMenuItem menuItem = menuStrip.Items["文件"] as ToolStripMenuItem;
+    if (menuItem != null)
+    {
+        menuStrip.Items.Remove(menuItem);
+    }
+    
+    // 移除子菜单项
+    ToolStripMenuItem fileMenu = menuStrip.Items.OfType<ToolStripMenuItem>()
+        .FirstOrDefault(m => m.Text == "文件");
+    if (fileMenu != null)
+    {
+        ToolStripMenuItem subItem = fileMenu.DropDownItems.OfType<ToolStripMenuItem>()
+            .FirstOrDefault(s => s.Text == "新建");
+        if (subItem != null)
+        {
+            fileMenu.DropDownItems.Remove(subItem);
+        }
+    }
+    
+    // 清空所有菜单
+    menuStrip.Items.Clear();
+}
+```
+
+### 18.8 ContextMenuStrip Items 集合操作
+
+#### 18.8.1 文件树结构
+
+```
+ContextMenuStrip
+└── Items (ToolStripItemCollection)
+    ├── ToolStripMenuItem (菜单项)
+    ├── ToolStripSeparator (分隔符)
+    └── 操作: Add, AddRange, Remove, RemoveAt, Clear
+```
+
+#### 18.8.2 行列增加方式
+
+```csharp
+// ========== 添加项的方式 ==========
+
+// 方式1: 创建上下文菜单
+ContextMenuStrip contextMenu = new ContextMenuStrip();
+
+// 方式2: 添加菜单项
+ToolStripMenuItem item1 = new ToolStripMenuItem("复制");
+ToolStripMenuItem item2 = new ToolStripMenuItem("粘贴");
+ToolStripMenuItem item3 = new ToolStripMenuItem("删除");
+ToolStripSeparator separator = new ToolStripSeparator();
+ToolStripMenuItem item4 = new ToolStripMenuItem("属性");
+
+contextMenu.Items.AddRange(new ToolStripItem[] 
+{ 
+    item1, item2, separator, item3, separator, item4 
+});
+
+// 方式3: 绑定到控件
+textBox1.ContextMenuStrip = contextMenu;
+listBox1.ContextMenuStrip = contextMenu;
+
+// 方式4: 动态创建上下文菜单
+private void CreateDynamicContextMenu(object sender, MouseEventArgs e)
+{
+    if (e.Button == MouseButtons.Right)
+    {
+        ContextMenuStrip contextMenu = new ContextMenuStrip();
+        
+        ToolStripMenuItem copyItem = new ToolStripMenuItem("复制");
+        copyItem.Click += CopyItem_Click;
+        
+        ToolStripMenuItem pasteItem = new ToolStripMenuItem("粘贴");
+        pasteItem.Click += PasteItem_Click;
+        
+        contextMenu.Items.AddRange(new ToolStripItem[] { copyItem, pasteItem });
+        contextMenu.Show(sender as Control, e.Location);
+    }
+}
+```
+
+#### 18.8.3 数据的增删改查
+
+```csharp
+// ========== 增加 (Create) ==========
+private void AddContextMenuStripItem()
+{
+    ToolStripMenuItem newItem = new ToolStripMenuItem("新项");
+    contextMenuStrip1.Items.Add(newItem);
+}
+
+// ========== 查询 (Read) ==========
+private void QueryContextMenuStripItems()
+{
+    foreach (ToolStripItem item in contextMenuStrip1.Items)
+    {
+        Console.WriteLine($"项: {item.Text}");
+    }
+}
+
+// ========== 修改 (Update) ==========
+private void UpdateContextMenuStripItem()
+{
+    ToolStripMenuItem item = contextMenuStrip1.Items["copyItem"] as ToolStripMenuItem;
+    if (item != null)
+    {
+        item.Text = "复制文本";
+    }
+}
+
+// ========== 删除 (Delete) ==========
+private void DeleteContextMenuStripItem()
+{
+    ToolStripItem item = contextMenuStrip1.Items["copyItem"];
+    if (item != null)
+    {
+        contextMenuStrip1.Items.Remove(item);
+    }
+    
+    contextMenuStrip1.Items.Clear();
+}
+```
+
+### 18.9 DataGridView Rows 和 Columns 集合操作
+
+#### 18.9.1 文件树结构
+
+```
+DataGridView
+├── Rows (DataGridViewRowCollection)
+│   ├── DataGridViewRow (行)
+│   │   └── Cells (DataGridViewCellCollection)
+│   │       ├── Cells[0] (第1列单元格)
+│   │       ├── Cells[1] (第2列单元格)
+│   │       └── ...
+│   └── 操作: Add, Insert, Remove, RemoveAt, Clear
+└── Columns (DataGridViewColumnCollection)
+    ├── DataGridViewTextBoxColumn (文本列)
+    ├── DataGridViewComboBoxColumn (下拉列)
+    ├── DataGridViewCheckBoxColumn (复选框列)
+    ├── DataGridViewButtonColumn (按钮列)
+    └── 操作: Add, Insert, Remove, RemoveAt, Clear
+```
+
+#### 18.9.2 行列增加方式
+
+```csharp
+// ========== 添加列（Columns）的方式 ==========
+
+// 方式1: 添加文本列
+DataGridViewTextBoxColumn idColumn = new DataGridViewTextBoxColumn();
+idColumn.Name = "Id";
+idColumn.HeaderText = "ID";
+idColumn.Width = 50;
+idColumn.ReadOnly = true;
+dataGridView1.Columns.Add(idColumn);
+
+// 方式2: 使用简化方式添加列
+dataGridView1.Columns.Add("Name", "名称");
+dataGridView1.Columns["Name"].Width = 150;
+
+// 方式3: 添加下拉框列
+DataGridViewComboBoxColumn genderColumn = new DataGridViewComboBoxColumn();
+genderColumn.Name = "Gender";
+genderColumn.HeaderText = "性别";
+genderColumn.Items.AddRange(new string[] { "男", "女" });
+dataGridView1.Columns.Add(genderColumn);
+
+// 方式4: 添加复选框列
+DataGridViewCheckBoxColumn activeColumn = new DataGridViewCheckBoxColumn();
+activeColumn.Name = "IsActive";
+activeColumn.HeaderText = "激活";
+dataGridView1.Columns.Add(activeColumn);
+
+// 方式5: 添加按钮列
+DataGridViewButtonColumn actionColumn = new DataGridViewButtonColumn();
+actionColumn.Name = "Action";
+actionColumn.HeaderText = "操作";
+actionColumn.Text = "编辑";
+actionColumn.UseColumnTextForButtonValue = true;
+dataGridView1.Columns.Add(actionColumn);
+
+// 方式6: 批量添加列
+dataGridView1.Columns.AddRange(
+    new DataGridViewColumn[]
+    {
+        new DataGridViewTextBoxColumn { Name = "Id", HeaderText = "ID", Width = 50 },
+        new DataGridViewTextBoxColumn { Name = "Name", HeaderText = "名称", Width = 150 },
+        new DataGridViewComboBoxColumn { Name = "Category", HeaderText = "类别", Width = 100 }
+    }
+);
+
+// ========== 添加行（Rows）的方式 ==========
+
+// 方式1: 添加空行
+DataGridViewRow newRow = new DataGridViewRow();
+dataGridView1.Rows.Add(newRow);
+
+// 方式2: 使用对象数组添加行
+dataGridView1.Rows.Add(new object[] { 1, "张三", "男", true });
+
+// 方式3: 使用字符串数组添加行
+dataGridView1.Rows.Add("1", "李四", "女", "false");
+
+// 方式4: 创建行并设置单元格值
+int rowIndex = dataGridView1.Rows.Add();
+dataGridView1.Rows[rowIndex].Cells["Id"].Value = 1;
+dataGridView1.Rows[rowIndex].Cells["Name"].Value = "王五";
+dataGridView1.Rows[rowIndex].Cells["Gender"].Value = "男";
+
+// 方式5: 插入到指定位置
+int insertIndex = dataGridView1.Rows.Add();
+dataGridView1.Rows[insertIndex].Cells["Id"].Value = 0;
+dataGridView1.Rows[insertIndex].Cells["Name"].Value = "新行";
+dataGridView1.Rows.Insert(0, dataGridView1.Rows[insertIndex]);
+
+// 方式6: 使用数据源绑定（自动生成行）
+List<Person> persons = new List<Person>
+{
+    new Person { Id = 1, Name = "张三", Age = 25 },
+    new Person { Id = 2, Name = "李四", Age = 30 }
+};
+dataGridView1.DataSource = persons;
+```
+
+#### 18.9.3 数据的增删改查
+
+```csharp
+// ========== 增加 (Create) ==========
+private void AddDataGridViewRow()
+{
+    // 添加新行
+    int rowIndex = dataGridView1.Rows.Add();
+    
+    // 设置单元格值
+    dataGridView1.Rows[rowIndex].Cells["Id"].Value = dataGridView1.Rows.Count;
+    dataGridView1.Rows[rowIndex].Cells["Name"].Value = "新用户";
+    dataGridView1.Rows[rowIndex].Cells["Gender"].Value = "男";
+    dataGridView1.Rows[rowIndex].Cells["IsActive"].Value = true;
+    
+    // 添加新列
+    DataGridViewTextBoxColumn newColumn = new DataGridViewTextBoxColumn();
+    newColumn.Name = "Email";
+    newColumn.HeaderText = "邮箱";
+    dataGridView1.Columns.Add(newColumn);
+    
+    // 为新列添加数据到现有行
+    foreach (DataGridViewRow row in dataGridView1.Rows)
+    {
+        if (row.Cells["Email"] != null)
+        {
+            row.Cells["Email"].Value = "example@email.com";
+        }
+    }
+}
+
+// ========== 查询 (Read) ==========
+private void QueryDataGridView()
+{
+    // 获取行数
+    int rowCount = dataGridView1.Rows.Count;
+    
+    // 获取列数
+    int columnCount = dataGridView1.Columns.Count;
+    
+    // 遍历所有行
+    foreach (DataGridViewRow row in dataGridView1.Rows)
+    {
+        // 遍历所有单元格
+        foreach (DataGridViewCell cell in row.Cells)
+        {
+            Console.WriteLine($"行 {row.Index}, 列 {cell.ColumnIndex}: {cell.Value}");
+        }
+    }
+    
+    // 获取指定单元格的值
+    if (dataGridView1.Rows.Count > 0 && dataGridView1.Columns.Contains("Name"))
+    {
+        object cellValue = dataGridView1.Rows[0].Cells["Name"].Value;
+    }
+    
+    // 获取选中行
+    if (dataGridView1.SelectedRows.Count > 0)
+    {
+        DataGridViewRow selectedRow = dataGridView1.SelectedRows[0];
+        int id = Convert.ToInt32(selectedRow.Cells["Id"].Value);
+        string name = selectedRow.Cells["Name"].Value.ToString();
+    }
+    
+    // 获取所有选中行
+    foreach (DataGridViewRow row in dataGridView1.SelectedRows)
+    {
+        Console.WriteLine($"选中行 {row.Index}: {row.Cells["Name"].Value}");
+    }
+    
+    // 根据条件查找行
+    foreach (DataGridViewRow row in dataGridView1.Rows)
+    {
+        if (row.Cells["Name"].Value != null && 
+            row.Cells["Name"].Value.ToString().Contains("张"))
+        {
+            Console.WriteLine($"找到匹配行: {row.Index}");
+        }
+    }
+}
+
+// ========== 修改 (Update) ==========
+private void UpdateDataGridViewRow()
+{
+    // 修改指定单元格的值
+    if (dataGridView1.Rows.Count > 0)
+    {
+        dataGridView1.Rows[0].Cells["Name"].Value = "修改后的名称";
+    }
+    
+    // 修改整行数据
+    if (dataGridView1.SelectedRows.Count > 0)
+    {
+        DataGridViewRow row = dataGridView1.SelectedRows[0];
+        row.Cells["Id"].Value = 999;
+        row.Cells["Name"].Value = "新名称";
+        row.Cells["Gender"].Value = "女";
+    }
+    
+    // 修改列属性
+    if (dataGridView1.Columns.Contains("Name"))
+    {
+        dataGridView1.Columns["Name"].HeaderText = "姓名";
+        dataGridView1.Columns["Name"].Width = 200;
+        dataGridView1.Columns["Name"].ReadOnly = false;
+    }
+    
+    // 批量更新符合条件的行
+    foreach (DataGridViewRow row in dataGridView1.Rows)
+    {
+        if (row.Cells["IsActive"].Value != null && 
+            Convert.ToBoolean(row.Cells["IsActive"].Value) == false)
+        {
+            row.Cells["Name"].Value = "已禁用: " + row.Cells["Name"].Value;
+        }
+    }
+}
+
+// ========== 删除 (Delete) ==========
+private void DeleteDataGridViewRow()
+{
+    // 方式1: 移除指定行
+    if (dataGridView1.Rows.Count > 0)
+    {
+        dataGridView1.Rows.Remove(dataGridView1.Rows[0]);
+    }
+    
+    // 方式2: 根据索引移除
+    if (dataGridView1.Rows.Count > 2)
+    {
+        dataGridView1.Rows.RemoveAt(1);
+    }
+    
+    // 方式3: 移除选中行
+    if (dataGridView1.SelectedRows.Count > 0)
+    {
+        // 从后往前删除，避免索引变化
+        for (int i = dataGridView1.SelectedRows.Count - 1; i >= 0; i--)
+        {
+            dataGridView1.Rows.Remove(dataGridView1.SelectedRows[i]);
+        }
+    }
+    
+    // 方式4: 移除符合条件的行
+    List<DataGridViewRow> rowsToRemove = new List<DataGridViewRow>();
+    foreach (DataGridViewRow row in dataGridView1.Rows)
+    {
+        if (row.Cells["IsActive"].Value != null && 
+            Convert.ToBoolean(row.Cells["IsActive"].Value) == false)
+        {
+            rowsToRemove.Add(row);
+        }
+    }
+    foreach (DataGridViewRow row in rowsToRemove)
+    {
+        dataGridView1.Rows.Remove(row);
+    }
+    
+    // 方式5: 清空所有行
+    dataGridView1.Rows.Clear();
+    
+    // 方式6: 移除指定列
+    if (dataGridView1.Columns.Contains("Email"))
+    {
+        dataGridView1.Columns.Remove("Email");
+    }
+    
+    // 方式7: 根据索引移除列
+    if (dataGridView1.Columns.Count > 0)
+    {
+        dataGridView1.Columns.RemoveAt(0);
+    }
+    
+    // 方式8: 清空所有列和行
+    dataGridView1.Columns.Clear();
+    dataGridView1.Rows.Clear();
+}
+```
+
+### 18.10 综合示例：完整的 CRUD 操作
+
+以下是一个完整的示例，展示如何在 ListView 中实现完整的增删改查操作：
+
+```csharp
+public partial class UserManagementForm : Form
+{
+    private ListView listViewUsers;
+    private Button btnAdd, btnEdit, btnDelete, btnRefresh;
+    private TextBox txtName, txtEmail;
+    
+    public UserManagementForm()
+    {
+        InitializeComponent();
+        InitializeListView();
+        InitializeControls();
+        LoadUsers();
+    }
+    
+    // 初始化 ListView
+    private void InitializeListView()
+    {
+        listViewUsers = new ListView();
+        listViewUsers.Dock = DockStyle.Fill;
+        listViewUsers.View = View.Details;
+        listViewUsers.FullRowSelect = true;
+        listViewUsers.GridLines = true;
+        listViewUsers.MultiSelect = false;
+        
+        // 添加列
+        listViewUsers.Columns.Add("ID", 50, HorizontalAlignment.Left);
+        listViewUsers.Columns.Add("姓名", 150, HorizontalAlignment.Left);
+        listViewUsers.Columns.Add("邮箱", 200, HorizontalAlignment.Left);
+        listViewUsers.Columns.Add("创建时间", 150, HorizontalAlignment.Left);
+        
+        // 绑定事件
+        listViewUsers.SelectedIndexChanged += ListViewUsers_SelectedIndexChanged;
+        listViewUsers.DoubleClick += ListViewUsers_DoubleClick;
+    }
+    
+    // 初始化控件
+    private void InitializeControls()
+    {
+        // 创建输入控件
+        txtName = new TextBox { Location = new Point(10, 10), Width = 200 };
+        txtEmail = new TextBox { Location = new Point(220, 10), Width = 200 };
+        
+        // 创建按钮
+        btnAdd = new Button { Text = "添加", Location = new Point(430, 8), Width = 80 };
+        btnEdit = new Button { Text = "编辑", Location = new Point(520, 8), Width = 80 };
+        btnDelete = new Button { Text = "删除", Location = new Point(610, 8), Width = 80 };
+        btnRefresh = new Button { Text = "刷新", Location = new Point(700, 8), Width = 80 };
+        
+        btnAdd.Click += BtnAdd_Click;
+        btnEdit.Click += BtnEdit_Click;
+        btnDelete.Click += BtnDelete_Click;
+        btnRefresh.Click += BtnRefresh_Click;
+        
+        // 添加到表单
+        this.Controls.Add(txtName);
+        this.Controls.Add(txtEmail);
+        this.Controls.Add(btnAdd);
+        this.Controls.Add(btnEdit);
+        this.Controls.Add(btnDelete);
+        this.Controls.Add(btnRefresh);
+        
+        Panel panel = new Panel { Dock = DockStyle.Bottom, Height = 50 };
+        panel.Controls.Add(listViewUsers);
+        this.Controls.Add(panel);
+    }
+    
+    // 加载用户列表（查询）
+    private void LoadUsers()
+    {
+        listViewUsers.BeginUpdate();
+        listViewUsers.Items.Clear();
+        
+        // 模拟从数据库加载数据
+        var users = new List<User>
+        {
+            new User { Id = 1, Name = "张三", Email = "zhangsan@example.com", CreateTime = DateTime.Now.AddDays(-10) },
+            new User { Id = 2, Name = "李四", Email = "lisi@example.com", CreateTime = DateTime.Now.AddDays(-5) },
+            new User { Id = 3, Name = "王五", Email = "wangwu@example.com", CreateTime = DateTime.Now.AddDays(-2) }
+        };
+        
+        foreach (var user in users)
+        {
+            ListViewItem item = new ListViewItem(user.Id.ToString());
+            item.SubItems.Add(user.Name);
+            item.SubItems.Add(user.Email);
+            item.SubItems.Add(user.CreateTime.ToString("yyyy-MM-dd HH:mm:ss"));
+            item.Tag = user;  // 保存用户对象引用
+            listViewUsers.Items.Add(item);
+        }
+        
+        listViewUsers.EndUpdate();
+    }
+    
+    // 添加用户（增加）
+    private void BtnAdd_Click(object sender, EventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(txtName.Text) || string.IsNullOrWhiteSpace(txtEmail.Text))
+        {
+            MessageBox.Show("请输入姓名和邮箱", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+        
+        // 创建新用户
+        User newUser = new User
+        {
+            Id = GetNextId(),
+            Name = txtName.Text,
+            Email = txtEmail.Text,
+            CreateTime = DateTime.Now
+        };
+        
+        // 添加到 ListView
+        ListViewItem item = new ListViewItem(newUser.Id.ToString());
+        item.SubItems.Add(newUser.Name);
+        item.SubItems.Add(newUser.Email);
+        item.SubItems.Add(newUser.CreateTime.ToString("yyyy-MM-dd HH:mm:ss"));
+        item.Tag = newUser;
+        
+        listViewUsers.Items.Add(item);
+        
+        // 清空输入框
+        txtName.Clear();
+        txtEmail.Clear();
+        
+        MessageBox.Show("用户添加成功", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+    }
+    
+    // 编辑用户（修改）
+    private void BtnEdit_Click(object sender, EventArgs e)
+    {
+        if (listViewUsers.SelectedItems.Count == 0)
+        {
+            MessageBox.Show("请选择要编辑的用户", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+        
+        ListViewItem selectedItem = listViewUsers.SelectedItems[0];
+        User user = selectedItem.Tag as User;
+        
+        if (user != null)
+        {
+            // 更新用户信息
+            user.Name = txtName.Text;
+            user.Email = txtEmail.Text;
+            
+            // 更新 ListView 显示
+            selectedItem.SubItems[0].Text = user.Id.ToString();
+            selectedItem.SubItems[1].Text = user.Name;
+            selectedItem.SubItems[2].Text = user.Email;
+            
+            MessageBox.Show("用户信息已更新", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+    }
+    
+    // 删除用户（删除）
+    private void BtnDelete_Click(object sender, EventArgs e)
+    {
+        if (listViewUsers.SelectedItems.Count == 0)
+        {
+            MessageBox.Show("请选择要删除的用户", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+        
+        if (MessageBox.Show("确定要删除选中的用户吗？", "确认", 
+            MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+        {
+            ListViewItem selectedItem = listViewUsers.SelectedItems[0];
+            listViewUsers.Items.Remove(selectedItem);
+            MessageBox.Show("用户已删除", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+    }
+    
+    // 刷新列表
+    private void BtnRefresh_Click(object sender, EventArgs e)
+    {
+        LoadUsers();
+    }
+    
+    // 选择变化事件
+    private void ListViewUsers_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (listViewUsers.SelectedItems.Count > 0)
+        {
+            ListViewItem selectedItem = listViewUsers.SelectedItems[0];
+            User user = selectedItem.Tag as User;
+            
+            if (user != null)
+            {
+                txtName.Text = user.Name;
+                txtEmail.Text = user.Email;
+            }
+        }
+    }
+    
+    // 双击编辑
+    private void ListViewUsers_DoubleClick(object sender, EventArgs e)
+    {
+        BtnEdit_Click(sender, e);
+    }
+    
+    // 获取下一个ID
+    private int GetNextId()
+    {
+        int maxId = 0;
+        foreach (ListViewItem item in listViewUsers.Items)
+        {
+            if (int.TryParse(item.SubItems[0].Text, out int id) && id > maxId)
+            {
+                maxId = id;
+            }
+        }
+        return maxId + 1;
+    }
+}
+
+// 用户类
+public class User
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public string Email { get; set; }
+    public DateTime CreateTime { get; set; }
+}
+```
+
+### 18.11 总结
+
+本章节详细介绍了 WinForm 中所有涉及 Items 集合的控件，包括：
+
+1. **ComboBox** - 下拉组合框的 Items 集合操作
+2. **ListBox** - 列表框的 Items 集合操作
+3. **ListView** - 列表视图的 Items 和 Columns 集合操作
+4. **ToolStrip** - 工具栏的 Items 集合操作
+5. **StatusStrip** - 状态栏的 Items 集合操作
+6. **MenuStrip** - 菜单栏的 Items 和 DropDownItems 集合操作
+7. **ContextMenuStrip** - 上下文菜单的 Items 集合操作
+8. **DataGridView** - 数据表格的 Rows 和 Columns 集合操作
+
+每个控件都包含了：
+- **文件树结构**：清晰的层次结构展示
+- **行列增加方式**：多种添加数据的方法
+- **数据的增删改查**：完整的 CRUD 操作示例
+
+掌握这些操作，可以灵活地管理和操作 WinForm 应用程序中的各种数据集合控件。
+
 ## 结语
 
 本教程介绍了 C# WinForm 开发的核心概念和实践技巧。通过学习这些内容，您可以开始构建功能完整、交互友好的 Windows 桌面应用程序。WinForm 虽然是较传统的技术，但在企业桌面应用开发中仍然有着广泛的应用场景。

@@ -274,6 +274,426 @@ private void btnOpenNewForm_Click(object sender, EventArgs e)
 | ListView | 列表视图 | Items, View, CheckBoxes, GridLines | ItemActivate, SelectedIndexChanged | Items.Add(), Clear(), Sort() |
 | TreeView | 树状视图 | Nodes, PathSeparator, CheckBoxes | AfterSelect, BeforeExpand, AfterExpand, AfterCollapse | Nodes.Add(), ExpandAll(), CollapseAll() |
 
+### 4.3 基础控件详细示例代码
+
+#### 4.3.1 Button 控件示例
+
+```csharp
+// 按钮基本属性设置
+button1.Text = "提交";
+button1.Enabled = true;
+button1.Size = new Size(100, 40);
+button1.BackColor = Color.FromArgb(255, 128, 0);  // 使用RGB颜色
+button1.Font = new Font("微软雅黑", 12, FontStyle.Bold);
+
+// 按钮事件注册 (三种方式)
+// 方式1：设计器中自动生成
+this.button1.Click += new System.EventHandler(this.button1_Click);
+
+// 方式2：传统方法绑定
+button1.Click += Button1_Click;
+
+// 方式3：Lambda表达式绑定
+button1.MouseEnter += (s, ev) => { button1.BackColor = Color.LightBlue; };
+button1.MouseLeave += (s, ev) => { button1.BackColor = Color.FromArgb(255, 128, 0); };
+
+// 按钮点击事件处理方法
+private void button1_Click(object sender, EventArgs e)
+{
+    // 获取事件源对象 (可以转换为具体控件类型)
+    Button clickedButton = sender as Button;
+    
+    // 执行操作
+    if (clickedButton != null)
+    {
+        // 使用MessageBox显示消息
+        DialogResult result = MessageBox.Show(
+            "确定要执行此操作吗？", 
+            "操作确认", 
+            MessageBoxButtons.YesNo, 
+            MessageBoxIcon.Question);
+            
+        // 根据用户选择执行不同操作
+        if (result == DialogResult.Yes)
+        {
+            // 执行确认后的操作
+            clickedButton.Text = "已确认";
+            clickedButton.Enabled = false;  // 禁用按钮防止重复点击
+            
+            // 延迟执行后续操作
+            Timer timer = new Timer();
+            timer.Interval = 2000;  // 2秒后执行
+            timer.Tick += (s, ev) => {
+                clickedButton.Text = "提交";
+                clickedButton.Enabled = true;
+                timer.Dispose();  // 释放定时器资源
+            };
+            timer.Start();
+        }
+    }
+}
+```
+
+#### 4.3.2 TextBox 控件示例
+
+```csharp
+// 文本框基本属性设置
+textBox1.Text = "默认文本";
+textBox1.MaxLength = 50;  // 限制最大输入长度
+textBox1.Multiline = true;  // 多行文本框
+textBox1.ScrollBars = ScrollBars.Vertical;  // 启用垂直滚动条
+textBox1.AcceptsReturn = true;  // 允许回车换行
+textBox1.WordWrap = true;  // 自动换行
+textBox1.ReadOnly = false;  // 可编辑
+
+// 密码框设置
+textBox2.PasswordChar = '*';  // 设置密码字符
+textBox2.UseSystemPasswordChar = true;  // 使用系统默认密码字符
+
+// 事件处理
+textBox1.TextChanged += TextBox1_TextChanged;
+textBox1.KeyPress += TextBox1_KeyPress;
+textBox1.Validating += TextBox1_Validating;
+textBox1.Validated += TextBox1_Validated;
+
+// 文本变化事件
+private void TextBox1_TextChanged(object sender, EventArgs e)
+{
+    // 实时显示字符数
+    label1.Text = $"字符数: {textBox1.Text.Length}/{textBox1.MaxLength}";
+    
+    // 根据文本内容启用/禁用按钮
+    button1.Enabled = textBox1.Text.Length > 0;
+}
+
+// 按键处理事件
+private void TextBox1_KeyPress(object sender, KeyPressEventArgs e)
+{
+    // 只允许输入数字和退格键
+    if (!char.IsDigit(e.KeyChar) && e.KeyChar != (char)Keys.Back)
+    {
+        e.Handled = true;  // 取消输入
+        System.Media.SystemSounds.Beep.Play();  // 发出提示音
+    }
+}
+
+// 输入验证事件 (Validating)
+private void TextBox1_Validating(object sender, CancelEventArgs e)
+{
+    TextBox tb = sender as TextBox;
+    if (tb != null && string.IsNullOrEmpty(tb.Text))
+    {
+        // 显示错误提示
+        errorProvider1.SetError(tb, "此字段不能为空");
+        e.Cancel = true;  // 取消焦点切换
+    }
+    else
+    {
+        errorProvider1.SetError(tb, "");  // 清除错误提示
+    }
+}
+
+// 验证通过事件 (Validated)
+private void TextBox1_Validated(object sender, EventArgs e)
+{
+    // 验证通过后执行操作
+    TextBox tb = sender as TextBox;
+    if (tb != null)
+    {
+        // 可以在这里执行数据处理或UI更新
+        label1.Text = $"已验证: {tb.Text}";
+    }
+}
+```
+
+#### 4.3.3 CheckBox 和 RadioButton 控件示例
+
+```csharp
+// 复选框设置
+checkBox1.Text = "接受用户协议";
+checkBox1.Checked = false;
+checkBox1.AutoCheck = true;  // 允许自动切换状态
+checkBox1.CheckAlign = ContentAlignment.MiddleRight;  // 文本对齐方式
+checkBox1.ThreeState = true;  // 启用三态复选框 (Checked/Unchecked/Indeterminate)
+
+// 单选按钮设置
+radioButton1.Text = "选项1";
+radioButton2.Text = "选项2";
+radioButton3.Text = "选项3";
+
+// 单选按钮分组 (放在同一个容器中自动分组)
+panel1.Controls.Add(radioButton1);
+panel1.Controls.Add(radioButton2);
+panel1.Controls.Add(radioButton3);
+
+// 事件处理
+checkBox1.CheckedChanged += CheckBox1_CheckedChanged;
+radioButton1.CheckedChanged += RadioButtons_CheckedChanged;
+radioButton2.CheckedChanged += RadioButtons_CheckedChanged;
+radioButton3.CheckedChanged += RadioButtons_CheckedChanged;
+
+// 复选框状态变化事件
+private void CheckBox1_CheckedChanged(object sender, EventArgs e)
+{
+    CheckBox cb = sender as CheckBox;
+    if (cb != null)
+    {
+        switch (cb.CheckState)
+        {
+            case CheckState.Checked:
+                label1.Text = "已选中";
+                button1.Enabled = true;
+                break;
+            case CheckState.Unchecked:
+                label1.Text = "未选中";
+                button1.Enabled = false;
+                break;
+            case CheckState.Indeterminate:
+                label1.Text = "不确定状态";
+                button1.Enabled = false;
+                break;
+        }
+    }
+}
+
+// 单选按钮状态变化事件
+private void RadioButtons_CheckedChanged(object sender, EventArgs e)
+{
+    RadioButton rb = sender as RadioButton;
+    if (rb != null && rb.Checked)  // 只处理被选中的单选按钮
+    {
+        switch (rb.Name)
+        {
+            case "radioButton1":
+                label2.Text = "已选择: " + rb.Text;
+                // 根据选择应用不同的UI设置
+                this.BackColor = Color.LightBlue;
+                break;
+            case "radioButton2":
+                label2.Text = "已选择: " + rb.Text;
+                this.BackColor = Color.LightGreen;
+                break;
+            case "radioButton3":
+                label2.Text = "已选择: " + rb.Text;
+                this.BackColor = Color.LightYellow;
+                break;
+        }
+    }
+}
+```
+
+#### 4.3.4 ComboBox 控件示例
+
+```csharp
+// 下拉框设置
+comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;  // 只能选择，不能输入
+comboBox1.FormattingEnabled = true;  // 启用格式化
+comboBox1.MaxDropDownItems = 8;  // 最大显示项数
+comboBox1.IntegralHeight = false;  // 允许非整数高度
+
+// 添加数据项 (多种方式)
+// 方式1: 直接添加字符串
+comboBox1.Items.Add("选项1");
+comboBox1.Items.Add("选项2");
+comboBox1.Items.Add("选项3");
+
+// 方式2: 添加自定义对象
+comboBox1.Items.Add(new { ID = 1, Name = "选项A" });
+comboBox1.DisplayMember = "Name";  // 显示字段
+comboBox1.ValueMember = "ID";  // 值字段
+
+// 方式3: 批量添加
+string[] items = { "红色", "蓝色", "绿色", "黄色", "紫色" };
+comboBox1.Items.AddRange(items);
+
+// 设置默认选择
+comboBox1.SelectedIndex = 0;  // 根据索引选择
+// comboBox1.SelectedItem = "选项2";  // 根据项选择
+
+// 自动完成设置 (当DropDownStyle为DropDown时)
+comboBox2.AutoCompleteSource = AutoCompleteSource.ListItems;
+comboBox2.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+
+// 事件处理
+comboBox1.SelectedIndexChanged += ComboBox1_SelectedIndexChanged;
+comboBox1.DropDown += ComboBox1_DropDown;
+comboBox1.DropDownClosed += ComboBox1_DropDownClosed;
+
+// 选择变化事件
+private void ComboBox1_SelectedIndexChanged(object sender, EventArgs e)
+{
+    ComboBox cb = sender as ComboBox;
+    if (cb != null && cb.SelectedIndex >= 0)
+    {
+        // 获取选中项的不同方式
+        label1.Text = $"选中索引: {cb.SelectedIndex}";
+        label2.Text = $"选中项: {cb.SelectedItem}";
+        
+        // 如果设置了DisplayMember和ValueMember
+        if (!string.IsNullOrEmpty(cb.DisplayMember) && !string.IsNullOrEmpty(cb.ValueMember))
+        {
+            label3.Text = $"选中值: {cb.SelectedValue}";
+        }
+    }
+}
+
+// 下拉展开事件
+private void ComboBox1_DropDown(object sender, EventArgs e)
+{
+    ComboBox cb = sender as ComboBox;
+    if (cb != null)
+    {
+        // 在下拉前更新数据源
+        // 例如：从数据库刷新最新数据
+        // UpdateComboBoxData(cb);
+    }
+}
+
+// 下拉关闭事件
+private void ComboBox1_DropDownClosed(object sender, EventArgs e)
+{
+    ComboBox cb = sender as ComboBox;
+    if (cb != null)
+    {
+        // 可以在这里处理下拉框关闭后的逻辑
+        label1.Text = "下拉框已关闭";
+    }
+}
+```
+
+#### 4.3.5 DataGridView 控件示例
+
+```csharp
+// 数据表格设置
+dataGridView1.AutoGenerateColumns = false;  // 不自动生成列
+
+// 添加自定义列
+dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
+{
+    HeaderText = "ID",
+    DataPropertyName = "ID",  // 绑定数据源的字段名
+    Width = 50,
+    ReadOnly = true  // 只读
+});
+
+dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
+{
+    HeaderText = "名称",
+    DataPropertyName = "Name",
+    Width = 150
+});
+
+dataGridView1.Columns.Add(new DataGridViewComboBoxColumn
+{
+    HeaderText = "类别",
+    DataPropertyName = "Category",
+    Width = 100,
+    DataSource = new string[] { "产品", "服务", "其他" }
+});
+
+dataGridView1.Columns.Add(new DataGridViewCheckBoxColumn
+{
+    HeaderText = "激活",
+    DataPropertyName = "IsActive",
+    Width = 60,
+    TrueValue = true,
+    FalseValue = false
+});
+
+// 添加操作列
+DataGridViewButtonColumn buttonColumn = new DataGridViewButtonColumn
+{
+    HeaderText = "操作",
+    Name = "ActionColumn",
+    Text = "编辑",
+    UseColumnTextForButtonValue = true,
+    Width = 80
+};
+dataGridView1.Columns.Add(buttonColumn);
+
+// 其他表格属性设置
+dataGridView1.AllowUserToAddRows = false;  // 不允许用户添加行
+dataGridView1.AllowUserToDeleteRows = false;  // 不允许用户删除行
+dataGridView1.RowHeadersVisible = true;  // 显示行标题
+dataGridView1.SelectionMode = DataGridViewSelectionMode.FullRowSelect;  // 整行选择
+dataGridView1.MultiSelect = false;  // 不允许多选
+dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;  // 自动填充列宽
+
+// 事件处理
+dataGridView1.CellClick += DataGridView1_CellClick;
+dataGridView1.CellContentClick += DataGridView1_CellContentClick;
+dataGridView1.CellValueChanged += DataGridView1_CellValueChanged;
+dataGridView1.RowValidating += DataGridView1_RowValidating;
+
+// 单元格点击事件
+private void DataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+{
+    // 处理操作列点击
+    if (e.ColumnIndex == dataGridView1.Columns["ActionColumn"].Index && e.RowIndex >= 0)
+    {
+        // 获取当前行数据
+        DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
+        int id = Convert.ToInt32(row.Cells["ID"].Value);
+        string name = row.Cells["Name"].Value.ToString();
+        
+        // 打开编辑窗口或执行其他操作
+        MessageBox.Show($"编辑项目: ID={id}, Name={name}");
+    }
+}
+
+// 单元格内容点击事件
+private void DataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+{
+    // 处理复选框等内容点击
+    // ...
+}
+
+// 单元格值变化事件
+private void DataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+{
+    if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
+    {
+        DataGridViewCell cell = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex];
+        string columnName = dataGridView1.Columns[e.ColumnIndex].Name;
+        
+        // 处理值变化，例如保存到数据库
+        // SaveCellValue(e.RowIndex, columnName, cell.Value);
+    }
+}
+
+// 行验证事件
+private void DataGridView1_RowValidating(object sender, DataGridViewCellCancelEventArgs e)
+{
+    DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
+    
+    // 验证数据
+    if (row.Cells["Name"].Value == null || string.IsNullOrWhiteSpace(row.Cells["Name"].Value.ToString()))
+    {
+        dataGridView1.Rows[e.RowIndex].ErrorText = "名称不能为空";
+        e.Cancel = true;  // 取消行切换
+    }
+    else
+    {
+        dataGridView1.Rows[e.RowIndex].ErrorText = "";
+    }
+}
+
+// 设置数据源的示例
+private void LoadData()
+{
+    // 示例数据
+    var data = new List<object>
+    {
+        new { ID = 1, Name = "产品A", Category = "产品", IsActive = true },
+        new { ID = 2, Name = "服务B", Category = "服务", IsActive = false },
+        new { ID = 3, Name = "产品C", Category = "产品", IsActive = true }
+    };
+    
+    // 绑定数据源
+    dataGridView1.DataSource = data;
+}
+```
+
 ## 5. WinForm 容器控件详解
 
 ### 5.1 容器控件概述
@@ -772,12 +1192,6 @@ btnLogin.Click += (sender, e) => {
         MessageBox.Show($"用户名: {textBox1.Text}\n密码长度: {textBox2.Text.Length}字符");
     }
 };
-```
-
-#### 5.4.7 容器控件嵌套使用示例
-
-```csharp
-// ... 嵌套使用示例代码保持不变 ...
 ```
 
 ### 5.5 容器控件事件处理详解
@@ -1983,7 +2397,7 @@ for (int i = 1; i <= 5; i++) {
 }
 ```
 
-#### 5.3 容器控件核心方法详解
+### 5.3 容器控件核心方法详解（续）
 
 #### Panel 控件核心方法
 
@@ -2077,480 +2491,6 @@ for (int i = 1; i <= 5; i++) {
 | ResumeLayout() | 恢复布局逻辑 | bool: 是否立即执行布局 | void |
 | PerformLayout() | 强制执行布局逻辑 | 无 | void |
 
-
-### 4.3 基础控件详细示例代码
-
-#### 4.3.1 Button 控件示例
-
-```csharp
-// 按钮基本属性设置
-button1.Text = "提交";
-button1.Enabled = true;
-button1.Size = new Size(100, 40);
-button1.BackColor = Color.FromArgb(255, 128, 0);  // 使用RGB颜色
-button1.Font = new Font("微软雅黑", 12, FontStyle.Bold);
-
-// 按钮事件注册 (三种方式)
-// 方式1：设计器中自动生成
-this.button1.Click += new System.EventHandler(this.button1_Click);
-
-// 方式2：传统方法绑定
-button1.Click += Button1_Click;
-
-// 方式3：Lambda表达式绑定
-button1.MouseEnter += (s, ev) => { button1.BackColor = Color.LightBlue; };
-button1.MouseLeave += (s, ev) => { button1.BackColor = Color.FromArgb(255, 128, 0); };
-
-// 按钮点击事件处理方法
-private void button1_Click(object sender, EventArgs e)
-{
-    // 获取事件源对象 (可以转换为具体控件类型)
-    Button clickedButton = sender as Button;
-    
-    // 执行操作
-    if (clickedButton != null)
-    {
-        // 使用MessageBox显示消息
-        DialogResult result = MessageBox.Show(
-            "确定要执行此操作吗？", 
-            "操作确认", 
-            MessageBoxButtons.YesNo, 
-            MessageBoxIcon.Question);
-            
-        // 根据用户选择执行不同操作
-        if (result == DialogResult.Yes)
-        {
-            // 执行确认后的操作
-            clickedButton.Text = "已确认";
-            clickedButton.Enabled = false;  // 禁用按钮防止重复点击
-            
-            // 延迟执行后续操作
-            Timer timer = new Timer();
-            timer.Interval = 2000;  // 2秒后执行
-            timer.Tick += (s, ev) => {
-                clickedButton.Text = "提交";
-                clickedButton.Enabled = true;
-                timer.Dispose();  // 释放定时器资源
-            };
-            timer.Start();
-        }
-    }
-}
-```
-
-#### 4.3.2 TextBox 控件示例
-
-```csharp
-// 文本框基本属性设置
-textBox1.Text = "默认文本";
-textBox1.MaxLength = 50;  // 限制最大输入长度
-textBox1.Multiline = true;  // 多行文本框
-textBox1.ScrollBars = ScrollBars.Vertical;  // 启用垂直滚动条
-textBox1.AcceptsReturn = true;  // 允许回车换行
-textBox1.WordWrap = true;  // 自动换行
-textBox1.ReadOnly = false;  // 可编辑
-
-// 密码框设置
-textBox2.PasswordChar = '*';  // 设置密码字符
-textBox2.UseSystemPasswordChar = true;  // 使用系统默认密码字符
-
-// 事件处理
-textBox1.TextChanged += TextBox1_TextChanged;
-textBox1.KeyPress += TextBox1_KeyPress;
-textBox1.Validating += TextBox1_Validating;
-textBox1.Validated += TextBox1_Validated;
-
-// 文本变化事件
-private void TextBox1_TextChanged(object sender, EventArgs e)
-{
-    // 实时显示字符数
-    label1.Text = $"字符数: {textBox1.Text.Length}/{textBox1.MaxLength}";
-    
-    // 根据文本内容启用/禁用按钮
-    button1.Enabled = textBox1.Text.Length > 0;
-}
-
-// 按键处理事件
-private void TextBox1_KeyPress(object sender, KeyPressEventArgs e)
-{
-    // 只允许输入数字和退格键
-    if (!char.IsDigit(e.KeyChar) && e.KeyChar != (char)Keys.Back)
-    {
-        e.Handled = true;  // 取消输入
-        System.Media.SystemSounds.Beep.Play();  // 发出提示音
-    }
-}
-
-// 输入验证事件 (Validating)
-private void TextBox1_Validating(object sender, CancelEventArgs e)
-{
-    TextBox tb = sender as TextBox;
-    if (tb != null && string.IsNullOrEmpty(tb.Text))
-    {
-        // 显示错误提示
-        errorProvider1.SetError(tb, "此字段不能为空");
-        e.Cancel = true;  // 取消焦点切换
-    }
-    else
-    {
-        errorProvider1.SetError(tb, "");  // 清除错误提示
-    }
-}
-
-// 验证通过事件 (Validated)
-private void TextBox1_Validated(object sender, EventArgs e)
-{
-    // 验证通过后执行操作
-    TextBox tb = sender as TextBox;
-    if (tb != null)
-    {
-        // 可以在这里执行数据处理或UI更新
-        label1.Text = $"已验证: {tb.Text}";
-    }
-}
-```
-
-#### 4.3.3 CheckBox 和 RadioButton 控件示例
-
-```csharp
-// 复选框设置
-checkBox1.Text = "接受用户协议";
-checkBox1.Checked = false;
-checkBox1.AutoCheck = true;  // 允许自动切换状态
-checkBox1.CheckAlign = ContentAlignment.MiddleRight;  // 文本对齐方式
-checkBox1.ThreeState = true;  // 启用三态复选框 (Checked/Unchecked/Indeterminate)
-
-// 单选按钮设置
-radioButton1.Text = "选项1";
-radioButton2.Text = "选项2";
-radioButton3.Text = "选项3";
-
-// 单选按钮分组 (放在同一个容器中自动分组)
-panel1.Controls.Add(radioButton1);
-panel1.Controls.Add(radioButton2);
-panel1.Controls.Add(radioButton3);
-
-// 事件处理
-checkBox1.CheckedChanged += CheckBox1_CheckedChanged;
-radioButton1.CheckedChanged += RadioButtons_CheckedChanged;
-radioButton2.CheckedChanged += RadioButtons_CheckedChanged;
-radioButton3.CheckedChanged += RadioButtons_CheckedChanged;
-
-// 复选框状态变化事件
-private void CheckBox1_CheckedChanged(object sender, EventArgs e)
-{
-    CheckBox cb = sender as CheckBox;
-    if (cb != null)
-    {
-        switch (cb.CheckState)
-        {
-            case CheckState.Checked:
-                label1.Text = "已选中";
-                button1.Enabled = true;
-                break;
-            case CheckState.Unchecked:
-                label1.Text = "未选中";
-                button1.Enabled = false;
-                break;
-            case CheckState.Indeterminate:
-                label1.Text = "不确定状态";
-                button1.Enabled = false;
-                break;
-        }
-    }
-}
-
-// 单选按钮状态变化事件
-private void RadioButtons_CheckedChanged(object sender, EventArgs e)
-{
-    RadioButton rb = sender as RadioButton;
-    if (rb != null && rb.Checked)  // 只处理被选中的单选按钮
-    {
-        switch (rb.Name)
-        {
-            case "radioButton1":
-                label2.Text = "已选择: " + rb.Text;
-                // 根据选择应用不同的UI设置
-                this.BackColor = Color.LightBlue;
-                break;
-            case "radioButton2":
-                label2.Text = "已选择: " + rb.Text;
-                this.BackColor = Color.LightGreen;
-                break;
-            case "radioButton3":
-                label2.Text = "已选择: " + rb.Text;
-                this.BackColor = Color.LightYellow;
-                break;
-        }
-    }
-}
-```
-
-#### 4.3.4 ComboBox 控件示例
-
-```csharp
-// 下拉框设置
-comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;  // 只能选择，不能输入
-comboBox1.FormattingEnabled = true;  // 启用格式化
-comboBox1.MaxDropDownItems = 8;  // 最大显示项数
-comboBox1.IntegralHeight = false;  // 允许非整数高度
-
-// 添加数据项 (多种方式)
-// 方式1: 直接添加字符串
-comboBox1.Items.Add("选项1");
-comboBox1.Items.Add("选项2");
-comboBox1.Items.Add("选项3");
-
-// 方式2: 添加自定义对象
-comboBox1.Items.Add(new { ID = 1, Name = "选项A" });
-comboBox1.DisplayMember = "Name";  // 显示字段
-comboBox1.ValueMember = "ID";  // 值字段
-
-// 方式3: 批量添加
-string[] items = { "红色", "蓝色", "绿色", "黄色", "紫色" };
-comboBox1.Items.AddRange(items);
-
-// 设置默认选择
-comboBox1.SelectedIndex = 0;  // 根据索引选择
-// comboBox1.SelectedItem = "选项2";  // 根据项选择
-
-// 自动完成设置 (当DropDownStyle为DropDown时)
-comboBox2.AutoCompleteSource = AutoCompleteSource.ListItems;
-comboBox2.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-
-// 事件处理
-comboBox1.SelectedIndexChanged += ComboBox1_SelectedIndexChanged;
-comboBox1.DropDown += ComboBox1_DropDown;
-comboBox1.DropDownClosed += ComboBox1_DropDownClosed;
-
-// 选择变化事件
-private void ComboBox1_SelectedIndexChanged(object sender, EventArgs e)
-{
-    ComboBox cb = sender as ComboBox;
-    if (cb != null && cb.SelectedIndex >= 0)
-    {
-        // 获取选中项的不同方式
-        label1.Text = $"选中索引: {cb.SelectedIndex}";
-        label2.Text = $"选中项: {cb.SelectedItem}";
-        
-        // 如果设置了DisplayMember和ValueMember
-        if (!string.IsNullOrEmpty(cb.DisplayMember) && !string.IsNullOrEmpty(cb.ValueMember))
-        {
-            label3.Text = $"选中值: {cb.SelectedValue}";
-        }
-    }
-}
-
-// 下拉展开事件
-private void ComboBox1_DropDown(object sender, EventArgs e)
-{
-    ComboBox cb = sender as ComboBox;
-    if (cb != null)
-    {
-        // 在下拉前更新数据源
-        // 例如：从数据库刷新最新数据
-        // UpdateComboBoxData(cb);
-    }
-}
-
-// 下拉关闭事件
-private void ComboBox1_DropDownClosed(object sender, EventArgs e)
-{
-    ComboBox cb = sender as ComboBox;
-    if (cb != null)
-    {
-        // 可以在这里处理下拉框关闭后的逻辑
-        label1.Text = "下拉框已关闭";
-    }
-}
-```
-
-#### 4.3.5 DataGridView 控件示例
-
-```csharp
-// 数据表格设置
-dataGridView1.AutoGenerateColumns = false;  // 不自动生成列
-
-// 添加自定义列
-dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
-{
-    HeaderText = "ID",
-    DataPropertyName = "ID",  // 绑定数据源的字段名
-    Width = 50,
-    ReadOnly = true  // 只读
-});
-
-dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
-{
-    HeaderText = "名称",
-    DataPropertyName = "Name",
-    Width = 150
-});
-
-dataGridView1.Columns.Add(new DataGridViewComboBoxColumn
-{
-    HeaderText = "类别",
-    DataPropertyName = "Category",
-    Width = 100,
-    DataSource = new string[] { "产品", "服务", "其他" }
-});
-
-dataGridView1.Columns.Add(new DataGridViewCheckBoxColumn
-{
-    HeaderText = "激活",
-    DataPropertyName = "IsActive",
-    Width = 60,
-    TrueValue = true,
-    FalseValue = false
-});
-
-// 添加操作列
-DataGridViewButtonColumn buttonColumn = new DataGridViewButtonColumn
-{
-    HeaderText = "操作",
-    Name = "ActionColumn",
-    Text = "编辑",
-    UseColumnTextForButtonValue = true,
-    Width = 80
-};
-dataGridView1.Columns.Add(buttonColumn);
-
-// 其他表格属性设置
-dataGridView1.AllowUserToAddRows = false;  // 不允许用户添加行
-dataGridView1.AllowUserToDeleteRows = false;  // 不允许用户删除行
-dataGridView1.RowHeadersVisible = true;  // 显示行标题
-dataGridView1.SelectionMode = DataGridViewSelectionMode.FullRowSelect;  // 整行选择
-dataGridView1.MultiSelect = false;  // 不允许多选
-dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;  // 自动填充列宽
-
-// 事件处理
-dataGridView1.CellClick += DataGridView1_CellClick;
-dataGridView1.CellContentClick += DataGridView1_CellContentClick;
-dataGridView1.CellValueChanged += DataGridView1_CellValueChanged;
-dataGridView1.RowValidating += DataGridView1_RowValidating;
-
-// 单元格点击事件
-private void DataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
-{
-    // 处理操作列点击
-    if (e.ColumnIndex == dataGridView1.Columns["ActionColumn"].Index && e.RowIndex >= 0)
-    {
-        // 获取当前行数据
-        DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
-        int id = Convert.ToInt32(row.Cells["ID"].Value);
-        string name = row.Cells["Name"].Value.ToString();
-        
-        // 打开编辑窗口或执行其他操作
-        MessageBox.Show($"编辑项目: ID={id}, Name={name}");
-    }
-}
-
-// 单元格内容点击事件
-private void DataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
-{
-    // 处理复选框等内容点击
-    // ...
-}
-
-// 单元格值变化事件
-private void DataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
-{
-    if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
-    {
-        DataGridViewCell cell = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex];
-        string columnName = dataGridView1.Columns[e.ColumnIndex].Name;
-        
-        // 处理值变化，例如保存到数据库
-        // SaveCellValue(e.RowIndex, columnName, cell.Value);
-    }
-}
-
-// 行验证事件
-private void DataGridView1_RowValidating(object sender, DataGridViewCellCancelEventArgs e)
-{
-    DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
-    
-    // 验证数据
-    if (row.Cells["Name"].Value == null || string.IsNullOrWhiteSpace(row.Cells["Name"].Value.ToString()))
-    {
-        dataGridView1.Rows[e.RowIndex].ErrorText = "名称不能为空";
-        e.Cancel = true;  // 取消行切换
-    }
-    else
-    {
-        dataGridView1.Rows[e.RowIndex].ErrorText = "";
-    }
-}
-
-// 设置数据源的示例
-private void LoadData()
-{
-    // 示例数据
-    var data = new List<object>
-    {
-        new { ID = 1, Name = "产品A", Category = "产品", IsActive = true },
-        new { ID = 2, Name = "服务B", Category = "服务", IsActive = false },
-        new { ID = 3, Name = "产品C", Category = "产品", IsActive = true }
-    };
-    
-    // 绑定数据源
-    dataGridView1.DataSource = data;
-}
-```
-```
-
-## 5. 表单设计与布局
-
-![WinForm 表单设计与布局技术](/img/in-post/winform-layout-design.svg)
-
-### 5.1 布局管理器
-
-- **FlowLayoutPanel**: 流式布局面板
-- **TableLayoutPanel**: 表格布局面板  
-- **SplitContainer**: 分割容器
-- **GroupBox**: 分组框
-- **TabControl**: 选项卡控件
-
-### 5.2 布局示例
-
-```csharp
-// 使用 TableLayoutPanel 进行布局
-private void InitializeLayout()
-{
-    // 创建表格布局面板
-    TableLayoutPanel tableLayoutPanel = new TableLayoutPanel
-    {
-        Dock = DockStyle.Fill,
-        ColumnCount = 2,
-        RowCount = 3,
-        AutoSize = true
-    };
-    
-    // 设置列样式
-    tableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100));
-    tableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-    
-    // 设置行样式
-    for (int i = 0; i < 3; i++)
-    {
-        tableLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
-    }
-    
-    // 添加控件到表格
-    tableLayoutPanel.Controls.Add(new Label() { Text = "用户名:" }, 0, 0);
-    tableLayoutPanel.Controls.Add(new TextBox() { Dock = DockStyle.Fill }, 1, 0);
-    
-    tableLayoutPanel.Controls.Add(new Label() { Text = "密码:" }, 0, 1);
-    tableLayoutPanel.Controls.Add(new TextBox() { Dock = DockStyle.Fill, PasswordChar = '*' }, 1, 1);
-    
-    Button btnLogin = new Button() { Text = "登录", Dock = DockStyle.Fill };
-    btnLogin.Click += BtnLogin_Click;
-    tableLayoutPanel.SetColumnSpan(btnLogin, 2);
-    tableLayoutPanel.Controls.Add(btnLogin, 0, 2);
-    
-    this.Controls.Add(tableLayoutPanel);
-}
-```
 
 ## 6. 事件处理
 

@@ -7,7 +7,7 @@ GitHub 上不是这样！<br>
 之后你把这个分支 **push** 到你自己的远程仓库，然后给我提一个 **Pull Request**。<br>
 在 PR 描述里，你要详细说明你的功能改动和实现思路，并且 @ 我和至少两个其他的评审。<br>
 我们会 **review**你的代码，可能会留下一些评论，你需要解决所有的 thread。<br>
-等 **CI/CD **流水线全部通过，并且拿到至少两个 **LGTM** 之后，我才会考虑把你的分支 **squash and merge** 到 d**evelop** 里，等待下一个版本发布。<br>
+等 **CI/CD **流水线全部通过，并且拿到至少两个 **LGTM** 之后，我才会考虑把你的分支 **squash and merge** 到 **develop** 里，等待下一个版本发布。<br>
 你怎么直接上来就想 **force push** 到 **main**？！<br>
 GitHub 上根本不是这样！<br>
 我拒绝合并！

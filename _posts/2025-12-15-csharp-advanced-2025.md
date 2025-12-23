@@ -33,7 +33,7 @@ tags:
 4. [C#异步编程详解](#async-programming)
    - [异步编程基础](#async-basics)
    - [async/await关键字](#async-await)
-   - [Task与Task<T>](#task-types)
+   - [Task与Task\<T>](#task-types)
    - [异步方法最佳实践](#async-best-practices)
    - [异步编程与WinForm集成](#async-winform)
 5. [C#文件操作与流处理](#file-stream)

@@ -43,6 +43,17 @@ tags:
    - [StreamReader和StreamWriter](#stream-reader-writer)
    - [MemoryStream内存流](#memorystream)
    - [文件操作与WinForm集成](#file-winform)
+6. [C#多线程编程详解](#multithreading)
+   - [多线程基础概念](#multithreading-basics)
+   - [Thread类详解](#thread-class)
+   - [ThreadPool线程池](#threadpool)
+   - [线程同步机制](#thread-synchronization)
+   - [线程安全集合](#thread-safe-collections)
+   - [并行编程（Parallel类）](#parallel-programming)
+   - [任务并行库（TPL）](#task-parallel-library)
+   - [线程间通信](#thread-communication)
+   - [死锁与竞态条件](#deadlock-race-condition)
+   - [多线程最佳实践](#multithreading-best-practices)
 
 ## <a id="generics-detail"></a>C#泛型详解
 
@@ -2250,14 +2261,1487 @@ public partial class FileCopyForm : Form
 }
 ```
 
+## <a id="multithreading"></a>C#多线程编程详解
+
+多线程编程是C#中实现并发执行的核心技术。通过多线程，可以让程序同时执行多个任务，充分利用多核CPU资源，提高程序性能。本章将深入讲解C#中的多线程编程，包括线程创建、同步、通信等各个方面。
+
+### <a id="multithreading-basics"></a>多线程基础概念
+
+#### 什么是线程？
+
+**线程（Thread）**是操作系统能够进行运算调度的最小单位。一个进程可以包含多个线程，每个线程可以独立执行不同的任务。
+
+**进程 vs 线程：**
+- **进程**：程序的执行实例，拥有独立的内存空间
+- **线程**：进程内的执行单元，共享进程的内存空间
+
+#### 为什么需要多线程？
+
+1. **提高性能**：充分利用多核CPU，并行处理任务
+2. **响应性**：在后台执行耗时操作，保持UI响应
+3. **资源利用**：在等待I/O操作时，可以执行其他任务
+4. **并发处理**：同时处理多个请求或任务
+
+#### 多线程的挑战
+
+1. **线程安全**：多个线程访问共享资源时的数据竞争
+2. **死锁**：线程相互等待导致的程序卡死
+3. **竞态条件**：执行顺序不确定导致的结果不一致
+4. **性能开销**：线程创建、切换、同步的开销
+
+### <a id="thread-class"></a>Thread类详解
+
+`Thread`类是C#中创建和管理线程的基础类。
+
+#### 创建线程
+
+```csharp
+using System.Threading;
+
+// 方式1：使用ThreadStart委托
+Thread thread1 = new Thread(new ThreadStart(DoWork));
+thread1.Start();
+
+// 方式2：使用ParameterizedThreadStart（带参数）
+Thread thread2 = new Thread(new ParameterizedThreadStart(DoWorkWithParameter));
+thread2.Start("参数值");
+
+// 方式3：使用Lambda表达式
+Thread thread3 = new Thread(() => 
+{
+    Console.WriteLine("线程执行中...");
+    Thread.Sleep(1000);
+    Console.WriteLine("线程完成");
+});
+thread3.Start();
+
+// 方式4：使用匿名方法
+Thread thread4 = new Thread(delegate()
+{
+    Console.WriteLine("匿名方法线程");
+});
+thread4.Start();
+
+// 线程方法
+static void DoWork()
+{
+    Console.WriteLine($"线程ID: {Thread.CurrentThread.ManagedThreadId}");
+    Console.WriteLine($"线程名称: {Thread.CurrentThread.Name}");
+    Console.WriteLine($"是否后台线程: {Thread.CurrentThread.IsBackground}");
+    Console.WriteLine($"线程状态: {Thread.CurrentThread.ThreadState}");
+    
+    for (int i = 0; i < 10; i++)
+    {
+        Console.WriteLine($"工作线程: {i}");
+        Thread.Sleep(100);
+    }
+}
+
+static void DoWorkWithParameter(object parameter)
+{
+    Console.WriteLine($"接收参数: {parameter}");
+    // 处理参数...
+}
+```
+
+#### Thread的常用属性
+
+```csharp
+Thread thread = new Thread(DoWork);
+
+// 线程属性
+thread.Name = "工作线程1";              // 线程名称
+thread.IsBackground = true;            // 是否为后台线程
+thread.Priority = ThreadPriority.Normal; // 线程优先级
+thread.CurrentCulture = CultureInfo.CurrentCulture; // 当前文化
+thread.CurrentUICulture = CultureInfo.CurrentUICulture; // UI文化
+
+// 线程状态
+ThreadState state = thread.ThreadState; // 获取线程状态
+
+// 线程ID
+int threadId = thread.ManagedThreadId;  // 托管线程ID
+
+thread.Start();
+```
+
+#### Thread的常用方法
+
+```csharp
+Thread thread = new Thread(DoWork);
+
+// 启动线程
+thread.Start();
+
+// 等待线程完成（阻塞当前线程）
+thread.Join();
+
+// 等待指定时间
+bool completed = thread.Join(1000); // 等待1秒，返回是否完成
+
+// 中断线程（抛出ThreadInterruptedException）
+thread.Interrupt();
+
+// 中止线程（已过时，不推荐使用）
+// thread.Abort(); // 已废弃
+
+// 挂起线程（已过时）
+// thread.Suspend(); // 已废弃
+
+// 恢复线程（已过时）
+// thread.Resume(); // 已废弃
+```
+
+#### 线程优先级
+
+```csharp
+Thread thread = new Thread(DoWork);
+
+// 设置线程优先级
+thread.Priority = ThreadPriority.Lowest;    // 最低
+thread.Priority = ThreadPriority.BelowNormal; // 低于正常
+thread.Priority = ThreadPriority.Normal;      // 正常（默认）
+thread.Priority = ThreadPriority.AboveNormal; // 高于正常
+thread.Priority = ThreadPriority.Highest;     // 最高
+
+thread.Start();
+```
+
+**注意**：线程优先级只是建议，操作系统可能不遵循。过度使用高优先级可能导致其他线程饥饿。
+
+#### 前台线程 vs 后台线程
+
+```csharp
+// 前台线程（默认）
+Thread foregroundThread = new Thread(DoWork);
+foregroundThread.IsBackground = false; // 前台线程
+foregroundThread.Start();
+// 进程会等待所有前台线程结束才退出
+
+// 后台线程
+Thread backgroundThread = new Thread(DoWork);
+backgroundThread.IsBackground = true; // 后台线程
+backgroundThread.Start();
+// 进程退出时，后台线程会被强制终止
+```
+
+**区别：**
+- **前台线程**：进程会等待所有前台线程结束才退出
+- **后台线程**：进程退出时，后台线程会被强制终止
+
+#### 线程状态
+
+```csharp
+Thread thread = new Thread(DoWork);
+
+// 线程状态枚举
+// Unstarted: 未启动
+// Running: 运行中
+// WaitSleepJoin: 等待、睡眠或加入
+// Suspended: 已挂起（已废弃）
+// AbortRequested: 中止请求（已废弃）
+// Stopped: 已停止
+// Aborted: 已中止（已废弃）
+
+ThreadState state = thread.ThreadState;
+Console.WriteLine($"线程状态: {state}");
+
+thread.Start();
+state = thread.ThreadState;
+Console.WriteLine($"启动后状态: {state}");
+```
+
+#### 线程本地存储（ThreadLocal）
+
+```csharp
+// ThreadLocal：每个线程有独立的值
+ThreadLocal<int> threadLocal = new ThreadLocal<int>(() => 
+{
+    return Thread.CurrentThread.ManagedThreadId; // 初始化为线程ID
+});
+
+// 在不同线程中使用
+Thread thread1 = new Thread(() =>
+{
+    threadLocal.Value = 100;
+    Console.WriteLine($"线程1的值: {threadLocal.Value}");
+});
+
+Thread thread2 = new Thread(() =>
+{
+    threadLocal.Value = 200;
+    Console.WriteLine($"线程2的值: {threadLocal.Value}");
+});
+
+thread1.Start();
+thread2.Start();
+thread1.Join();
+thread2.Join();
+
+// 每个线程的值是独立的
+Console.WriteLine($"主线程的值: {threadLocal.Value}");
+
+// 清理资源
+threadLocal.Dispose();
+```
+
+#### ThreadStatic特性
+
+```csharp
+// 使用[ThreadStatic]特性标记静态字段
+[ThreadStatic]
+private static int threadStaticValue = 0;
+
+// 每个线程都有独立的副本
+Thread thread1 = new Thread(() =>
+{
+    threadStaticValue = 100;
+    Console.WriteLine($"线程1的值: {threadStaticValue}");
+});
+
+Thread thread2 = new Thread(() =>
+{
+    threadStaticValue = 200;
+    Console.WriteLine($"线程2的值: {threadStaticValue}");
+});
+
+thread1.Start();
+thread2.Start();
+thread1.Join();
+thread2.Join();
+
+// 注意：主线程的值仍然是0（初始值）
+Console.WriteLine($"主线程的值: {threadStaticValue}");
+```
+
+### <a id="threadpool"></a>ThreadPool线程池
+
+线程池是.NET提供的线程管理机制，可以重用线程，减少线程创建和销毁的开销。
+
+#### 为什么使用线程池？
+
+1. **性能优化**：重用线程，减少创建/销毁开销
+2. **资源管理**：自动管理线程数量，避免创建过多线程
+3. **简单易用**：无需手动管理线程生命周期
+
+#### ThreadPool的基本使用
+
+```csharp
+using System.Threading;
+
+// 方式1：使用QueueUserWorkItem（无返回值）
+ThreadPool.QueueUserWorkItem(DoWork);
+ThreadPool.QueueUserWorkItem(DoWork, "参数值");
+
+// 方式2：使用Lambda表达式
+ThreadPool.QueueUserWorkItem(state =>
+{
+    Console.WriteLine($"线程池线程执行: {state}");
+    Console.WriteLine($"线程ID: {Thread.CurrentThread.ManagedThreadId}");
+    Console.WriteLine($"是否线程池线程: {Thread.CurrentThread.IsThreadPoolThread}");
+});
+
+// 方式3：使用WaitCallback委托
+WaitCallback callback = new WaitCallback(DoWork);
+ThreadPool.QueueUserWorkItem(callback, "数据");
+
+static void DoWork(object state)
+{
+    Console.WriteLine($"执行工作: {state}");
+    Thread.Sleep(1000);
+    Console.WriteLine("工作完成");
+}
+```
+
+#### ThreadPool的配置
+
+```csharp
+// 获取线程池信息
+int workerThreads, completionPortThreads;
+ThreadPool.GetAvailableThreads(out workerThreads, out completionPortThreads);
+Console.WriteLine($"可用工作线程: {workerThreads}");
+Console.WriteLine($"可用I/O线程: {completionPortThreads}");
+
+// 获取最大线程数
+ThreadPool.GetMaxThreads(out workerThreads, out completionPortThreads);
+Console.WriteLine($"最大工作线程: {workerThreads}");
+Console.WriteLine($"最大I/O线程: {completionPortThreads}");
+
+// 获取最小线程数
+ThreadPool.GetMinThreads(out workerThreads, out completionPortThreads);
+Console.WriteLine($"最小工作线程: {workerThreads}");
+Console.WriteLine($"最小I/O线程: {completionPortThreads}");
+
+// 设置最小线程数
+ThreadPool.SetMinThreads(10, 10);
+
+// 设置最大线程数
+ThreadPool.SetMaxThreads(100, 100);
+```
+
+#### ThreadPool vs Thread
+
+| 特性 | Thread | ThreadPool |
+|------|--------|------------|
+| 线程创建 | 手动创建 | 自动管理 |
+| 线程重用 | 不重用 | 重用线程 |
+| 适用场景 | 长时间运行的任务 | 短时间任务 |
+| 控制能力 | 完全控制 | 有限控制 |
+| 性能开销 | 较大 | 较小 |
+
+### <a id="thread-synchronization"></a>线程同步机制
+
+当多个线程访问共享资源时，需要使用同步机制确保线程安全。
+
+#### lock关键字
+
+`lock`是最常用的同步机制，基于`Monitor`类实现。
+
+```csharp
+// 共享资源
+private int _counter = 0;
+private readonly object _lockObject = new object();
+
+// 使用lock保护共享资源
+public void Increment()
+{
+    lock (_lockObject)
+    {
+        _counter++;
+        Console.WriteLine($"计数器: {_counter}, 线程ID: {Thread.CurrentThread.ManagedThreadId}");
+    }
+}
+
+// 多线程测试
+Thread thread1 = new Thread(() =>
+{
+    for (int i = 0; i < 1000; i++)
+    {
+        Increment();
+    }
+});
+
+Thread thread2 = new Thread(() =>
+{
+    for (int i = 0; i < 1000; i++)
+    {
+        Increment();
+    }
+});
+
+thread1.Start();
+thread2.Start();
+thread1.Join();
+thread2.Join();
+
+Console.WriteLine($"最终计数: {_counter}"); // 应该是2000
+```
+
+**lock的注意事项：**
+1. 锁定对象应该是`private readonly`，避免外部锁定
+2. 不要锁定`this`或`Type`对象
+3. 避免嵌套锁定，防止死锁
+4. 锁定范围要尽可能小
+
+#### Monitor类
+
+`Monitor`提供了比`lock`更灵活的控制。
+
+```csharp
+private readonly object _lockObject = new object();
+
+// 使用Monitor
+public void DoWork()
+{
+    Monitor.Enter(_lockObject);
+    try
+    {
+        // 临界区代码
+        Console.WriteLine("执行工作");
+    }
+    finally
+    {
+        Monitor.Exit(_lockObject);
+    }
+}
+
+// Monitor.TryEnter（非阻塞）
+public bool TryDoWork()
+{
+    if (Monitor.TryEnter(_lockObject, 1000)) // 等待1秒
+    {
+        try
+        {
+            // 临界区代码
+            return true;
+        }
+        finally
+        {
+            Monitor.Exit(_lockObject);
+        }
+    }
+    return false;
+}
+
+// Monitor.Wait和Monitor.Pulse（线程间通信）
+private bool _condition = false;
+
+public void WaitForCondition()
+{
+    lock (_lockObject)
+    {
+        while (!_condition)
+        {
+            Monitor.Wait(_lockObject); // 释放锁并等待
+        }
+        // 条件满足，继续执行
+    }
+}
+
+public void SetCondition()
+{
+    lock (_lockObject)
+    {
+        _condition = true;
+        Monitor.Pulse(_lockObject); // 通知等待的线程
+    }
+}
+```
+
+#### Mutex互斥锁
+
+`Mutex`是跨进程的同步机制。
+
+```csharp
+// 创建Mutex
+Mutex mutex = new Mutex(false, "MyMutex");
+
+// 等待获取锁
+mutex.WaitOne();
+try
+{
+    // 临界区代码
+    Console.WriteLine("执行工作");
+}
+finally
+{
+    mutex.ReleaseMutex();
+}
+
+// 使用using自动释放
+using (Mutex mutex = new Mutex(false, "MyMutex"))
+{
+    if (mutex.WaitOne(1000)) // 等待1秒
+    {
+        try
+        {
+            // 临界区代码
+        }
+        finally
+        {
+            mutex.ReleaseMutex();
+        }
+    }
+}
+```
+
+#### Semaphore信号量
+
+`Semaphore`控制同时访问资源的线程数量。
+
+```csharp
+// 创建信号量：最多允许3个线程同时访问
+Semaphore semaphore = new Semaphore(3, 3, "MySemaphore");
+
+// 多个线程竞争访问
+for (int i = 0; i < 10; i++)
+{
+    int threadId = i;
+    Thread thread = new Thread(() =>
+    {
+        semaphore.WaitOne(); // 等待获取信号量
+        try
+        {
+            Console.WriteLine($"线程 {threadId} 开始工作");
+            Thread.Sleep(2000);
+            Console.WriteLine($"线程 {threadId} 完成工作");
+        }
+        finally
+        {
+            semaphore.Release(); // 释放信号量
+        }
+    });
+    thread.Start();
+}
+```
+
+#### SemaphoreSlim（轻量级信号量）
+
+`SemaphoreSlim`是`Semaphore`的轻量级版本，性能更好。
+
+```csharp
+// 创建SemaphoreSlim
+SemaphoreSlim semaphore = new SemaphoreSlim(3, 3);
+
+// 异步等待
+async Task DoWorkAsync()
+{
+    await semaphore.WaitAsync(); // 异步等待
+    try
+    {
+        // 临界区代码
+        await Task.Delay(1000);
+    }
+    finally
+    {
+        semaphore.Release();
+    }
+}
+
+// 同步等待
+void DoWork()
+{
+    semaphore.Wait(); // 同步等待
+    try
+    {
+        // 临界区代码
+    }
+    finally
+    {
+        semaphore.Release();
+    }
+}
+```
+
+#### ReaderWriterLockSlim读写锁
+
+`ReaderWriterLockSlim`允许多个读操作或单个写操作。
+
+```csharp
+private ReaderWriterLockSlim _rwLock = new ReaderWriterLockSlim();
+private int _data = 0;
+
+// 读操作（允许多个线程同时读）
+public int ReadData()
+{
+    _rwLock.EnterReadLock();
+    try
+    {
+        return _data;
+    }
+    finally
+    {
+        _rwLock.ExitReadLock();
+    }
+}
+
+// 写操作（独占）
+public void WriteData(int value)
+{
+    _rwLock.EnterWriteLock();
+    try
+    {
+        _data = value;
+    }
+    finally
+    {
+        _rwLock.ExitWriteLock();
+    }
+}
+
+// 可升级锁（先读后写）
+public void UpgradeReadToWrite()
+{
+    _rwLock.EnterUpgradeableReadLock();
+    try
+    {
+        // 读取数据
+        int current = _data;
+        
+        // 需要时升级为写锁
+        _rwLock.EnterWriteLock();
+        try
+        {
+            _data = current + 1;
+        }
+        finally
+        {
+            _rwLock.ExitWriteLock();
+        }
+    }
+    finally
+    {
+        _rwLock.ExitUpgradeableReadLock();
+    }
+}
+```
+
+#### Interlocked原子操作
+
+`Interlocked`提供原子操作，无需锁定。
+
+```csharp
+private int _counter = 0;
+
+// 原子递增
+int newValue = Interlocked.Increment(ref _counter);
+
+// 原子递减
+int newValue = Interlocked.Decrement(ref _counter);
+
+// 原子加法
+int newValue = Interlocked.Add(ref _counter, 10);
+
+// 原子交换
+int oldValue = Interlocked.Exchange(ref _counter, 100);
+
+// 原子比较并交换（CAS）
+int expected = 50;
+int desired = 100;
+bool success = Interlocked.CompareExchange(ref _counter, desired, expected) == expected;
+
+// 原子读取（64位）
+long longValue = 0;
+long result = Interlocked.Read(ref longValue);
+```
+
+**Interlocked的优势：**
+- 性能高：无需锁定，CPU级别原子操作
+- 无死锁风险：不涉及锁
+- 适合简单操作：递增、递减、交换等
+
+### <a id="thread-safe-collections"></a>线程安全集合
+
+.NET提供了线程安全的集合类，可以在多线程环境中安全使用。
+
+#### ConcurrentQueue<T>线程安全队列
+
+```csharp
+using System.Collections.Concurrent;
+
+ConcurrentQueue<int> queue = new ConcurrentQueue<int>();
+
+// 多线程入队
+Parallel.For(0, 100, i =>
+{
+    queue.Enqueue(i);
+});
+
+// 出队
+int value;
+while (queue.TryDequeue(out value))
+{
+    Console.WriteLine($"出队: {value}");
+}
+
+// 查看但不移除
+if (queue.TryPeek(out value))
+{
+    Console.WriteLine($"队首元素: {value}");
+}
+```
+
+#### ConcurrentStack<T>线程安全栈
+
+```csharp
+ConcurrentStack<int> stack = new ConcurrentStack<int>();
+
+// 入栈
+stack.Push(1);
+stack.Push(2);
+stack.Push(3);
+
+// 出栈
+int value;
+if (stack.TryPop(out value))
+{
+    Console.WriteLine($"出栈: {value}");
+}
+
+// 查看栈顶
+if (stack.TryPeek(out value))
+{
+    Console.WriteLine($"栈顶: {value}");
+}
+
+// 批量出栈
+int[] values = new int[10];
+int count = stack.TryPopRange(values);
+```
+
+#### ConcurrentDictionary<TKey, TValue>线程安全字典
+
+```csharp
+ConcurrentDictionary<string, int> dictionary = new ConcurrentDictionary<string, int>();
+
+// 添加或更新
+dictionary.TryAdd("key1", 1);
+dictionary.TryAdd("key2", 2);
+
+// 获取或添加
+int value = dictionary.GetOrAdd("key3", 3);
+
+// 添加或更新
+dictionary.AddOrUpdate("key1", 1, (key, oldValue) => oldValue + 1);
+
+// 尝试更新
+if (dictionary.TryUpdate("key1", 2, 1))
+{
+    Console.WriteLine("更新成功");
+}
+
+// 尝试移除
+if (dictionary.TryRemove("key1", out value))
+{
+    Console.WriteLine($"移除的值: {value}");
+}
+
+// 遍历（快照）
+foreach (var kvp in dictionary)
+{
+    Console.WriteLine($"{kvp.Key}: {kvp.Value}");
+}
+```
+
+#### ConcurrentBag<T>线程安全包
+
+```csharp
+ConcurrentBag<int> bag = new ConcurrentBag<int>();
+
+// 添加
+bag.Add(1);
+bag.Add(2);
+bag.Add(3);
+
+// 取出（不保证顺序）
+if (bag.TryTake(out int value))
+{
+    Console.WriteLine($"取出: {value}");
+}
+
+// 查看但不移除
+if (bag.TryPeek(out value))
+{
+    Console.WriteLine($"查看: {value}");
+}
+```
+
+#### BlockingCollection<T>阻塞集合
+
+```csharp
+// 创建阻塞集合（基于ConcurrentQueue）
+BlockingCollection<int> collection = new BlockingCollection<int>();
+
+// 生产者线程
+Thread producer = new Thread(() =>
+{
+    for (int i = 0; i < 10; i++)
+    {
+        collection.Add(i);
+        Console.WriteLine($"生产: {i}");
+        Thread.Sleep(100);
+    }
+    collection.CompleteAdding(); // 标记完成
+});
+
+// 消费者线程
+Thread consumer = new Thread(() =>
+{
+    foreach (int item in collection.GetConsumingEnumerable())
+    {
+        Console.WriteLine($"消费: {item}");
+    }
+});
+
+producer.Start();
+consumer.Start();
+producer.Join();
+consumer.Join();
+```
+
+### <a id="parallel-programming"></a>并行编程（Parallel类）
+
+`Parallel`类提供了简单的并行循环和并行执行方法。
+
+#### Parallel.For并行循环
+
+```csharp
+using System.Threading.Tasks;
+
+// 基本用法
+Parallel.For(0, 100, i =>
+{
+    Console.WriteLine($"并行执行: {i}, 线程ID: {Thread.CurrentThread.ManagedThreadId}");
+});
+
+// 带选项的并行循环
+ParallelOptions options = new ParallelOptions
+{
+    MaxDegreeOfParallelism = 4, // 最大并行度
+    CancellationToken = CancellationToken.None
+};
+
+Parallel.For(0, 100, options, i =>
+{
+    // 执行工作
+    Console.WriteLine($"执行: {i}");
+});
+
+// 带状态的并行循环
+long sum = 0;
+Parallel.For<long>(0, 100,
+    () => 0, // 初始化局部状态
+    (i, loop, localSum) => // 循环体
+    {
+        localSum += i;
+        return localSum;
+    },
+    localSum => // 合并局部状态
+    {
+        Interlocked.Add(ref sum, localSum);
+    }
+);
+Console.WriteLine($"总和: {sum}");
+```
+
+#### Parallel.ForEach并行遍历
+
+```csharp
+List<int> numbers = Enumerable.Range(0, 100).ToList();
+
+// 基本用法
+Parallel.ForEach(numbers, number =>
+{
+    Console.WriteLine($"处理: {number}");
+});
+
+// 带选项
+ParallelOptions options = new ParallelOptions
+{
+    MaxDegreeOfParallelism = 4
+};
+
+Parallel.ForEach(numbers, options, number =>
+{
+    // 处理每个元素
+    ProcessNumber(number);
+});
+
+// 带局部状态
+int total = 0;
+Parallel.ForEach(numbers,
+    () => 0, // 初始化
+    (number, loopState, localTotal) => // 循环体
+    {
+        return localTotal + number;
+    },
+    localTotal => // 合并
+    {
+        Interlocked.Add(ref total, localTotal);
+    }
+);
+```
+
+#### Parallel.Invoke并行执行
+
+```csharp
+// 并行执行多个方法
+Parallel.Invoke(
+    () => DoWork1(),
+    () => DoWork2(),
+    () => DoWork3(),
+    () => DoWork4()
+);
+
+// 带选项
+ParallelOptions options = new ParallelOptions
+{
+    MaxDegreeOfParallelism = 2
+};
+
+Parallel.Invoke(options,
+    () => DoWork1(),
+    () => DoWork2(),
+    () => DoWork3()
+);
+```
+
+#### 中断和取消并行操作
+
+```csharp
+// 使用ParallelLoopState中断
+Parallel.For(0, 100, (i, loopState) =>
+{
+    if (i == 50)
+    {
+        loopState.Break(); // 中断循环
+        // 或
+        loopState.Stop(); // 立即停止
+    }
+    
+    Console.WriteLine($"执行: {i}");
+    
+    // 检查是否应该停止
+    if (loopState.ShouldExitCurrentIteration)
+    {
+        return;
+    }
+});
+
+// 使用CancellationToken取消
+CancellationTokenSource cts = new CancellationTokenSource();
+ParallelOptions options = new ParallelOptions
+{
+    CancellationToken = cts.Token
+};
+
+Task.Run(() =>
+{
+    Thread.Sleep(2000);
+    cts.Cancel(); // 2秒后取消
+});
+
+try
+{
+    Parallel.For(0, 100, options, i =>
+    {
+        // 检查取消
+        options.CancellationToken.ThrowIfCancellationRequested();
+        Console.WriteLine($"执行: {i}");
+        Thread.Sleep(100);
+    });
+}
+catch (OperationCanceledException)
+{
+    Console.WriteLine("操作已取消");
+}
+```
+
+### <a id="task-parallel-library"></a>任务并行库（TPL）
+
+TPL（Task Parallel Library）是.NET推荐的并行编程方式，比直接使用Thread更高级。
+
+#### Task基础
+
+```csharp
+using System.Threading.Tasks;
+
+// 创建并启动Task
+Task task = Task.Run(() =>
+{
+    Console.WriteLine("Task执行中...");
+    Thread.Sleep(1000);
+    Console.WriteLine("Task完成");
+});
+
+// 等待Task完成
+task.Wait();
+
+// 创建带返回值的Task
+Task<int> taskWithResult = Task.Run(() =>
+{
+    Thread.Sleep(1000);
+    return 42;
+});
+
+int result = taskWithResult.Result; // 阻塞等待结果
+
+// 使用Task.Factory创建Task
+Task task2 = Task.Factory.StartNew(() =>
+{
+    Console.WriteLine("使用Factory创建Task");
+});
+
+// 创建未启动的Task
+Task task3 = new Task(() =>
+{
+    Console.WriteLine("手动启动的Task");
+});
+task3.Start();
+task3.Wait();
+```
+
+#### Task的延续
+
+```csharp
+// ContinueWith：任务完成后执行
+Task task1 = Task.Run(() =>
+{
+    Console.WriteLine("任务1");
+    return 10;
+});
+
+Task task2 = task1.ContinueWith(previousTask =>
+{
+    int result = previousTask.Result;
+    Console.WriteLine($"任务2，接收结果: {result}");
+    return result * 2;
+});
+
+Task task3 = task2.ContinueWith(previousTask =>
+{
+    int result = previousTask.Result;
+    Console.WriteLine($"任务3，接收结果: {result}");
+});
+
+task3.Wait();
+
+// 多个延续选项
+Task task = Task.Run(() => DoWork());
+
+task.ContinueWith(t => Console.WriteLine("成功"), TaskContinuationOptions.OnlyOnRanToCompletion);
+task.ContinueWith(t => Console.WriteLine("失败"), TaskContinuationOptions.OnlyOnFaulted);
+task.ContinueWith(t => Console.WriteLine("取消"), TaskContinuationOptions.OnlyOnCanceled);
+```
+
+#### Task异常处理
+
+```csharp
+// Task中的异常会被包装在AggregateException中
+Task task = Task.Run(() =>
+{
+    throw new InvalidOperationException("任务异常");
+});
+
+try
+{
+    task.Wait();
+}
+catch (AggregateException ex)
+{
+    foreach (var innerEx in ex.InnerExceptions)
+    {
+        Console.WriteLine($"异常: {innerEx.Message}");
+    }
+    ex.Handle(e => e is InvalidOperationException);
+}
+
+// 检查Task状态
+if (task.IsFaulted)
+{
+    Console.WriteLine("Task失败");
+    Console.WriteLine(task.Exception?.Message);
+}
+
+if (task.IsCanceled)
+{
+    Console.WriteLine("Task已取消");
+}
+
+if (task.IsCompleted)
+{
+    Console.WriteLine("Task已完成");
+}
+```
+
+#### Task组合
+
+```csharp
+// Task.WhenAll：等待所有任务完成
+Task task1 = Task.Run(() => { Thread.Sleep(1000); return 1; });
+Task task2 = Task.Run(() => { Thread.Sleep(2000); return 2; });
+Task task3 = Task.Run(() => { Thread.Sleep(1500); return 3; });
+
+Task<int[]> allTasks = Task.WhenAll(task1, task2, task3);
+int[] results = await allTasks;
+Console.WriteLine($"结果: {string.Join(", ", results)}");
+
+// Task.WhenAny：等待任意一个任务完成
+Task<int>[] tasks = new[]
+{
+    Task.Run(() => { Thread.Sleep(1000); return 1; }),
+    Task.Run(() => { Thread.Sleep(2000); return 2; }),
+    Task.Run(() => { Thread.Sleep(1500); return 3; })
+};
+
+Task<int> completedTask = await Task.WhenAny(tasks);
+int result = await completedTask;
+Console.WriteLine($"第一个完成的任务结果: {result}");
+```
+
+### <a id="thread-communication"></a>线程间通信
+
+线程间需要协调和通信时，可以使用多种机制。
+
+#### 事件等待句柄（EventWaitHandle）
+
+```csharp
+// AutoResetEvent：自动重置事件
+AutoResetEvent autoEvent = new AutoResetEvent(false);
+
+Thread thread1 = new Thread(() =>
+{
+    Console.WriteLine("线程1等待事件");
+    autoEvent.WaitOne(); // 等待事件
+    Console.WriteLine("线程1收到事件");
+});
+
+Thread thread2 = new Thread(() =>
+{
+    Thread.Sleep(2000);
+    Console.WriteLine("线程2设置事件");
+    autoEvent.Set(); // 设置事件
+});
+
+thread1.Start();
+thread2.Start();
+thread1.Join();
+thread2.Join();
+
+// ManualResetEvent：手动重置事件
+ManualResetEvent manualEvent = new ManualResetEvent(false);
+
+Thread thread3 = new Thread(() =>
+{
+    Console.WriteLine("线程3等待事件");
+    manualEvent.WaitOne();
+    Console.WriteLine("线程3收到事件");
+});
+
+Thread thread4 = new Thread(() =>
+{
+    Thread.Sleep(2000);
+    Console.WriteLine("线程4设置事件");
+    manualEvent.Set(); // 设置事件，所有等待的线程都会继续
+    Thread.Sleep(1000);
+    manualEvent.Reset(); // 重置事件
+});
+
+thread3.Start();
+thread4.Start();
+thread3.Join();
+thread4.Join();
+```
+
+#### CountdownEvent倒计时事件
+
+```csharp
+// 等待多个操作完成
+CountdownEvent countdown = new CountdownEvent(3);
+
+for (int i = 0; i < 3; i++)
+{
+    int taskId = i;
+    Task.Run(() =>
+    {
+        Console.WriteLine($"任务 {taskId} 开始");
+        Thread.Sleep(1000);
+        Console.WriteLine($"任务 {taskId} 完成");
+        countdown.Signal(); // 信号计数减1
+    });
+}
+
+countdown.Wait(); // 等待计数为0
+Console.WriteLine("所有任务完成");
+countdown.Dispose();
+```
+
+#### Barrier屏障
+
+```csharp
+// 多个线程在屏障处同步
+Barrier barrier = new Barrier(3, b =>
+{
+    Console.WriteLine($"阶段 {b.CurrentPhaseNumber} 完成");
+});
+
+for (int i = 0; i < 3; i++)
+{
+    int threadId = i;
+    Task.Run(() =>
+    {
+        Console.WriteLine($"线程 {threadId} 阶段1");
+        barrier.SignalAndWait(); // 到达屏障并等待
+        
+        Console.WriteLine($"线程 {threadId} 阶段2");
+        barrier.SignalAndWait();
+        
+        Console.WriteLine($"线程 {threadId} 完成");
+    });
+}
+
+Thread.Sleep(5000);
+barrier.Dispose();
+```
+
+### <a id="deadlock-race-condition"></a>死锁与竞态条件
+
+#### 死锁（Deadlock）
+
+死锁是指两个或多个线程相互等待对方释放资源，导致程序无法继续执行。
+
+```csharp
+// 死锁示例
+object lock1 = new object();
+object lock2 = new object();
+
+Thread thread1 = new Thread(() =>
+{
+    lock (lock1)
+    {
+        Thread.Sleep(100);
+        lock (lock2) // 等待lock2
+        {
+            Console.WriteLine("线程1完成");
+        }
+    }
+});
+
+Thread thread2 = new Thread(() =>
+{
+    lock (lock2)
+    {
+        Thread.Sleep(100);
+        lock (lock1) // 等待lock1
+        {
+            Console.WriteLine("线程2完成");
+        }
+    }
+});
+
+thread1.Start();
+thread2.Start();
+// 两个线程相互等待，导致死锁
+```
+
+**避免死锁的方法：**
+1. 按相同顺序获取锁
+2. 使用超时机制（Monitor.TryEnter）
+3. 避免嵌套锁定
+4. 使用更高级的同步机制
+
+```csharp
+// 避免死锁：按相同顺序获取锁
+object lock1 = new object();
+object lock2 = new object();
+
+void SafeMethod1()
+{
+    lock (lock1)
+    {
+        lock (lock2) // 总是先lock1后lock2
+        {
+            // 安全代码
+        }
+    }
+}
+
+void SafeMethod2()
+{
+    lock (lock1) // 同样先lock1
+    {
+        lock (lock2) // 后lock2
+        {
+            // 安全代码
+        }
+    }
+}
+```
+
+#### 竞态条件（Race Condition）
+
+竞态条件是指多个线程访问共享资源时，执行顺序不确定导致的结果不一致。
+
+```csharp
+// 竞态条件示例
+private int _counter = 0;
+
+void Increment()
+{
+    _counter++; // 不是原子操作
+    // 实际包含：读取、加1、写入三个步骤
+}
+
+// 多线程调用会导致结果不正确
+Parallel.For(0, 10000, i => Increment());
+Console.WriteLine($"计数器: {_counter}"); // 可能不是10000
+```
+
+**解决方法：**
+
+```csharp
+// 方法1：使用lock
+private int _counter = 0;
+private readonly object _lock = new object();
+
+void SafeIncrement()
+{
+    lock (_lock)
+    {
+        _counter++;
+    }
+}
+
+// 方法2：使用Interlocked
+private int _counter = 0;
+
+void AtomicIncrement()
+{
+    Interlocked.Increment(ref _counter);
+}
+
+// 方法3：使用线程安全集合
+private ConcurrentDictionary<string, int> _counters = new ConcurrentDictionary<string, int>();
+
+void SafeIncrement(string key)
+{
+    _counters.AddOrUpdate(key, 1, (k, v) => v + 1);
+}
+```
+
+### <a id="multithreading-best-practices"></a>多线程最佳实践
+
+#### 1. 优先使用Task而不是Thread
+
+```csharp
+// ❌ 不推荐：直接使用Thread
+Thread thread = new Thread(DoWork);
+thread.Start();
+
+// ✅ 推荐：使用Task
+Task task = Task.Run(DoWork);
+await task;
+```
+
+#### 2. 使用async/await进行异步编程
+
+```csharp
+// ❌ 不推荐：阻塞等待
+Task task = Task.Run(DoWork);
+task.Wait();
+
+// ✅ 推荐：异步等待
+await Task.Run(DoWork);
+```
+
+#### 3. 避免共享可变状态
+
+```csharp
+// ❌ 不推荐：共享可变状态
+private int _sharedCounter = 0;
+
+// ✅ 推荐：使用不可变对象或线程安全集合
+private readonly ConcurrentDictionary<string, int> _counters = new ConcurrentDictionary<string, int>();
+```
+
+#### 4. 使用线程安全集合
+
+```csharp
+// ❌ 不推荐：普通集合+锁
+private List<int> _list = new List<int>();
+private readonly object _lock = new object();
+
+// ✅ 推荐：线程安全集合
+private ConcurrentBag<int> _bag = new ConcurrentBag<int>();
+```
+
+#### 5. 合理使用锁的范围
+
+```csharp
+// ❌ 不推荐：锁范围太大
+lock (_lock)
+{
+    DoWork1(); // 不需要锁的操作
+    DoWork2(); // 不需要锁的操作
+    UpdateSharedResource(); // 需要锁的操作
+}
+
+// ✅ 推荐：锁范围最小化
+DoWork1();
+DoWork2();
+lock (_lock)
+{
+    UpdateSharedResource();
+}
+```
+
+#### 6. 避免在锁内调用外部方法
+
+```csharp
+// ❌ 不推荐：锁内调用外部方法可能导致死锁
+lock (_lock)
+{
+    ExternalMethod(); // 可能获取其他锁
+}
+
+// ✅ 推荐：先调用外部方法，再锁定
+var result = ExternalMethod();
+lock (_lock)
+{
+    UpdateWithResult(result);
+}
+```
+
+#### 7. 使用CancellationToken支持取消
+
+```csharp
+// ✅ 推荐：支持取消
+async Task DoWorkAsync(CancellationToken cancellationToken)
+{
+    for (int i = 0; i < 100; i++)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        await ProcessItemAsync(i);
+    }
+}
+```
+
+#### 8. 合理设置并行度
+
+```csharp
+// ✅ 推荐：根据CPU核心数设置并行度
+int maxParallelism = Environment.ProcessorCount;
+ParallelOptions options = new ParallelOptions
+{
+    MaxDegreeOfParallelism = maxParallelism
+};
+
+Parallel.For(0, 1000, options, i =>
+{
+    // 处理工作
+});
+```
+
+#### 9. 及时释放资源
+
+```csharp
+// ✅ 推荐：使用using确保资源释放
+using (SemaphoreSlim semaphore = new SemaphoreSlim(1))
+{
+    await semaphore.WaitAsync();
+    try
+    {
+        // 使用资源
+    }
+    finally
+    {
+        semaphore.Release();
+    }
+}
+```
+
+#### 10. 监控和诊断
+
+```csharp
+// 使用性能计数器监控线程
+PerformanceCounter threadCounter = new PerformanceCounter(
+    "Process", "Thread Count", Process.GetCurrentProcess().ProcessName);
+
+Console.WriteLine($"线程数: {threadCounter.NextValue()}");
+
+// 使用诊断工具
+System.Diagnostics.Trace.WriteLine($"线程ID: {Thread.CurrentThread.ManagedThreadId}");
+```
+
 ## 总结
 
-C#进阶特性包括泛型、委托与Lambda表达式、设计模式、异步编程和文件操作流处理等。这些特性在现代C#开发中发挥着重要作用：
+C#进阶特性包括泛型、委托与Lambda表达式、设计模式、异步编程、文件操作流处理和多线程编程等。这些特性在现代C#开发中发挥着重要作用：
 
 1. **泛型**：提供类型安全、代码重用和性能优化
 2. **委托与Lambda表达式**：支持函数式编程，简化代码
 3. **设计模式**：提供经过验证的解决方案
 4. **异步编程**：提高应用程序响应性和性能
 5. **文件操作与流处理**：高效处理数据输入输出
+6. **多线程编程**：充分利用多核CPU，实现并发执行
 
-在WinForm开发中，合理运用这些特性可以构建出高性能、可维护的桌面应用程序。异步编程特别重要，可以保持UI响应性；文件操作流处理则提供了灵活的数据处理能力。
+在WinForm开发中，合理运用这些特性可以构建出高性能、可维护的桌面应用程序。异步编程和多线程编程特别重要，可以保持UI响应性并提高程序性能；但需要注意线程安全和同步机制，避免死锁和竞态条件。

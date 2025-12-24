@@ -1191,7 +1191,7 @@ private async void LoadFileAsync()
 
 1. **异步方法**：使用`async`关键字标记的方法
 2. **await表达式**：等待异步操作完成，但不阻塞当前线程
-3. **Task和Task<T>**：表示异步操作的返回类型
+3. **Task和Task\<T>**：表示异步操作的返回类型
 4. **异步状态机**：编译器将异步方法转换为状态机
 
 ### <a id="async-await"></a>async/await关键字

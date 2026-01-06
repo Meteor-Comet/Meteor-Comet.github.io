@@ -34,8 +34,8 @@ tags:
 - **获取信息**：创建成功后，获取服务器IP地址、用户名（通常是root）和初始密码
 
 **VPS推荐**：
-- 10美元VPS：`https://hello.cloudcone.com/`
-- 住宅IP VPS：`https://ipraft.com/server/purchase`
+- 10美元VPS：`https://app.cloudcone.com/?ref=13734`
+- 住宅IP VPS：`https://ipraft.com/?i6c1ab5`
 
 ### 第二步：连接服务器并进行基准测试
 

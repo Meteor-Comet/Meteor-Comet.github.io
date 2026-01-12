@@ -28,16 +28,46 @@ tags:
    - [Predicate委托详解](#predicate-delegate-advanced)
    - [委托链与事件](#delegate-chain-event)
    - [表达式树](#expression-trees)
-3. [C#设计模式详解](#design-patterns)
+3. [C# LINQ详解](#linq-detail)
+   - [LINQ的基本概念](#linq-concept)
+   - [LINQ查询语法](#linq-query-syntax)
+   - [LINQ方法语法](#linq-method-syntax)
+   - [标准查询操作符](#standard-query-operators)
+   - [LINQ to Objects](#linq-to-objects)
+   - [LINQ to SQL](#linq-to-sql)
+   - [LINQ to XML](#linq-to-xml)
+   - [LINQ性能优化](#linq-performance)
+   - [LINQ应用场景](#linq-scenarios)
+4. [C# ORM框架详解](#orm-frameworks)
+   - [ADO.NET基础](#ado-net-basics)
+   - [ADO.NET连接管理](#ado-net-connection)
+   - [ADO.NET命令执行](#ado-net-commands)
+   - [ADO.NET数据读取](#ado-net-data-reader)
+   - [ADO.NET参数化查询](#ado-net-parameters)
+   - [ADO.NET事务处理](#ado-net-transactions)
+   - [ADO.NET存储过程](#ado-net-stored-procedures)
+   - [Entity Framework 6基础](#ef6-basics)
+   - [DbContext详解](#dbcontext-detail)
+   - [DbSet详解](#dbset-detail)
+   - [实体配置](#entity-configuration)
+   - [关系配置](#relationship-configuration)
+   - [数据查询](#ef6-querying)
+   - [数据修改](#ef6-modifying)
+   - [变更跟踪](#change-tracking)
+   - [并发控制](#concurrency-control)
+   - [迁移（Migrations）](#migrations)
+   - [性能优化](#ef6-performance)
+   - [高级特性](#ef6-advanced)
+5. [C#设计模式详解](#design-patterns)
    - [单例模式](#singleton-pattern)
-4. [C#特性（Attributes）详解](#attributes-detail)
+6. [C#特性（Attributes）详解](#attributes-detail)
    - [特性的基本概念](#attributes-concept)
    - [特性的定义与使用](#attributes-usage)
    - [常见内置特性](#common-attributes)
    - [自定义特性](#custom-attributes)
    - [特性的反射访问](#attributes-reflection)
    - [特性的应用场景](#attributes-scenarios)
-5. [C#反射（Reflection）详解](#reflection-detail)
+7. [C#反射（Reflection）详解](#reflection-detail)
    - [反射的基本概念](#reflection-concept)
    - [Type类型详解](#type-class)
    - [程序集（Assembly）操作](#assembly-operations)
@@ -47,20 +77,20 @@ tags:
    - [泛型类型的反射](#generic-reflection)
    - [反射的性能优化](#reflection-performance)
    - [反射的应用场景](#reflection-scenarios)
-6. [C#异步编程详解](#async-programming)
+8. [C#异步编程详解](#async-programming)
    - [异步编程基础](#async-basics)
    - [async/await关键字](#async-await)
    - [Task与Task\<T>](#task-types)
    - [异步方法最佳实践](#async-best-practices)
    - [异步编程与WinForm集成](#async-winform)
-7. [C#文件操作与流处理](#file-stream)
+9. [C#文件操作与流处理](#file-stream)
    - [文件操作基础](#file-basics)
    - [流（Stream）概述](#stream-overview)
    - [FileStream文件流](#filestream)
    - [StreamReader和StreamWriter](#stream-reader-writer)
    - [MemoryStream内存流](#memorystream)
    - [文件操作与WinForm集成](#file-winform)
-8. [C#多线程编程详解](#multithreading)
+10. [C#多线程编程详解](#multithreading)
    - [多线程基础概念](#multithreading-basics)
    - [Thread类详解](#thread-class)
    - [ThreadPool线程池](#threadpool)
@@ -991,6 +1021,2404 @@ using (var context = new MyDbContext())
     Expression<Func<Customer, bool>> filter = c => c.City == "北京" && c.Age > 18;
     var customers = context.Customers.Where(filter).ToList();
     // 生成的SQL类似: SELECT * FROM Customers WHERE City = '北京' AND Age > 18
+}
+```
+
+## <a id="linq-detail"></a>C# LINQ详解
+
+LINQ（Language Integrated Query，语言集成查询）是C#中的强大查询功能，它提供了一种统一的语法来查询各种数据源（集合、数据库、XML等）。LINQ将查询语法直接集成到C#语言中，使得数据查询变得简洁、类型安全和易于维护。
+
+### <a id="linq-concept"></a>LINQ的基本概念
+
+#### 什么是LINQ？
+
+LINQ是一组技术和语言扩展，允许在C#中编写类似SQL的查询语句来查询数据。LINQ支持多种数据源：
+- **LINQ to Objects**：查询内存中的集合
+- **LINQ to SQL**：查询关系数据库
+- **LINQ to XML**：查询XML文档
+- **LINQ to Entities**：查询Entity Framework实体
+
+#### LINQ的优势
+
+1. **统一语法**：使用相同的语法查询不同的数据源
+2. **类型安全**：编译时类型检查，减少运行时错误
+3. **IntelliSense支持**：IDE自动完成和类型提示
+4. **延迟执行**：查询在需要时才执行，提高性能
+5. **声明式编程**：描述"做什么"而不是"怎么做"
+
+#### LINQ的两种语法
+
+LINQ支持两种语法形式：
+
+```csharp
+// 1. 查询语法（Query Syntax）- 类似SQL
+var query1 = from p in products
+             where p.Price > 100
+             select p.Name;
+
+// 2. 方法语法（Method Syntax）- 链式方法调用
+var query2 = products
+    .Where(p => p.Price > 100)
+    .Select(p => p.Name);
+```
+
+### <a id="linq-query-syntax"></a>LINQ查询语法
+
+查询语法使用类似SQL的关键字，更加直观和易读。
+
+#### 基本查询语法
+
+```csharp
+using System.Linq;
+
+public class Product
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public decimal Price { get; set; }
+    public string Category { get; set; }
+    public bool InStock { get; set; }
+}
+
+List<Product> products = new List<Product>
+{
+    new Product { Id = 1, Name = "笔记本电脑", Price = 5999.99m, Category = "电子产品", InStock = true },
+    new Product { Id = 2, Name = "智能手机", Price = 3999.99m, Category = "电子产品", InStock = true },
+    new Product { Id = 3, Name = "办公桌", Price = 899.99m, Category = "家具", InStock = false },
+    new Product { Id = 4, Name = "椅子", Price = 299.99m, Category = "家具", InStock = true }
+};
+
+// from：指定数据源
+var query1 = from p in products
+             select p;
+
+// where：过滤条件
+var query2 = from p in products
+             where p.Price > 1000
+             select p;
+
+// select：选择字段
+var query3 = from p in products
+             select p.Name;
+
+// 选择多个字段（匿名类型）
+var query4 = from p in products
+             select new { p.Name, p.Price };
+
+// orderby：排序
+var query5 = from p in products
+             orderby p.Price ascending
+             select p;
+
+// orderby descending：降序排序
+var query6 = from p in products
+             orderby p.Price descending
+             select p;
+
+// 多个排序条件
+var query7 = from p in products
+             orderby p.Category, p.Price descending
+             select p;
+
+// group by：分组
+var query8 = from p in products
+             group p by p.Category into g
+             select new { Category = g.Key, Products = g };
+
+// join：连接
+List<Category> categories = new List<Category>
+{
+    new Category { Id = 1, Name = "电子产品" },
+    new Category { Id = 2, Name = "家具" }
+};
+
+var query9 = from p in products
+             join c in categories on p.Category equals c.Name
+             select new { ProductName = p.Name, CategoryName = c.Name };
+
+// let：创建临时变量
+var query10 = from p in products
+              let discountPrice = p.Price * 0.9m
+              where discountPrice > 500
+              select new { p.Name, OriginalPrice = p.Price, DiscountPrice = discountPrice };
+
+// into：继续查询
+var query11 = from p in products
+              group p by p.Category into categoryGroup
+              where categoryGroup.Count() > 1
+              select new { Category = categoryGroup.Key, Count = categoryGroup.Count() };
+```
+
+### <a id="linq-method-syntax"></a>LINQ方法语法
+
+方法语法使用扩展方法和Lambda表达式，更加灵活和功能强大。
+
+#### 基本方法语法
+
+```csharp
+// Where：过滤
+var query1 = products.Where(p => p.Price > 1000);
+
+// Select：投影
+var query2 = products.Select(p => p.Name);
+var query3 = products.Select(p => new { p.Name, p.Price });
+
+// OrderBy / OrderByDescending：排序
+var query4 = products.OrderBy(p => p.Price);
+var query5 = products.OrderByDescending(p => p.Price);
+
+// ThenBy / ThenByDescending：多级排序
+var query6 = products
+    .OrderBy(p => p.Category)
+    .ThenByDescending(p => p.Price);
+
+// GroupBy：分组
+var query7 = products.GroupBy(p => p.Category);
+
+// SelectMany：展平嵌套集合
+List<Order> orders = new List<Order>
+{
+    new Order { Id = 1, Items = new List<OrderItem> { new OrderItem { ProductName = "A" }, new OrderItem { ProductName = "B" } } },
+    new Order { Id = 2, Items = new List<OrderItem> { new OrderItem { ProductName = "C" } } }
+};
+
+var allItems = orders.SelectMany(o => o.Items);
+
+// Join：连接
+var query8 = products.Join(
+    categories,
+    p => p.Category,
+    c => c.Name,
+    (p, c) => new { ProductName = p.Name, CategoryName = c.Name }
+);
+
+// Take / Skip：分页
+var query9 = products.OrderBy(p => p.Price).Take(10);      // 前10条
+var query10 = products.OrderBy(p => p.Price).Skip(10).Take(10); // 第11-20条
+
+// First / FirstOrDefault：获取第一个元素
+var firstProduct = products.First(p => p.Price > 1000);
+var firstOrNull = products.FirstOrDefault(p => p.Price > 10000); // 找不到返回null
+
+// Last / LastOrDefault：获取最后一个元素
+var lastProduct = products.Last(p => p.InStock);
+
+// Single / SingleOrDefault：获取唯一元素
+var singleProduct = products.Single(p => p.Id == 1);
+var singleOrNull = products.SingleOrDefault(p => p.Id == 999);
+
+// Any / All：存在性检查
+bool hasExpensive = products.Any(p => p.Price > 5000);
+bool allInStock = products.All(p => p.InStock);
+
+// Count / Sum / Average / Min / Max：聚合
+int count = products.Count();
+int expensiveCount = products.Count(p => p.Price > 1000);
+decimal totalPrice = products.Sum(p => p.Price);
+decimal avgPrice = products.Average(p => p.Price);
+decimal minPrice = products.Min(p => p.Price);
+decimal maxPrice = products.Max(p => p.Price);
+
+// Distinct：去重
+var distinctCategories = products.Select(p => p.Category).Distinct();
+
+// Contains：包含检查
+bool containsProduct = products.Select(p => p.Name).Contains("笔记本电脑");
+
+// Concat / Union：合并
+var allItems1 = products.Select(p => p.Name);
+var allItems2 = new List<string> { "新产品1", "新产品2" };
+var combined = allItems1.Concat(allItems2);
+var unioned = allItems1.Union(allItems2); // 去重合并
+
+// Intersect / Except：集合运算
+var set1 = new List<int> { 1, 2, 3, 4 };
+var set2 = new List<int> { 3, 4, 5, 6 };
+var intersection = set1.Intersect(set2); // {3, 4}
+var except = set1.Except(set2);          // {1, 2}
+
+// ToList / ToArray / ToDictionary：转换为集合
+List<Product> productList = products.Where(p => p.InStock).ToList();
+Product[] productArray = products.ToArray();
+Dictionary<int, Product> productDict = products.ToDictionary(p => p.Id);
+Dictionary<string, List<Product>> categoryDict = products
+    .GroupBy(p => p.Category)
+    .ToDictionary(g => g.Key, g => g.ToList());
+```
+
+### <a id="standard-query-operators"></a>标准查询操作符
+
+#### 筛选操作符（Filtering）
+
+```csharp
+// Where：根据条件筛选
+var inStockProducts = products.Where(p => p.InStock);
+var expensiveProducts = products.Where(p => p.Price > 1000 && p.Category == "电子产品");
+
+// 使用索引的Where重载
+var productsByIndex = products.Where((p, index) => index % 2 == 0); // 偶数索引
+```
+
+#### 投影操作符（Projection）
+
+```csharp
+// Select：选择单个字段
+var names = products.Select(p => p.Name);
+
+// Select：创建匿名类型
+var productInfo = products.Select(p => new { p.Name, p.Price, IsExpensive = p.Price > 1000 });
+
+// Select：使用索引
+var indexedProducts = products.Select((p, index) => new { Index = index, p.Name });
+
+// SelectMany：展平嵌套集合
+var allOrderItems = orders.SelectMany(o => o.Items);
+var allOrderItemsWithOrder = orders.SelectMany(o => o.Items, (o, item) => new { OrderId = o.Id, Item = item });
+```
+
+#### 排序操作符（Sorting）
+
+```csharp
+// OrderBy / OrderByDescending
+var sortedByPrice = products.OrderBy(p => p.Price);
+var sortedByPriceDesc = products.OrderByDescending(p => p.Price);
+
+// ThenBy / ThenByDescending（多级排序）
+var sorted = products
+    .OrderBy(p => p.Category)
+    .ThenByDescending(p => p.Price)
+    .ThenBy(p => p.Name);
+
+// Reverse：反转顺序
+var reversed = products.Reverse();
+```
+
+#### 分组操作符（Grouping）
+
+```csharp
+// GroupBy：分组
+var groupedByCategory = products.GroupBy(p => p.Category);
+
+foreach (var group in groupedByCategory)
+{
+    Console.WriteLine($"类别: {group.Key}");
+    foreach (var product in group)
+    {
+        Console.WriteLine($"  - {product.Name}");
+    }
+}
+
+// GroupBy：多个键
+var groupedByMultiple = products.GroupBy(p => new { p.Category, p.InStock });
+
+// GroupBy：使用结果选择器
+var categoryStats = products.GroupBy(
+    p => p.Category,
+    (key, items) => new 
+    { 
+        Category = key, 
+        Count = items.Count(), 
+        TotalPrice = items.Sum(p => p.Price),
+        Products = items.ToList()
+    }
+);
+```
+
+#### 连接操作符（Joining）
+
+```csharp
+// Join：内连接
+var joinQuery = products.Join(
+    categories,
+    product => product.Category,
+    category => category.Name,
+    (product, category) => new 
+    { 
+        ProductName = product.Name, 
+        CategoryName = category.Name 
+    }
+);
+
+// GroupJoin：分组连接
+var groupJoinQuery = categories.GroupJoin(
+    products,
+    category => category.Name,
+    product => product.Category,
+    (category, products) => new 
+    { 
+        Category = category.Name, 
+        Products = products 
+    }
+);
+
+// Zip：合并两个序列
+var numbers = new List<int> { 1, 2, 3 };
+var letters = new List<string> { "A", "B", "C" };
+var zipped = numbers.Zip(letters, (n, l) => $"{n}{l}"); // {"1A", "2B", "3C"}
+```
+
+#### 聚合操作符（Aggregation）
+
+```csharp
+// Count：计数
+int totalCount = products.Count();
+int inStockCount = products.Count(p => p.InStock);
+
+// Sum：求和
+decimal totalPrice = products.Sum(p => p.Price);
+decimal categoryTotal = products.Where(p => p.Category == "电子产品").Sum(p => p.Price);
+
+// Average：平均值
+decimal avgPrice = products.Average(p => p.Price);
+
+// Min / Max：最小/最大值
+decimal minPrice = products.Min(p => p.Price);
+decimal maxPrice = products.Max(p => p.Price);
+Product cheapestProduct = products.OrderBy(p => p.Price).First();
+
+// Aggregate：自定义聚合
+decimal total = products.Aggregate(0m, (sum, p) => sum + p.Price);
+string allNames = products.Aggregate("", (current, p) => current + p.Name + ", ");
+```
+
+#### 元素操作符（Element）
+
+```csharp
+// First / FirstOrDefault
+Product first = products.First();
+Product firstExpensive = products.First(p => p.Price > 5000);
+Product firstOrNull = products.FirstOrDefault(p => p.Price > 10000);
+
+// Last / LastOrDefault
+Product last = products.Last();
+Product lastExpensive = products.LastOrDefault(p => p.Price > 5000);
+
+// Single / SingleOrDefault
+Product single = products.Single(p => p.Id == 1);
+Product singleOrNull = products.SingleOrDefault(p => p.Id == 999);
+
+// ElementAt / ElementAtOrDefault
+Product atIndex = products.ElementAt(2);
+Product atIndexOrNull = products.ElementAtOrDefault(100);
+```
+
+#### 集合操作符（Set）
+
+```csharp
+// Distinct：去重
+var distinctCategories = products.Select(p => p.Category).Distinct();
+
+// Distinct：使用自定义比较器
+var distinctProducts = products.Distinct(new ProductComparer());
+
+// Union：并集（去重）
+var set1 = new List<int> { 1, 2, 3 };
+var set2 = new List<int> { 3, 4, 5 };
+var union = set1.Union(set2); // {1, 2, 3, 4, 5}
+
+// Intersect：交集
+var intersection = set1.Intersect(set2); // {3}
+
+// Except：差集
+var except = set1.Except(set2); // {1, 2}
+
+// Concat：连接（不去重）
+var concat = set1.Concat(set2); // {1, 2, 3, 3, 4, 5}
+```
+
+#### 分区操作符（Partitioning）
+
+```csharp
+// Take：取前N个
+var first10 = products.Take(10);
+
+// Skip：跳过前N个
+var after10 = products.Skip(10);
+
+// TakeWhile：满足条件时取
+var takeWhile = products.TakeWhile(p => p.Price < 1000);
+
+// SkipWhile：满足条件时跳过
+var skipWhile = products.SkipWhile(p => p.Price < 1000);
+
+// 分页示例
+int pageSize = 10;
+int pageNumber = 2;
+var page = products
+    .OrderBy(p => p.Id)
+    .Skip((pageNumber - 1) * pageSize)
+    .Take(pageSize);
+```
+
+#### 转换操作符（Conversion）
+
+```csharp
+// ToList
+List<Product> productList = products.ToList();
+
+// ToArray
+Product[] productArray = products.ToArray();
+
+// ToDictionary
+Dictionary<int, Product> dictById = products.ToDictionary(p => p.Id);
+Dictionary<int, string> dictIdToName = products.ToDictionary(p => p.Id, p => p.Name);
+
+// ToLookup：类似Dictionary，但一个键可以对应多个值
+ILookup<string, Product> lookupByCategory = products.ToLookup(p => p.Category);
+var electronics = lookupByCategory["电子产品"];
+
+// AsEnumerable / AsQueryable：延迟执行
+IEnumerable<Product> enumerable = products.AsEnumerable();
+IQueryable<Product> queryable = products.AsQueryable();
+
+// Cast：类型转换
+IEnumerable<object> objects = new List<object> { 1, 2, 3 };
+IEnumerable<int> integers = objects.Cast<int>();
+
+// OfType：类型过滤
+IEnumerable<object> mixed = new List<object> { 1, "hello", 2, "world" };
+IEnumerable<int> numbers = mixed.OfType<int>(); // {1, 2}
+```
+
+### <a id="linq-to-objects"></a>LINQ to Objects
+
+LINQ to Objects用于查询内存中的集合（如List、Array等）。
+
+#### 复杂查询示例
+
+```csharp
+// 示例1：查找价格最高的前3个产品
+var top3Products = products
+    .OrderByDescending(p => p.Price)
+    .Take(3)
+    .Select(p => new { p.Name, p.Price });
+
+// 示例2：按类别分组，计算每类的平均价格
+var categoryAvgPrice = products
+    .GroupBy(p => p.Category)
+    .Select(g => new 
+    { 
+        Category = g.Key, 
+        AvgPrice = g.Average(p => p.Price),
+        Count = g.Count()
+    });
+
+// 示例3：查找有库存且价格在指定范围内的产品
+decimal minPrice = 100;
+decimal maxPrice = 5000;
+var filteredProducts = products
+    .Where(p => p.InStock && p.Price >= minPrice && p.Price <= maxPrice)
+    .OrderBy(p => p.Price)
+    .ToList();
+
+// 示例4：计算总价值
+decimal totalValue = products
+    .Where(p => p.InStock)
+    .Sum(p => p.Price);
+
+// 示例5：查找产品名称中包含特定关键字的产品
+string keyword = "电脑";
+var searchResults = products
+    .Where(p => p.Name.Contains(keyword))
+    .ToList();
+
+// 示例6：判断是否存在符合条件的产品
+bool hasExpensiveElectronics = products
+    .Any(p => p.Category == "电子产品" && p.Price > 5000);
+
+// 示例7：获取所有类别及其产品数量
+var categoryCounts = products
+    .GroupBy(p => p.Category)
+    .Select(g => new { Category = g.Key, ProductCount = g.Count() })
+    .OrderByDescending(x => x.ProductCount);
+
+// 示例8：查找价格最高的产品
+var mostExpensive = products
+    .OrderByDescending(p => p.Price)
+    .FirstOrDefault();
+
+// 示例9：获取产品名称列表（去重）
+var uniqueNames = products
+    .Select(p => p.Name)
+    .Distinct()
+    .ToList();
+```
+
+### <a id="linq-to-sql"></a>LINQ to SQL
+
+LINQ to SQL用于查询SQL Server数据库。
+
+#### Entity Framework Core示例
+
+```csharp
+using Microsoft.EntityFrameworkCore;
+
+public class ApplicationDbContext : DbContext
+{
+    public DbSet<Product> Products { get; set; }
+    public DbSet<Category> Categories { get; set; }
+    
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.UseSqlServer("connection string");
+    }
+}
+
+// 使用LINQ查询数据库
+using (var context = new ApplicationDbContext())
+{
+    // 基本查询（延迟执行，转换为SQL）
+    var query = from p in context.Products
+                where p.Price > 1000
+                select p;
+    
+    // 执行查询（此时才执行SQL）
+    List<Product> products = query.ToList();
+    
+    // 方法语法
+    var expensiveProducts = context.Products
+        .Where(p => p.Price > 1000)
+        .OrderByDescending(p => p.Price)
+        .ToList();
+    
+    // 连接查询
+    var productsWithCategory = from p in context.Products
+                               join c in context.Categories on p.CategoryId equals c.Id
+                               select new { p.Name, CategoryName = c.Name };
+    
+    var result = productsWithCategory.ToList();
+    
+    // 分组查询
+    var categoryStats = context.Products
+        .GroupBy(p => p.CategoryId)
+        .Select(g => new 
+        { 
+            CategoryId = g.Key, 
+            Count = g.Count(),
+            AvgPrice = g.Average(p => p.Price)
+        })
+        .ToList();
+    
+    // 聚合查询
+    decimal totalValue = context.Products.Sum(p => p.Price);
+    int productCount = context.Products.Count();
+    
+    // 分页查询
+    int pageSize = 10;
+    int pageNumber = 1;
+    var pagedProducts = context.Products
+        .OrderBy(p => p.Id)
+        .Skip((pageNumber - 1) * pageSize)
+        .Take(pageSize)
+        .ToList();
+}
+```
+
+### <a id="linq-to-xml"></a>LINQ to XML
+
+LINQ to XML用于查询和操作XML文档。
+
+```csharp
+using System.Xml.Linq;
+
+// 创建XML文档
+XDocument xml = new XDocument(
+    new XElement("Products",
+        new XElement("Product",
+            new XAttribute("Id", 1),
+            new XElement("Name", "笔记本电脑"),
+            new XElement("Price", 5999.99)
+        ),
+        new XElement("Product",
+            new XAttribute("Id", 2),
+            new XElement("Name", "智能手机"),
+            new XElement("Price", 3999.99)
+        )
+    )
+);
+
+// 查询XML
+var products = from p in xml.Descendants("Product")
+               where (decimal)p.Element("Price") > 1000
+               select new 
+               { 
+                   Id = (int)p.Attribute("Id"),
+                   Name = (string)p.Element("Name"),
+                   Price = (decimal)p.Element("Price")
+               };
+
+// 方法语法
+var expensiveProducts = xml.Descendants("Product")
+    .Where(p => (decimal)p.Element("Price") > 1000)
+    .Select(p => new 
+    { 
+        Id = (int)p.Attribute("Id"),
+        Name = (string)p.Element("Name"),
+        Price = (decimal)p.Element("Price")
+    })
+    .ToList();
+
+// 修改XML
+XElement product = xml.Descendants("Product").First(p => (int)p.Attribute("Id") == 1);
+product.Element("Price").Value = "5499.99";
+
+// 添加元素
+XElement newProduct = new XElement("Product",
+    new XAttribute("Id", 3),
+    new XElement("Name", "平板电脑"),
+    new XElement("Price", 2999.99)
+);
+xml.Root.Add(newProduct);
+
+// 删除元素
+xml.Descendants("Product")
+    .Where(p => (int)p.Attribute("Id") == 2)
+    .Remove();
+```
+
+### <a id="linq-performance"></a>LINQ性能优化
+
+#### 延迟执行（Deferred Execution）
+
+```csharp
+// LINQ查询默认延迟执行
+var query = products.Where(p => p.Price > 1000); // 此时不执行查询
+
+// 只有在迭代或调用ToList、ToArray等时才执行
+List<Product> result = query.ToList(); // 此时才执行查询
+
+// 多次迭代会多次执行查询
+foreach (var item in query) { } // 执行查询
+foreach (var item in query) { } // 再次执行查询
+
+// 缓存结果避免重复执行
+var cachedResult = query.ToList(); // 执行一次并缓存
+foreach (var item in cachedResult) { } // 使用缓存
+foreach (var item in cachedResult) { } // 使用缓存
+```
+
+#### 及早执行（Immediate Execution）
+
+```csharp
+// 这些操作会立即执行
+int count = products.Count();
+bool any = products.Any();
+Product first = products.First();
+decimal sum = products.Sum(p => p.Price);
+List<Product> list = products.ToList();
+Product[] array = products.ToArray();
+```
+
+#### 性能优化技巧
+
+```csharp
+// 1. 使用索引而不是顺序查找
+// ❌ 较慢
+var result1 = products.Where(p => p.Name == "笔记本电脑").ToList();
+
+// ✅ 较快（如果有索引）
+var result2 = products.Where(p => p.Id == 1).ToList();
+
+// 2. 在Where之前进行排序（如果只需要Top N）
+// ❌ 较慢：先排序全部，再取前10
+var result3 = products.OrderBy(p => p.Price).Take(10).ToList();
+
+// ✅ 较快：使用索引或较小的数据集
+var result4 = products.Where(p => p.InStock).OrderBy(p => p.Price).Take(10).ToList();
+
+// 3. 避免不必要的多次迭代
+// ❌ 多次执行查询
+if (products.Any(p => p.Price > 1000))
+{
+    var expensive = products.Where(p => p.Price > 1000).ToList();
+}
+
+// ✅ 执行一次
+var expensive = products.Where(p => p.Price > 1000).ToList();
+if (expensive.Any())
+{
+    // 使用expensive
+}
+
+// 4. 使用正确的集合类型
+// ✅ ToList：需要列表操作时
+var list = products.ToList();
+
+// ✅ ToArray：需要数组时
+var array = products.ToArray();
+
+// ✅ ToDictionary：需要按键查找时
+var dict = products.ToDictionary(p => p.Id);
+
+// 5. 避免Select的重复调用
+// ❌ 多次Select
+var names1 = products.Select(p => p.Name);
+var prices1 = products.Select(p => p.Price);
+
+// ✅ 一次Select选择多个字段
+var namesAndPrices = products.Select(p => new { p.Name, p.Price });
+var names2 = namesAndPrices.Select(x => x.Name);
+var prices2 = namesAndPrices.Select(x => x.Price);
+```
+
+### <a id="linq-scenarios"></a>LINQ应用场景
+
+#### 1. 数据筛选和排序
+
+```csharp
+// 电商网站：筛选和排序商品
+public class ProductService
+{
+    public IEnumerable<Product> GetProducts(
+        string category = null, 
+        decimal? minPrice = null, 
+        decimal? maxPrice = null,
+        bool? inStock = null,
+        string sortBy = "Price",
+        bool ascending = true)
+    {
+        var query = products.AsQueryable();
+        
+        if (!string.IsNullOrEmpty(category))
+            query = query.Where(p => p.Category == category);
+        
+        if (minPrice.HasValue)
+            query = query.Where(p => p.Price >= minPrice.Value);
+        
+        if (maxPrice.HasValue)
+            query = query.Where(p => p.Price <= maxPrice.Value);
+        
+        if (inStock.HasValue)
+            query = query.Where(p => p.InStock == inStock.Value);
+        
+        query = sortBy switch
+        {
+            "Price" => ascending ? query.OrderBy(p => p.Price) : query.OrderByDescending(p => p.Price),
+            "Name" => ascending ? query.OrderBy(p => p.Name) : query.OrderByDescending(p => p.Name),
+            _ => query
+        };
+        
+        return query.ToList();
+    }
+}
+```
+
+#### 2. 数据统计和分析
+
+```csharp
+// 销售报表：统计各类别销售额
+public class SalesReport
+{
+    public class CategorySales
+    {
+        public string Category { get; set; }
+        public int ProductCount { get; set; }
+        public decimal TotalValue { get; set; }
+        public decimal AveragePrice { get; set; }
+    }
+    
+    public List<CategorySales> GetCategoryStatistics(List<Product> products)
+    {
+        return products
+            .GroupBy(p => p.Category)
+            .Select(g => new CategorySales
+            {
+                Category = g.Key,
+                ProductCount = g.Count(),
+                TotalValue = g.Sum(p => p.Price),
+                AveragePrice = g.Average(p => p.Price)
+            })
+            .OrderByDescending(x => x.TotalValue)
+            .ToList();
+    }
+}
+```
+
+#### 3. 数据转换和映射
+
+```csharp
+// DTO映射
+public class ProductDto
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public string FormattedPrice { get; set; }
+    public string Status { get; set; }
+}
+
+public List<ProductDto> MapToDto(List<Product> products)
+{
+    return products.Select(p => new ProductDto
+    {
+        Id = p.Id,
+        Name = p.Name,
+        FormattedPrice = $"¥{p.Price:N2}",
+        Status = p.InStock ? "有库存" : "缺货"
+    }).ToList();
+}
+```
+
+#### 4. 数据分组和聚合
+
+```csharp
+// 按日期分组统计
+public class DailySales
+{
+    public DateTime Date { get; set; }
+    public decimal TotalSales { get; set; }
+    public int OrderCount { get; set; }
+}
+
+public List<DailySales> GetDailySales(List<Order> orders)
+{
+    return orders
+        .GroupBy(o => o.OrderDate.Date)
+        .Select(g => new DailySales
+        {
+            Date = g.Key,
+            TotalSales = g.Sum(o => o.TotalAmount),
+            OrderCount = g.Count()
+        })
+        .OrderBy(x => x.Date)
+        .ToList();
+}
+```
+
+LINQ是C#中强大的查询工具，它提供了一种统一、类型安全、声明式的方式来查询各种数据源。通过合理使用LINQ，可以编写出简洁、易读、高效的数据处理代码。
+
+## <a id="orm-frameworks"></a>C# ORM框架详解
+
+ORM（Object-Relational Mapping，对象关系映射）是一种编程技术，用于在面向对象编程语言和关系数据库之间建立映射关系。在C#中，从基础的ADO.NET到现代的Entity Framework，提供了多种数据访问方式。本章将从ADO.NET基础开始，逐步介绍Entity Framework 6的完整功能。
+
+### <a id="ado-net-basics"></a>ADO.NET基础
+
+ADO.NET是.NET Framework中用于访问数据库的核心技术，它提供了直接访问数据库的能力，是其他ORM框架的基础。
+
+#### ADO.NET架构
+
+ADO.NET采用断开式架构，主要组件包括：
+
+```
+ADO.NET架构
+├── .NET Framework数据提供程序
+│   ├── SqlClient（SQL Server）
+│   ├── OleDb（OLE DB数据源）
+│   ├── Odbc（ODBC数据源）
+│   └── OracleClient（Oracle）
+├── DataSet和DataTable（断开式数据）
+└── 数据访问类
+    ├── Connection（连接）
+    ├── Command（命令）
+    ├── DataReader（数据读取器）
+    └── DataAdapter（数据适配器）
+```
+
+#### 命名空间
+
+```csharp
+using System.Data;                    // 核心数据类
+using System.Data.SqlClient;          // SQL Server提供程序
+using System.Data.Common;             // 通用数据访问类
+using System.Data.SqlTypes;           // SQL Server数据类型
+```
+
+### <a id="ado-net-connection"></a>ADO.NET连接管理
+
+#### SqlConnection类
+
+`SqlConnection`用于建立与SQL Server数据库的连接。
+
+```csharp
+using System.Data.SqlClient;
+
+// 连接字符串
+string connectionString = "Server=localhost;Database=MyDB;User Id=sa;Password=123456;";
+// 或者使用集成安全
+string connectionString2 = "Server=localhost;Database=MyDB;Integrated Security=True;";
+// 或者使用连接字符串构建器
+SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder
+{
+    DataSource = "localhost",
+    InitialCatalog = "MyDB",
+    UserID = "sa",
+    Password = "123456",
+    ConnectTimeout = 30,
+    Encrypt = true,
+    TrustServerCertificate = false
+};
+string connectionString3 = builder.ConnectionString;
+
+// 创建连接
+SqlConnection connection = new SqlConnection(connectionString);
+
+// 打开连接
+try
+{
+    connection.Open();
+    Console.WriteLine("连接成功");
+    Console.WriteLine($"数据库: {connection.Database}");
+    Console.WriteLine($"服务器: {connection.DataSource}");
+    Console.WriteLine($"状态: {connection.State}");
+    Console.WriteLine($"服务器版本: {connection.ServerVersion}");
+}
+catch (SqlException ex)
+{
+    Console.WriteLine($"连接失败: {ex.Message}");
+}
+finally
+{
+    // 关闭连接
+    if (connection.State == ConnectionState.Open)
+    {
+        connection.Close();
+    }
+    connection.Dispose();
+}
+
+// 使用using语句（推荐）
+using (SqlConnection conn = new SqlConnection(connectionString))
+{
+    conn.Open();
+    // 使用连接
+    // 自动关闭和释放
+}
+```
+
+#### 连接字符串详解
+
+```csharp
+// 基本连接字符串
+string basic = "Server=localhost;Database=MyDB;User Id=sa;Password=123456;";
+
+// 完整连接字符串（包含所有常用选项）
+string full = @"Server=localhost,1433;
+                Database=MyDB;
+                User Id=sa;
+                Password=123456;
+                Connect Timeout=30;
+                Encrypt=True;
+                TrustServerCertificate=False;
+                Integrated Security=False;
+                MultipleActiveResultSets=True;
+                Pooling=True;
+                Min Pool Size=5;
+                Max Pool Size=100;
+                Connection Lifetime=0;
+                Application Name=MyApp";
+
+// 使用连接字符串构建器（类型安全）
+SqlConnectionStringBuilder csb = new SqlConnectionStringBuilder
+{
+    // 服务器和数据库
+    DataSource = "localhost",
+    InitialCatalog = "MyDB",
+    
+    // 身份验证
+    IntegratedSecurity = false,
+    UserID = "sa",
+    Password = "123456",
+    
+    // 连接选项
+    ConnectTimeout = 30,
+    Encrypt = true,
+    TrustServerCertificate = false,
+    MultipleActiveResultSets = true,
+    
+    // 连接池
+    Pooling = true,
+    MinPoolSize = 5,
+    MaxPoolSize = 100,
+    ConnectionLifetime = 0,
+    
+    // 应用程序信息
+    ApplicationName = "MyApplication"
+};
+
+string connectionString = csb.ConnectionString;
+```
+
+#### 连接池管理
+
+ADO.NET自动管理连接池，提高性能：
+
+```csharp
+// 连接池默认启用
+// 相同连接字符串的连接会被放入池中重用
+
+// 检查连接池状态
+string poolInfo = $"当前连接池中的连接数: {GetConnectionPoolInfo()}";
+
+// 手动控制连接池
+SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder
+{
+    DataSource = "localhost",
+    InitialCatalog = "MyDB",
+    IntegratedSecurity = true,
+    Pooling = true,        // 启用连接池（默认）
+    MinPoolSize = 5,       // 最小连接数
+    MaxPoolSize = 100,     // 最大连接数
+    ConnectionLifetime = 0 // 连接生命周期（0表示不限制）
+};
+
+// 清空连接池（谨慎使用）
+SqlConnection.ClearPool(connection);
+SqlConnection.ClearAllPools(); // 清空所有连接池
+```
+
+### <a id="ado-net-commands"></a>ADO.NET命令执行
+
+#### SqlCommand类
+
+`SqlCommand`用于执行SQL命令。
+
+```csharp
+using (SqlConnection connection = new SqlConnection(connectionString))
+{
+    connection.Open();
+    
+    // 方式1：使用构造函数
+    SqlCommand command = new SqlCommand("SELECT * FROM Users", connection);
+    
+    // 方式2：使用CommandText属性
+    SqlCommand command2 = new SqlCommand();
+    command2.Connection = connection;
+    command2.CommandText = "SELECT * FROM Users";
+    
+    // 方式3：使用CommandType
+    SqlCommand command3 = new SqlCommand("GetAllUsers", connection);
+    command3.CommandType = CommandType.StoredProcedure; // 存储过程
+    
+    // 执行命令
+    // ExecuteNonQuery：执行不返回数据的命令（INSERT、UPDATE、DELETE）
+    int rowsAffected = command.ExecuteNonQuery();
+    
+    // ExecuteScalar：执行返回单个值的命令
+    object result = command.ExecuteScalar();
+    
+    // ExecuteReader：执行返回数据集的命令（SELECT）
+    SqlDataReader reader = command.ExecuteReader();
+}
+```
+
+#### 执行不同类型的命令
+
+```csharp
+using (SqlConnection connection = new SqlConnection(connectionString))
+{
+    connection.Open();
+    
+    // 1. SELECT查询（使用ExecuteReader）
+    SqlCommand selectCmd = new SqlCommand("SELECT Id, Name, Email FROM Users", connection);
+    using (SqlDataReader reader = selectCmd.ExecuteReader())
+    {
+        while (reader.Read())
+        {
+            int id = reader.GetInt32(0);
+            string name = reader.GetString(1);
+            string email = reader.GetString(2);
+            Console.WriteLine($"ID: {id}, Name: {name}, Email: {email}");
+        }
+    }
+    
+    // 2. INSERT命令（使用ExecuteNonQuery）
+    SqlCommand insertCmd = new SqlCommand(
+        "INSERT INTO Users (Name, Email) VALUES (@Name, @Email)", 
+        connection);
+    insertCmd.Parameters.AddWithValue("@Name", "张三");
+    insertCmd.Parameters.AddWithValue("@Email", "zhangsan@example.com");
+    int insertedRows = insertCmd.ExecuteNonQuery();
+    Console.WriteLine($"插入了 {insertedRows} 行");
+    
+    // 3. UPDATE命令
+    SqlCommand updateCmd = new SqlCommand(
+        "UPDATE Users SET Email = @Email WHERE Id = @Id", 
+        connection);
+    updateCmd.Parameters.AddWithValue("@Email", "newemail@example.com");
+    updateCmd.Parameters.AddWithValue("@Id", 1);
+    int updatedRows = updateCmd.ExecuteNonQuery();
+    Console.WriteLine($"更新了 {updatedRows} 行");
+    
+    // 4. DELETE命令
+    SqlCommand deleteCmd = new SqlCommand("DELETE FROM Users WHERE Id = @Id", connection);
+    deleteCmd.Parameters.AddWithValue("@Id", 1);
+    int deletedRows = deleteCmd.ExecuteNonQuery();
+    Console.WriteLine($"删除了 {deletedRows} 行");
+    
+    // 5. 返回单个值（使用ExecuteScalar）
+    SqlCommand countCmd = new SqlCommand("SELECT COUNT(*) FROM Users", connection);
+    int userCount = (int)countCmd.ExecuteScalar();
+    Console.WriteLine($"用户总数: {userCount}");
+    
+    // 6. 返回OUTPUT参数
+    SqlCommand outputCmd = new SqlCommand(
+        "INSERT INTO Users (Name, Email) OUTPUT INSERTED.Id VALUES (@Name, @Email)", 
+        connection);
+    outputCmd.Parameters.AddWithValue("@Name", "李四");
+    outputCmd.Parameters.AddWithValue("@Email", "lisi@example.com");
+    int newId = (int)outputCmd.ExecuteScalar();
+    Console.WriteLine($"新插入的ID: {newId}");
+}
+```
+
+### <a id="ado-net-data-reader"></a>ADO.NET数据读取
+
+#### SqlDataReader类
+
+`SqlDataReader`提供只进、只读的数据流访问。
+
+```csharp
+using (SqlConnection connection = new SqlConnection(connectionString))
+{
+    connection.Open();
+    
+    SqlCommand command = new SqlCommand("SELECT * FROM Users", connection);
+    
+    // 执行查询并获取DataReader
+    using (SqlDataReader reader = command.ExecuteReader())
+    {
+        // 检查是否有数据
+        if (reader.HasRows)
+        {
+            // 读取列信息
+            for (int i = 0; i < reader.FieldCount; i++)
+            {
+                Console.WriteLine($"列 {i}: {reader.GetName(i)}, 类型: {reader.GetFieldType(i)}");
+            }
+            
+            // 逐行读取数据
+            while (reader.Read())
+            {
+                // 方式1：使用索引（最快）
+                int id = reader.GetInt32(0);
+                string name = reader.GetString(1);
+                
+                // 方式2：使用列名（更安全）
+                int id2 = reader.GetInt32("Id");
+                string name2 = reader.GetString("Name");
+                
+                // 方式3：使用IsDBNull检查空值
+                string email = reader.IsDBNull("Email") 
+                    ? null 
+                    : reader.GetString("Email");
+                
+                // 方式4：使用索引器
+                object idObj = reader["Id"];
+                object nameObj = reader["Name"];
+                
+                Console.WriteLine($"ID: {id}, Name: {name}, Email: {email}");
+            }
+        }
+    }
+}
+```
+
+#### DataReader的常用方法
+
+```csharp
+using (SqlDataReader reader = command.ExecuteReader())
+{
+    while (reader.Read())
+    {
+        // 获取值的方法（按类型）
+        int intValue = reader.GetInt32("Id");
+        long longValue = reader.GetInt64("BigId");
+        string stringValue = reader.GetString("Name");
+        bool boolValue = reader.GetBoolean("IsActive");
+        DateTime dateValue = reader.GetDateTime("CreateDate");
+        decimal decimalValue = reader.GetDecimal("Price");
+        double doubleValue = reader.GetDouble("Rate");
+        float floatValue = reader.GetFloat("Score");
+        byte[] bytes = (byte[])reader["ImageData"];
+        Guid guidValue = reader.GetGuid("GuidId");
+        
+        // 获取值（通用方法）
+        object value = reader.GetValue("ColumnName");
+        string valueAsString = reader.GetValue("ColumnName").ToString();
+        
+        // 检查是否为NULL
+        if (!reader.IsDBNull("Email"))
+        {
+            string email = reader.GetString("Email");
+        }
+        
+        // 获取列索引
+        int columnIndex = reader.GetOrdinal("Name");
+        string name = reader.GetString(columnIndex);
+        
+        // 获取列名
+        string columnName = reader.GetName(0);
+        
+        // 获取列类型
+        Type columnType = reader.GetFieldType(0);
+        
+        // 获取数据类型名称
+        string dataTypeName = reader.GetDataTypeName(0);
+    }
+}
+```
+
+#### 读取多个结果集
+
+```csharp
+using (SqlConnection connection = new SqlConnection(connectionString))
+{
+    connection.Open();
+    
+    SqlCommand command = new SqlCommand(
+        "SELECT * FROM Users; SELECT * FROM Orders;", 
+        connection);
+    
+    using (SqlDataReader reader = command.ExecuteReader())
+    {
+        // 第一个结果集：Users
+        Console.WriteLine("=== 用户列表 ===");
+        while (reader.Read())
+        {
+            Console.WriteLine($"用户: {reader.GetString("Name")}");
+        }
+        
+        // 移动到下一个结果集
+        if (reader.NextResult())
+        {
+            Console.WriteLine("=== 订单列表 ===");
+            while (reader.Read())
+            {
+                Console.WriteLine($"订单ID: {reader.GetInt32("Id")}");
+            }
+        }
+    }
+}
+```
+
+### <a id="ado-net-parameters"></a>ADO.NET参数化查询
+
+参数化查询是防止SQL注入攻击的最佳实践，同时提高查询性能。
+
+#### SqlParameter类
+
+```csharp
+using (SqlConnection connection = new SqlConnection(connectionString))
+{
+    connection.Open();
+    
+    // 方式1：使用AddWithValue（简单但不推荐用于生产环境）
+    SqlCommand command1 = new SqlCommand(
+        "SELECT * FROM Users WHERE Name = @Name AND Age > @Age", 
+        connection);
+    command1.Parameters.AddWithValue("@Name", "张三");
+    command1.Parameters.AddWithValue("@Age", 18);
+    
+    // 方式2：使用Add方法（推荐）
+    SqlCommand command2 = new SqlCommand(
+        "INSERT INTO Users (Name, Email, Age, CreateDate) VALUES (@Name, @Email, @Age, @CreateDate)", 
+        connection);
+    
+    // 添加参数并指定类型和值
+    command2.Parameters.Add("@Name", SqlDbType.NVarChar, 100).Value = "张三";
+    command2.Parameters.Add("@Email", SqlDbType.NVarChar, 200).Value = "zhangsan@example.com";
+    command2.Parameters.Add("@Age", SqlDbType.Int).Value = 25;
+    command2.Parameters.Add("@CreateDate", SqlDbType.DateTime).Value = DateTime.Now;
+    
+    // 方式3：创建SqlParameter对象
+    SqlParameter nameParam = new SqlParameter("@Name", SqlDbType.NVarChar, 100)
+    {
+        Value = "张三",
+        Direction = ParameterDirection.Input
+    };
+    command2.Parameters.Add(nameParam);
+    
+    // 执行命令
+    int rowsAffected = command2.ExecuteNonQuery();
+}
+```
+
+#### 参数类型和方向
+
+```csharp
+using (SqlConnection connection = new SqlConnection(connectionString))
+{
+    connection.Open();
+    
+    // 输入参数（默认）
+    SqlCommand command = new SqlCommand(
+        "INSERT INTO Users (Name, Email) VALUES (@Name, @Email); SELECT SCOPE_IDENTITY();", 
+        connection);
+    
+    SqlParameter nameParam = new SqlParameter("@Name", SqlDbType.NVarChar, 100)
+    {
+        Value = "张三",
+        Direction = ParameterDirection.Input // 输入参数
+    };
+    command.Parameters.Add(nameParam);
+    
+    // 输出参数
+    SqlParameter idParam = new SqlParameter("@NewId", SqlDbType.Int)
+    {
+        Direction = ParameterDirection.Output // 输出参数
+    };
+    command.Parameters.Add(idParam);
+    
+    // 输入输出参数
+    SqlParameter countParam = new SqlParameter("@Count", SqlDbType.Int)
+    {
+        Value = 0,
+        Direction = ParameterDirection.InputOutput // 输入输出参数
+    };
+    command.Parameters.Add(countParam);
+    
+    // 返回值参数
+    SqlParameter returnParam = new SqlParameter("@ReturnValue", SqlDbType.Int)
+    {
+        Direction = ParameterDirection.ReturnValue // 返回值
+    };
+    command.Parameters.Add(returnParam);
+    
+    command.ExecuteNonQuery();
+    
+    // 获取输出参数值
+    int newId = (int)idParam.Value;
+    int count = (int)countParam.Value;
+    int returnValue = (int)returnParam.Value;
+}
+```
+
+#### 参数化查询完整示例
+
+```csharp
+// 用户实体类
+public class User
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public string Email { get; set; }
+    public int Age { get; set; }
+    public DateTime CreateDate { get; set; }
+}
+
+// 查询示例
+public List<User> GetUsers(string nameFilter, int minAge)
+{
+    List<User> users = new List<User>();
+    
+    using (SqlConnection connection = new SqlConnection(connectionString))
+    {
+        connection.Open();
+        
+        SqlCommand command = new SqlCommand(
+            "SELECT Id, Name, Email, Age FROM Users WHERE Name LIKE @Name AND Age >= @MinAge", 
+            connection);
+        
+        // 使用LIKE时，通配符在值中
+        command.Parameters.Add("@Name", SqlDbType.NVarChar, 100).Value = $"%{nameFilter}%";
+        command.Parameters.Add("@MinAge", SqlDbType.Int).Value = minAge;
+        
+        using (SqlDataReader reader = command.ExecuteReader())
+        {
+            while (reader.Read())
+            {
+                users.Add(new User
+                {
+                    Id = reader.GetInt32("Id"),
+                    Name = reader.GetString("Name"),
+                    Email = reader.GetString("Email"),
+                    Age = reader.GetInt32("Age")
+                });
+            }
+        }
+    }
+    
+    return users;
+}
+
+// 插入示例
+public int InsertUser(User user)
+{
+    using (SqlConnection connection = new SqlConnection(connectionString))
+    {
+        connection.Open();
+        
+        SqlCommand command = new SqlCommand(
+            "INSERT INTO Users (Name, Email, Age, CreateDate) " +
+            "VALUES (@Name, @Email, @Age, @CreateDate); " +
+            "SELECT SCOPE_IDENTITY();", 
+            connection);
+        
+        command.Parameters.Add("@Name", SqlDbType.NVarChar, 100).Value = user.Name;
+        command.Parameters.Add("@Email", SqlDbType.NVarChar, 200).Value = user.Email;
+        command.Parameters.Add("@Age", SqlDbType.Int).Value = user.Age;
+        command.Parameters.Add("@CreateDate", SqlDbType.DateTime).Value = DateTime.Now;
+        
+        object result = command.ExecuteScalar();
+        return Convert.ToInt32(result);
+    }
+}
+
+// 更新示例
+public int UpdateUser(User user)
+{
+    using (SqlConnection connection = new SqlConnection(connectionString))
+    {
+        connection.Open();
+        
+        SqlCommand command = new SqlCommand(
+            "UPDATE Users SET Name = @Name, Email = @Email, Age = @Age WHERE Id = @Id", 
+            connection);
+        
+        command.Parameters.Add("@Id", SqlDbType.Int).Value = user.Id;
+        command.Parameters.Add("@Name", SqlDbType.NVarChar, 100).Value = user.Name;
+        command.Parameters.Add("@Email", SqlDbType.NVarChar, 200).Value = user.Email;
+        command.Parameters.Add("@Age", SqlDbType.Int).Value = user.Age;
+        
+        return command.ExecuteNonQuery();
+    }
+}
+
+// 删除示例
+public int DeleteUser(int userId)
+{
+    using (SqlConnection connection = new SqlConnection(connectionString))
+    {
+        connection.Open();
+        
+        SqlCommand command = new SqlCommand("DELETE FROM Users WHERE Id = @Id", connection);
+        command.Parameters.Add("@Id", SqlDbType.Int).Value = userId;
+        
+        return command.ExecuteNonQuery();
+    }
+}
+```
+
+### <a id="ado-net-transactions"></a>ADO.NET事务处理
+
+事务确保数据库操作的原子性、一致性、隔离性和持久性（ACID特性）。
+
+#### 基本事务
+
+```csharp
+using (SqlConnection connection = new SqlConnection(connectionString))
+{
+    connection.Open();
+    
+    // 开始事务
+    SqlTransaction transaction = connection.BeginTransaction();
+    
+    try
+    {
+        // 命令1：插入用户
+        SqlCommand cmd1 = new SqlCommand(
+            "INSERT INTO Users (Name, Email) VALUES (@Name, @Email)", 
+            connection, 
+            transaction);
+        cmd1.Parameters.AddWithValue("@Name", "张三");
+        cmd1.Parameters.AddWithValue("@Email", "zhangsan@example.com");
+        cmd1.ExecuteNonQuery();
+        
+        // 命令2：插入订单
+        SqlCommand cmd2 = new SqlCommand(
+            "INSERT INTO Orders (UserId, TotalAmount) VALUES (@UserId, @TotalAmount)", 
+            connection, 
+            transaction);
+        cmd2.Parameters.AddWithValue("@UserId", 1);
+        cmd2.Parameters.AddWithValue("@TotalAmount", 100.00m);
+        cmd2.ExecuteNonQuery();
+        
+        // 提交事务
+        transaction.Commit();
+        Console.WriteLine("事务提交成功");
+    }
+    catch (Exception ex)
+    {
+        // 回滚事务
+        transaction.Rollback();
+        Console.WriteLine($"事务回滚: {ex.Message}");
+    }
+}
+```
+
+#### 事务隔离级别
+
+```csharp
+using (SqlConnection connection = new SqlConnection(connectionString))
+{
+    connection.Open();
+    
+    // 设置事务隔离级别
+    SqlTransaction transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted);
+    
+    // 隔离级别选项：
+    // ReadUncommitted：读取未提交的数据（最低隔离级别，可能脏读）
+    // ReadCommitted：读取已提交的数据（默认，SQL Server，避免脏读）
+    // RepeatableRead：可重复读（避免脏读和不可重复读）
+    // Serializable：序列化（最高隔离级别，避免所有并发问题，但性能最低）
+    // Snapshot：快照隔离（SQL Server 2005+，使用行版本控制）
+    
+    try
+    {
+        SqlCommand command = new SqlCommand("UPDATE Users SET Name = @Name WHERE Id = @Id", 
+            connection, transaction);
+        command.Parameters.AddWithValue("@Name", "新名称");
+        command.Parameters.AddWithValue("@Id", 1);
+        command.ExecuteNonQuery();
+        
+        transaction.Commit();
+    }
+    catch
+    {
+        transaction.Rollback();
+        throw;
+    }
+}
+```
+
+#### 嵌套事务（保存点）
+
+```csharp
+using (SqlConnection connection = new SqlConnection(connectionString))
+{
+    connection.Open();
+    SqlTransaction transaction = connection.BeginTransaction();
+    
+    try
+    {
+        // 第一个操作
+        SqlCommand cmd1 = new SqlCommand("INSERT INTO Users (Name) VALUES ('用户1')", 
+            connection, transaction);
+        cmd1.ExecuteNonQuery();
+        
+        // 创建保存点
+        transaction.Save("SavePoint1");
+        
+        try
+        {
+            // 第二个操作（可能失败）
+            SqlCommand cmd2 = new SqlCommand("INSERT INTO Users (Name) VALUES ('用户2')", 
+                connection, transaction);
+            cmd2.ExecuteNonQuery();
+        }
+        catch
+        {
+            // 回滚到保存点（只回滚保存点之后的操作）
+            transaction.Rollback("SavePoint1");
+            Console.WriteLine("回滚到保存点，第一个操作仍然有效");
+        }
+        
+        // 提交事务
+        transaction.Commit();
+    }
+    catch
+    {
+        transaction.Rollback();
+        throw;
+    }
+}
+```
+
+### <a id="ado-net-stored-procedures"></a>ADO.NET存储过程
+
+存储过程是预编译的SQL代码，可以提高性能、安全性和代码重用性。
+
+#### 执行存储过程
+
+```csharp
+// 创建存储过程（SQL Server示例）
+/*
+CREATE PROCEDURE GetUserById
+    @UserId INT
+AS
+BEGIN
+    SELECT Id, Name, Email, Age, CreateDate
+    FROM Users 
+    WHERE Id = @UserId
+END
+
+CREATE PROCEDURE InsertUser
+    @Name NVARCHAR(100),
+    @Email NVARCHAR(200),
+    @Age INT,
+    @NewId INT OUTPUT
+AS
+BEGIN
+    INSERT INTO Users (Name, Email, Age, CreateDate)
+    VALUES (@Name, @Email, @Age, GETDATE())
+    
+    SET @NewId = SCOPE_IDENTITY()
+END
+
+CREATE PROCEDURE GetUsersByAgeRange
+    @MinAge INT,
+    @MaxAge INT
+AS
+BEGIN
+    SELECT Id, Name, Email, Age
+    FROM Users
+    WHERE Age BETWEEN @MinAge AND @MaxAge
+    ORDER BY Age
+END
+*/
+
+// 执行存储过程（查询）
+public User GetUserById(int userId)
+{
+    using (SqlConnection connection = new SqlConnection(connectionString))
+    {
+        connection.Open();
+        
+        SqlCommand command = new SqlCommand("GetUserById", connection);
+        command.CommandType = CommandType.StoredProcedure;
+        command.Parameters.Add("@UserId", SqlDbType.Int).Value = userId;
+        
+        using (SqlDataReader reader = command.ExecuteReader())
+        {
+            if (reader.Read())
+            {
+                return new User
+                {
+                    Id = reader.GetInt32("Id"),
+                    Name = reader.GetString("Name"),
+                    Email = reader.GetString("Email"),
+                    Age = reader.GetInt32("Age"),
+                    CreateDate = reader.GetDateTime("CreateDate")
+                };
+            }
+        }
+    }
+    return null;
+}
+
+// 执行存储过程（带输出参数）
+public int InsertUserWithStoredProcedure(User user)
+{
+    using (SqlConnection connection = new SqlConnection(connectionString))
+    {
+        connection.Open();
+        
+        SqlCommand command = new SqlCommand("InsertUser", connection);
+        command.CommandType = CommandType.StoredProcedure;
+        
+        // 输入参数
+        command.Parameters.Add("@Name", SqlDbType.NVarChar, 100).Value = user.Name;
+        command.Parameters.Add("@Email", SqlDbType.NVarChar, 200).Value = user.Email;
+        command.Parameters.Add("@Age", SqlDbType.Int).Value = user.Age;
+        
+        // 输出参数
+        SqlParameter newIdParam = new SqlParameter("@NewId", SqlDbType.Int)
+        {
+            Direction = ParameterDirection.Output
+        };
+        command.Parameters.Add(newIdParam);
+        
+        command.ExecuteNonQuery();
+        
+        // 获取输出参数值
+        return (int)newIdParam.Value;
+    }
+}
+
+// 执行存储过程（返回多个结果集）
+public void GetUsersAndOrders(int userId)
+{
+    using (SqlConnection connection = new SqlConnection(connectionString))
+    {
+        connection.Open();
+        
+        SqlCommand command = new SqlCommand("GetUserWithOrders", connection);
+        command.CommandType = CommandType.StoredProcedure;
+        command.Parameters.Add("@UserId", SqlDbType.Int).Value = userId;
+        
+        using (SqlDataReader reader = command.ExecuteReader())
+        {
+            // 第一个结果集：用户信息
+            if (reader.Read())
+            {
+                Console.WriteLine($"用户: {reader.GetString("Name")}");
+            }
+            
+            // 第二个结果集：订单信息
+            if (reader.NextResult())
+            {
+                while (reader.Read())
+                {
+                    Console.WriteLine($"订单: {reader.GetInt32("Id")}");
+                }
+            }
+        }
+    }
+}
+```
+
+#### 使用DataAdapter填充DataSet
+
+```csharp
+using System.Data;
+
+// 使用DataAdapter填充DataSet（断开式数据访问）
+public DataSet GetUsersDataSet()
+{
+    DataSet dataSet = new DataSet();
+    
+    using (SqlConnection connection = new SqlConnection(connectionString))
+    {
+        connection.Open();
+        
+        SqlDataAdapter adapter = new SqlDataAdapter("SELECT * FROM Users", connection);
+        
+        // 填充DataSet
+        adapter.Fill(dataSet, "Users");
+        
+        // 可以填充多个表
+        adapter.SelectCommand.CommandText = "SELECT * FROM Orders";
+        adapter.Fill(dataSet, "Orders");
+    }
+    
+    return dataSet;
+}
+
+// 使用DataAdapter更新数据
+public void UpdateUsersWithAdapter(DataTable dataTable)
+{
+    using (SqlConnection connection = new SqlConnection(connectionString))
+    {
+        connection.Open();
+        
+        SqlDataAdapter adapter = new SqlDataAdapter();
+        
+        // 配置SelectCommand
+        adapter.SelectCommand = new SqlCommand("SELECT * FROM Users", connection);
+        
+        // 配置InsertCommand
+        adapter.InsertCommand = new SqlCommand(
+            "INSERT INTO Users (Name, Email, Age, CreateDate) VALUES (@Name, @Email, @Age, @CreateDate)", 
+            connection);
+        adapter.InsertCommand.Parameters.Add("@Name", SqlDbType.NVarChar, 100, "Name");
+        adapter.InsertCommand.Parameters.Add("@Email", SqlDbType.NVarChar, 200, "Email");
+        adapter.InsertCommand.Parameters.Add("@Age", SqlDbType.Int, 0, "Age");
+        adapter.InsertCommand.Parameters.Add("@CreateDate", SqlDbType.DateTime, 0, "CreateDate");
+        
+        // 配置UpdateCommand
+        adapter.UpdateCommand = new SqlCommand(
+            "UPDATE Users SET Name = @Name, Email = @Email, Age = @Age WHERE Id = @Id", 
+            connection);
+        adapter.UpdateCommand.Parameters.Add("@Name", SqlDbType.NVarChar, 100, "Name");
+        adapter.UpdateCommand.Parameters.Add("@Email", SqlDbType.NVarChar, 200, "Email");
+        adapter.UpdateCommand.Parameters.Add("@Age", SqlDbType.Int, 0, "Age");
+        SqlParameter idParam = adapter.UpdateCommand.Parameters.Add("@Id", SqlDbType.Int, 0, "Id");
+        idParam.SourceVersion = DataRowVersion.Original; // 使用原始值
+        
+        // 配置DeleteCommand
+        adapter.DeleteCommand = new SqlCommand("DELETE FROM Users WHERE Id = @Id", connection);
+        SqlParameter deleteIdParam = adapter.DeleteCommand.Parameters.Add("@Id", SqlDbType.Int, 0, "Id");
+        deleteIdParam.SourceVersion = DataRowVersion.Original;
+        
+        // 执行更新
+        int rowsAffected = adapter.Update(dataTable);
+        Console.WriteLine($"更新了 {rowsAffected} 行");
+    }
+}
+```
+
+### <a id="ef6-basics"></a>Entity Framework 6基础
+
+Entity Framework 6（EF6）是Microsoft开发的ORM框架，它允许开发者使用面向对象的方式操作数据库，而无需编写大量的SQL代码。
+
+#### Entity Framework 6概述
+
+Entity Framework 6的主要特点：
+- **Code First**：通过代码定义模型，EF自动创建数据库
+- **Database First**：从现有数据库生成模型
+- **Model First**：使用设计器创建模型
+- **LINQ支持**：使用LINQ查询数据库
+- **变更跟踪**：自动跟踪实体状态变化
+- **迁移支持**：数据库架构版本管理
+
+#### 安装Entity Framework 6
+
+```csharp
+// 通过NuGet包管理器安装
+// Install-Package EntityFramework
+
+// 或者在Package Manager Console中执行：
+// PM> Install-Package EntityFramework -Version 6.4.4
+
+// 安装后会自动添加引用：
+// using System.Data.Entity;
+```
+
+#### 基本实体类定义
+
+```csharp
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+// 用户实体
+public class User
+{
+    [Key]
+    public int Id { get; set; }
+    
+    [Required]
+    [MaxLength(100)]
+    public string Name { get; set; }
+    
+    [Required]
+    [MaxLength(200)]
+    [Index(IsUnique = true)] // 唯一索引
+    public string Email { get; set; }
+    
+    public int Age { get; set; }
+    
+    public DateTime CreateDate { get; set; }
+    
+    // 导航属性（一对多）
+    public virtual ICollection<Order> Orders { get; set; }
+    
+    public User()
+    {
+        Orders = new HashSet<Order>();
+        CreateDate = DateTime.Now;
+    }
+}
+
+// 订单实体
+public class Order
+{
+    [Key]
+    public int Id { get; set; }
+    
+    [Required]
+    public DateTime OrderDate { get; set; }
+    
+    [Required]
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal TotalAmount { get; set; }
+    
+    // 外键
+    [Required]
+    [ForeignKey("User")]
+    public int UserId { get; set; }
+    
+    // 导航属性（多对一）
+    public virtual User User { get; set; }
+    
+    // 导航属性（一对多）
+    public virtual ICollection<OrderItem> OrderItems { get; set; }
+    
+    public Order()
+    {
+        OrderItems = new HashSet<OrderItem>();
+        OrderDate = DateTime.Now;
+    }
+}
+
+// 订单项实体
+public class OrderItem
+{
+    [Key]
+    public int Id { get; set; }
+    
+    [Required]
+    [MaxLength(200)]
+    public string ProductName { get; set; }
+    
+    [Required]
+    public int Quantity { get; set; }
+    
+    [Required]
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal UnitPrice { get; set; }
+    
+    [Required]
+    [ForeignKey("Order")]
+    public int OrderId { get; set; }
+    
+    // 导航属性（多对一）
+    public virtual Order Order { get; set; }
+}
+```
+
+#### DbContext类定义
+
+```csharp
+using System.Data.Entity;
+
+public class MyDbContext : DbContext
+{
+    // 构造函数：指定连接字符串名称（从App.config或Web.config读取）
+    public MyDbContext() : base("DefaultConnection")
+    {
+        // 禁用数据库初始化器（生产环境）
+        // Database.SetInitializer<MyDbContext>(null);
+        
+        // 或者使用自定义初始化器
+        Database.SetInitializer(new CreateDatabaseIfNotExists<MyDbContext>());
+    }
+    
+    // 构造函数：直接指定连接字符串
+    public MyDbContext(string connectionString) : base(connectionString)
+    {
+    }
+    
+    // DbSet属性：表示数据库中的表
+    public DbSet<User> Users { get; set; }
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<OrderItem> OrderItems { get; set; }
+    
+    // 重写OnModelCreating方法进行Fluent API配置
+    protected override void OnModelCreating(DbModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        
+        // 可以在这里进行额外的配置
+        // 详见"实体配置"章节
+    }
+}
+```
+
+#### 配置文件（App.config或Web.config）
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <configSections>
+    <section name="entityFramework" 
+             type="System.Data.Entity.Internal.ConfigFile.EntityFrameworkSection, 
+                   EntityFramework, Version=6.0.0.0, Culture=neutral, 
+                   PublicKeyToken=b77a5c561934e089" 
+             requirePermission="false" />
+  </configSections>
+  
+  <connectionStrings>
+    <add name="DefaultConnection" 
+         connectionString="Server=localhost;Database=MyDB;Integrated Security=True;" 
+         providerName="System.Data.SqlClient" />
+  </connectionStrings>
+  
+  <entityFramework>
+    <defaultConnectionFactory type="System.Data.Entity.Infrastructure.SqlConnectionFactory, EntityFramework" />
+    <providers>
+      <provider invariantName="System.Data.SqlClient" 
+                type="System.Data.Entity.SqlServer.SqlProviderServices, EntityFramework.SqlServer" />
+    </providers>
+  </entityFramework>
+</configuration>
+```
+
+#### 基本使用示例
+
+```csharp
+using (var context = new MyDbContext())
+{
+    // 1. 添加数据
+    var user = new User
+    {
+        Name = "张三",
+        Email = "zhangsan@example.com",
+        Age = 25
+    };
+    context.Users.Add(user);
+    context.SaveChanges(); // 保存到数据库
+    
+    // 2. 查询数据
+    var users = context.Users.ToList(); // 查询所有用户
+    var userById = context.Users.Find(1); // 根据主键查找
+    var userByEmail = context.Users.FirstOrDefault(u => u.Email == "zhangsan@example.com");
+    
+    // 3. 更新数据
+    if (userById != null)
+    {
+        userById.Name = "李四";
+        userById.Age = 30;
+        context.SaveChanges();
+    }
+    
+    // 4. 删除数据
+    var userToDelete = context.Users.Find(2);
+    if (userToDelete != null)
+    {
+        context.Users.Remove(userToDelete);
+        context.SaveChanges();
+    }
+}
+```
+
+### <a id="dbcontext-detail"></a>DbContext详解
+
+`DbContext`是Entity Framework的核心类，它代表与数据库的会话，负责跟踪实体变化、管理连接和执行数据库操作。
+
+#### DbContext的主要属性和方法
+
+```csharp
+public class MyDbContext : DbContext
+{
+    public MyDbContext() : base("DefaultConnection")
+    {
+    }
+    
+    public DbSet<User> Users { get; set; }
+    public DbSet<Order> Orders { get; set; }
+    
+    // Database属性：提供对数据库的访问
+    // context.Database.Connection - 获取数据库连接
+    // context.Database.ExecuteSqlCommand() - 执行SQL命令
+    // context.Database.SqlQuery<T>() - 执行SQL查询
+    
+    // ChangeTracker属性：跟踪实体状态变化
+    // context.ChangeTracker.Entries() - 获取所有被跟踪的实体
+    
+    // Configuration属性：配置选项
+    // context.Configuration.LazyLoadingEnabled - 延迟加载
+    // context.Configuration.ProxyCreationEnabled - 代理创建
+    // context.Configuration.ValidateOnSaveEnabled - 保存时验证
+}
+```
+
+#### DbContext的常用方法
+
+```csharp
+using (var context = new MyDbContext())
+{
+    // ========== 查询方法 ==========
+    
+    // Find：根据主键查找（同步）
+    var user1 = context.Users.Find(1);
+    
+    // FindAsync：根据主键查找（异步）
+    var user2 = await context.Users.FindAsync(1);
+    
+    // Set<T>：获取指定类型的DbSet
+    var users = context.Set<User>();
+    
+    // Entry：获取实体的跟踪信息
+    var entry = context.Entry(user1);
+    Console.WriteLine($"状态: {entry.State}"); // Added, Modified, Deleted, Unchanged, Detached
+    
+    // ========== 保存方法 ==========
+    
+    // SaveChanges：保存所有更改（同步）
+    int count = context.SaveChanges();
+    
+    // SaveChangesAsync：保存所有更改（异步）
+    int count2 = await context.SaveChangesAsync();
+    
+    // ========== 数据库方法 ==========
+    
+    // Database.ExecuteSqlCommand：执行SQL命令
+    int rowsAffected = context.Database.ExecuteSqlCommand(
+        "UPDATE Users SET Age = Age + 1 WHERE Age < 18");
+    
+    // Database.SqlQuery：执行SQL查询
+    var users2 = context.Database.SqlQuery<User>(
+        "SELECT * FROM Users WHERE Age > @Age", 
+        new SqlParameter("@Age", 18)).ToList();
+    
+    // Database.BeginTransaction：开始事务
+    using (var transaction = context.Database.BeginTransaction())
+    {
+        try
+        {
+            // 执行操作
+            context.Users.Add(new User { Name = "新用户" });
+            context.SaveChanges();
+            
+            transaction.Commit();
+        }
+        catch
+        {
+            transaction.Rollback();
+            throw;
+        }
+    }
+    
+    // ========== 变更跟踪方法 ==========
+    
+    // ChangeTracker.Entries：获取所有被跟踪的实体
+    var allEntries = context.ChangeTracker.Entries();
+    foreach (var entry in allEntries)
+    {
+        Console.WriteLine($"实体: {entry.Entity.GetType().Name}, 状态: {entry.State}");
+    }
+    
+    // ChangeTracker.Entries<T>：获取指定类型的被跟踪实体
+    var userEntries = context.ChangeTracker.Entries<User>();
+    
+    // ========== 配置方法 ==========
+    
+    // 禁用延迟加载
+    context.Configuration.LazyLoadingEnabled = false;
+    
+    // 禁用代理创建
+    context.Configuration.ProxyCreationEnabled = false;
+    
+    // 禁用保存时验证
+    context.Configuration.ValidateOnSaveEnabled = false;
+    
+    // ========== 其他方法 ==========
+    
+    // Dispose：释放资源（通常由using语句自动调用）
+    // context.Dispose();
+}
+```
+
+#### DbContext的生命周期管理
+
+```csharp
+// 方式1：使用using语句（推荐）
+using (var context = new MyDbContext())
+{
+    // 使用context
+    var users = context.Users.ToList();
+} // 自动释放资源
+
+// 方式2：手动管理（不推荐）
+var context = new MyDbContext();
+try
+{
+    var users = context.Users.ToList();
+}
+finally
+{
+    context.Dispose();
+}
+
+// 方式3：依赖注入（推荐用于Web应用）
+public class UserService
+{
+    private readonly MyDbContext _context;
+    
+    public UserService(MyDbContext context)
+    {
+        _context = context;
+    }
+    
+    public List<User> GetUsers()
+    {
+        return _context.Users.ToList();
+    }
+}
+```
+
+#### DbContext的配置选项
+
+```csharp
+public class MyDbContext : DbContext
+{
+    public MyDbContext() : base("DefaultConnection")
+    {
+        // 配置选项
+        
+        // 禁用延迟加载（提高性能，但需要显式加载关联数据）
+        this.Configuration.LazyLoadingEnabled = false;
+        
+        // 禁用代理创建（提高性能，但失去某些EF功能）
+        this.Configuration.ProxyCreationEnabled = false;
+        
+        // 启用保存时验证（默认启用）
+        this.Configuration.ValidateOnSaveEnabled = true;
+        
+        // 启用自动检测更改（默认启用，可关闭以提高性能）
+        this.Configuration.AutoDetectChangesEnabled = true;
+        
+        // 日志记录（开发环境）
+        #if DEBUG
+        this.Database.Log = s => System.Diagnostics.Debug.WriteLine(s);
+        #endif
+    }
+    
+    public DbSet<User> Users { get; set; }
+    public DbSet<Order> Orders { get; set; }
+}
+```
+
+### <a id="dbset-detail"></a>DbSet详解
+
+`DbSet<T>`表示数据库中的表，提供了查询、添加、更新、删除等操作。
+
+#### DbSet的主要方法
+
+```csharp
+using (var context = new MyDbContext())
+{
+    // ========== 查询方法 ==========
+    
+    // ToList：转换为列表（立即执行）
+    var allUsers = context.Users.ToList();
+    
+    // ToArray：转换为数组
+    var usersArray = context.Users.ToArray();
+    
+    // First：获取第一个元素（如果不存在会抛异常）
+    var firstUser = context.Users.First();
+    var firstUserWithCondition = context.Users.First(u => u.Age > 18);
+    
+    // FirstOrDefault：获取第一个元素（如果不存在返回null）
+    var firstUserOrNull = context.Users.FirstOrDefault();
+    var firstUserOrNullWithCondition = context.Users.FirstOrDefault(u => u.Age > 100);
+    
+    // Single：获取唯一元素（如果不存在或存在多个会抛异常）
+    var singleUser = context.Users.Single(u => u.Id == 1);
+    
+    // SingleOrDefault：获取唯一元素（如果不存在返回null，存在多个抛异常）
+    var singleUserOrNull = context.Users.SingleOrDefault(u => u.Id == 999);
+    
+    // Find：根据主键查找（同步）
+    var userById = context.Users.Find(1);
+    
+    // FindAsync：根据主键查找（异步）
+    var userByIdAsync = await context.Users.FindAsync(1);
+    
+    // Where：过滤
+    var adultUsers = context.Users.Where(u => u.Age >= 18).ToList();
+    
+    // OrderBy / OrderByDescending：排序
+    var sortedUsers = context.Users.OrderBy(u => u.Name).ToList();
+    var sortedUsersDesc = context.Users.OrderByDescending(u => u.Age).ToList();
+    
+    // ThenBy / ThenByDescending：多级排序
+    var multiSorted = context.Users
+        .OrderBy(u => u.Age)
+        .ThenByDescending(u => u.Name)
+        .ToList();
+    
+    // Skip / Take：分页
+    var pagedUsers = context.Users
+        .OrderBy(u => u.Id)
+        .Skip(10)
+        .Take(20)
+        .ToList();
+    
+    // Count：计数
+    int userCount = context.Users.Count();
+    int adultCount = context.Users.Count(u => u.Age >= 18);
+    
+    // Any：是否存在
+    bool hasUsers = context.Users.Any();
+    bool hasAdults = context.Users.Any(u => u.Age >= 18);
+    
+    // All：是否全部满足条件
+    bool allAdults = context.Users.All(u => u.Age >= 18);
+    
+    // Sum / Average / Min / Max：聚合
+    int totalAge = context.Users.Sum(u => u.Age);
+    double avgAge = context.Users.Average(u => u.Age);
+    int minAge = context.Users.Min(u => u.Age);
+    int maxAge = context.Users.Max(u => u.Age);
+    
+    // Select：投影
+    var userNames = context.Users.Select(u => u.Name).ToList();
+    var userInfo = context.Users.Select(u => new { u.Id, u.Name, u.Email }).ToList();
+    
+    // Include：预加载关联数据
+    var usersWithOrders = context.Users
+        .Include(u => u.Orders)
+        .ToList();
+    
+    var usersWithOrdersAndItems = context.Users
+        .Include(u => u.Orders.Select(o => o.OrderItems))
+        .ToList();
+    
+    // ========== 添加方法 ==========
+    
+    // Add：添加单个实体
+    var newUser = new User { Name = "新用户", Email = "new@example.com", Age = 25 };
+    context.Users.Add(newUser);
+    
+    // AddRange：添加多个实体
+    var newUsers = new List<User>
+    {
+        new User { Name = "用户1", Email = "user1@example.com", Age = 20 },
+        new User { Name = "用户2", Email = "user2@example.com", Age = 30 }
+    };
+    context.Users.AddRange(newUsers);
+    
+    // ========== 更新方法 ==========
+    
+    // 更新方式1：修改已跟踪的实体
+    var userToUpdate = context.Users.Find(1);
+    if (userToUpdate != null)
+    {
+        userToUpdate.Name = "更新后的名称";
+        userToUpdate.Age = 30;
+        // 不需要显式调用Update，SaveChanges时会自动检测更改
+    }
+    
+    // 更新方式2：附加并标记为已修改
+    var detachedUser = new User { Id = 1, Name = "新名称", Email = "new@example.com", Age = 25 };
+    context.Users.Attach(detachedUser);
+    context.Entry(detachedUser).State = EntityState.Modified;
+    
+    // 更新方式3：使用Entry设置状态
+    var userToUpdate2 = new User { Id = 2, Name = "更新的名称" };
+    context.Entry(userToUpdate2).State = EntityState.Modified;
+    // 注意：这种方式只会更新非空属性
+    
+    // ========== 删除方法 ==========
+    
+    // Remove：删除单个实体
+    var userToDelete = context.Users.Find(1);
+    if (userToDelete != null)
+    {
+        context.Users.Remove(userToDelete);
+    }
+    
+    // RemoveRange：删除多个实体
+    var usersToDelete = context.Users.Where(u => u.Age < 18).ToList();
+    context.Users.RemoveRange(usersToDelete);
+    
+    // 删除方式2：直接设置状态
+    var userToDelete2 = new User { Id = 2 };
+    context.Entry(userToDelete2).State = EntityState.Deleted;
+    
+    // ========== 其他方法 ==========
+    
+    // Attach：附加实体到上下文（不跟踪）
+    var existingUser = new User { Id = 1, Name = "现有用户" };
+    context.Users.Attach(existingUser);
+    
+    // Local：获取本地（内存中）的实体
+    var localUsers = context.Users.Local.ToList();
+    
+    // AsNoTracking：禁用变更跟踪（提高查询性能）
+    var usersNoTracking = context.Users.AsNoTracking().ToList();
+    
+    // AsQueryable：转换为IQueryable（用于动态查询）
+    IQueryable<User> query = context.Users.AsQueryable();
+    if (someCondition)
+    {
+        query = query.Where(u => u.Age > 18);
+    }
+    var result = query.ToList();
+    
+    // 保存更改
+    context.SaveChanges();
+}
+```
+
+#### DbSet的异步方法
+
+```csharp
+using (var context = new MyDbContext())
+{
+    // 异步查询
+    var users = await context.Users.ToListAsync();
+    var user = await context.Users.FirstOrDefaultAsync(u => u.Id == 1);
+    var count = await context.Users.CountAsync();
+    var hasUsers = await context.Users.AnyAsync();
+    
+    // 异步查找
+    var userById = await context.Users.FindAsync(1);
+    
+    // 异步添加
+    var newUser = new User { Name = "新用户", Email = "new@example.com", Age = 25 };
+    context.Users.Add(newUser);
+    await context.SaveChangesAsync();
+    
+    // 异步删除
+    var userToDelete = await context.Users.FindAsync(1);
+    if (userToDelete != null)
+    {
+        context.Users.Remove(userToDelete);
+        await context.SaveChangesAsync();
+    }
 }
 ```
 
@@ -5209,20 +7637,22 @@ System.Diagnostics.Trace.WriteLine($"线程ID: {Thread.CurrentThread.ManagedThre
 
 ## 总结
 
-C#进阶特性包括泛型、委托与Lambda表达式、设计模式、特性（Attributes）、反射（Reflection）、异步编程、文件操作流处理和多线程编程等。这些特性在现代C#开发中发挥着重要作用：
+C#进阶特性包括泛型、委托与Lambda表达式、LINQ、设计模式、特性（Attributes）、反射（Reflection）、异步编程、文件操作流处理和多线程编程等。这些特性在现代C#开发中发挥着重要作用：
 
 1. **泛型**：提供类型安全、代码重用和性能优化
 2. **委托与Lambda表达式**：支持函数式编程，简化代码
-3. **设计模式**：提供经过验证的解决方案
-4. **特性（Attributes）**：为代码添加元数据，支持声明式编程
-5. **反射（Reflection）**：运行时类型检查和操作，支持框架和插件系统
-6. **异步编程**：提高应用程序响应性和性能
-7. **文件操作与流处理**：高效处理数据输入输出
-8. **多线程编程**：充分利用多核CPU，实现并发执行
+3. **LINQ**：统一的查询语法，简化数据查询和处理
+4. **设计模式**：提供经过验证的解决方案
+5. **特性（Attributes）**：为代码添加元数据，支持声明式编程
+6. **反射（Reflection）**：运行时类型检查和操作，支持框架和插件系统
+7. **异步编程**：提高应用程序响应性和性能
+8. **文件操作与流处理**：高效处理数据输入输出
+9. **多线程编程**：充分利用多核CPU，实现并发执行
 
 在WinForm开发中，合理运用这些特性可以构建出高性能、可维护的桌面应用程序：
+- **LINQ**统一了数据查询语法，无论是查询内存集合、数据库还是XML，都能使用一致的语法，大大简化了数据处理代码
 - **异步编程和多线程编程**特别重要，可以保持UI响应性并提高程序性能；但需要注意线程安全和同步机制，避免死锁和竞态条件
 - **特性（Attributes）**广泛用于数据验证、序列化、ORM映射等场景，使得代码更加声明式和可配置
 - **反射（Reflection）**在框架开发、插件系统、对象映射等场景中不可或缺，但需要注意性能优化，通过缓存和委托提高执行效率
 
-掌握这些进阶特性，可以让您构建更加灵活、高效和可维护的C#应用程序。
+掌握这些进阶特性，可以让您构建更加灵活、高效和可维护的C#应用程序。LINQ作为数据查询的统一接口，与其他特性（如泛型、委托、反射）结合使用，可以构建出功能强大且易于维护的应用程序。

@@ -30,20 +30,37 @@ tags:
    - [表达式树](#expression-trees)
 3. [C#设计模式详解](#design-patterns)
    - [单例模式](#singleton-pattern)
-4. [C#异步编程详解](#async-programming)
+4. [C#特性（Attributes）详解](#attributes-detail)
+   - [特性的基本概念](#attributes-concept)
+   - [特性的定义与使用](#attributes-usage)
+   - [常见内置特性](#common-attributes)
+   - [自定义特性](#custom-attributes)
+   - [特性的反射访问](#attributes-reflection)
+   - [特性的应用场景](#attributes-scenarios)
+5. [C#反射（Reflection）详解](#reflection-detail)
+   - [反射的基本概念](#reflection-concept)
+   - [Type类型详解](#type-class)
+   - [程序集（Assembly）操作](#assembly-operations)
+   - [类型成员访问](#type-members)
+   - [动态创建对象](#dynamic-object-creation)
+   - [方法调用与属性访问](#method-property-access)
+   - [泛型类型的反射](#generic-reflection)
+   - [反射的性能优化](#reflection-performance)
+   - [反射的应用场景](#reflection-scenarios)
+6. [C#异步编程详解](#async-programming)
    - [异步编程基础](#async-basics)
    - [async/await关键字](#async-await)
    - [Task与Task\<T>](#task-types)
    - [异步方法最佳实践](#async-best-practices)
    - [异步编程与WinForm集成](#async-winform)
-5. [C#文件操作与流处理](#file-stream)
+7. [C#文件操作与流处理](#file-stream)
    - [文件操作基础](#file-basics)
    - [流（Stream）概述](#stream-overview)
    - [FileStream文件流](#filestream)
    - [StreamReader和StreamWriter](#stream-reader-writer)
    - [MemoryStream内存流](#memorystream)
    - [文件操作与WinForm集成](#file-winform)
-6. [C#多线程编程详解](#multithreading)
+8. [C#多线程编程详解](#multithreading)
    - [多线程基础概念](#multithreading-basics)
    - [Thread类详解](#thread-class)
    - [ThreadPool线程池](#threadpool)
@@ -1160,6 +1177,1463 @@ public sealed class InnerClassSingleton
 单例模式是C#开发中最常用的设计模式之一，正确应用单例模式可以提高系统的性能和可维护性，但也要注意避免过度使用带来的问题。
 
 在实际开发中，合理使用泛型可以提高代码的质量、性能和可维护性，是现代C#开发中不可或缺的一部分。
+
+## <a id="attributes-detail"></a>C#特性（Attributes）详解
+
+特性（Attributes）是C#中的元数据机制，它允许为程序元素（类、方法、属性等）添加声明性信息。特性可以在运行时通过反射访问，广泛应用于序列化、ORM、依赖注入、单元测试等场景。
+
+### <a id="attributes-concept"></a>特性的基本概念
+
+#### 什么是特性？
+
+特性是一种声明性标签，用于向程序元素添加元数据信息。特性本身不直接影响程序的执行逻辑，但可以通过反射在运行时获取和利用这些信息。
+
+```csharp
+// 特性使用方括号 [] 语法
+[Serializable]
+public class Person
+{
+    [Obsolete("使用新版本的方法")]
+    public void OldMethod() { }
+}
+```
+
+#### 特性的作用
+
+1. **添加元数据**：为代码元素添加描述性信息
+2. **编译时检查**：某些特性会被编译器识别并产生警告或错误
+3. **运行时访问**：通过反射可以获取特性信息
+4. **框架支持**：许多框架（如ASP.NET、Entity Framework）依赖特性来配置行为
+
+### <a id="attributes-usage"></a>特性的定义与使用
+
+#### 特性的语法
+
+```csharp
+// 基本语法：[特性名]
+[Serializable]
+
+// 带参数的特性：[特性名(参数)]
+[Obsolete("此方法已过时")]
+
+// 多个参数：[特性名(参数1, 参数2, 命名参数=值)]
+[Author("张三", "2024-01-01", Version = 2.0)]
+
+// 多个特性：可以堆叠或分开
+[Serializable]
+[Obsolete]
+public class MyClass { }
+
+// 或者
+[Serializable, Obsolete]
+public class MyClass { }
+```
+
+#### 特性的应用目标
+
+特性可以应用于各种程序元素：
+
+```csharp
+// 应用于程序集
+[assembly: AssemblyTitle("MyApplication")]
+
+// 应用于模块
+[module: CLSCompliant(true)]
+
+// 应用于类
+[Serializable]
+public class MyClass { }
+
+// 应用于方法
+[Obsolete("此方法已过时")]
+public void MyMethod() { }
+
+// 应用于属性
+[Required]
+public string Name { get; set; }
+
+// 应用于字段
+[NonSerialized]
+private int _value;
+
+// 应用于参数
+public void Method([In] int parameter) { }
+
+// 应用于返回值
+[return: MarshalAs(UnmanagedType.Bool)]
+public bool GetValue() { return true; }
+```
+
+### <a id="common-attributes"></a>常见内置特性
+
+#### 序列化相关特性
+
+```csharp
+using System;
+using System.Runtime.Serialization;
+
+// Serializable：标记类可序列化
+[Serializable]
+public class Person
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+    
+    // NonSerialized：标记字段不序列化
+    [NonSerialized]
+    private string _tempData;
+    
+    // OptionalField：标记字段为可选（用于版本兼容）
+    [OptionalField]
+    public string Email { get; set; }
+}
+
+// DataContract：用于WCF数据契约
+[DataContract]
+public class Customer
+{
+    [DataMember(Name = "CustomerName")]
+    public string Name { get; set; }
+    
+    [DataMember(IsRequired = true)]
+    public int Id { get; set; }
+    
+    // 不标记DataMember的成员不会被序列化
+    public string TempData { get; set; }
+}
+```
+
+#### 过时标记特性
+
+```csharp
+// Obsolete：标记代码元素已过时
+[Obsolete("此方法已过时，请使用NewMethod代替")]
+public void OldMethod() { }
+
+// 第二个参数为true时，使用该元素会产生编译错误
+[Obsolete("此方法已移除", true)]
+public void RemovedMethod() { }
+
+public void NewMethod() { }
+```
+
+#### 条件编译特性
+
+```csharp
+using System.Diagnostics;
+
+// Conditional：条件编译特性
+[Conditional("DEBUG")]
+public void DebugMethod()
+{
+    Console.WriteLine("仅在DEBUG模式下执行");
+}
+
+// 使用示例
+public void Test()
+{
+    DebugMethod(); // 在DEBUG模式下才会编译和执行
+}
+```
+
+#### 调用者信息特性
+
+```csharp
+using System.Runtime.CompilerServices;
+
+public class Logger
+{
+    // CallerMemberName：自动获取调用者成员名
+    public void Log(
+        string message,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
+    {
+        Console.WriteLine($"[{memberName}] {filePath}:{lineNumber} - {message}");
+    }
+}
+
+// 使用示例
+public void Test()
+{
+    Logger logger = new Logger();
+    logger.Log("测试消息");
+    // 输出: [Test] C:\...\Program.cs:123 - 测试消息
+}
+```
+
+#### 参数验证特性
+
+```csharp
+// 在.NET Core/.NET 5+中的参数验证
+public void ProcessData(
+    [NotNull] string data,
+    [Range(0, 100)] int value,
+    [EmailAddress] string email)
+{
+    // data不为null
+    // value在0-100范围内
+    // email是有效的邮箱地址
+}
+```
+
+#### 结构布局特性
+
+```csharp
+using System.Runtime.InteropServices;
+
+// StructLayout：控制结构体在内存中的布局
+[StructLayout(LayoutKind.Sequential)]
+public struct Point
+{
+    public int X;
+    public int Y;
+}
+
+// 显式布局（用于与C/C++互操作）
+[StructLayout(LayoutKind.Explicit)]
+public struct Union
+{
+    [FieldOffset(0)]
+    public int Integer;
+    
+    [FieldOffset(0)]
+    public float Float;
+}
+
+// MarshalAs：指定如何封送数据
+[DllImport("user32.dll")]
+public static extern int MessageBox(
+    IntPtr hWnd,
+    [MarshalAs(UnmanagedType.LPStr)] string text,
+    [MarshalAs(UnmanagedType.LPStr)] string caption,
+    uint type);
+```
+
+### <a id="custom-attributes"></a>自定义特性
+
+#### 创建自定义特性
+
+自定义特性类必须继承自`Attribute`类：
+
+```csharp
+using System;
+
+// 定义自定义特性
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false)]
+public class AuthorAttribute : Attribute
+{
+    public string Name { get; }
+    public string Date { get; set; }
+    public double Version { get; set; }
+    
+    // 位置参数（必需参数）
+    public AuthorAttribute(string name)
+    {
+        Name = name;
+    }
+}
+
+// 使用自定义特性
+[Author("张三", Date = "2024-01-01", Version = 1.0)]
+public class MyClass
+{
+    [Author("李四")]
+    public void MyMethod() { }
+}
+```
+
+#### AttributeUsage特性
+
+`AttributeUsage`用于定义特性的使用规则：
+
+```csharp
+[AttributeUsage(
+    AttributeTargets.Class | AttributeTargets.Method,  // 应用目标
+    AllowMultiple = false,                              // 是否允许多次应用
+    Inherited = true)]                                  // 是否可继承
+public class MyAttribute : Attribute { }
+```
+
+**AttributeTargets枚举值：**
+- `All`：所有目标
+- `Class`：类
+- `Method`：方法
+- `Property`：属性
+- `Field`：字段
+- `Parameter`：参数
+- `Constructor`：构造函数
+- `Event`：事件
+- `Interface`：接口
+- `Struct`：结构体
+- `Enum`：枚举
+- `Assembly`：程序集
+- `Module`：模块
+- `ReturnValue`：返回值
+
+#### 自定义特性示例
+
+```csharp
+// 示例1：验证特性
+[AttributeUsage(AttributeTargets.Property)]
+public class RequiredAttribute : Attribute
+{
+    public string ErrorMessage { get; set; }
+    
+    public RequiredAttribute(string errorMessage = "此字段是必需的")
+    {
+        ErrorMessage = errorMessage;
+    }
+}
+
+// 示例2：权限特性
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
+public class AuthorizeAttribute : Attribute
+{
+    public string[] Roles { get; set; }
+    
+    public AuthorizeAttribute(params string[] roles)
+    {
+        Roles = roles;
+    }
+}
+
+// 示例3：性能监控特性
+[AttributeUsage(AttributeTargets.Method)]
+public class PerformanceMonitorAttribute : Attribute
+{
+    public int Threshold { get; set; } // 阈值（毫秒）
+    
+    public PerformanceMonitorAttribute(int threshold = 1000)
+    {
+        Threshold = threshold;
+    }
+}
+
+// 使用示例
+public class UserService
+{
+    [Authorize("Admin", "Manager")]
+    [PerformanceMonitor(500)]
+    public void DeleteUser(int userId)
+    {
+        // 方法实现
+    }
+    
+    [Required("用户名不能为空")]
+    public string UserName { get; set; }
+}
+```
+
+### <a id="attributes-reflection"></a>特性的反射访问
+
+#### 获取特性
+
+通过反射可以获取和应用在代码元素上的特性：
+
+```csharp
+using System;
+using System.Reflection;
+
+// 获取类上的特性
+[Author("张三", Date = "2024-01-01")]
+public class MyClass { }
+
+// 获取特性
+Type type = typeof(MyClass);
+AuthorAttribute authorAttr = type.GetCustomAttribute<AuthorAttribute>();
+
+if (authorAttr != null)
+{
+    Console.WriteLine($"作者: {authorAttr.Name}");
+    Console.WriteLine($"日期: {authorAttr.Date}");
+    Console.WriteLine($"版本: {authorAttr.Version}");
+}
+
+// 获取所有特性
+object[] attributes = type.GetCustomAttributes(true);
+foreach (Attribute attr in attributes)
+{
+    Console.WriteLine($"特性: {attr.GetType().Name}");
+}
+
+// 获取方法上的特性
+[Author("李四")]
+public void MyMethod() { }
+
+MethodInfo method = typeof(MyClass).GetMethod("MyMethod");
+AuthorAttribute methodAttr = method.GetCustomAttribute<AuthorAttribute>();
+```
+
+#### 实现特性驱动的验证
+
+```csharp
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+
+// 验证特性基类
+public abstract class ValidationAttribute : Attribute
+{
+    public abstract bool IsValid(object value);
+    public abstract string ErrorMessage { get; }
+}
+
+// 必需字段特性
+[AttributeUsage(AttributeTargets.Property)]
+public class RequiredAttribute : ValidationAttribute
+{
+    public override bool IsValid(object value)
+    {
+        if (value == null) return false;
+        if (value is string str) return !string.IsNullOrWhiteSpace(str);
+        return true;
+    }
+    
+    public override string ErrorMessage => "此字段是必需的";
+}
+
+// 范围验证特性
+[AttributeUsage(AttributeTargets.Property)]
+public class RangeAttribute : ValidationAttribute
+{
+    public int Min { get; }
+    public int Max { get; }
+    
+    public RangeAttribute(int min, int max)
+    {
+        Min = min;
+        Max = max;
+    }
+    
+    public override bool IsValid(object value)
+    {
+        if (value is int intValue)
+        {
+            return intValue >= Min && intValue <= Max;
+        }
+        return false;
+    }
+    
+    public override string ErrorMessage => $"值必须在 {Min} 到 {Max} 之间";
+}
+
+// 验证器类
+public static class Validator
+{
+    public static List<string> Validate(object obj)
+    {
+        List<string> errors = new List<string>();
+        Type type = obj.GetType();
+        
+        foreach (PropertyInfo property in type.GetProperties())
+        {
+            // 获取所有验证特性
+            var validationAttributes = property.GetCustomAttributes<ValidationAttribute>();
+            
+            foreach (var attribute in validationAttributes)
+            {
+                object value = property.GetValue(obj);
+                
+                if (!attribute.IsValid(value))
+                {
+                    errors.Add($"{property.Name}: {attribute.ErrorMessage}");
+                }
+            }
+        }
+        
+        return errors;
+    }
+}
+
+// 使用示例
+[Required]
+public class Person
+{
+    [Required]
+    public string Name { get; set; }
+    
+    [Range(0, 150)]
+    public int Age { get; set; }
+    
+    [Required]
+    public string Email { get; set; }
+}
+
+// 验证
+Person person = new Person { Name = "", Age = 200, Email = null };
+List<string> errors = Validator.Validate(person);
+foreach (string error in errors)
+{
+    Console.WriteLine(error);
+}
+```
+
+#### 特性驱动的AOP（面向切面编程）
+
+```csharp
+using System;
+using System.Diagnostics;
+using System.Reflection;
+
+// 日志特性
+[AttributeUsage(AttributeTargets.Method)]
+public class LogAttribute : Attribute
+{
+    public LogLevel Level { get; set; } = LogLevel.Info;
+}
+
+public enum LogLevel
+{
+    Debug,
+    Info,
+    Warning,
+    Error
+}
+
+// 缓存特性
+[AttributeUsage(AttributeTargets.Method)]
+public class CacheAttribute : Attribute
+{
+    public int Duration { get; set; } // 缓存时长（秒）
+    
+    public CacheAttribute(int duration = 60)
+    {
+        Duration = duration;
+    }
+}
+
+// 特性处理器（简化示例）
+public static class AttributeProcessor
+{
+    public static void ProcessMethod(MethodInfo method, object instance, object[] parameters)
+    {
+        // 检查日志特性
+        var logAttr = method.GetCustomAttribute<LogAttribute>();
+        if (logAttr != null)
+        {
+            Console.WriteLine($"[{logAttr.Level}] 调用方法: {method.Name}");
+        }
+        
+        // 检查缓存特性
+        var cacheAttr = method.GetCustomAttribute<CacheAttribute>();
+        if (cacheAttr != null)
+        {
+            Console.WriteLine($"检查缓存，缓存时长: {cacheAttr.Duration}秒");
+            // 实现缓存逻辑
+        }
+        
+        // 执行方法
+        method.Invoke(instance, parameters);
+    }
+}
+```
+
+### <a id="attributes-scenarios"></a>特性的应用场景
+
+#### 1. 数据序列化
+
+```csharp
+using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+public class Product
+{
+    [JsonPropertyName("product_id")]
+    public int Id { get; set; }
+    
+    [JsonPropertyName("product_name")]
+    public string Name { get; set; }
+    
+    [JsonIgnore]
+    public decimal InternalPrice { get; set; }
+    
+    [JsonPropertyName("price")]
+    public decimal PublicPrice { get; set; }
+}
+
+// 序列化时会使用特性指定的名称
+Product product = new Product { Id = 1, Name = "商品", PublicPrice = 99.99m };
+string json = JsonSerializer.Serialize(product);
+// 输出: {"product_id":1,"product_name":"商品","price":99.99}
+```
+
+#### 2. ORM映射
+
+```csharp
+// Entity Framework使用特性进行映射
+[Table("Users")]
+public class User
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int Id { get; set; }
+    
+    [Required]
+    [MaxLength(100)]
+    [Column("UserName")]
+    public string Name { get; set; }
+    
+    [NotMapped]
+    public string TempData { get; set; }
+}
+```
+
+#### 3. API路由和验证
+
+```csharp
+// ASP.NET Core中使用特性
+[ApiController]
+[Route("api/[controller]")]
+public class UsersController : ControllerBase
+{
+    [HttpGet("{id}")]
+    [Authorize(Roles = "Admin")]
+    public IActionResult GetUser(int id)
+    {
+        // 实现
+        return Ok();
+    }
+    
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult CreateUser([FromBody] CreateUserRequest request)
+    {
+        // 实现
+        return Ok();
+    }
+}
+
+public class CreateUserRequest
+{
+    [Required(ErrorMessage = "用户名是必需的")]
+    [StringLength(50, MinimumLength = 3)]
+    public string UserName { get; set; }
+    
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; }
+}
+```
+
+#### 4. 单元测试
+
+```csharp
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+[TestClass]
+public class CalculatorTests
+{
+    [TestMethod]
+    [TestCategory("Math")]
+    [Priority(1)]
+    public void Add_TwoNumbers_ReturnsSum()
+    {
+        // 测试代码
+    }
+    
+    [TestMethod]
+    [ExpectedException(typeof(ArgumentException))]
+    public void Divide_ByZero_ThrowsException()
+    {
+        // 测试代码
+    }
+    
+    [TestInitialize]
+    public void Setup()
+    {
+        // 测试初始化
+    }
+    
+    [TestCleanup]
+    public void Cleanup()
+    {
+        // 测试清理
+    }
+}
+```
+
+#### 5. 依赖注入
+
+```csharp
+// 使用特性标记需要注入的依赖
+public class UserService
+{
+    [Inject]
+    private IUserRepository _repository;
+    
+    [Inject]
+    private ILogger _logger;
+}
+
+// 或者方法注入
+public class OrderService
+{
+    private IOrderRepository _repository;
+    
+    [Inject]
+    public void SetRepository(IOrderRepository repository)
+    {
+        _repository = repository;
+    }
+}
+```
+
+特性是C#中强大的元数据机制，它使得代码更加声明式、可配置，并且为框架提供了丰富的扩展点。通过合理使用特性，可以构建更加灵活和可维护的应用程序。
+
+## <a id="reflection-detail"></a>C#反射（Reflection）详解
+
+反射（Reflection）是C#中强大的运行时类型检查和操作机制。它允许在运行时获取类型信息、创建对象实例、调用方法和访问属性，而无需在编译时知道这些类型。反射广泛应用于序列化、ORM框架、依赖注入、代码生成等场景。
+
+### <a id="reflection-concept"></a>反射的基本概念
+
+#### 什么是反射？
+
+反射是程序在运行时检查、访问和修改自身结构的能力。通过反射，可以：
+- 获取类型的元数据信息
+- 动态创建类型实例
+- 动态调用方法和访问属性
+- 在运行时构建和执行代码
+
+#### 为什么需要反射？
+
+1. **框架开发**：框架需要处理未知类型（如ORM、序列化器）
+2. **插件系统**：动态加载和调用插件
+3. **代码生成**：动态生成和执行代码
+4. **调试和诊断**：运行时类型检查和分析
+5. **配置驱动**：基于配置动态创建和配置对象
+
+#### 反射的性能考虑
+
+反射操作比直接调用慢很多，因为需要：
+- 运行时类型查找
+- 动态方法调用
+- 安全性检查
+
+**性能优化建议：**
+- 缓存反射结果
+- 使用`Delegate.CreateDelegate`创建委托
+- 使用表达式树编译
+- 避免在频繁调用的代码中使用反射
+
+### <a id="type-class"></a>Type类型详解
+
+`Type`类是反射的核心，它表示类型声明（类、接口、数组等）。
+
+#### 获取Type对象
+
+```csharp
+using System;
+using System.Reflection;
+
+// 方式1：使用typeof运算符（编译时已知类型）
+Type type1 = typeof(string);
+Type type2 = typeof(int);
+Type type3 = typeof(Person);
+
+// 方式2：使用GetType()方法（运行时获取）
+string str = "Hello";
+Type type4 = str.GetType();
+
+Person person = new Person();
+Type type5 = person.GetType();
+
+// 方式3：使用Type.GetType()（通过类型名）
+Type type6 = Type.GetType("System.String");
+Type type7 = Type.GetType("MyNamespace.Person", true); // true表示找不到时抛出异常
+
+// 方式4：从程序集获取
+Assembly assembly = Assembly.GetExecutingAssembly();
+Type[] types = assembly.GetTypes(); // 获取所有类型
+Type type8 = assembly.GetType("MyNamespace.Person");
+```
+
+#### Type的常用属性
+
+```csharp
+Type type = typeof(Person);
+
+// 类型基本信息
+Console.WriteLine($"名称: {type.Name}");                    // Person
+Console.WriteLine($"完整名称: {type.FullName}");            // MyNamespace.Person
+Console.WriteLine($"命名空间: {type.Namespace}");           // MyNamespace
+Console.WriteLine($"程序集: {type.Assembly.FullName}");     // 程序集名称
+
+// 类型特性
+Console.WriteLine($"是类: {type.IsClass}");                 // True
+Console.WriteLine($"是接口: {type.IsInterface}");           // False
+Console.WriteLine($"是值类型: {type.IsValueType}");         // False
+Console.WriteLine($"是抽象类: {type.IsAbstract}");          // False
+Console.WriteLine($"是密封类: {type.IsSealed}");            // False
+Console.WriteLine($"是泛型: {type.IsGenericType}");         // False
+
+// 可见性
+Console.WriteLine($"是公开的: {type.IsPublic}");            // True
+Console.WriteLine($"不是公开的: {type.IsNotPublic}");       // False
+
+// 继承关系
+Console.WriteLine($"基类: {type.BaseType}");                // System.Object
+Console.WriteLine($"是否实现接口: {type.IsAssignableFrom(typeof(IDisposable))}");
+```
+
+#### 获取类型的成员
+
+```csharp
+Type type = typeof(Person);
+
+// 获取所有公共成员
+MemberInfo[] allMembers = type.GetMembers();
+
+// 获取特定类型的成员
+PropertyInfo[] properties = type.GetProperties();
+MethodInfo[] methods = type.GetMethods();
+FieldInfo[] fields = type.GetFields();
+ConstructorInfo[] constructors = type.GetConstructors();
+EventInfo[] events = type.GetEvents();
+
+// 使用BindingFlags控制搜索
+BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
+
+PropertyInfo[] allProperties = type.GetProperties(flags);
+MethodInfo[] allMethods = type.GetMethods(flags);
+FieldInfo[] allFields = type.GetFields(flags);
+
+// 获取特定成员
+PropertyInfo nameProperty = type.GetProperty("Name");
+MethodInfo toStringMethod = type.GetMethod("ToString");
+FieldInfo idField = type.GetField("_id", BindingFlags.NonPublic | BindingFlags.Instance);
+ConstructorInfo constructor = type.GetConstructor(new Type[] { typeof(string), typeof(int) });
+```
+
+### <a id="assembly-operations"></a>程序集（Assembly）操作
+
+程序集是.NET中代码部署和版本控制的基本单位。
+
+#### 加载程序集
+
+```csharp
+using System.Reflection;
+
+// 方式1：加载已加载的程序集
+Assembly assembly1 = Assembly.GetExecutingAssembly(); // 当前程序集
+Assembly assembly2 = Assembly.GetCallingAssembly();   // 调用者程序集
+Assembly assembly3 = Assembly.GetEntryAssembly();     // 入口程序集
+
+// 方式2：通过程序集名称加载
+Assembly assembly4 = Assembly.Load("MyAssembly");
+Assembly assembly5 = Assembly.LoadFrom("C:\\Path\\To\\MyAssembly.dll");
+Assembly assembly6 = Assembly.LoadFile("C:\\Path\\To\\MyAssembly.dll");
+
+// 方式3：通过类型获取程序集
+Assembly assembly7 = typeof(Person).Assembly;
+
+// 方式4：反射加载（推荐用于插件系统）
+string assemblyPath = "MyPlugin.dll";
+Assembly pluginAssembly = Assembly.LoadFrom(assemblyPath);
+```
+
+#### 程序集信息
+
+```csharp
+Assembly assembly = Assembly.GetExecutingAssembly();
+
+// 程序集基本信息
+Console.WriteLine($"程序集名称: {assembly.GetName().Name}");
+Console.WriteLine($"完整名称: {assembly.FullName}");
+Console.WriteLine($"位置: {assembly.Location}");
+Console.WriteLine($"是否在GAC: {assembly.GlobalAssemblyCache}");
+
+// 获取程序集中的所有类型
+Type[] types = assembly.GetTypes();
+foreach (Type type in types)
+{
+    Console.WriteLine($"类型: {type.FullName}");
+}
+
+// 获取导出的类型（公开类型）
+Type[] exportedTypes = assembly.GetExportedTypes();
+
+// 获取类型（通过名称）
+Type type = assembly.GetType("MyNamespace.Person");
+
+// 获取程序集的清单资源
+string[] resources = assembly.GetManifestResourceNames();
+foreach (string resource in resources)
+{
+    Console.WriteLine($"资源: {resource}");
+}
+
+// 加载嵌入资源
+using (Stream stream = assembly.GetManifestResourceStream("MyNamespace.resource.txt"))
+{
+    // 读取资源
+}
+```
+
+### <a id="type-members"></a>类型成员访问
+
+#### 属性（Property）访问
+
+```csharp
+using System.Reflection;
+
+public class Person
+{
+    public string Name { get; set; }
+    public int Age { get; private set; }
+    private string _email;
+    
+    public Person(string name, int age)
+    {
+        Name = name;
+        Age = age;
+    }
+}
+
+// 获取属性信息
+Type type = typeof(Person);
+PropertyInfo nameProperty = type.GetProperty("Name");
+PropertyInfo ageProperty = type.GetProperty("Age");
+
+// 属性信息
+Console.WriteLine($"属性名: {nameProperty.Name}");
+Console.WriteLine($"属性类型: {nameProperty.PropertyType}");
+Console.WriteLine($"可读: {nameProperty.CanRead}");
+Console.WriteLine($"可写: {nameProperty.CanWrite}");
+Console.WriteLine($"是静态: {nameProperty.GetMethod.IsStatic}");
+
+// 获取和设置属性值
+Person person = new Person("张三", 25);
+
+// 获取值
+object nameValue = nameProperty.GetValue(person);
+Console.WriteLine($"Name: {nameValue}"); // 输出: Name: 张三
+
+// 设置值
+nameProperty.SetValue(person, "李四");
+Console.WriteLine($"Name: {person.Name}"); // 输出: Name: 李四
+
+// 获取所有属性
+PropertyInfo[] properties = type.GetProperties();
+foreach (PropertyInfo prop in properties)
+{
+    Console.WriteLine($"{prop.Name} ({prop.PropertyType.Name})");
+}
+
+// 获取特性
+var attributes = nameProperty.GetCustomAttributes();
+foreach (Attribute attr in attributes)
+{
+    Console.WriteLine($"特性: {attr.GetType().Name}");
+}
+```
+
+#### 方法（Method）访问
+
+```csharp
+public class Calculator
+{
+    public int Add(int a, int b)
+    {
+        return a + b;
+    }
+    
+    private int Multiply(int a, int b)
+    {
+        return a * b;
+    }
+    
+    public static int Subtract(int a, int b)
+    {
+        return a - b;
+    }
+}
+
+// 获取方法信息
+Type type = typeof(Calculator);
+MethodInfo addMethod = type.GetMethod("Add");
+MethodInfo multiplyMethod = type.GetMethod("Multiply", BindingFlags.NonPublic | BindingFlags.Instance);
+
+// 方法信息
+Console.WriteLine($"方法名: {addMethod.Name}");
+Console.WriteLine($"返回类型: {addMethod.ReturnType}");
+Console.WriteLine($"参数数量: {addMethod.GetParameters().Length}");
+Console.WriteLine($"是静态: {addMethod.IsStatic}");
+
+// 获取参数信息
+ParameterInfo[] parameters = addMethod.GetParameters();
+foreach (ParameterInfo param in parameters)
+{
+    Console.WriteLine($"参数: {param.Name}, 类型: {param.ParameterType}");
+}
+
+// 调用实例方法
+Calculator calc = new Calculator();
+object result = addMethod.Invoke(calc, new object[] { 10, 20 });
+Console.WriteLine($"结果: {result}"); // 输出: 结果: 30
+
+// 调用私有方法
+object multiplyResult = multiplyMethod.Invoke(calc, new object[] { 5, 6 });
+Console.WriteLine($"结果: {multiplyResult}"); // 输出: 结果: 30
+
+// 调用静态方法
+MethodInfo subtractMethod = type.GetMethod("Subtract");
+object subtractResult = subtractMethod.Invoke(null, new object[] { 20, 10 });
+Console.WriteLine($"结果: {subtractResult}"); // 输出: 结果: 10
+```
+
+#### 字段（Field）访问
+
+```csharp
+public class Person
+{
+    public string Name;
+    private int _age;
+    public static int Count;
+}
+
+// 获取字段信息
+Type type = typeof(Person);
+FieldInfo nameField = type.GetField("Name");
+FieldInfo ageField = type.GetField("_age", BindingFlags.NonPublic | BindingFlags.Instance);
+FieldInfo countField = type.GetField("Count");
+
+// 字段信息
+Console.WriteLine($"字段名: {nameField.Name}");
+Console.WriteLine($"字段类型: {nameField.FieldType}");
+Console.WriteLine($"是静态: {nameField.IsStatic}");
+
+// 获取和设置字段值
+Person person = new Person();
+
+// 设置公共字段
+nameField.SetValue(person, "张三");
+Console.WriteLine($"Name: {person.Name}"); // 输出: Name: 张三
+
+// 获取公共字段
+object nameValue = nameField.GetValue(person);
+Console.WriteLine($"Name: {nameValue}"); // 输出: Name: 张三
+
+// 访问私有字段
+ageField.SetValue(person, 25);
+int age = (int)ageField.GetValue(person);
+Console.WriteLine($"Age: {age}"); // 输出: Age: 25
+
+// 访问静态字段
+countField.SetValue(null, 10);
+int count = (int)countField.GetValue(null);
+Console.WriteLine($"Count: {count}"); // 输出: Count: 10
+```
+
+#### 构造函数访问
+
+```csharp
+public class Person
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+    
+    public Person() { }
+    
+    public Person(string name)
+    {
+        Name = name;
+    }
+    
+    public Person(string name, int age)
+    {
+        Name = name;
+        Age = age;
+    }
+    
+    private Person(int age)
+    {
+        Age = age;
+    }
+}
+
+// 获取构造函数
+Type type = typeof(Person);
+
+// 获取无参构造函数
+ConstructorInfo defaultConstructor = type.GetConstructor(Type.EmptyTypes);
+Person person1 = (Person)defaultConstructor.Invoke(null);
+
+// 获取带参数的构造函数
+ConstructorInfo constructor1 = type.GetConstructor(new Type[] { typeof(string) });
+Person person2 = (Person)constructor1.Invoke(new object[] { "张三" });
+
+ConstructorInfo constructor2 = type.GetConstructor(new Type[] { typeof(string), typeof(int) });
+Person person3 = (Person)constructor2.Invoke(new object[] { "李四", 25 });
+
+// 获取所有构造函数
+ConstructorInfo[] constructors = type.GetConstructors();
+foreach (ConstructorInfo ctor in constructors)
+{
+    Console.WriteLine($"构造函数参数: {ctor.GetParameters().Length}");
+}
+
+// 获取私有构造函数
+ConstructorInfo privateConstructor = type.GetConstructor(
+    BindingFlags.NonPublic | BindingFlags.Instance,
+    null,
+    new Type[] { typeof(int) },
+    null);
+Person person4 = (Person)privateConstructor.Invoke(new object[] { 30 });
+```
+
+### <a id="dynamic-object-creation"></a>动态创建对象
+
+#### 使用Activator创建对象
+
+```csharp
+using System;
+
+// 方式1：使用Activator.CreateInstance（无参构造函数）
+Type type = typeof(Person);
+Person person1 = (Person)Activator.CreateInstance(type);
+
+// 方式2：带参数
+Person person2 = (Person)Activator.CreateInstance(type, "张三", 25);
+
+// 方式3：通过类型名创建
+object person3 = Activator.CreateInstance("MyAssembly", "MyNamespace.Person");
+object person4 = Activator.CreateInstance("MyAssembly", "MyNamespace.Person", false, 
+    BindingFlags.Default, null, new object[] { "李四", 30 }, null, null);
+
+// 方式4：使用泛型方法（编译时已知类型）
+Person person5 = Activator.CreateInstance<Person>();
+```
+
+#### 使用构造函数创建对象
+
+```csharp
+// 性能更好的方式：使用ConstructorInfo
+Type type = typeof(Person);
+ConstructorInfo constructor = type.GetConstructor(new Type[] { typeof(string), typeof(int) });
+
+// 创建委托以提高性能（只创建一次）
+Func<string, int, Person> createPerson = (name, age) =>
+    (Person)constructor.Invoke(new object[] { name, age });
+
+// 使用委托创建对象（比直接Invoke快）
+Person person = createPerson("张三", 25);
+```
+
+#### 使用表达式树创建对象（高性能）
+
+```csharp
+using System.Linq.Expressions;
+
+// 创建对象工厂（编译后性能接近直接new）
+public static class ObjectFactory
+{
+    public static Func<object> CreateFactory(Type type)
+    {
+        NewExpression newExpr = Expression.New(type);
+        Expression<Func<object>> lambda = Expression.Lambda<Func<object>>(newExpr);
+        return lambda.Compile();
+    }
+    
+    public static Func<T> CreateFactory<T>()
+    {
+        return Expression.Lambda<Func<T>>(Expression.New(typeof(T))).Compile();
+    }
+}
+
+// 使用
+Func<Person> factory = ObjectFactory.CreateFactory<Person>();
+Person person = factory(); // 性能接近 new Person()
+```
+
+### <a id="method-property-access"></a>方法调用与属性访问
+
+#### 性能优化的方法调用
+
+```csharp
+using System.Reflection;
+
+// 方式1：直接Invoke（最慢）
+MethodInfo method = typeof(Calculator).GetMethod("Add");
+Calculator calc = new Calculator();
+int result = (int)method.Invoke(calc, new object[] { 10, 20 });
+
+// 方式2：使用Delegate.CreateDelegate（较快）
+MethodInfo addMethod = typeof(Calculator).GetMethod("Add");
+Func<Calculator, int, int, int> addDelegate = 
+    (Func<Calculator, int, int, int>)Delegate.CreateDelegate(
+        typeof(Func<Calculator, int, int, int>), addMethod);
+int result2 = addDelegate(calc, 10, 20);
+
+// 方式3：使用表达式树编译（最快，接近直接调用）
+using System.Linq.Expressions;
+
+MethodInfo methodInfo = typeof(Calculator).GetMethod("Add");
+ParameterExpression instance = Expression.Parameter(typeof(Calculator), "calc");
+ParameterExpression param1 = Expression.Parameter(typeof(int), "a");
+ParameterExpression param2 = Expression.Parameter(typeof(int), "b");
+MethodCallExpression call = Expression.Call(instance, methodInfo, param1, param2);
+Expression<Func<Calculator, int, int, int>> lambda = 
+    Expression.Lambda<Func<Calculator, int, int, int>>(call, instance, param1, param2);
+Func<Calculator, int, int, int> compiled = lambda.Compile();
+int result3 = compiled(calc, 10, 20);
+```
+
+#### 属性访问优化
+
+```csharp
+// 方式1：直接GetValue/SetValue（较慢）
+PropertyInfo property = typeof(Person).GetProperty("Name");
+Person person = new Person();
+property.SetValue(person, "张三");
+string name = (string)property.GetValue(person);
+
+// 方式2：使用委托（较快）
+PropertyInfo nameProperty = typeof(Person).GetProperty("Name");
+
+// 创建getter和setter委托
+Func<Person, string> getter = (Func<Person, string>)Delegate.CreateDelegate(
+    typeof(Func<Person, string>), nameProperty.GetMethod);
+Action<Person, string> setter = (Action<Person, string>)Delegate.CreateDelegate(
+    typeof(Action<Person, string>), nameProperty.SetMethod);
+
+// 使用委托
+setter(person, "李四");
+string value = getter(person);
+```
+
+### <a id="generic-reflection"></a>泛型类型的反射
+
+#### 处理泛型类型
+
+```csharp
+// 获取泛型类型定义
+Type listType = typeof(List<>);
+Type dictionaryType = typeof(Dictionary<,>);
+
+// 创建封闭的泛型类型
+Type stringListType = listType.MakeGenericType(typeof(string));
+Type intStringDictType = dictionaryType.MakeGenericType(typeof(int), typeof(string));
+
+// 创建泛型类型实例
+object stringList = Activator.CreateInstance(stringListType);
+object intStringDict = Activator.CreateInstance(intStringDictType);
+
+// 调用泛型方法
+public class GenericHelper
+{
+    public static T Create<T>() where T : new()
+    {
+        return new T();
+    }
+    
+    public static void Process<T>(T item)
+    {
+        Console.WriteLine($"处理: {item}");
+    }
+}
+
+// 使用反射调用泛型方法
+MethodInfo createMethod = typeof(GenericHelper).GetMethod("Create");
+MethodInfo genericCreateMethod = createMethod.MakeGenericMethod(typeof(Person));
+Person person = (Person)genericCreateMethod.Invoke(null, null);
+
+MethodInfo processMethod = typeof(GenericHelper).GetMethod("Process");
+MethodInfo genericProcessMethod = processMethod.MakeGenericMethod(typeof(string));
+genericProcessMethod.Invoke(null, new object[] { "测试" });
+
+// 检查泛型类型
+Type type = typeof(List<string>);
+Console.WriteLine($"是泛型: {type.IsGenericType}");              // True
+Console.WriteLine($"是泛型定义: {type.IsGenericTypeDefinition}"); // False
+Console.WriteLine($"泛型参数: {string.Join(", ", type.GetGenericArguments().Select(t => t.Name))}");
+```
+
+### <a id="reflection-performance"></a>反射的性能优化
+
+#### 缓存反射结果
+
+```csharp
+using System.Collections.Generic;
+
+// 缓存Type对象
+private static Dictionary<string, Type> _typeCache = new Dictionary<string, Type>();
+
+public static Type GetCachedType(string typeName)
+{
+    if (!_typeCache.TryGetValue(typeName, out Type type))
+    {
+        type = Type.GetType(typeName);
+        _typeCache[typeName] = type;
+    }
+    return type;
+}
+
+// 缓存MethodInfo
+private static Dictionary<string, MethodInfo> _methodCache = new Dictionary<string, MethodInfo>();
+
+public static MethodInfo GetCachedMethod(Type type, string methodName, Type[] parameterTypes)
+{
+    string key = $"{type.FullName}.{methodName}({string.Join(",", parameterTypes.Select(t => t.Name))})";
+    
+    if (!_methodCache.TryGetValue(key, out MethodInfo method))
+    {
+        method = type.GetMethod(methodName, parameterTypes);
+        _methodCache[key] = method;
+    }
+    return method;
+}
+
+// 缓存编译后的委托
+private static Dictionary<string, Delegate> _delegateCache = new Dictionary<string, Delegate>();
+
+public static Func<T, TResult> GetCachedGetter<T, TResult>(PropertyInfo property)
+{
+    string key = $"{typeof(T).FullName}.{property.Name}.Getter";
+    
+    if (!_delegateCache.TryGetValue(key, out Delegate del))
+    {
+        MethodInfo getter = property.GetMethod;
+        del = Delegate.CreateDelegate(typeof(Func<T, TResult>), getter);
+        _delegateCache[key] = del;
+    }
+    
+    return (Func<T, TResult>)del;
+}
+```
+
+### <a id="reflection-scenarios"></a>反射的应用场景
+
+#### 1. 对象映射（Object Mapper）
+
+```csharp
+public static class ObjectMapper
+{
+    public static TTarget Map<TSource, TTarget>(TSource source) where TTarget : new()
+    {
+        TTarget target = new TTarget();
+        Type sourceType = typeof(TSource);
+        Type targetType = typeof(TTarget);
+        
+        foreach (PropertyInfo targetProperty in targetType.GetProperties())
+        {
+            PropertyInfo sourceProperty = sourceType.GetProperty(targetProperty.Name);
+            
+            if (sourceProperty != null && sourceProperty.PropertyType == targetProperty.PropertyType)
+            {
+                object value = sourceProperty.GetValue(source);
+                targetProperty.SetValue(target, value);
+            }
+        }
+        
+        return target;
+    }
+}
+
+// 使用
+public class Source
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+}
+
+public class Target
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+}
+
+Source source = new Source { Name = "张三", Age = 25 };
+Target target = ObjectMapper.Map<Source, Target>(source);
+```
+
+#### 2. 依赖注入容器
+
+```csharp
+public class SimpleContainer
+{
+    private Dictionary<Type, Type> _mappings = new Dictionary<Type, Type>();
+    private Dictionary<Type, object> _singletons = new Dictionary<Type, object>();
+    
+    public void Register<TInterface, TImplementation>() where TImplementation : TInterface
+    {
+        _mappings[typeof(TInterface)] = typeof(TImplementation);
+    }
+    
+    public void RegisterSingleton<TInterface, TImplementation>() where TImplementation : TInterface
+    {
+        _mappings[typeof(TInterface)] = typeof(TImplementation);
+    }
+    
+    public T Resolve<T>()
+    {
+        return (T)Resolve(typeof(T));
+    }
+    
+    private object Resolve(Type type)
+    {
+        // 检查单例
+        if (_singletons.ContainsKey(type))
+        {
+            return _singletons[type];
+        }
+        
+        // 获取实现类型
+        Type implementationType = _mappings.ContainsKey(type) ? _mappings[type] : type;
+        
+        // 获取构造函数
+        ConstructorInfo constructor = implementationType.GetConstructors()[0];
+        ParameterInfo[] parameters = constructor.GetParameters();
+        
+        // 解析参数
+        object[] resolvedParameters = parameters.Select(p => Resolve(p.ParameterType)).ToArray();
+        
+        // 创建实例
+        object instance = constructor.Invoke(resolvedParameters);
+        
+        // 如果是单例，缓存
+        if (_singletons.ContainsKey(type))
+        {
+            _singletons[type] = instance;
+        }
+        
+        return instance;
+    }
+}
+```
+
+#### 3. 序列化器
+
+```csharp
+public static class SimpleSerializer
+{
+    public static string Serialize(object obj)
+    {
+        Type type = obj.GetType();
+        var properties = type.GetProperties();
+        
+        var keyValues = properties.Select(p => 
+            $"\"{p.Name}\":\"{p.GetValue(obj)}\"");
+        
+        return "{" + string.Join(",", keyValues) + "}";
+    }
+    
+    public static T Deserialize<T>(string json) where T : new()
+    {
+        T obj = new T();
+        Type type = typeof(T);
+        
+        // 简化的JSON解析（实际应使用JSON库）
+        // 这里仅演示反射的使用
+        
+        return obj;
+    }
+}
+```
+
+反射是C#中强大的运行时类型操作机制，它使得程序能够动态地处理类型、创建对象和调用方法。虽然反射有一定的性能开销，但在框架开发、插件系统、序列化等场景中，反射是不可或缺的工具。通过合理使用缓存和委托，可以在保持灵活性的同时提高性能。
 
 ## <a id="async-programming"></a>C#异步编程详解
 
@@ -3735,13 +5209,20 @@ System.Diagnostics.Trace.WriteLine($"线程ID: {Thread.CurrentThread.ManagedThre
 
 ## 总结
 
-C#进阶特性包括泛型、委托与Lambda表达式、设计模式、异步编程、文件操作流处理和多线程编程等。这些特性在现代C#开发中发挥着重要作用：
+C#进阶特性包括泛型、委托与Lambda表达式、设计模式、特性（Attributes）、反射（Reflection）、异步编程、文件操作流处理和多线程编程等。这些特性在现代C#开发中发挥着重要作用：
 
 1. **泛型**：提供类型安全、代码重用和性能优化
 2. **委托与Lambda表达式**：支持函数式编程，简化代码
 3. **设计模式**：提供经过验证的解决方案
-4. **异步编程**：提高应用程序响应性和性能
-5. **文件操作与流处理**：高效处理数据输入输出
-6. **多线程编程**：充分利用多核CPU，实现并发执行
+4. **特性（Attributes）**：为代码添加元数据，支持声明式编程
+5. **反射（Reflection）**：运行时类型检查和操作，支持框架和插件系统
+6. **异步编程**：提高应用程序响应性和性能
+7. **文件操作与流处理**：高效处理数据输入输出
+8. **多线程编程**：充分利用多核CPU，实现并发执行
 
-在WinForm开发中，合理运用这些特性可以构建出高性能、可维护的桌面应用程序。异步编程和多线程编程特别重要，可以保持UI响应性并提高程序性能；但需要注意线程安全和同步机制，避免死锁和竞态条件。
+在WinForm开发中，合理运用这些特性可以构建出高性能、可维护的桌面应用程序：
+- **异步编程和多线程编程**特别重要，可以保持UI响应性并提高程序性能；但需要注意线程安全和同步机制，避免死锁和竞态条件
+- **特性（Attributes）**广泛用于数据验证、序列化、ORM映射等场景，使得代码更加声明式和可配置
+- **反射（Reflection）**在框架开发、插件系统、对象映射等场景中不可或缺，但需要注意性能优化，通过缓存和委托提高执行效率
+
+掌握这些进阶特性，可以让您构建更加灵活、高效和可维护的C#应用程序。

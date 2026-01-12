@@ -3422,6 +3422,1240 @@ using (var context = new MyDbContext())
 }
 ```
 
+### <a id="entity-configuration"></a>实体配置
+
+Entity Framework提供了两种方式来配置实体：Data Annotations（数据注解）和Fluent API（流式API）。
+
+#### Data Annotations（数据注解）
+
+数据注解是直接在实体类上使用特性来配置：
+
+```csharp
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+public class User
+{
+    // [Key]：指定主键
+    [Key]
+    public int Id { get; set; }
+    
+    // [Required]：必填字段
+    [Required]
+    [MaxLength(100)] // 最大长度
+    public string Name { get; set; }
+    
+    // [StringLength]：字符串长度限制
+    [StringLength(200, MinimumLength = 5)]
+    public string Email { get; set; }
+    
+    // [Column]：指定列名和类型
+    [Column("UserAge", TypeName = "int")]
+    public int Age { get; set; }
+    
+    // [Index]：创建索引
+    [Index(IsUnique = true)]
+    public string Email { get; set; }
+    
+    // [Index]：复合索引
+    [Index("IX_Name_Age", IsUnique = false)]
+    public string Name { get; set; }
+    
+    // [Table]：指定表名
+    [Table("Users", Schema = "dbo")]
+    public class User { }
+    
+    // [NotMapped]：不映射到数据库
+    [NotMapped]
+    public string FullName => $"{FirstName} {LastName}";
+    
+    // [DatabaseGenerated]：数据库生成的值
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)] // 自增
+    public int Id { get; set; }
+    
+    [DatabaseGenerated(DatabaseGeneratedOption.Computed)] // 计算列
+    public DateTime CreateDate { get; set; }
+    
+    [DatabaseGenerated(DatabaseGeneratedOption.None)] // 手动设置
+    public Guid UniqueId { get; set; }
+    
+    // [Timestamp]：时间戳（并发控制）
+    [Timestamp]
+    public byte[] RowVersion { get; set; }
+    
+    // [ConcurrencyCheck]：并发检查
+    [ConcurrencyCheck]
+    public int Version { get; set; }
+}
+```
+
+#### Fluent API（流式API）
+
+Fluent API在`OnModelCreating`方法中配置，更灵活强大：
+
+```csharp
+public class MyDbContext : DbContext
+{
+    public DbSet<User> Users { get; set; }
+    public DbSet<Order> Orders { get; set; }
+    
+    protected override void OnModelCreating(DbModelBuilder modelBuilder)
+    {
+        // 配置User实体
+        modelBuilder.Entity<User>()
+            // 指定表名和架构
+            .ToTable("Users", "dbo")
+            
+            // 配置主键
+            .HasKey(u => u.Id)
+            
+            // 配置属性
+            .Property(u => u.Id)
+                .HasDatabaseGeneratedOption(DatabaseGeneratedOption.Identity) // 自增
+                .HasColumnName("UserId") // 列名
+                .HasColumnOrder(1); // 列顺序
+            
+            .Property(u => u.Name)
+                .IsRequired() // 必填
+                .HasMaxLength(100) // 最大长度
+                .IsUnicode(false); // 非Unicode
+            
+            .Property(u => u.Email)
+                .IsRequired()
+                .HasMaxLength(200)
+                .HasColumnName("EmailAddress");
+            
+            .Property(u => u.Age)
+                .IsOptional() // 可选
+                .HasColumnType("int");
+            
+            .Property(u => u.CreateDate)
+                .IsRequired()
+                .HasColumnType("datetime2")
+                .HasDatabaseGeneratedOption(DatabaseGeneratedOption.Computed);
+            
+            // 忽略属性（不映射到数据库）
+            .Ignore(u => u.FullName);
+            
+            // 配置索引
+            .HasIndex(u => u.Email)
+                .IsUnique()
+                .HasName("IX_Users_Email");
+            
+            .HasIndex(u => new { u.Name, u.Age })
+                .HasName("IX_Users_Name_Age");
+    }
+}
+```
+
+#### 完整的Fluent API配置示例
+
+```csharp
+protected override void OnModelCreating(DbModelBuilder modelBuilder)
+{
+    // ========== User实体配置 ==========
+    modelBuilder.Entity<User>(entity =>
+    {
+        // 表配置
+        entity.ToTable("Users", "dbo");
+        entity.HasKey(u => u.Id);
+        
+        // 属性配置
+        entity.Property(u => u.Id)
+            .HasColumnName("UserId")
+            .HasDatabaseGeneratedOption(DatabaseGeneratedOption.Identity);
+        
+        entity.Property(u => u.Name)
+            .IsRequired()
+            .HasMaxLength(100)
+            .IsUnicode(true);
+        
+        entity.Property(u => u.Email)
+            .IsRequired()
+            .HasMaxLength(200)
+            .HasColumnName("EmailAddress");
+        
+        entity.Property(u => u.Age)
+            .IsOptional()
+            .HasColumnType("int");
+        
+        entity.Property(u => u.CreateDate)
+            .IsRequired()
+            .HasColumnType("datetime2")
+            .HasDatabaseGeneratedOption(DatabaseGeneratedOption.Computed);
+        
+        // 索引配置
+        entity.HasIndex(u => u.Email)
+            .IsUnique()
+            .HasName("IX_Users_Email_Unique");
+        
+        entity.HasIndex(u => new { u.Name, u.Age })
+            .HasName("IX_Users_Name_Age");
+        
+        // 导航属性配置（在关系配置中详细说明）
+    });
+    
+    // ========== Order实体配置 ==========
+    modelBuilder.Entity<Order>(entity =>
+    {
+        entity.ToTable("Orders");
+        entity.HasKey(o => o.Id);
+        
+        entity.Property(o => o.OrderDate)
+            .IsRequired()
+            .HasColumnType("datetime2");
+        
+        entity.Property(o => o.TotalAmount)
+            .IsRequired()
+            .HasColumnType("decimal(18,2)")
+            .HasPrecision(18, 2);
+    });
+}
+```
+
+### <a id="relationship-configuration"></a>关系配置
+
+Entity Framework支持三种关系类型：一对一、一对多、多对多。
+
+#### 一对多关系（One-to-Many）
+
+```csharp
+// 实体定义
+public class User
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    
+    // 导航属性：一个用户有多个订单
+    public virtual ICollection<Order> Orders { get; set; }
+}
+
+public class Order
+{
+    public int Id { get; set; }
+    public DateTime OrderDate { get; set; }
+    
+    // 外键属性
+    public int UserId { get; set; }
+    
+    // 导航属性：一个订单属于一个用户
+    public virtual User User { get; set; }
+}
+
+// Fluent API配置
+protected override void OnModelCreating(DbModelBuilder modelBuilder)
+{
+    // 方式1：通过导航属性配置
+    modelBuilder.Entity<Order>()
+        .HasRequired(o => o.User) // 订单必须有用户（必需关系）
+        .WithMany(u => u.Orders)  // 用户有多个订单
+        .HasForeignKey(o => o.UserId); // 外键
+    
+    // 方式2：可选关系
+    modelBuilder.Entity<Order>()
+        .HasOptional(o => o.User) // 订单可以没有用户（可选关系）
+        .WithMany(u => u.Orders)
+        .HasForeignKey(o => o.UserId)
+        .WillCascadeOnDelete(true); // 级联删除
+    
+    // 方式3：指定外键名称
+    modelBuilder.Entity<Order>()
+        .HasRequired(o => o.User)
+        .WithMany(u => u.Orders)
+        .Map(m => m.MapKey("FK_UserId")); // 指定外键列名
+}
+```
+
+#### 一对一关系（One-to-One）
+
+```csharp
+// 实体定义
+public class User
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    
+    // 导航属性：一个用户有一个用户资料
+    public virtual UserProfile Profile { get; set; }
+}
+
+public class UserProfile
+{
+    public int Id { get; set; }
+    public string Address { get; set; }
+    public string Phone { get; set; }
+    
+    // 外键
+    public int UserId { get; set; }
+    
+    // 导航属性：一个用户资料属于一个用户
+    public virtual User User { get; set; }
+}
+
+// Fluent API配置
+protected override void OnModelCreating(DbModelBuilder modelBuilder)
+{
+    // 方式1：User是主体，UserProfile是依赖
+    modelBuilder.Entity<UserProfile>()
+        .HasRequired(p => p.User) // 用户资料必须有用户
+        .WithOptional(u => u.Profile) // 用户可以有可选的资料
+        .HasForeignKey(p => p.UserId); // 外键在UserProfile中
+    
+    // 方式2：共享主键（UserProfile的主键也是外键）
+    modelBuilder.Entity<UserProfile>()
+        .HasRequired(p => p.User)
+        .WithOptional(u => u.Profile)
+        .Map(m => m.MapKey("UserId")); // UserId既是主键也是外键
+}
+```
+
+#### 多对多关系（Many-to-Many）
+
+```csharp
+// 实体定义
+public class User
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    
+    // 导航属性：一个用户有多个角色
+    public virtual ICollection<Role> Roles { get; set; }
+}
+
+public class Role
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    
+    // 导航属性：一个角色有多个用户
+    public virtual ICollection<User> Users { get; set; }
+}
+
+// Fluent API配置
+protected override void OnModelCreating(DbModelBuilder modelBuilder)
+{
+    // 方式1：使用默认连接表名（UsersRoles）
+    modelBuilder.Entity<User>()
+        .HasMany(u => u.Roles)
+        .WithMany(r => r.Users)
+        .Map(m =>
+        {
+            m.ToTable("UserRoles"); // 连接表名
+            m.MapLeftKey("UserId");  // User表的外键
+            m.MapRightKey("RoleId"); // Role表的外键
+        });
+    
+    // 方式2：使用中间实体（更灵活）
+    // 定义中间实体
+    public class UserRole
+    {
+        public int UserId { get; set; }
+        public int RoleId { get; set; }
+        public DateTime AssignedDate { get; set; }
+        
+        public virtual User User { get; set; }
+        public virtual Role Role { get; set; }
+    }
+    
+    // 配置中间实体
+    modelBuilder.Entity<UserRole>()
+        .HasKey(ur => new { ur.UserId, ur.RoleId });
+    
+    modelBuilder.Entity<User>()
+        .HasMany(u => u.Roles)
+        .WithMany(r => r.Users)
+        .Map(m =>
+        {
+            m.ToTable("UserRoles");
+            m.MapLeftKey("UserId");
+            m.MapRightKey("RoleId");
+        });
+}
+```
+
+#### 级联删除配置
+
+```csharp
+protected override void OnModelCreating(DbModelBuilder modelBuilder)
+{
+    // 级联删除：删除用户时自动删除其订单
+    modelBuilder.Entity<Order>()
+        .HasRequired(o => o.User)
+        .WithMany(u => u.Orders)
+        .HasForeignKey(o => o.UserId)
+        .WillCascadeOnDelete(true); // 启用级联删除
+    
+    // 限制删除：删除用户时，如果有订单则不允许删除
+    modelBuilder.Entity<Order>()
+        .HasRequired(o => o.User)
+        .WithMany(u => u.Orders)
+        .HasForeignKey(o => o.UserId)
+        .WillCascadeOnDelete(false); // 禁用级联删除
+}
+```
+
+### <a id="ef6-querying"></a>数据查询
+
+Entity Framework支持多种查询方式：LINQ to Entities、原始SQL、存储过程等。
+
+#### LINQ to Entities查询
+
+```csharp
+using (var context = new MyDbContext())
+{
+    // ========== 基本查询 ==========
+    
+    // 查询所有用户
+    var allUsers = context.Users.ToList();
+    
+    // 条件查询
+    var adultUsers = context.Users.Where(u => u.Age >= 18).ToList();
+    
+    // 排序查询
+    var sortedUsers = context.Users.OrderBy(u => u.Name).ToList();
+    var sortedUsersDesc = context.Users.OrderByDescending(u => u.Age).ToList();
+    
+    // 分页查询
+    int pageSize = 10;
+    int pageNumber = 2;
+    var pagedUsers = context.Users
+        .OrderBy(u => u.Id)
+        .Skip((pageNumber - 1) * pageSize)
+        .Take(pageSize)
+        .ToList();
+    
+    // 投影查询（只选择需要的字段）
+    var userNames = context.Users.Select(u => u.Name).ToList();
+    var userInfo = context.Users.Select(u => new 
+    { 
+        u.Id, 
+        u.Name, 
+        u.Email 
+    }).ToList();
+    
+    // ========== 关联查询 ==========
+    
+    // Include：预加载关联数据（Eager Loading）
+    var usersWithOrders = context.Users
+        .Include(u => u.Orders)
+        .ToList();
+    
+    // 多级Include
+    var usersWithOrdersAndItems = context.Users
+        .Include(u => u.Orders.Select(o => o.OrderItems))
+        .ToList();
+    
+    // 多个Include
+    var usersWithAll = context.Users
+        .Include(u => u.Orders)
+        .Include(u => u.Profile)
+        .ToList();
+    
+    // Join查询
+    var usersWithOrderCount = context.Users
+        .GroupJoin(
+            context.Orders,
+            u => u.Id,
+            o => o.UserId,
+            (user, orders) => new 
+            { 
+                User = user, 
+                OrderCount = orders.Count() 
+            })
+        .ToList();
+    
+    // ========== 聚合查询 ==========
+    
+    var userCount = context.Users.Count();
+    var adultCount = context.Users.Count(u => u.Age >= 18);
+    var avgAge = context.Users.Average(u => u.Age);
+    var maxAge = context.Users.Max(u => u.Age);
+    var minAge = context.Users.Min(u => u.Age);
+    var totalAge = context.Users.Sum(u => u.Age);
+    
+    // 分组查询
+    var usersByAge = context.Users
+        .GroupBy(u => u.Age)
+        .Select(g => new 
+        { 
+            Age = g.Key, 
+            Count = g.Count(),
+            Users = g.ToList()
+        })
+        .ToList();
+    
+    // ========== 复杂查询 ==========
+    
+    // 子查询
+    var usersWithManyOrders = context.Users
+        .Where(u => u.Orders.Count() > 5)
+        .ToList();
+    
+    // 条件查询
+    var users = context.Users
+        .Where(u => u.Age >= 18 && u.Age <= 65)
+        .Where(u => u.Email.Contains("@example.com"))
+        .OrderBy(u => u.Name)
+        .ToList();
+    
+    // 动态查询
+    IQueryable<User> query = context.Users;
+    
+    if (filterByAge)
+    {
+        query = query.Where(u => u.Age >= minAge);
+    }
+    
+    if (filterByName)
+    {
+        query = query.Where(u => u.Name.Contains(nameFilter));
+    }
+    
+    var result = query.ToList();
+}
+```
+
+#### 延迟加载（Lazy Loading）
+
+```csharp
+// 启用延迟加载（默认启用）
+public class MyDbContext : DbContext
+{
+    public MyDbContext() : base("DefaultConnection")
+    {
+        this.Configuration.LazyLoadingEnabled = true; // 启用延迟加载
+    }
+}
+
+using (var context = new MyDbContext())
+{
+    var user = context.Users.First();
+    
+    // 访问导航属性时自动加载（延迟加载）
+    var orders = user.Orders.ToList(); // 此时才执行SQL查询Orders表
+}
+```
+
+#### 显式加载（Explicit Loading）
+
+```csharp
+using (var context = new MyDbContext())
+{
+    var user = context.Users.First();
+    
+    // 显式加载关联数据
+    context.Entry(user)
+        .Collection(u => u.Orders)
+        .Load();
+    
+    // 显式加载单个关联实体
+    context.Entry(user)
+        .Reference(u => u.Profile)
+        .Load();
+    
+    // 条件加载
+    context.Entry(user)
+        .Collection(u => u.Orders)
+        .Query()
+        .Where(o => o.TotalAmount > 100)
+        .Load();
+    
+    // 检查是否已加载
+    bool isLoaded = context.Entry(user)
+        .Collection(u => u.Orders)
+        .IsLoaded;
+}
+```
+
+#### 原始SQL查询
+
+```csharp
+using (var context = new MyDbContext())
+{
+    // 方式1：SqlQuery（返回实体）
+    var users = context.Database.SqlQuery<User>(
+        "SELECT * FROM Users WHERE Age > @Age",
+        new SqlParameter("@Age", 18))
+        .ToList();
+    
+    // 方式2：SqlQuery（返回匿名类型）
+    var userInfo = context.Database.SqlQuery<UserInfo>(
+        "SELECT Id, Name, Email FROM Users WHERE Age > @Age",
+        new SqlParameter("@Age", 18))
+        .ToList();
+    
+    // 方式3：ExecuteSqlCommand（执行命令）
+    int rowsAffected = context.Database.ExecuteSqlCommand(
+        "UPDATE Users SET Age = Age + 1 WHERE Age < @Age",
+        new SqlParameter("@Age", 18));
+    
+    // 方式4：使用DbSet的SqlQuery
+    var users2 = context.Users.SqlQuery(
+        "SELECT * FROM Users WHERE Age > @Age",
+        new SqlParameter("@Age", 18))
+        .ToList();
+}
+```
+
+#### 存储过程查询
+
+```csharp
+// 定义存储过程结果类
+public class UserOrderSummary
+{
+    public int UserId { get; set; }
+    public string UserName { get; set; }
+    public int OrderCount { get; set; }
+    public decimal TotalAmount { get; set; }
+}
+
+using (var context = new MyDbContext())
+{
+    // 调用存储过程
+    var summaries = context.Database.SqlQuery<UserOrderSummary>(
+        "EXEC GetUserOrderSummary @UserId",
+        new SqlParameter("@UserId", 1))
+        .ToList();
+    
+    // 带输出参数的存储过程
+    var userIdParam = new SqlParameter("@UserId", 1);
+    var orderCountParam = new SqlParameter("@OrderCount", SqlDbType.Int)
+    {
+        Direction = ParameterDirection.Output
+    };
+    
+    context.Database.ExecuteSqlCommand(
+        "EXEC GetUserOrderCount @UserId, @OrderCount OUTPUT",
+        userIdParam,
+        orderCountParam);
+    
+    int orderCount = (int)orderCountParam.Value;
+}
+```
+
+### <a id="ef6-modifying"></a>数据修改
+
+Entity Framework提供了多种方式来添加、更新和删除数据。
+
+#### 添加数据
+
+```csharp
+using (var context = new MyDbContext())
+{
+    // 方式1：Add单个实体
+    var newUser = new User
+    {
+        Name = "张三",
+        Email = "zhangsan@example.com",
+        Age = 25
+    };
+    context.Users.Add(newUser);
+    context.SaveChanges(); // 返回受影响的行数
+    
+    // 方式2：AddRange多个实体
+    var newUsers = new List<User>
+    {
+        new User { Name = "李四", Email = "lisi@example.com", Age = 30 },
+        new User { Name = "王五", Email = "wangwu@example.com", Age = 28 }
+    };
+    context.Users.AddRange(newUsers);
+    context.SaveChanges();
+    
+    // 方式3：直接设置状态
+    var user = new User { Name = "赵六", Email = "zhaoliu@example.com", Age = 32 };
+    context.Entry(user).State = EntityState.Added;
+    context.SaveChanges();
+    
+    // 获取插入后的ID
+    var user2 = new User { Name = "新用户", Email = "new@example.com", Age = 20 };
+    context.Users.Add(user2);
+    context.SaveChanges();
+    int newId = user2.Id; // SaveChanges后自动填充ID
+}
+```
+
+#### 更新数据
+
+```csharp
+using (var context = new MyDbContext())
+{
+    // 方式1：修改已跟踪的实体（推荐）
+    var user = context.Users.Find(1);
+    if (user != null)
+    {
+        user.Name = "更新后的名称";
+        user.Age = 30;
+        context.SaveChanges(); // EF自动检测更改
+    }
+    
+    // 方式2：附加并标记为已修改
+    var detachedUser = new User 
+    { 
+        Id = 1, 
+        Name = "新名称", 
+        Email = "newemail@example.com",
+        Age = 25
+    };
+    context.Users.Attach(detachedUser);
+    context.Entry(detachedUser).State = EntityState.Modified;
+    context.SaveChanges();
+    
+    // 方式3：只更新特定属性
+    var userToUpdate = new User { Id = 1, Name = "只更新名称" };
+    context.Users.Attach(userToUpdate);
+    context.Entry(userToUpdate).Property(u => u.Name).IsModified = true;
+    context.SaveChanges(); // 只更新Name字段
+    
+    // 方式4：批量更新（使用原始SQL，性能更好）
+    int rowsAffected = context.Database.ExecuteSqlCommand(
+        "UPDATE Users SET Age = Age + 1 WHERE Age < @Age",
+        new SqlParameter("@Age", 18));
+}
+```
+
+#### 删除数据
+
+```csharp
+using (var context = new MyDbContext())
+{
+    // 方式1：Remove单个实体
+    var user = context.Users.Find(1);
+    if (user != null)
+    {
+        context.Users.Remove(user);
+        context.SaveChanges();
+    }
+    
+    // 方式2：RemoveRange多个实体
+    var usersToDelete = context.Users.Where(u => u.Age < 18).ToList();
+    context.Users.RemoveRange(usersToDelete);
+    context.SaveChanges();
+    
+    // 方式3：直接设置状态
+    var userToDelete = new User { Id = 2 };
+    context.Entry(userToDelete).State = EntityState.Deleted;
+    context.SaveChanges();
+    
+    // 方式4：批量删除（使用原始SQL，性能更好）
+    int rowsAffected = context.Database.ExecuteSqlCommand(
+        "DELETE FROM Users WHERE Age < @Age",
+        new SqlParameter("@Age", 18));
+}
+```
+
+#### 批量操作
+
+```csharp
+using (var context = new MyDbContext())
+{
+    // 批量添加
+    var users = new List<User>();
+    for (int i = 0; i < 1000; i++)
+    {
+        users.Add(new User 
+        { 
+            Name = $"User{i}", 
+            Email = $"user{i}@example.com", 
+            Age = 20 + i % 50 
+        });
+    }
+    
+    // 方式1：AddRange（EF会分批执行）
+    context.Users.AddRange(users);
+    context.SaveChanges();
+    
+    // 方式2：使用BulkInsert扩展（需要安装EntityFramework.BulkInsert）
+    // context.BulkInsert(users);
+    
+    // 批量更新
+    var usersToUpdate = context.Users.Where(u => u.Age < 18).ToList();
+    foreach (var user in usersToUpdate)
+    {
+        user.Age = 18;
+    }
+    context.SaveChanges();
+    
+    // 批量删除
+    var usersToDelete = context.Users.Where(u => u.Age > 100).ToList();
+    context.Users.RemoveRange(usersToDelete);
+    context.SaveChanges();
+}
+```
+
+### <a id="change-tracking"></a>变更跟踪
+
+Entity Framework自动跟踪实体的状态变化，这是实现更新和删除的基础。
+
+#### 实体状态（EntityState）
+
+```csharp
+using (var context = new MyDbContext())
+{
+    // 实体状态枚举：
+    // Detached：未跟踪
+    // Unchanged：未更改
+    // Added：已添加
+    // Deleted：已删除
+    // Modified：已修改
+    
+    var user = new User { Name = "新用户", Email = "new@example.com", Age = 25 };
+    
+    // 检查状态
+    var state1 = context.Entry(user).State; // Detached（未跟踪）
+    
+    context.Users.Add(user);
+    var state2 = context.Entry(user).State; // Added（已添加）
+    
+    context.SaveChanges();
+    var state3 = context.Entry(user).State; // Unchanged（未更改）
+    
+    user.Name = "更新的名称";
+    var state4 = context.Entry(user).State; // Modified（已修改）
+    
+    context.Users.Remove(user);
+    var state5 = context.Entry(user).State; // Deleted（已删除）
+    
+    context.SaveChanges();
+}
+```
+
+#### 获取变更信息
+
+```csharp
+using (var context = new MyDbContext())
+{
+    var user = context.Users.Find(1);
+    user.Name = "新名称";
+    user.Age = 30;
+    
+    // 获取实体的变更跟踪信息
+    var entry = context.Entry(user);
+    
+    // 检查实体是否被修改
+    bool isModified = entry.State == EntityState.Modified;
+    
+    // 获取所有被修改的属性
+    var modifiedProperties = entry.Properties
+        .Where(p => p.IsModified)
+        .Select(p => p.Name)
+        .ToList();
+    
+    // 获取属性的原始值和当前值
+    foreach (var property in entry.Properties)
+    {
+        if (property.IsModified)
+        {
+            var originalValue = property.OriginalValue;
+            var currentValue = property.CurrentValue;
+            Console.WriteLine($"{property.Name}: {originalValue} -> {currentValue}");
+        }
+    }
+    
+    // 获取所有被跟踪的实体
+    var allEntries = context.ChangeTracker.Entries();
+    foreach (var e in allEntries)
+    {
+        Console.WriteLine($"实体: {e.Entity.GetType().Name}, 状态: {e.State}");
+    }
+    
+    // 获取特定类型的被跟踪实体
+    var userEntries = context.ChangeTracker.Entries<User>();
+    foreach (var e in userEntries)
+    {
+        if (e.State == EntityState.Modified)
+        {
+            Console.WriteLine($"修改的用户: {e.Entity.Name}");
+        }
+    }
+    
+    context.SaveChanges();
+}
+```
+
+#### 禁用变更跟踪
+
+```csharp
+using (var context = new MyDbContext())
+{
+    // AsNoTracking：禁用变更跟踪（提高查询性能）
+    var users = context.Users
+        .AsNoTracking()
+        .ToList();
+    
+    // 修改后不会自动跟踪
+    users[0].Name = "新名称";
+    // 需要手动附加才能更新
+    context.Users.Attach(users[0]);
+    context.Entry(users[0]).State = EntityState.Modified;
+    context.SaveChanges();
+    
+    // 全局禁用自动检测更改（提高批量操作性能）
+    context.Configuration.AutoDetectChangesEnabled = false;
+    
+    // 手动检测更改
+    context.ChangeTracker.DetectChanges();
+    
+    // 批量操作后重新启用
+    context.Configuration.AutoDetectChangesEnabled = true;
+}
+```
+
+### <a id="concurrency-control"></a>并发控制
+
+Entity Framework提供了多种并发控制机制来处理多用户同时修改数据的情况。
+
+#### 乐观并发控制（Optimistic Concurrency）
+
+```csharp
+// 方式1：使用RowVersion（时间戳）
+public class User
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    
+    [Timestamp] // 自动生成时间戳
+    public byte[] RowVersion { get; set; }
+}
+
+// 更新时会检查RowVersion
+using (var context = new MyDbContext())
+{
+    var user = context.Users.Find(1);
+    user.Name = "新名称";
+    
+    try
+    {
+        context.SaveChanges();
+    }
+    catch (DbUpdateConcurrencyException ex)
+    {
+        // 处理并发冲突
+        var entry = ex.Entries.Single();
+        var databaseValues = entry.GetDatabaseValues();
+        var clientValues = entry.Entity as User;
+        
+        // 选择解决策略
+        // 策略1：使用数据库值
+        entry.OriginalValues.SetValues(databaseValues);
+        
+        // 策略2：使用客户端值
+        entry.CurrentValues.SetValues(clientValues);
+        
+        // 策略3：合并值
+        var databaseUser = databaseValues.ToObject() as User;
+        clientValues.Name = databaseUser.Name; // 使用数据库的Name
+        entry.CurrentValues.SetValues(clientValues);
+        
+        context.SaveChanges();
+    }
+}
+
+// 方式2：使用ConcurrencyCheck特性
+public class User
+{
+    public int Id { get; set; }
+    
+    [ConcurrencyCheck] // 并发检查
+    public int Version { get; set; }
+    
+    public string Name { get; set; }
+}
+
+// 方式3：Fluent API配置并发
+protected override void OnModelCreating(DbModelBuilder modelBuilder)
+{
+    modelBuilder.Entity<User>()
+        .Property(u => u.Version)
+        .IsConcurrencyToken(); // 设置为并发令牌
+}
+```
+
+#### 悲观并发控制（Pessimistic Concurrency）
+
+```csharp
+using (var context = new MyDbContext())
+{
+    using (var transaction = context.Database.BeginTransaction(IsolationLevel.Serializable))
+    {
+        try
+        {
+            // 使用Serializable隔离级别实现悲观锁
+            var user = context.Users
+                .SqlQuery("SELECT * FROM Users WITH (UPDLOCK) WHERE Id = @Id",
+                    new SqlParameter("@Id", 1))
+                .FirstOrDefault();
+            
+            if (user != null)
+            {
+                user.Name = "更新的名称";
+                context.SaveChanges();
+            }
+            
+            transaction.Commit();
+        }
+        catch
+        {
+            transaction.Rollback();
+            throw;
+        }
+    }
+}
+```
+
+### <a id="migrations"></a>迁移（Migrations）
+
+迁移是Entity Framework的数据库版本控制系统，用于管理数据库架构的变更。
+
+#### 启用迁移
+
+```bash
+# 在Package Manager Console中执行
+PM> Enable-Migrations
+
+# 指定上下文
+PM> Enable-Migrations -ContextTypeName MyDbContext
+
+# 启用自动迁移（不推荐用于生产环境）
+PM> Enable-Migrations -EnableAutomaticMigrations
+```
+
+#### 创建迁移
+
+```bash
+# 创建迁移
+PM> Add-Migration InitialCreate
+
+# 创建命名迁移
+PM> Add-Migration AddUserTable
+
+# 指定迁移名称和配置
+PM> Add-Migration AddEmailIndex -ConfigurationTypeName MyProject.Migrations.Configuration
+```
+
+#### 迁移文件结构
+
+```csharp
+// 自动生成的迁移文件
+public partial class AddUserTable : DbMigration
+{
+    public override void Up()
+    {
+        CreateTable(
+            "dbo.Users",
+            c => new
+            {
+                Id = c.Int(nullable: false, identity: true),
+                Name = c.String(nullable: false, maxLength: 100),
+                Email = c.String(nullable: false, maxLength: 200),
+                Age = c.Int(nullable: false),
+                CreateDate = c.DateTime(nullable: false),
+            })
+            .PrimaryKey(t => t.Id)
+            .Index(t => t.Email, unique: true, name: "IX_Users_Email");
+    }
+    
+    public override void Down()
+    {
+        DropIndex("dbo.Users", "IX_Users_Email");
+        DropTable("dbo.Users");
+    }
+}
+```
+
+#### 应用迁移
+
+```csharp
+// 方式1：使用Update-Database命令
+// PM> Update-Database
+
+// 方式2：在代码中应用迁移
+public class MyDbContext : DbContext
+{
+    public MyDbContext() : base("DefaultConnection")
+    {
+        // 自动应用迁移（仅用于开发环境）
+        Database.SetInitializer(new MigrateDatabaseToLatestVersion<MyDbContext, Migrations.Configuration>());
+    }
+}
+
+// 方式3：手动应用迁移
+using (var context = new MyDbContext())
+{
+    var migrator = new DbMigrator(new Migrations.Configuration());
+    migrator.Update(); // 应用所有待处理的迁移
+}
+```
+
+#### 回滚迁移
+
+```bash
+# 回滚到指定迁移
+PM> Update-Database -TargetMigration PreviousMigrationName
+
+# 回滚所有迁移
+PM> Update-Database -TargetMigration 0
+```
+
+### <a id="ef6-performance"></a>性能优化
+
+Entity Framework提供了多种性能优化技巧来提高查询和操作效率。
+
+#### 查询性能优化
+
+```csharp
+using (var context = new MyDbContext())
+{
+    // 1. 使用AsNoTracking禁用变更跟踪（只读查询）
+    var users = context.Users
+        .AsNoTracking()
+        .ToList();
+    
+    // 2. 使用Select只查询需要的字段
+    var userNames = context.Users
+        .Select(u => new { u.Id, u.Name })
+        .ToList();
+    
+    // 3. 使用Include预加载关联数据（避免N+1查询）
+    var usersWithOrders = context.Users
+        .Include(u => u.Orders)
+        .ToList();
+    
+    // 4. 禁用延迟加载（避免意外查询）
+    context.Configuration.LazyLoadingEnabled = false;
+    
+    // 5. 使用Find查找（使用主键，性能最好）
+    var user = context.Users.Find(1);
+    
+    // 6. 批量操作时禁用自动检测更改
+    context.Configuration.AutoDetectChangesEnabled = false;
+    
+    for (int i = 0; i < 1000; i++)
+    {
+        context.Users.Add(new User { Name = $"User{i}", Email = $"user{i}@example.com", Age = 20 });
+    }
+    
+    context.SaveChanges(); // 只检测一次更改
+    
+    context.Configuration.AutoDetectChangesEnabled = true;
+    
+    // 7. 使用编译查询（重复查询）
+    private static readonly Func<MyDbContext, int, User> GetUserById =
+        CompiledQuery.Compile((MyDbContext ctx, int id) =>
+            ctx.Users.FirstOrDefault(u => u.Id == id));
+    
+    var user2 = GetUserById(context, 1);
+    
+    // 8. 使用原始SQL进行复杂查询
+    var users = context.Database.SqlQuery<User>(
+        "SELECT * FROM Users WHERE Age > @Age",
+        new SqlParameter("@Age", 18))
+        .ToList();
+}
+```
+
+#### 批量操作优化
+
+```csharp
+using (var context = new MyDbContext())
+{
+    // 1. 批量添加
+    var users = new List<User>();
+    for (int i = 0; i < 1000; i++)
+    {
+        users.Add(new User { Name = $"User{i}", Email = $"user{i}@example.com", Age = 20 });
+    }
+    
+    context.Configuration.AutoDetectChangesEnabled = false;
+    context.Users.AddRange(users);
+    context.SaveChanges();
+    context.Configuration.AutoDetectChangesEnabled = true;
+    
+    // 2. 批量更新（使用原始SQL）
+    int rowsAffected = context.Database.ExecuteSqlCommand(
+        "UPDATE Users SET Age = Age + 1 WHERE Age < @Age",
+        new SqlParameter("@Age", 18));
+    
+    // 3. 批量删除（使用原始SQL）
+    int deletedRows = context.Database.ExecuteSqlCommand(
+        "DELETE FROM Users WHERE Age < @Age",
+        new SqlParameter("@Age", 18));
+}
+```
+
+### <a id="ef6-advanced"></a>高级特性
+
+#### 数据库初始化策略
+
+```csharp
+public class MyDbContext : DbContext
+{
+    public MyDbContext() : base("DefaultConnection")
+    {
+        // 策略1：如果数据库不存在则创建（开发环境）
+        Database.SetInitializer(new CreateDatabaseIfNotExists<MyDbContext>());
+        
+        // 策略2：总是删除并重新创建（开发环境，危险）
+        // Database.SetInitializer(new DropCreateDatabaseAlways<MyDbContext>());
+        
+        // 策略3：模型改变时删除并重新创建（开发环境）
+        // Database.SetInitializer(new DropCreateDatabaseIfModelChanges<MyDbContext>());
+        
+        // 策略4：使用迁移（生产环境推荐）
+        Database.SetInitializer(new MigrateDatabaseToLatestVersion<MyDbContext, Migrations.Configuration>());
+        
+        // 策略5：禁用初始化（生产环境）
+        // Database.SetInitializer<MyDbContext>(null);
+    }
+}
+```
+
+#### 数据库日志记录
+
+```csharp
+public class MyDbContext : DbContext
+{
+    public MyDbContext() : base("DefaultConnection")
+    {
+        // 记录SQL到控制台
+        this.Database.Log = s => Console.WriteLine(s);
+        
+        // 记录SQL到文件
+        this.Database.Log = s => 
+        {
+            File.AppendAllText("ef.log", s);
+        };
+        
+        // 记录SQL到调试输出
+        #if DEBUG
+        this.Database.Log = s => System.Diagnostics.Debug.WriteLine(s);
+        #endif
+    }
+}
+```
+
+#### 存储过程和函数映射
+
+```csharp
+// 定义存储过程结果类
+public class UserOrderResult
+{
+    public int UserId { get; set; }
+    public string UserName { get; set; }
+    public int OrderCount { get; set; }
+}
+
+// 调用存储过程
+using (var context = new MyDbContext())
+{
+    var results = context.Database.SqlQuery<UserOrderResult>(
+        "EXEC GetUserOrders @UserId",
+        new SqlParameter("@UserId", 1))
+        .ToList();
+}
+```
+
+Entity Framework 6提供了强大的ORM功能，从基础的ADO.NET到高级的EF6特性，涵盖了数据访问的各个方面。通过合理使用这些特性，可以大大提高开发效率和代码质量。
+
 ## <a id="design-patterns"></a>C#设计模式详解
 
 设计模式是软件工程中经过验证的解决方案，用于解决常见的设计问题。它们提供了一套最佳实践，帮助开发者构建可维护、可扩展和可重用的软件系统。在C#中，设计模式被广泛应用于各种类型的应用程序开发。
@@ -7637,22 +8871,31 @@ System.Diagnostics.Trace.WriteLine($"线程ID: {Thread.CurrentThread.ManagedThre
 
 ## 总结
 
-C#进阶特性包括泛型、委托与Lambda表达式、LINQ、设计模式、特性（Attributes）、反射（Reflection）、异步编程、文件操作流处理和多线程编程等。这些特性在现代C#开发中发挥着重要作用：
+C#进阶特性包括泛型、委托与Lambda表达式、LINQ、ORM框架、设计模式、特性（Attributes）、反射（Reflection）、异步编程、文件操作流处理和多线程编程等。这些特性在现代C#开发中发挥着重要作用：
 
 1. **泛型**：提供类型安全、代码重用和性能优化
 2. **委托与Lambda表达式**：支持函数式编程，简化代码
 3. **LINQ**：统一的查询语法，简化数据查询和处理
-4. **设计模式**：提供经过验证的解决方案
-5. **特性（Attributes）**：为代码添加元数据，支持声明式编程
-6. **反射（Reflection）**：运行时类型检查和操作，支持框架和插件系统
-7. **异步编程**：提高应用程序响应性和性能
-8. **文件操作与流处理**：高效处理数据输入输出
-9. **多线程编程**：充分利用多核CPU，实现并发执行
+4. **ORM框架**：从ADO.NET到Entity Framework 6，提供了完整的数据访问解决方案
+5. **设计模式**：提供经过验证的解决方案
+6. **特性（Attributes）**：为代码添加元数据，支持声明式编程
+7. **反射（Reflection）**：运行时类型检查和操作，支持框架和插件系统
+8. **异步编程**：提高应用程序响应性和性能
+9. **文件操作与流处理**：高效处理数据输入输出
+10. **多线程编程**：充分利用多核CPU，实现并发执行
 
 在WinForm开发中，合理运用这些特性可以构建出高性能、可维护的桌面应用程序：
-- **LINQ**统一了数据查询语法，无论是查询内存集合、数据库还是XML，都能使用一致的语法，大大简化了数据处理代码
-- **异步编程和多线程编程**特别重要，可以保持UI响应性并提高程序性能；但需要注意线程安全和同步机制，避免死锁和竞态条件
-- **特性（Attributes）**广泛用于数据验证、序列化、ORM映射等场景，使得代码更加声明式和可配置
-- **反射（Reflection）**在框架开发、插件系统、对象映射等场景中不可或缺，但需要注意性能优化，通过缓存和委托提高执行效率
 
-掌握这些进阶特性，可以让您构建更加灵活、高效和可维护的C#应用程序。LINQ作为数据查询的统一接口，与其他特性（如泛型、委托、反射）结合使用，可以构建出功能强大且易于维护的应用程序。
+- **ADO.NET**是数据访问的基础，提供了直接访问数据库的能力，包括连接管理、命令执行、参数化查询、事务处理和存储过程等核心功能。掌握ADO.NET有助于理解数据访问的底层机制。
+
+- **Entity Framework 6**是强大的ORM框架，提供了Code First、Database First等多种开发模式。通过DbContext和DbSet，可以以面向对象的方式操作数据库。EF6支持LINQ查询、变更跟踪、并发控制、迁移等高级特性，大大提高了开发效率。
+
+- **LINQ**统一了数据查询语法，无论是查询内存集合、数据库还是XML，都能使用一致的语法，大大简化了数据处理代码。LINQ与EF6结合使用，可以实现类型安全、高效的数据库查询。
+
+- **异步编程和多线程编程**特别重要，可以保持UI响应性并提高程序性能；但需要注意线程安全和同步机制，避免死锁和竞态条件。在数据访问中，使用异步方法可以避免阻塞UI线程。
+
+- **特性（Attributes）**广泛用于数据验证、序列化、ORM映射等场景，使得代码更加声明式和可配置。在EF6中，Data Annotations提供了简洁的实体配置方式。
+
+- **反射（Reflection）**在框架开发、插件系统、对象映射等场景中不可或缺，但需要注意性能优化，通过缓存和委托提高执行效率。EF6内部大量使用反射来实现ORM功能。
+
+掌握这些进阶特性，可以让您构建更加灵活、高效和可维护的C#应用程序。从基础的ADO.NET到高级的Entity Framework 6，从简单的CRUD操作到复杂的查询和性能优化，这些技术构成了现代C#数据访问的完整体系。通过合理使用ORM框架，可以大大提高开发效率，同时保持代码的可维护性和性能。

@@ -318,7 +318,7 @@ pre.highlight {
   background: #282c34;
 }
 .highlight .c {
-  color: #98c379;
+  color: #61afef;
   font-style: italic;
 }
 .highlight .err {
@@ -345,19 +345,19 @@ pre.highlight {
   color: #abb2bf;
 }
 .highlight .cm {
-  color: #98c379;
+  color: #61afef;
   font-style: italic;
 }
 .highlight .cp {
-  color: #98c379;
+  color: #61afef;
   font-style: italic;
 }
 .highlight .c1 {
-  color: #98c379;
+  color: #61afef;
   font-style: italic;
 }
 .highlight .cs {
-  color: #98c379;
+  color: #61afef;
   font-style: italic;
 }
 .highlight .ge {

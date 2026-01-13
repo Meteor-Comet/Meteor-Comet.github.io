@@ -2843,6 +2843,461 @@ Entity Framework 6的主要特点：
 // using System.Data.Entity;
 ```
 
+#### Code First开发流程（代码先行）
+
+Code First是Entity Framework的一种开发模式，开发者先定义实体类和DbContext，然后由EF自动创建数据库。这种方式适合新项目开发，可以完全通过代码控制数据库结构。
+
+**Code First开发步骤：**
+
+**步骤1：定义实体类**
+
+```csharp
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+public class User
+{
+    [Key]
+    public int Id { get; set; }
+    
+    [Required]
+    [MaxLength(100)]
+    public string Name { get; set; }
+    
+    [Required]
+    [MaxLength(200)]
+    [Index(IsUnique = true)]
+    public string Email { get; set; }
+    
+    public int Age { get; set; }
+    
+    public DateTime CreateDate { get; set; }
+    
+    public virtual ICollection<Order> Orders { get; set; }
+    
+    public User()
+    {
+        Orders = new HashSet<Order>();
+        CreateDate = DateTime.Now;
+    }
+}
+```
+
+**步骤2：定义DbContext**
+
+```csharp
+using System.Data.Entity;
+
+public class MyDbContext : DbContext
+{
+    public MyDbContext() : base("DefaultConnection")
+    {
+        // 开发阶段：自动创建数据库（如果不存在）
+        Database.SetInitializer(new CreateDatabaseIfNotExists<MyDbContext>());
+        
+        // 或者：删除并重新创建数据库（仅开发环境，会丢失数据）
+        // Database.SetInitializer(new DropCreateDatabaseIfModelChanges<MyDbContext>());
+        
+        // 生产环境：禁用自动创建
+        // Database.SetInitializer<MyDbContext>(null);
+    }
+    
+    public DbSet<User> Users { get; set; }
+    public DbSet<Order> Orders { get; set; }
+    
+    protected override void OnModelCreating(DbModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        
+        // 使用Fluent API进行额外配置
+        modelBuilder.Entity<User>()
+            .HasMany(u => u.Orders)
+            .WithRequired(o => o.User)
+            .HasForeignKey(o => o.UserId)
+            .WillCascadeOnDelete(true);
+    }
+}
+```
+
+**步骤3：配置连接字符串（App.config或Web.config）**
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <connectionStrings>
+    <add name="DefaultConnection" 
+         connectionString="Server=localhost;Database=MyCodeFirstDB;Integrated Security=True;" 
+         providerName="System.Data.SqlClient" />
+  </connectionStrings>
+  
+  <entityFramework>
+    <defaultConnectionFactory type="System.Data.Entity.Infrastructure.SqlConnectionFactory, EntityFramework" />
+    <providers>
+      <provider invariantName="System.Data.SqlClient" 
+                type="System.Data.Entity.SqlServer.SqlProviderServices, EntityFramework.SqlServer" />
+    </providers>
+  </entityFramework>
+</configuration>
+```
+
+**步骤4：启用迁移（Migration）**
+
+```bash
+# 在Package Manager Console中执行：
+# 1. 启用迁移（首次）
+PM> Enable-Migrations
+
+# 这会创建一个Migrations文件夹和Configuration.cs文件
+```
+
+**步骤5：创建初始迁移**
+
+```bash
+# 2. 创建初始迁移
+PM> Add-Migration InitialCreate
+
+# 这会创建一个迁移文件，包含创建数据库的代码
+# 文件名格式：时间戳_InitialCreate.cs
+```
+
+**步骤6：查看迁移SQL（可选）**
+
+```bash
+# 查看将要执行的SQL语句
+PM> Update-Database -Script
+
+# 这会生成SQL脚本，但不执行
+```
+
+**步骤7：应用迁移到数据库**
+
+```bash
+# 应用迁移，创建或更新数据库
+PM> Update-Database
+
+# 这会：
+# - 创建数据库（如果不存在）
+# - 创建表结构
+# - 创建索引和约束
+```
+
+**步骤8：使用DbContext**
+
+```csharp
+using (var context = new MyDbContext())
+{
+    // 第一次运行时会自动创建数据库（如果启用了自动创建）
+    // 或者手动执行迁移：Update-Database
+    
+    // 添加数据
+    var user = new User
+    {
+        Name = "张三",
+        Email = "zhangsan@example.com",
+        Age = 25
+    };
+    context.Users.Add(user);
+    context.SaveChanges(); // 此时数据库和表已创建
+}
+```
+
+**Code First迁移工作流：**
+
+```bash
+# 1. 修改实体类（添加属性、修改属性等）
+# 例如：在User类中添加Phone属性
+
+# 2. 创建新的迁移
+PM> Add-Migration AddPhoneToUser
+
+# 3. 查看SQL（可选）
+PM> Update-Database -Script
+
+# 4. 应用迁移
+PM> Update-Database
+
+# 5. 回滚迁移（如果需要）
+PM> Update-Database -TargetMigration:PreviousMigrationName
+```
+
+**Code First数据库初始化策略：**
+
+```csharp
+// 1. CreateDatabaseIfNotExists（默认，如果数据库不存在则创建）
+Database.SetInitializer(new CreateDatabaseIfNotExists<MyDbContext>());
+
+// 2. DropCreateDatabaseIfModelChanges（模型改变时删除并重建，仅开发环境）
+Database.SetInitializer(new DropCreateDatabaseIfModelChanges<MyDbContext>());
+
+// 3. DropCreateDatabaseAlways（总是删除并重建，仅开发环境）
+Database.SetInitializer(new DropCreateDatabaseAlways<MyDbContext>());
+
+// 4. 自定义初始化器
+public class MyDbInitializer : CreateDatabaseIfNotExists<MyDbContext>
+{
+    protected override void Seed(MyDbContext context)
+    {
+        // 初始化种子数据
+        context.Users.Add(new User { Name = "管理员", Email = "admin@example.com" });
+        context.SaveChanges();
+        base.Seed(context);
+    }
+}
+
+Database.SetInitializer(new MyDbInitializer());
+
+// 5. 禁用初始化（生产环境）
+Database.SetInitializer<MyDbContext>(null);
+```
+
+#### Database First开发流程（数据库先行）
+
+Database First是Entity Framework的另一种开发模式，开发者先创建数据库，然后使用EF工具从数据库生成实体类和DbContext。这种方式适合已有数据库或数据库优先的场景。
+
+**Database First开发步骤：**
+
+**步骤1：创建数据库**
+
+在SQL Server Management Studio中创建数据库和表：
+
+```sql
+-- 创建数据库
+CREATE DATABASE MyDatabaseFirstDB;
+GO
+
+USE MyDatabaseFirstDB;
+GO
+
+-- 创建Users表
+CREATE TABLE Users (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    Name NVARCHAR(100) NOT NULL,
+    Email NVARCHAR(200) NOT NULL UNIQUE,
+    Age INT NOT NULL,
+    CreateDate DATETIME NOT NULL DEFAULT GETDATE()
+);
+
+-- 创建Orders表
+CREATE TABLE Orders (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    OrderDate DATETIME NOT NULL,
+    TotalAmount DECIMAL(18,2) NOT NULL,
+    UserId INT NOT NULL,
+    FOREIGN KEY (UserId) REFERENCES Users(Id)
+);
+```
+
+**步骤2：在Visual Studio中添加ADO.NET Entity Data Model**
+
+1. 右键点击项目 → 添加 → 新建项
+2. 选择"数据" → "ADO.NET Entity Data Model"
+3. 输入模型名称（如：MyModel.edmx）
+4. 点击"添加"
+
+**步骤3：选择"来自数据库的EF设计器"**
+
+在"Entity Data Model向导"中选择：
+- **从数据库生成**（Database First）
+- 点击"下一步"
+
+**步骤4：配置数据库连接**
+
+1. 选择"新建连接"
+2. 配置连接：
+   - 服务器名：localhost
+   - 数据库名：MyDatabaseFirstDB
+   - 身份验证方式（Windows或SQL Server）
+3. 测试连接
+4. 勾选"将App.config中的实体连接设置另存为"
+5. 连接字符串名称：MyDatabaseFirstDBEntities（或自定义）
+6. 点击"下一步"
+
+**步骤5：选择数据库对象**
+
+1. 选择要包含在模型中的表、视图、存储过程
+2. 勾选：
+   - ✅ Users（表）
+   - ✅ Orders（表）
+   - ✅ 存储过程（可选）
+   - ✅ 视图（可选）
+3. 输入模型命名空间（如：MyModel）
+4. 勾选"确定所生成对象名称的单复数形式"
+5. 勾选"包含外键列"
+6. 勾选"导入所选存储过程和函数到实体模型"
+7. 点击"完成"
+
+**步骤6：查看生成的模型**
+
+EF会生成以下文件：
+
+```
+MyModel.edmx          // 实体数据模型文件（设计器）
+MyModel.edmx.diagram  // 模型关系图
+MyModel.Designer.cs   // 设计器生成的代码（包含实体类和DbContext）
+MyModel.Context.tt    // T4模板
+MyModel.tt            // T4模板
+MyModel.Context.cs    // DbContext类（由T4生成）
+User.cs               // User实体类（由T4生成）
+Order.cs              // Order实体类（由T4生成）
+```
+
+**步骤7：查看生成的代码**
+
+**生成的DbContext（MyModel.Context.cs）：**
+
+```csharp
+public partial class MyDatabaseFirstDBEntities : DbContext
+{
+    public MyDatabaseFirstDBEntities()
+        : base("name=MyDatabaseFirstDBEntities")
+    {
+    }
+    
+    protected override void OnModelCreating(DbModelBuilder modelBuilder)
+    {
+        throw new UnintentionalCodeFirstException();
+    }
+    
+    public virtual DbSet<User> Users { get; set; }
+    public virtual DbSet<Order> Orders { get; set; }
+}
+```
+
+**生成的实体类（User.cs）：**
+
+```csharp
+public partial class User
+{
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", 
+        "CA2214:DoNotCallOverridableMethodsInConstructors")]
+    public User()
+    {
+        this.Orders = new HashSet<Order>();
+    }
+    
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public string Email { get; set; }
+    public int Age { get; set; }
+    public System.DateTime CreateDate { get; set; }
+    
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", 
+        "CA2227:CollectionPropertiesShouldBeReadOnly")]
+    public virtual ICollection<Order> Orders { get; set; }
+}
+```
+
+**步骤8：使用生成的DbContext**
+
+```csharp
+using (var context = new MyDatabaseFirstDBEntities())
+{
+    // 查询数据
+    var users = context.Users.ToList();
+    var userById = context.Users.Find(1);
+    
+    // 添加数据
+    var newUser = new User
+    {
+        Name = "李四",
+        Email = "lisi@example.com",
+        Age = 30,
+        CreateDate = DateTime.Now
+    };
+    context.Users.Add(newUser);
+    context.SaveChanges();
+    
+    // 更新数据
+    var user = context.Users.Find(1);
+    if (user != null)
+    {
+        user.Name = "更新的名称";
+        context.SaveChanges();
+    }
+    
+    // 删除数据
+    var userToDelete = context.Users.Find(2);
+    if (userToDelete != null)
+    {
+        context.Users.Remove(userToDelete);
+        context.SaveChanges();
+    }
+}
+```
+
+**步骤9：更新模型（当数据库结构改变时）**
+
+1. 在数据库中修改表结构（添加列、修改列等）
+2. 在Visual Studio中，右键点击.edmx文件
+3. 选择"从数据库更新模型..."
+4. 点击"刷新"标签
+5. 选择要更新的表
+6. 点击"完成"
+7. 保存.edmx文件（会自动重新生成代码）
+
+**Database First与数据库同步：**
+
+```bash
+# 如果数据库结构改变了：
+# 1. 右键.edmx → 从数据库更新模型
+# 2. 或者删除.edmx，重新生成
+# 3. 注意：Database First不支持迁移（Migration），需要手动更新模型
+
+# 如果模型改变了（但不推荐，Database First应该从数据库同步）：
+# 右键.edmx → 从模型生成数据库
+# 这会生成SQL脚本，可以执行更新数据库
+```
+
+**Database First注意事项：**
+
+1. **不支持迁移**：Database First不支持Code First的迁移功能，数据库结构改变时需要手动更新模型
+2. **代码会被覆盖**：.Designer.cs和.tt生成的代码在更新模型时会被覆盖
+3. **自定义代码**：将自定义代码放在Partial Class中，避免被覆盖
+4. **配置文件**：连接字符串保存在App.config或Web.config中
+
+**创建Partial Class扩展实体：**
+
+```csharp
+// 创建新文件：UserExtensions.cs
+// 不会被覆盖，可以添加自定义属性和方法
+
+public partial class User
+{
+    // 计算属性
+    public string FullInfo => $"{Name} ({Email}) - {Age}岁";
+    
+    // 自定义方法
+    public bool IsAdult => Age >= 18;
+    
+    // 业务逻辑方法
+    public void UpdateAge(int newAge)
+    {
+        if (newAge < 0 || newAge > 150)
+            throw new ArgumentException("年龄无效");
+        Age = newAge;
+    }
+}
+```
+
+#### Code First vs Database First对比
+
+| 特性 | Code First | Database First |
+|------|------------|----------------|
+| **适用场景** | 新项目开发 | 已有数据库 |
+| **控制权** | 代码优先 | 数据库优先 |
+| **迁移支持** | ✅ 支持（Migration） | ❌ 不支持 |
+| **版本控制** | ✅ 代码控制，便于版本管理 | ⚠️ 需要手动同步 |
+| **灵活性** | ✅ 高，完全由代码控制 | ⚠️ 受限于数据库结构 |
+| **开发效率** | ✅ 高（修改代码即可） | ⚠️ 需要更新模型 |
+| **学习曲线** | 中等 | 较低 |
+| **维护成本** | 较低（代码统一管理） | 较高（需要同步数据库和模型） |
+
+**选择建议：**
+
+- **选择Code First**：新项目、需要版本控制、团队协作、需要频繁修改模型
+- **选择Database First**：已有数据库、数据库由DBA管理、不需要频繁修改模型、快速原型开发
+
 #### 基本实体类定义
 
 ```csharp
@@ -3317,56 +3772,24 @@ using (var context = new MyDbContext())
         .ToList();
     
     // ========== 添加方法 ==========
-    
-    // Add：添加单个实体
-    var newUser = new User { Name = "新用户", Email = "new@example.com", Age = 25 };
-    context.Users.Add(newUser);
-    
-    // AddRange：添加多个实体
-    var newUsers = new List<User>
-    {
-        new User { Name = "用户1", Email = "user1@example.com", Age = 20 },
-        new User { Name = "用户2", Email = "user2@example.com", Age = 30 }
-    };
-    context.Users.AddRange(newUsers);
+    // Add(T entity)：添加单个实体到DbSet
+    // AddRange(IEnumerable<T> entities)：添加多个实体到DbSet
+    // 注意：添加后需要调用SaveChanges()才会保存到数据库
+    // 详细示例请参考"数据修改"章节
     
     // ========== 更新方法 ==========
-    
-    // 更新方式1：修改已跟踪的实体
-    var userToUpdate = context.Users.Find(1);
-    if (userToUpdate != null)
-    {
-        userToUpdate.Name = "更新后的名称";
-        userToUpdate.Age = 30;
-        // 不需要显式调用Update，SaveChanges时会自动检测更改
-    }
-    
-    // 更新方式2：附加并标记为已修改
-    var detachedUser = new User { Id = 1, Name = "新名称", Email = "new@example.com", Age = 25 };
-    context.Users.Attach(detachedUser);
-    context.Entry(detachedUser).State = EntityState.Modified;
-    
-    // 更新方式3：使用Entry设置状态
-    var userToUpdate2 = new User { Id = 2, Name = "更新的名称" };
-    context.Entry(userToUpdate2).State = EntityState.Modified;
-    // 注意：这种方式只会更新非空属性
+    // DbSet没有Update方法，更新操作通过以下方式实现：
+    // 1. 修改已跟踪的实体（通过查询获得的实体），然后SaveChanges()
+    // 2. 使用Attach()附加实体，然后设置EntityState.Modified
+    // 3. 直接使用Entry().State = EntityState.Modified
+    // 详细示例请参考"数据修改"章节
     
     // ========== 删除方法 ==========
-    
-    // Remove：删除单个实体
-    var userToDelete = context.Users.Find(1);
-    if (userToDelete != null)
-    {
-        context.Users.Remove(userToDelete);
-    }
-    
-    // RemoveRange：删除多个实体
-    var usersToDelete = context.Users.Where(u => u.Age < 18).ToList();
-    context.Users.RemoveRange(usersToDelete);
-    
-    // 删除方式2：直接设置状态
-    var userToDelete2 = new User { Id = 2 };
-    context.Entry(userToDelete2).State = EntityState.Deleted;
+    // Remove(T entity)：删除单个实体
+    // RemoveRange(IEnumerable<T> entities)：删除多个实体
+    // 注意：删除后需要调用SaveChanges()才会保存到数据库
+    // 也可以通过设置Entry().State = EntityState.Deleted来删除
+    // 详细示例请参考"数据修改"章节
     
     // ========== 其他方法 ==========
     

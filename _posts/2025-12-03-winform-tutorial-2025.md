@@ -3482,10 +3482,10 @@ public partial class Form1 : Form
         
         // 方式2: 使用 BindingSource（推荐）
         BindingSource personBindingSource = new BindingSource();
-        personBindingSource.DataSource = currentPerson;
+personBindingSource.DataSource = currentPerson;
         
-        txtName.DataBindings.Add("Text", personBindingSource, "Name");
-        txtAge.DataBindings.Add("Text", personBindingSource, "Age");
+txtName.DataBindings.Add("Text", personBindingSource, "Name");
+txtAge.DataBindings.Add("Text", personBindingSource, "Age");
         txtEmail.DataBindings.Add("Text", personBindingSource, "Email");
         
         // 绑定日期到 DateTimePicker
@@ -3702,11 +3702,11 @@ public partial class Form1 : Form
     {
         // 准备数据
         persons = new List<Person>
-        {
-            new Person { Name = "张三", Age = 25, Email = "zhangsan@example.com" },
-            new Person { Name = "李四", Age = 30, Email = "lisi@example.com" },
-            new Person { Name = "王五", Age = 22, Email = "wangwu@example.com" }
-        };
+{
+    new Person { Name = "张三", Age = 25, Email = "zhangsan@example.com" },
+    new Person { Name = "李四", Age = 30, Email = "lisi@example.com" },
+    new Person { Name = "王五", Age = 22, Email = "wangwu@example.com" }
+};
         
         // 创建 BindingSource
         listBindingSource = new BindingSource();
@@ -3784,8 +3784,8 @@ public partial class Form1 : Form
         // 创建 BindingSource
         gridBindingSource = new BindingSource();
         gridBindingSource.DataSource = persons;
-        
-        // 绑定到 DataGridView
+
+// 绑定到 DataGridView
         dataGridView1.DataSource = gridBindingSource;
         
         // 配置列显示（在绑定后配置）
@@ -3801,17 +3801,17 @@ public partial class Form1 : Form
         // 隐藏列
         if (dataGridView1.Columns["Email"] != null)
         {
-            dataGridView1.Columns["Email"].Visible = false;
+dataGridView1.Columns["Email"].Visible = false;
         }
         
         // 修改列标题
         if (dataGridView1.Columns["Name"] != null)
         {
-            dataGridView1.Columns["Name"].HeaderText = "姓名";
+dataGridView1.Columns["Name"].HeaderText = "姓名";
         }
         if (dataGridView1.Columns["Age"] != null)
         {
-            dataGridView1.Columns["Age"].HeaderText = "年龄";
+dataGridView1.Columns["Age"].HeaderText = "年龄";
         }
         if (dataGridView1.Columns["BirthDate"] != null)
         {

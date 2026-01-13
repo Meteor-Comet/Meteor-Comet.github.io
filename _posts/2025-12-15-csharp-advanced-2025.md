@@ -3971,68 +3971,626 @@ public class MyDbContext : DbContext
 }
 ```
 
-#### 完整的Fluent API配置示例
+#### Fluent API详细配置指南（EF6）
+
+Fluent API提供了丰富的配置选项，可以精确控制实体映射、属性设置、关系配置和级联行为。
+
+**1. 实体级别配置**
 
 ```csharp
 protected override void OnModelCreating(DbModelBuilder modelBuilder)
 {
-    // ========== User实体配置 ==========
+    // ========== 实体基础配置 ==========
     modelBuilder.Entity<User>(entity =>
     {
-        // 表配置
-        entity.ToTable("Users", "dbo");
-        entity.HasKey(u => u.Id);
+        // 表名和架构配置
+        entity.ToTable("Users", "dbo"); // 指定表名和架构
         
-        // 属性配置
+        // 主键配置
+        entity.HasKey(u => u.Id); // 单主键
+        entity.HasKey(u => new { u.Id, u.Code }); // 复合主键
+        
+        // 忽略实体（不映射到数据库）
+        // modelBuilder.Ignore<SomeClass>();
+        
+        // 实体映射到多个表（Table Splitting）
+        entity.Map(m =>
+        {
+            m.Properties(u => new { u.Id, u.Name, u.Email });
+            m.ToTable("Users");
+        })
+        .Map(m =>
+        {
+            m.Properties(u => new { u.Id, u.Address, u.Phone });
+            m.ToTable("UserDetails");
+        });
+    });
+}
+```
+
+**2. 属性详细配置**
+
+```csharp
+protected override void OnModelCreating(DbModelBuilder modelBuilder)
+{
+    modelBuilder.Entity<User>(entity =>
+    {
+        // ========== 主键属性配置 ==========
         entity.Property(u => u.Id)
-            .HasColumnName("UserId")
-            .HasDatabaseGeneratedOption(DatabaseGeneratedOption.Identity);
+            .HasColumnName("UserId")                    // 列名
+            .HasColumnOrder(1)                           // 列顺序
+            .HasDatabaseGeneratedOption(DatabaseGeneratedOption.Identity) // 自增
+            .IsRequired();                               // 必填
         
+        // ========== 字符串属性配置 ==========
         entity.Property(u => u.Name)
-            .IsRequired()
-            .HasMaxLength(100)
-            .IsUnicode(true);
+            .IsRequired()                                // 必填
+            .HasMaxLength(100)                           // 最大长度
+            .HasMinLength(2)                             // 最小长度（EF6不支持，仅用于验证）
+            .IsUnicode(true)                             // Unicode字符（nvarchar）
+            .IsUnicode(false)                            // 非Unicode（varchar）
+            .IsFixedLength()                             // 固定长度（char）
+            .IsVariableLength()                          // 可变长度（varchar/nvarchar）
+            .HasColumnType("nvarchar")                        // 数据库类型
+            .HasColumnType("nvarchar(100)")               // 完整类型定义
+            .HasColumnName("UserName");                  // 列名
         
         entity.Property(u => u.Email)
             .IsRequired()
             .HasMaxLength(200)
-            .HasColumnName("EmailAddress");
+            .HasColumnName("EmailAddress")
+            .IsUnicode(false);                           // varchar(200)
         
+        // ========== 数值属性配置 ==========
         entity.Property(u => u.Age)
-            .IsOptional()
-            .HasColumnType("int");
+            .IsOptional()                                // 可选（可空）
+            .HasColumnType("int")                             // SQL Server类型
+            .HasPrecision(10, 0);                        // 精度（对decimal有效）
         
+        entity.Property(u => u.Salary)
+            .HasColumnType("decimal(18,2)")                  // decimal类型
+            .HasPrecision(18, 2)                         // 精度18，小数位2
+            .IsOptional();
+        
+        entity.Property(u => u.Rating)
+            .HasColumnType("float")                          // float类型
+            .IsOptional();
+        
+        // ========== 日期时间属性配置 ==========
         entity.Property(u => u.CreateDate)
             .IsRequired()
+            .HasColumnType("datetime2")                      // datetime2类型
+            .HasDatabaseGeneratedOption(DatabaseGeneratedOption.Computed) // 计算列
+            .HasDefaultValueSql("GETDATE()");            // 默认值SQL
+        
+        entity.Property(u => u.UpdateDate)
             .HasColumnType("datetime2")
-            .HasDatabaseGeneratedOption(DatabaseGeneratedOption.Computed);
+            .IsOptional()
+            .HasDatabaseGeneratedOption(DatabaseGeneratedOption.None);
         
-        // 索引配置
-        entity.HasIndex(u => u.Email)
-            .IsUnique()
-            .HasName("IX_Users_Email_Unique");
+        // ========== 布尔属性配置 ==========
+        entity.Property(u => u.IsActive)
+            .IsRequired()
+            .HasColumnType("bit")                             // SQL Server bit类型
+            .HasDefaultValue(true);                       // 默认值
         
-        entity.HasIndex(u => new { u.Name, u.Age })
-            .HasName("IX_Users_Name_Age");
+        // ========== 字节数组属性配置 ==========
+        entity.Property(u => u.Avatar)
+            .HasColumnType("varbinary(max)")                 // varbinary(max)
+            .IsOptional();
         
-        // 导航属性配置（在关系配置中详细说明）
+        entity.Property(u => u.RowVersion)
+            .HasColumnType("timestamp")                      // timestamp（并发控制）
+            .IsRowVersion()                              // 行版本（等同于[Timestamp]）
+            .IsConcurrencyToken();                       // 并发令牌
+        
+        // ========== GUID属性配置 ==========
+        entity.Property(u => u.UniqueId)
+            .HasColumnType("uniqueidentifier")                // GUID类型
+            .HasDatabaseGeneratedOption(DatabaseGeneratedOption.Identity) // 自动生成
+            .IsRequired();
+        
+        // ========== 枚举属性配置 ==========
+        entity.Property(u => u.Status)
+            .HasColumnType("int")                             // 枚举存储为int
+            .IsRequired();
+        
+        // ========== 忽略属性（不映射到数据库）==========
+        entity.Ignore(u => u.FullName);                  // 计算属性
+        entity.Ignore(u => u.DisplayName);              // 临时属性
+        
+        // ========== 复杂类型配置 ==========
+        // 如果Address是复杂类型
+        entity.ComplexProperty(u => u.Address)
+            .Property(a => a.Street)
+            .HasMaxLength(200);
     });
-    
-    // ========== Order实体配置 ==========
-    modelBuilder.Entity<Order>(entity =>
+}
+```
+
+**3. 索引配置**
+
+```csharp
+protected override void OnModelCreating(DbModelBuilder modelBuilder)
+{
+    modelBuilder.Entity<User>(entity =>
     {
-        entity.ToTable("Orders");
-        entity.HasKey(o => o.Id);
+        // ========== 单列索引 ==========
+        entity.HasIndex(u => u.Email)
+            .IsUnique()                                  // 唯一索引
+            .HasName("IX_Users_Email_Unique");           // 索引名称
         
-        entity.Property(o => o.OrderDate)
-            .IsRequired()
-            .HasColumnType("datetime2");
+        // ========== 复合索引 ==========
+        entity.HasIndex(u => new { u.Name, u.Age })
+            .HasName("IX_Users_Name_Age")
+            .IsUnique(false);                            // 非唯一索引
         
-        entity.Property(o => o.TotalAmount)
-            .IsRequired()
-            .HasColumnType("decimal(18,2)")
-            .HasPrecision(18, 2);
+        // ========== 包含列索引（SQL Server 2005+）==========
+        // EF6不支持包含列，需要在迁移中手动添加
+        // CREATE INDEX IX_Users_Email ON Users(Email) INCLUDE (Name, Age)
+        
+        // ========== 过滤索引（SQL Server 2008+）==========
+        // EF6不支持过滤索引，需要在迁移中手动添加
+        // CREATE INDEX IX_Users_Active ON Users(Email) WHERE IsActive = 1
     });
+}
+```
+
+**4. 关系配置详解**
+
+```csharp
+protected override void OnModelCreating(DbModelBuilder modelBuilder)
+{
+    // ========== 一对多关系配置 ==========
+    
+    // 方式1：从Order端配置（推荐）
+    modelBuilder.Entity<Order>()
+        .HasRequired(o => o.User)                        // 订单必须有用户（必需关系）
+        .WithMany(u => u.Orders)                         // 用户有多个订单
+        .HasForeignKey(o => o.UserId)                    // 外键属性
+        .WillCascadeOnDelete(true);                      // 级联删除
+    
+    // 方式2：从User端配置
+    modelBuilder.Entity<User>()
+        .HasMany(u => u.Orders)                          // 用户有多个订单
+        .WithRequired(o => o.User)                       // 订单必须有用户
+        .HasForeignKey(o => o.UserId)
+        .WillCascadeOnDelete(true);
+    
+    // 方式3：可选关系（外键可空）
+    modelBuilder.Entity<Order>()
+        .HasOptional(o => o.User)                        // 订单可以没有用户（可选）
+        .WithMany(u => u.Orders)
+        .HasForeignKey(o => o.UserId)
+        .WillCascadeOnDelete(false);
+    
+    // 方式4：指定外键列名
+    modelBuilder.Entity<Order>()
+        .HasRequired(o => o.User)
+        .WithMany(u => u.Orders)
+        .Map(m => m.MapKey("FK_UserId"));                // 指定外键列名
+    
+    // ========== 一对一关系配置 ==========
+    
+    // 方式1：UserProfile依赖User（UserId是外键）
+    modelBuilder.Entity<UserProfile>()
+        .HasRequired(p => p.User)                       // 用户资料必须有用户
+        .WithOptional(u => u.Profile)                   // 用户可以有可选的资料
+        .HasForeignKey(p => p.UserId)
+        .WillCascadeOnDelete(true);
+    
+    // 方式2：共享主键（UserProfile的主键也是外键）
+    modelBuilder.Entity<UserProfile>()
+        .HasRequired(p => p.User)
+        .WithOptional(u => u.Profile)
+        .Map(m => m.MapKey("UserId"));                   // UserId既是主键也是外键
+    
+    // 方式3：双向可选
+    modelBuilder.Entity<UserProfile>()
+        .HasOptional(p => p.User)
+        .WithOptional(u => u.Profile)
+        .Map(m => m.MapKey("UserId"));
+    
+    // ========== 多对多关系配置 ==========
+    
+    // 方式1：使用默认连接表
+    modelBuilder.Entity<User>()
+        .HasMany(u => u.Roles)
+        .WithMany(r => r.Users)
+        .Map(m =>
+        {
+            m.ToTable("UserRoles");                      // 连接表名
+            m.MapLeftKey("UserId");                      // User表的外键
+            m.MapRightKey("RoleId");                     // Role表的外键
+        });
+    
+    // 方式2：使用中间实体（推荐，更灵活）
+    modelBuilder.Entity<UserRole>()
+        .HasKey(ur => new { ur.UserId, ur.RoleId });    // 复合主键
+    
+    modelBuilder.Entity<UserRole>()
+        .HasRequired(ur => ur.User)
+        .WithMany(u => u.UserRoles)
+        .HasForeignKey(ur => ur.UserId)
+        .WillCascadeOnDelete(true);
+    
+    modelBuilder.Entity<UserRole>()
+        .HasRequired(ur => ur.Role)
+        .WithMany(r => r.UserRoles)
+        .HasForeignKey(ur => ur.RoleId)
+        .WillCascadeOnDelete(true);
+}
+```
+
+**5. 级联删除详细配置**
+
+```csharp
+protected override void OnModelCreating(DbModelBuilder modelBuilder)
+{
+    // ========== 级联删除配置 ==========
+    
+    // 场景1：删除用户时，自动删除其所有订单（级联删除）
+    modelBuilder.Entity<Order>()
+        .HasRequired(o => o.User)
+        .WithMany(u => u.Orders)
+        .HasForeignKey(o => o.UserId)
+        .WillCascadeOnDelete(true);                      // 启用级联删除
+    
+    // 效果：删除User时，会自动删除所有相关的Order记录
+    // DELETE FROM Users WHERE Id = 1
+    // 会自动执行：DELETE FROM Orders WHERE UserId = 1
+    
+    // 场景2：删除用户时，不允许删除（如果存在订单）
+    modelBuilder.Entity<Order>()
+        .HasRequired(o => o.User)
+        .WithMany(u => u.Orders)
+        .HasForeignKey(o => o.UserId)
+        .WillCascadeOnDelete(false);                     // 禁用级联删除
+    
+    // 效果：如果User有Order，删除User会抛出异常
+    // 需要先删除Order，再删除User
+    
+    // 场景3：可选关系的级联删除
+    modelBuilder.Entity<Order>()
+        .HasOptional(o => o.User)
+        .WithMany(u => u.Orders)
+        .HasForeignKey(o => o.UserId)
+        .WillCascadeOnDelete(true);                      // 可选关系也可以级联删除
+    
+    // 场景4：多级级联删除
+    // User -> Order -> OrderItem
+    // 删除User时，会级联删除Order，Order删除时会级联删除OrderItem
+    
+    modelBuilder.Entity<Order>()
+        .HasRequired(o => o.User)
+        .WithMany(u => u.Orders)
+        .HasForeignKey(o => o.UserId)
+        .WillCascadeOnDelete(true);                      // User -> Order级联
+    
+    modelBuilder.Entity<OrderItem>()
+        .HasRequired(oi => oi.Order)
+        .WithMany(o => o.OrderItems)
+        .HasForeignKey(oi => oi.OrderId)
+        .WillCascadeOnDelete(true);                      // Order -> OrderItem级联
+    
+    // 场景5：一对一关系的级联删除
+    modelBuilder.Entity<UserProfile>()
+        .HasRequired(p => p.User)
+        .WithOptional(u => u.Profile)
+        .HasForeignKey(p => p.UserId)
+        .WillCascadeOnDelete(true);                      // 删除User时删除UserProfile
+    
+    // 场景6：多对多关系的级联删除
+    // 删除User时，删除UserRole连接记录，但不删除Role
+    modelBuilder.Entity<UserRole>()
+        .HasRequired(ur => ur.User)
+        .WithMany(u => u.UserRoles)
+        .HasForeignKey(ur => ur.UserId)
+        .WillCascadeOnDelete(true);                      // 删除User时删除UserRole
+    
+    modelBuilder.Entity<UserRole>()
+        .HasRequired(ur => ur.Role)
+        .WithMany(r => r.UserRoles)
+        .HasForeignKey(ur => ur.RoleId)
+        .WillCascadeOnDelete(false);                     // 删除Role时不删除UserRole（保护User）
+    
+    // ========== 级联删除注意事项 ==========
+    // 1. 级联删除是数据库级别的约束，不是EF代码逻辑
+    // 2. 启用级联删除后，数据库会自动创建外键约束
+    // 3. 级联删除可能导致意外的数据丢失，需要谨慎使用
+    // 4. 生产环境建议禁用级联删除，使用软删除或手动删除
+    // 5. 级联删除的性能影响：删除父记录时，需要检查所有子记录
+}
+```
+
+**6. 并发控制配置**
+
+```csharp
+protected override void OnModelCreating(DbModelBuilder modelBuilder)
+{
+    modelBuilder.Entity<User>(entity =>
+    {
+        // ========== 时间戳并发控制 ==========
+        entity.Property(u => u.RowVersion)
+            .IsRowVersion()                              // 等同于[Timestamp]
+            .IsConcurrencyToken();                       // 并发令牌
+        
+        // ========== 字段级并发控制 ==========
+        entity.Property(u => u.Version)
+            .IsConcurrencyToken();                       // 并发检查字段
+        
+        // ========== 多字段并发控制 ==========
+        entity.Property(u => u.UpdateDate)
+            .IsConcurrencyToken();
+        
+        entity.Property(u => u.UpdateBy)
+            .IsConcurrencyToken();
+    });
+}
+```
+
+**7. 默认值和计算列配置**
+
+```csharp
+protected override void OnModelCreating(DbModelBuilder modelBuilder)
+{
+    modelBuilder.Entity<User>(entity =>
+    {
+        // ========== 默认值配置 ==========
+        entity.Property(u => u.CreateDate)
+            .HasDefaultValueSql("GETDATE()");            // SQL Server函数
+        
+        entity.Property(u => u.IsActive)
+            .HasDefaultValue(true);                      // C#默认值
+        
+        entity.Property(u => u.Status)
+            .HasDefaultValue(0);                         // 枚举默认值
+        
+        // ========== 计算列配置 ==========
+        entity.Property(u => u.FullName)
+            .HasDatabaseGeneratedOption(DatabaseGeneratedOption.Computed)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(200);
+        
+        // 需要在迁移中手动添加计算列SQL：
+        // ALTER TABLE Users ADD FullName AS (Name + ' ' + Email)
+    });
+}
+```
+
+**8. 完整的Fluent API配置示例**
+
+```csharp
+using System.Data.Entity;
+using System.Data.Entity.ModelConfiguration.Configuration;
+
+public class MyDbContext : DbContext
+{
+    public DbSet<User> Users { get; set; }
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<OrderItem> OrderItems { get; set; }
+    public DbSet<UserProfile> UserProfiles { get; set; }
+    public DbSet<Role> Roles { get; set; }
+    public DbSet<UserRole> UserRoles { get; set; }
+    
+    protected override void OnModelCreating(DbModelBuilder modelBuilder)
+    {
+        // ========== User实体完整配置 ==========
+        modelBuilder.Entity<User>(entity =>
+        {
+            // 表配置
+            entity.ToTable("Users", "dbo");
+            entity.HasKey(u => u.Id);
+            
+            // 主键属性配置
+            entity.Property(u => u.Id)
+                .HasColumnName("UserId")
+                .HasDatabaseGeneratedOption(DatabaseGeneratedOption.Identity)
+                .IsRequired();
+            
+            // 字符串属性配置
+            entity.Property(u => u.Name)
+                .IsRequired()
+                .HasMaxLength(100)
+                .IsUnicode(true)
+                .HasColumnName("UserName");
+            
+            entity.Property(u => u.Email)
+                .IsRequired()
+                .HasMaxLength(200)
+                .IsUnicode(false)
+                .HasColumnName("EmailAddress");
+            
+            // 数值属性配置
+            entity.Property(u => u.Age)
+                .IsOptional()
+                .HasColumnType("int");
+            
+            // 日期时间属性配置
+            entity.Property(u => u.CreateDate)
+                .IsRequired()
+                .HasColumnType("datetime2")
+                .HasDefaultValueSql("GETDATE()");
+            
+            entity.Property(u => u.UpdateDate)
+                .IsOptional()
+                .HasColumnType("datetime2");
+            
+            // 布尔属性配置
+            entity.Property(u => u.IsActive)
+                .IsRequired()
+                .HasColumnType("bit")
+                .HasDefaultValue(true);
+            
+            // 并发控制
+            entity.Property(u => u.RowVersion)
+                .IsRowVersion()
+                .IsConcurrencyToken();
+            
+            // 索引配置
+            entity.HasIndex(u => u.Email)
+                .IsUnique()
+                .HasName("IX_Users_Email_Unique");
+            
+            entity.HasIndex(u => new { u.Name, u.Age })
+                .HasName("IX_Users_Name_Age");
+            
+            // 忽略属性
+            entity.Ignore(u => u.FullName);
+        });
+        
+        // ========== Order实体配置 ==========
+        modelBuilder.Entity<Order>(entity =>
+        {
+            entity.ToTable("Orders");
+            entity.HasKey(o => o.Id);
+            
+            entity.Property(o => o.OrderDate)
+                .IsRequired()
+                .HasColumnType("datetime2");
+            
+            entity.Property(o => o.TotalAmount)
+                .IsRequired()
+                .HasColumnType("decimal(18,2)")
+                .HasPrecision(18, 2);
+            
+            // 一对多关系：Order -> User（级联删除）
+            entity.HasRequired(o => o.User)
+                .WithMany(u => u.Orders)
+                .HasForeignKey(o => o.UserId)
+                .WillCascadeOnDelete(true);
+        });
+        
+        // ========== OrderItem实体配置 ==========
+        modelBuilder.Entity<OrderItem>(entity =>
+        {
+            entity.ToTable("OrderItems");
+            entity.HasKey(oi => oi.Id);
+            
+            entity.Property(oi => oi.ProductName)
+                .IsRequired()
+                .HasMaxLength(200);
+            
+            entity.Property(oi => oi.Quantity)
+                .IsRequired()
+                .HasColumnType("int");
+            
+            entity.Property(oi => oi.UnitPrice)
+                .IsRequired()
+                .HasColumnType("decimal(18,2)")
+                .HasPrecision(18, 2);
+            
+            // 一对多关系：OrderItem -> Order（级联删除）
+            entity.HasRequired(oi => oi.Order)
+                .WithMany(o => o.OrderItems)
+                .HasForeignKey(oi => oi.OrderId)
+                .WillCascadeOnDelete(true);
+        });
+        
+        // ========== UserProfile实体配置（一对一）==========
+        modelBuilder.Entity<UserProfile>(entity =>
+        {
+            entity.ToTable("UserProfiles");
+            entity.HasKey(p => p.Id);
+            
+            entity.Property(p => p.Address)
+                .IsOptional()
+                .HasMaxLength(500);
+            
+            entity.Property(p => p.Phone)
+                .IsOptional()
+                .HasMaxLength(20);
+            
+            // 一对一关系：UserProfile -> User（级联删除）
+            entity.HasRequired(p => p.User)
+                .WithOptional(u => u.Profile)
+                .HasForeignKey(p => p.UserId)
+                .WillCascadeOnDelete(true);
+        });
+        
+        // ========== Role实体配置 ==========
+        modelBuilder.Entity<Role>(entity =>
+        {
+            entity.ToTable("Roles");
+            entity.HasKey(r => r.Id);
+            
+            entity.Property(r => r.Name)
+                .IsRequired()
+                .HasMaxLength(50);
+        });
+        
+        // ========== UserRole中间实体配置（多对多）==========
+        modelBuilder.Entity<UserRole>(entity =>
+        {
+            entity.ToTable("UserRoles");
+            entity.HasKey(ur => new { ur.UserId, ur.RoleId }); // 复合主键
+            
+            entity.Property(ur => ur.AssignedDate)
+                .IsRequired()
+                .HasColumnType("datetime2")
+                .HasDefaultValueSql("GETDATE()");
+            
+            // UserRole -> User（级联删除）
+            entity.HasRequired(ur => ur.User)
+                .WithMany(u => u.UserRoles)
+                .HasForeignKey(ur => ur.UserId)
+                .WillCascadeOnDelete(true);
+            
+            // UserRole -> Role（不级联删除，保护Role）
+            entity.HasRequired(ur => ur.Role)
+                .WithMany(r => r.UserRoles)
+                .HasForeignKey(ur => ur.RoleId)
+                .WillCascadeOnDelete(false);
+        });
+    }
+}
+```
+
+**9. Fluent API配置最佳实践**
+
+```csharp
+protected override void OnModelCreating(DbModelBuilder modelBuilder)
+{
+    // ========== 最佳实践 ==========
+    
+    // 1. 使用EntityTypeConfiguration分离配置（推荐）
+    // 创建单独的配置类
+    public class UserConfiguration : EntityTypeConfiguration<User>
+    {
+        public UserConfiguration()
+        {
+            ToTable("Users");
+            HasKey(u => u.Id);
+            
+            Property(u => u.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+            
+            // ... 其他配置
+        }
+    }
+    
+    // 在OnModelCreating中应用配置
+    modelBuilder.Configurations.Add(new UserConfiguration());
+    
+    // 2. 使用配置约定（Convention）
+    // 所有字符串属性默认最大长度100
+    modelBuilder.Properties<string>()
+        .Configure(p => p.HasMaxLength(100));
+    
+    // 所有DateTime属性默认类型为datetime2
+    modelBuilder.Properties<DateTime>()
+        .Configure(p => p.HasColumnType("datetime2"));
+    
+    // 3. 级联删除策略建议
+    // - 开发环境：可以启用级联删除，方便测试
+    // - 生产环境：建议禁用级联删除，使用软删除或手动删除
+    // - 多对多关系：通常不级联删除，保护关联实体
+    
+    // 4. 性能优化建议
+    // - 合理使用索引
+    // - 避免过度配置
+    // - 使用延迟加载（Lazy Loading）或显式加载（Explicit Loading）
 }
 ```
 
@@ -4196,25 +4754,225 @@ protected override void OnModelCreating(DbModelBuilder modelBuilder)
 }
 ```
 
-#### 级联删除配置
+#### 级联删除配置详解
+
+级联删除（Cascade Delete）是数据库外键约束的一种行为，当删除父记录时，自动删除所有相关的子记录。EF6通过`WillCascadeOnDelete()`方法配置级联删除行为。
+
+**基本级联删除配置：**
 
 ```csharp
 protected override void OnModelCreating(DbModelBuilder modelBuilder)
 {
-    // 级联删除：删除用户时自动删除其订单
+    // ========== 启用级联删除 ==========
+    // 删除用户时，自动删除其所有订单
     modelBuilder.Entity<Order>()
         .HasRequired(o => o.User)
         .WithMany(u => u.Orders)
         .HasForeignKey(o => o.UserId)
         .WillCascadeOnDelete(true); // 启用级联删除
     
-    // 限制删除：删除用户时，如果有订单则不允许删除
+    // 效果：
+    // DELETE FROM Users WHERE Id = 1
+    // 会自动执行：DELETE FROM Orders WHERE UserId = 1
+    
+    // ========== 禁用级联删除 ==========
+    // 删除用户时，如果有订单则不允许删除（会抛出异常）
     modelBuilder.Entity<Order>()
         .HasRequired(o => o.User)
         .WithMany(u => u.Orders)
         .HasForeignKey(o => o.UserId)
         .WillCascadeOnDelete(false); // 禁用级联删除
+    
+    // 效果：
+    // 如果User有Order，删除User会抛出异常：
+    // "The DELETE statement conflicted with the REFERENCE constraint"
+    // 需要先手动删除Order，再删除User
 }
+```
+
+**级联删除的多种场景：**
+
+```csharp
+protected override void OnModelCreating(DbModelBuilder modelBuilder)
+{
+    // ========== 场景1：一对多关系的级联删除 ==========
+    // User -> Order（级联删除）
+    modelBuilder.Entity<Order>()
+        .HasRequired(o => o.User)
+        .WithMany(u => u.Orders)
+        .HasForeignKey(o => o.UserId)
+        .WillCascadeOnDelete(true);
+    
+    // ========== 场景2：多级级联删除 ==========
+    // User -> Order -> OrderItem
+    // 删除User时，会级联删除Order，Order删除时会级联删除OrderItem
+    
+    modelBuilder.Entity<Order>()
+        .HasRequired(o => o.User)
+        .WithMany(u => u.Orders)
+        .HasForeignKey(o => o.UserId)
+        .WillCascadeOnDelete(true); // User -> Order级联
+    
+    modelBuilder.Entity<OrderItem>()
+        .HasRequired(oi => oi.Order)
+        .WithMany(o => o.OrderItems)
+        .HasForeignKey(oi => oi.OrderId)
+        .WillCascadeOnDelete(true); // Order -> OrderItem级联
+    
+    // 删除User(Id=1)时的执行顺序：
+    // 1. DELETE FROM OrderItems WHERE OrderId IN (SELECT Id FROM Orders WHERE UserId = 1)
+    // 2. DELETE FROM Orders WHERE UserId = 1
+    // 3. DELETE FROM Users WHERE Id = 1
+    
+    // ========== 场景3：一对一关系的级联删除 ==========
+    // User -> UserProfile（级联删除）
+    modelBuilder.Entity<UserProfile>()
+        .HasRequired(p => p.User)
+        .WithOptional(u => u.Profile)
+        .HasForeignKey(p => p.UserId)
+        .WillCascadeOnDelete(true);
+    
+    // 删除User时，会自动删除对应的UserProfile
+    
+    // ========== 场景4：可选关系的级联删除 ==========
+    // Order -> User（可选，但可以级联删除）
+    modelBuilder.Entity<Order>()
+        .HasOptional(o => o.User)
+        .WithMany(u => u.Orders)
+        .HasForeignKey(o => o.UserId)
+        .WillCascadeOnDelete(true); // 可选关系也可以级联删除
+    
+    // ========== 场景5：多对多关系的级联删除 ==========
+    // UserRole中间表：删除User时删除UserRole，但不删除Role
+    
+    modelBuilder.Entity<UserRole>()
+        .HasRequired(ur => ur.User)
+        .WithMany(u => u.UserRoles)
+        .HasForeignKey(ur => ur.UserId)
+        .WillCascadeOnDelete(true); // 删除User时删除UserRole
+    
+    modelBuilder.Entity<UserRole>()
+        .HasRequired(ur => ur.Role)
+        .WithMany(r => r.UserRoles)
+        .HasForeignKey(ur => ur.RoleId)
+        .WillCascadeOnDelete(false); // 删除Role时不删除UserRole（保护User）
+    
+    // 删除User时，只删除UserRole连接记录，Role不受影响
+    // 删除Role时，如果存在UserRole，会抛出异常（需要先删除UserRole）
+}
+```
+
+**级联删除的实际使用示例：**
+
+```csharp
+using (var context = new MyDbContext())
+{
+    // ========== 启用级联删除的情况 ==========
+    // 删除User，会自动删除其所有Order和OrderItem
+    var user = context.Users.Find(1);
+    if (user != null)
+    {
+        context.Users.Remove(user);
+        context.SaveChanges(); // 自动删除相关数据，不会抛出异常
+    }
+    
+    // ========== 禁用级联删除的情况 ==========
+    // 如果禁用了级联删除，需要手动删除子记录
+    var user = context.Users.Find(1);
+    if (user != null)
+    {
+        // 先删除所有订单项
+        var orderIds = user.Orders.Select(o => o.Id).ToList();
+        var orderItems = context.OrderItems
+            .Where(oi => orderIds.Contains(oi.OrderId))
+            .ToList();
+        context.OrderItems.RemoveRange(orderItems);
+        
+        // 再删除所有订单
+        context.Orders.RemoveRange(user.Orders);
+        
+        // 最后删除用户
+        context.Users.Remove(user);
+        context.SaveChanges();
+    }
+    
+    // 或者使用数据库的级联删除（推荐）
+    // 在EF中启用级联删除，让数据库处理
+}
+```
+
+**级联删除的注意事项：**
+
+```csharp
+// ========== 注意事项 ==========
+// 1. 级联删除是数据库级别的约束，不是EF代码逻辑
+//    - 在数据库中创建外键约束时，会设置ON DELETE CASCADE
+//    - EF只是配置这个约束，实际删除由数据库执行
+//
+// 2. 级联删除可能导致意外的数据丢失
+//    - 删除父记录时，所有子记录都会被删除
+//    - 生产环境需要谨慎使用
+//
+// 3. 级联删除的性能影响
+//    - 删除父记录时，数据库需要检查所有子记录
+//    - 如果子记录很多，删除操作可能较慢
+//
+// 4. 级联删除的限制
+//    - SQL Server不允许循环级联删除
+//    - 不能创建相互级联删除的关系
+//
+// 5. 最佳实践建议
+//    - 开发环境：可以启用级联删除，方便测试
+//    - 生产环境：建议禁用级联删除，使用软删除或手动删除
+//    - 多对多关系：通常不级联删除，保护关联实体
+//    - 重要数据：禁用级联删除，防止误删
+```
+
+**级联删除的替代方案：**
+
+```csharp
+// ========== 替代方案1：软删除 ==========
+public class User
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public bool IsDeleted { get; set; } // 软删除标记
+    public DateTime? DeletedDate { get; set; }
+}
+
+// 查询时过滤已删除的记录
+var activeUsers = context.Users.Where(u => !u.IsDeleted).ToList();
+
+// ========== 替代方案2：手动删除 ==========
+public void DeleteUser(int userId)
+{
+    using (var context = new MyDbContext())
+    {
+        var user = context.Users.Find(userId);
+        if (user != null)
+        {
+            // 手动删除相关数据
+            DeleteUserOrders(context, userId);
+            DeleteUserProfile(context, userId);
+            
+            // 最后删除用户
+            context.Users.Remove(user);
+            context.SaveChanges();
+        }
+    }
+}
+
+// ========== 替代方案3：使用存储过程 ==========
+// 在数据库中创建存储过程，控制删除逻辑
+// CREATE PROCEDURE DeleteUser
+//     @UserId INT
+// AS
+// BEGIN
+//     DELETE FROM OrderItems WHERE OrderId IN (SELECT Id FROM Orders WHERE UserId = @UserId)
+//     DELETE FROM Orders WHERE UserId = @UserId
+//     DELETE FROM UserProfiles WHERE UserId = @UserId
+//     DELETE FROM Users WHERE Id = @UserId
+// END
 ```
 
 ### <a id="ef6-querying"></a>数据查询
@@ -6790,7 +7548,8 @@ public async Task<string> DownloadFileAsync(string url)
 {
     using (HttpClient client = new HttpClient())
     {
-        // await等待异步操作完成
+        // await等待
+        异步操作完成
         string content = await client.GetStringAsync(url);
         return content;
     }

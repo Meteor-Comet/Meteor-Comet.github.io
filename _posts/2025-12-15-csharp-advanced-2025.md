@@ -4222,6 +4222,92 @@ protected override void OnModelCreating(DbModelBuilder modelBuilder)
 }
 ```
 
+**多对多标准开发流程（中间表方案，EF6推荐）**
+
+```csharp
+// 步骤1：创建中间表实体（包含复合主键） 
+public class UserRole
+{
+    public int UserId { get; set; }
+    public int RoleId { get; set; }
+    public DateTime AssignedDate { get; set; } = DateTime.Now; // 额外字段示例
+    
+    public virtual User User { get; set; }
+    public virtual Role Role { get; set; }
+}
+
+// 步骤2：在主实体中添加导航集合
+public class User
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public virtual ICollection<UserRole> UserRoles { get; set; } = new HashSet<UserRole>();
+}
+
+public class Role
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public virtual ICollection<UserRole> UserRoles { get; set; } = new HashSet<UserRole>();
+}
+
+// 步骤3：在 DbContext 中添加 DbSet
+public class MyDbContext : DbContext
+{
+    public DbSet<User> Users { get; set; }
+    public DbSet<Role> Roles { get; set; }
+    public DbSet<UserRole> UserRoles { get; set; }
+
+    protected override void OnModelCreating(DbModelBuilder modelBuilder)
+    {
+        // 3.1 配置中间表主键
+        modelBuilder.Entity<UserRole>()
+            .HasKey(ur => new { ur.UserId, ur.RoleId });
+
+        // 3.2 配置 UserRole -> User（一对多）
+        modelBuilder.Entity<UserRole>()
+            .HasRequired(ur => ur.User)
+            .WithMany(u => u.UserRoles)
+            .HasForeignKey(ur => ur.UserId)
+            .WillCascadeOnDelete(true); // 删除 User 时删除关联
+
+        // 3.3 配置 UserRole -> Role（一对多）
+        modelBuilder.Entity<UserRole>()
+            .HasRequired(ur => ur.Role)
+            .WithMany(r => r.UserRoles)
+            .HasForeignKey(ur => ur.RoleId)
+            .WillCascadeOnDelete(false); // 避免删除 Role 时误删用户关联
+
+        base.OnModelCreating(modelBuilder);
+    }
+}
+
+// 步骤4：增删改查示例
+using (var context = new MyDbContext())
+{
+    // 添加关联
+    var userRole = new UserRole { UserId = 1, RoleId = 2 };
+    context.UserRoles.Add(userRole);
+    context.SaveChanges();
+
+    // 查询用户的所有角色
+    var roles = context.UserRoles
+        .Where(ur => ur.UserId == 1)
+        .Select(ur => ur.Role)
+        .ToList();
+
+    // 移除关联
+    var link = context.UserRoles.Find(1, 2);
+    if (link != null)
+    {
+        context.UserRoles.Remove(link);
+        context.SaveChanges();
+    }
+}
+```
+
+要点：先建“中间表实体”，然后用两个一对多完成多对多；可在中间表上挂载额外业务字段（如创建时间、操作人），比默认连接表更灵活。
+
 **5. 级联删除详细配置**
 
 ```csharp

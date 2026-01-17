@@ -60,6 +60,12 @@ tags:
    - [高级特性](#ef6-advanced)
 5. [C#设计模式详解](#design-patterns)
    - [单例模式](#singleton-pattern)
+   - [工厂模式](#factory-pattern)
+   - [观察者模式](#observer-pattern)
+   - [策略模式](#strategy-pattern)
+   - [适配器模式](#adapter-pattern)
+   - [装饰器模式](#decorator-pattern)
+   - [依赖注入模式](#dependency-injection-pattern)
 6. [C#特性（Attributes）详解](#attributes-detail)
    - [特性的基本概念](#attributes-concept)
    - [特性的定义与使用](#attributes-usage)
@@ -101,6 +107,17 @@ tags:
    - [线程间通信](#thread-communication)
    - [死锁与竞态条件](#deadlock-race-condition)
    - [多线程最佳实践](#multithreading-best-practices)
+11. [C#通信编程详解](#communication-programming)
+   - [TCP/IP通信基础](#tcp-ip-basics)
+   - [Socket编程](#socket-programming)
+   - [TcpClient与TcpListener](#tcpclient-tcplistener)
+   - [UdpClient编程](#udpclient-programming)
+   - [HTTP通信](#http-communication)
+   - [WebSocket通信](#websocket-communication)
+   - [命名管道通信](#named-pipes)
+   - [WCF通信](#wcf-communication)
+   - [gRPC通信](#grpc-communication)
+   - [消息队列](#message-queues)
 
 ## <a id="generics-detail"></a>C#泛型详解
 
@@ -6103,9 +6120,1702 @@ public sealed class InnerClassSingleton
 5. **考虑线程安全**：确保在多线程环境下的正确性
 6. **实现IDisposable**：如果单例持有非托管资源，应实现`IDisposable`接口
 
-单例模式是C#开发中最常用的设计模式之一，正确应用单例模式可以提高系统的性能和可维护性，但也要注意避免过度使用带来的问题。
+### <a id="factory-pattern"></a>工厂模式
 
-在实际开发中，合理使用泛型可以提高代码的质量、性能和可维护性，是现代C#开发中不可或缺的一部分。
+工厂模式是一种创建型设计模式，它提供了一种创建对象的最佳方式，将对象的创建与使用分离。工厂模式包括简单工厂、工厂方法和抽象工厂三种形式。
+
+#### 1. 简单工厂模式
+
+简单工厂模式通过一个工厂类来创建所有产品实例，客户端不需要知道具体产品的创建细节。
+
+```csharp
+// 产品接口
+public interface IProduct
+{
+    void Display();
+}
+
+// 具体产品A
+public class ProductA : IProduct
+{
+    public void Display()
+    {
+        Console.WriteLine("这是产品A");
+    }
+}
+
+// 具体产品B
+public class ProductB : IProduct
+{
+    public void Display()
+    {
+        Console.WriteLine("这是产品B");
+    }
+}
+
+// 简单工厂类
+public class SimpleFactory
+{
+    public IProduct CreateProduct(string type)
+    {
+        switch (type.ToLower())
+        {
+            case "a":
+                return new ProductA();
+            case "b":
+                return new ProductB();
+            default:
+                throw new ArgumentException("无效的产品类型");
+        }
+    }
+}
+
+// 使用示例
+public void TestSimpleFactory()
+{
+    SimpleFactory factory = new SimpleFactory();
+    IProduct productA = factory.CreateProduct("a");
+    productA.Display();
+    
+    IProduct productB = factory.CreateProduct("b");
+    productB.Display();
+}
+```
+
+#### 2. 工厂方法模式
+
+工厂方法模式将产品的创建推迟到子类中实现，每个具体产品对应一个具体工厂。
+
+```csharp
+// 产品接口
+public interface IProduct
+{
+    void Display();
+}
+
+// 具体产品A
+public class ProductA : IProduct
+{
+    public void Display()
+    {
+        Console.WriteLine("这是产品A");
+    }
+}
+
+// 具体产品B
+public class ProductB : IProduct
+{
+    public void Display()
+    {
+        Console.WriteLine("这是产品B");
+    }
+}
+
+// 抽象工厂接口
+public interface IFactory
+{
+    IProduct CreateProduct();
+}
+
+// 具体工厂A
+public class FactoryA : IFactory
+{
+    public IProduct CreateProduct()
+    {
+        return new ProductA();
+    }
+}
+
+// 具体工厂B
+public class FactoryB : IFactory
+{
+    public IProduct CreateProduct()
+    {
+        return new ProductB();
+    }
+}
+
+// 使用示例
+public void TestFactoryMethod()
+{
+    IFactory factoryA = new FactoryA();
+    IProduct productA = factoryA.CreateProduct();
+    productA.Display();
+    
+    IFactory factoryB = new FactoryB();
+    IProduct productB = factoryB.CreateProduct();
+    productB.Display();
+}
+```
+
+#### 3. 抽象工厂模式
+
+抽象工厂模式用于创建一系列相关或相互依赖的对象，它提供了一个接口，可以创建多个产品族中的产品对象。
+
+```csharp
+// 抽象产品A
+public interface IProductA
+{
+    void Display();
+}
+
+// 抽象产品B
+public interface IProductB
+{
+    void Display();
+}
+
+// 具体产品A1
+public class ProductA1 : IProductA
+{
+    public void Display()
+    {
+        Console.WriteLine("这是产品A1");
+    }
+}
+
+// 具体产品A2
+public class ProductA2 : IProductA
+{
+    public void Display()
+    {
+        Console.WriteLine("这是产品A2");
+    }
+}
+
+// 具体产品B1
+public class ProductB1 : IProductB
+{
+    public void Display()
+    {
+        Console.WriteLine("这是产品B1");
+    }
+}
+
+// 具体产品B2
+public class ProductB2 : IProductB
+{
+    public void Display()
+    {
+        Console.WriteLine("这是产品B2");
+    }
+}
+
+// 抽象工厂
+public interface IAbstractFactory
+{
+    IProductA CreateProductA();
+    IProductB CreateProductB();
+}
+
+// 具体工厂1
+public class ConcreteFactory1 : IAbstractFactory
+{
+    public IProductA CreateProductA()
+    {
+        return new ProductA1();
+    }
+    
+    public IProductB CreateProductB()
+    {
+        return new ProductB1();
+    }
+}
+
+// 具体工厂2
+public class ConcreteFactory2 : IAbstractFactory
+{
+    public IProductA CreateProductA()
+    {
+        return new ProductA2();
+    }
+    
+    public IProductB CreateProductB()
+    {
+        return new ProductB2();
+    }
+}
+
+// 使用示例
+public void TestAbstractFactory()
+{
+    IAbstractFactory factory1 = new ConcreteFactory1();
+    IProductA productA1 = factory1.CreateProductA();
+    IProductB productB1 = factory1.CreateProductB();
+    productA1.Display();
+    productB1.Display();
+    
+    IAbstractFactory factory2 = new ConcreteFactory2();
+    IProductA productA2 = factory2.CreateProductA();
+    IProductB productB2 = factory2.CreateProductB();
+    productA2.Display();
+    productB2.Display();
+}
+```
+
+### <a id="observer-pattern"></a>观察者模式
+
+观察者模式（发布-订阅模式）定义了对象间的一种一对多依赖关系，当一个对象状态发生变化时，所有依赖它的对象都会得到通知并自动更新。
+
+```csharp
+// 被观察者接口
+public interface ISubject
+{
+    void RegisterObserver(IObserver observer);
+    void RemoveObserver(IObserver observer);
+    void NotifyObservers();
+}
+
+// 观察者接口
+public interface IObserver
+{
+    void Update(string message);
+}
+
+// 具体被观察者
+public class Subject : ISubject
+{
+    private List<IObserver> _observers = new List<IObserver>();
+    private string _message;
+    
+    public void RegisterObserver(IObserver observer)
+    {
+        _observers.Add(observer);
+    }
+    
+    public void RemoveObserver(IObserver observer)
+    {
+        _observers.Remove(observer);
+    }
+    
+    public void NotifyObservers()
+    {
+        foreach (var observer in _observers)
+        {
+            observer.Update(_message);
+        }
+    }
+    
+    public void SetMessage(string message)
+    {
+        _message = message;
+        NotifyObservers();
+    }
+}
+
+// 具体观察者A
+public class ObserverA : IObserver
+{
+    public void Update(string message)
+    {
+        Console.WriteLine($"观察者A收到消息: {message}");
+    }
+}
+
+// 具体观察者B
+public class ObserverB : IObserver
+{
+    public void Update(string message)
+    {
+        Console.WriteLine($"观察者B收到消息: {message}");
+    }
+}
+
+// 使用示例
+public void TestObserver()
+{
+    Subject subject = new Subject();
+    
+    IObserver observerA = new ObserverA();
+    IObserver observerB = new ObserverB();
+    
+    subject.RegisterObserver(observerA);
+    subject.RegisterObserver(observerB);
+    
+    subject.SetMessage("Hello, Observers!");
+    
+    subject.RemoveObserver(observerA);
+    
+    subject.SetMessage("Second message!");
+}
+```
+
+### <a id="strategy-pattern"></a>策略模式
+
+策略模式定义了一系列算法，并将每个算法封装起来，使它们可以相互替换。策略模式让算法独立于使用它的客户而变化。
+
+```csharp
+// 策略接口
+public interface IStrategy
+{
+    int Calculate(int a, int b);
+}
+
+// 具体策略A：加法
+public class AddStrategy : IStrategy
+{
+    public int Calculate(int a, int b)
+    {
+        return a + b;
+    }
+}
+
+// 具体策略B：减法
+public class SubtractStrategy : IStrategy
+{
+    public int Calculate(int a, int b)
+    {
+        return a - b;
+    }
+}
+
+// 具体策略C：乘法
+public class MultiplyStrategy : IStrategy
+{
+    public int Calculate(int a, int b)
+    {
+        return a * b;
+    }
+}
+
+// 上下文类
+public class Context
+{
+    private IStrategy _strategy;
+    
+    public Context(IStrategy strategy)
+    {
+        _strategy = strategy;
+    }
+    
+    public void SetStrategy(IStrategy strategy)
+    {
+        _strategy = strategy;
+    }
+    
+    public int ExecuteStrategy(int a, int b)
+    {
+        return _strategy.Calculate(a, b);
+    }
+}
+
+// 使用示例
+public void TestStrategy()
+{
+    Context context = new Context(new AddStrategy());
+    Console.WriteLine($"10 + 5 = {context.ExecuteStrategy(10, 5)}");
+    
+    context.SetStrategy(new SubtractStrategy());
+    Console.WriteLine($"10 - 5 = {context.ExecuteStrategy(10, 5)}");
+    
+    context.SetStrategy(new MultiplyStrategy());
+    Console.WriteLine($"10 * 5 = {context.ExecuteStrategy(10, 5)}");
+}
+```
+
+### <a id="adapter-pattern"></a>适配器模式
+
+适配器模式将一个类的接口转换成客户希望的另外一个接口，使得原本由于接口不兼容而不能一起工作的那些类可以一起工作。
+
+```csharp
+// 目标接口
+public interface ITarget
+{
+    void Request();
+}
+
+// 适配者类
+public class Adaptee
+{
+    public void SpecificRequest()
+    {
+        Console.WriteLine("适配者的具体请求");
+    }
+}
+
+// 类适配器
+public class ClassAdapter : Adaptee, ITarget
+{
+    public void Request()
+    {
+        SpecificRequest();
+    }
+}
+
+// 对象适配器
+public class ObjectAdapter : ITarget
+{
+    private Adaptee _adaptee;
+    
+    public ObjectAdapter(Adaptee adaptee)
+    {
+        _adaptee = adaptee;
+    }
+    
+    public void Request()
+    {
+        _adaptee.SpecificRequest();
+    }
+}
+
+// 使用示例
+public void TestAdapter()
+{
+    // 类适配器
+    ITarget classAdapter = new ClassAdapter();
+    classAdapter.Request();
+    
+    // 对象适配器
+    Adaptee adaptee = new Adaptee();
+    ITarget objectAdapter = new ObjectAdapter(adaptee);
+    objectAdapter.Request();
+}
+```
+
+### <a id="decorator-pattern"></a>装饰器模式
+
+装饰器模式动态地给一个对象添加一些额外的职责，就增加功能来说，装饰器模式比生成子类更为灵活。
+
+```csharp
+// 组件接口
+public interface IComponent
+{
+    string Operation();
+}
+
+// 具体组件
+public class ConcreteComponent : IComponent
+{
+    public string Operation()
+    {
+        return "具体组件的操作";
+    }
+}
+
+// 装饰器抽象类
+public abstract class Decorator : IComponent
+{
+    protected IComponent _component;
+    
+    public Decorator(IComponent component)
+    {
+        _component = component;
+    }
+    
+    public virtual string Operation()
+    {
+        return _component.Operation();
+    }
+}
+
+// 具体装饰器A
+public class ConcreteDecoratorA : Decorator
+{
+    public ConcreteDecoratorA(IComponent component) : base(component) { }
+    
+    public override string Operation()
+    {
+        return $"{base.Operation()} + 装饰器A的操作";
+    }
+}
+
+// 具体装饰器B
+public class ConcreteDecoratorB : Decorator
+{
+    public ConcreteDecoratorB(IComponent component) : base(component) { }
+    
+    public override string Operation()
+    {
+        return $"{base.Operation()} + 装饰器B的操作";
+    }
+}
+
+// 使用示例
+public void TestDecorator()
+{
+    IComponent component = new ConcreteComponent();
+    Console.WriteLine(component.Operation());
+    
+    IComponent decoratorA = new ConcreteDecoratorA(component);
+    Console.WriteLine(decoratorA.Operation());
+    
+    IComponent decoratorB = new ConcreteDecoratorB(decoratorA);
+    Console.WriteLine(decoratorB.Operation());
+}
+```
+
+### <a id="dependency-injection-pattern"></a>依赖注入模式
+
+依赖注入模式是一种实现控制反转（IoC）的设计模式，它允许对象在运行时接收依赖关系，而不是在编译时硬编码。
+
+```csharp
+// 服务接口
+public interface IService
+{
+    void Execute();
+}
+
+// 具体服务A
+public class ServiceA : IService
+{
+    public void Execute()
+    {
+        Console.WriteLine("ServiceA执行");
+    }
+}
+
+// 具体服务B
+public class ServiceB : IService
+{
+    public void Execute()
+    {
+        Console.WriteLine("ServiceB执行");
+    }
+}
+
+// 客户端类
+public class Client
+{
+    private IService _service;
+    
+    // 构造函数注入
+    public Client(IService service)
+    {
+        _service = service;
+    }
+    
+    // 属性注入
+    public IService Service
+    {
+        get { return _service; }
+        set { _service = value; }
+    }
+    
+    // 方法注入
+    public void SetService(IService service)
+    {
+        _service = service;
+    }
+    
+    public void DoSomething()
+    {
+        _service.Execute();
+    }
+}
+
+// 使用示例
+public void TestDependencyInjection()
+{
+    // 构造函数注入
+    IService serviceA = new ServiceA();
+    Client client = new Client(serviceA);
+    client.DoSomething();
+    
+    // 属性注入
+    IService serviceB = new ServiceB();
+    client.Service = serviceB;
+    client.DoSomething();
+    
+    // 方法注入
+    client.SetService(serviceA);
+    client.DoSomething();
+}
+```
+
+## <a id="communication-programming"></a>C#通信编程详解
+
+通信编程是C#开发中的重要组成部分，它涉及不同系统之间的数据交换和通信。C#提供了多种通信方式，包括TCP/IP、HTTP、WebSocket、命名管道等。本章将详细介绍C#中的各种通信编程技术。
+
+### <a id="tcp-ip-basics"></a>TCP/IP通信基础
+
+TCP/IP是Internet的基础协议，它提供了可靠的、面向连接的通信机制。在C#中，可以通过Socket编程或高级封装类（如TcpClient、TcpListener）来实现TCP/IP通信。
+
+#### TCP/IP协议栈
+
+TCP/IP协议栈由四层组成：
+- **应用层**：提供应用程序接口，如HTTP、FTP、SMTP等
+- **传输层**：提供端到端的通信服务，主要协议包括TCP和UDP
+- **网络层**：负责数据包的路由和转发，主要协议是IP
+- **链路层**：负责物理网络的连接和数据帧的传输
+
+#### TCP与UDP的区别
+
+| 特性 | TCP | UDP |
+|------|-----|-----|
+| 连接类型 | 面向连接 | 无连接 |
+| 可靠性 | 可靠 | 不可靠 |
+| 传输速度 | 相对较慢 | 相对较快 |
+| 数据大小 | 无限制 | 有限制（通常小于65535字节） |
+| 适用场景 | 文件传输、网页浏览等 | 实时通信、视频流等 |
+
+### <a id="socket-programming"></a>Socket编程
+
+Socket是TCP/IP通信的基础，它提供了低级别的网络通信API。通过Socket编程，可以实现复杂的网络通信逻辑。
+
+#### Socket基本概念
+
+- **Socket类型**：
+  - `Stream`：面向连接的TCP套接字
+  - `Datagram`：无连接的UDP套接字
+  - `Raw`：原始套接字，用于直接访问网络层协议
+
+- **Socket地址**：
+  - `IPEndPoint`：包含IP地址和端口号
+  - `Dns`：用于域名解析
+
+#### TCP Socket服务器示例
+
+```csharp
+using System;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading;
+
+public class TcpSocketServer
+{
+    public static void Start()
+    {
+        // 创建TCP监听套接字
+        TcpListener server = new TcpListener(IPAddress.Any, 8888);
+        server.Start();
+        Console.WriteLine("TCP服务器已启动，监听端口8888...");
+
+        while (true)
+        {
+            // 等待客户端连接
+            TcpClient client = server.AcceptTcpClient();
+            Console.WriteLine($"客户端 {((IPEndPoint)client.Client.RemoteEndPoint).Address} 已连接");
+
+            // 为每个客户端创建一个新线程处理通信
+            Thread clientThread = new Thread(HandleClient);
+            clientThread.Start(client);
+        }
+    }
+
+    private static void HandleClient(object obj)
+    {
+        TcpClient client = (TcpClient)obj;
+        NetworkStream stream = client.GetStream();
+        byte[] buffer = new byte[1024];
+
+        try
+        {
+            while (true)
+            {
+                // 读取客户端数据
+                int bytesRead = stream.Read(buffer, 0, buffer.Length);
+                if (bytesRead == 0) break;
+
+                string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                Console.WriteLine($"收到客户端消息: {message}");
+
+                // 回复客户端
+                string response = $"服务器已收到消息: {message}";
+                byte[] responseBytes = Encoding.UTF8.GetBytes(response);
+                stream.Write(responseBytes, 0, responseBytes.Length);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"通信错误: {ex.Message}");
+        }
+        finally
+        {
+            stream.Close();
+            client.Close();
+            Console.WriteLine($"客户端 {((IPEndPoint)client.Client.RemoteEndPoint).Address} 已断开连接");
+        }
+    }
+}
+
+// 使用示例
+// TcpSocketServer.Start();
+```
+
+#### TCP Socket客户端示例
+
+```csharp
+using System;
+using System.Net.Sockets;
+using System.Text;
+
+public class TcpSocketClient
+{
+    public static void Start()
+    {
+        TcpClient client = new TcpClient();
+        
+        try
+        {
+            // 连接服务器
+            client.Connect("127.0.0.1", 8888);
+            Console.WriteLine("已连接到服务器");
+
+            NetworkStream stream = client.GetStream();
+            
+            // 发送消息
+            string message = "Hello, Server!";
+            byte[] messageBytes = Encoding.UTF8.GetBytes(message);
+            stream.Write(messageBytes, 0, messageBytes.Length);
+            Console.WriteLine($"已发送消息: {message}");
+
+            // 接收回复
+            byte[] buffer = new byte[1024];
+            int bytesRead = stream.Read(buffer, 0, buffer.Length);
+            string response = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+            Console.WriteLine($"收到服务器回复: {response}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"连接错误: {ex.Message}");
+        }
+        finally
+        {
+            client.Close();
+        }
+    }
+}
+
+// 使用示例
+// TcpSocketClient.Start();
+```
+
+### <a id="tcpclient-tcplistener"></a>TcpClient与TcpListener
+
+TcpClient和TcpListener是Socket的高级封装，它们简化了TCP通信的开发过程。
+
+#### TcpListener（TCP服务器）示例
+
+```csharp
+using System;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading.Tasks;
+
+public class TcpListenerExample
+{
+    public static async Task StartAsync()
+    {
+        // 创建TcpListener实例
+        TcpListener listener = new TcpListener(IPAddress.Loopback, 9000);
+        listener.Start();
+        Console.WriteLine("TcpListener服务器已启动，监听端口9000...");
+
+        while (true)
+        {
+            // 异步接受客户端连接
+            TcpClient client = await listener.AcceptTcpClientAsync();
+            Console.WriteLine($"客户端已连接: {client.Client.RemoteEndPoint}");
+            
+            // 使用异步方法处理客户端通信
+            _ = HandleClientAsync(client);
+        }
+    }
+
+    private static async Task HandleClientAsync(TcpClient client)
+    {
+        using (client)
+        {
+            NetworkStream stream = client.GetStream();
+            byte[] buffer = new byte[1024];
+
+            try
+            {
+                while (true)
+                {
+                    // 异步读取数据
+                    int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
+                    if (bytesRead == 0) break;
+
+                    string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                    Console.WriteLine($"收到消息: {message}");
+
+                    // 异步回复
+                    string response = $"已处理消息: {message}";
+                    byte[] responseBytes = Encoding.UTF8.GetBytes(response);
+                    await stream.WriteAsync(responseBytes, 0, responseBytes.Length);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"通信错误: {ex.Message}");
+            }
+            finally
+            {
+                Console.WriteLine($"客户端已断开连接: {client.Client.RemoteEndPoint}");
+            }
+        }
+    }
+}
+
+// 使用示例
+// await TcpListenerExample.StartAsync();
+```
+
+#### TcpClient（TCP客户端）示例
+
+```csharp
+using System;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading.Tasks;
+
+public class TcpClientExample
+{
+    public static async Task StartAsync()
+    {
+        using (TcpClient client = new TcpClient())
+        {
+            // 异步连接服务器
+            await client.ConnectAsync(IPAddress.Loopback, 9000);
+            Console.WriteLine("已连接到服务器");
+
+            NetworkStream stream = client.GetStream();
+
+            // 发送多条消息
+            for (int i = 1; i <= 3; i++)
+            {
+                string message = $"消息 #{i}";
+                byte[] messageBytes = Encoding.UTF8.GetBytes(message);
+                await stream.WriteAsync(messageBytes, 0, messageBytes.Length);
+                Console.WriteLine($"已发送: {message}");
+
+                // 接收回复
+                byte[] buffer = new byte[1024];
+                int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
+                string response = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                Console.WriteLine($"收到回复: {response}");
+
+                // 等待1秒
+                await Task.Delay(1000);
+            }
+        }
+    }
+}
+
+// 使用示例
+// await TcpClientExample.StartAsync();
+```
+
+### <a id="udpclient-programming"></a>UdpClient编程
+
+UdpClient是UDP通信的高级封装，它简化了UDP套接字的使用。
+
+#### UDP服务器示例
+
+```csharp
+using System;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading.Tasks;
+
+public class UdpServerExample
+{
+    public static async Task StartAsync()
+    {
+        UdpClient server = new UdpClient(9001);
+        Console.WriteLine("UDP服务器已启动，监听端口9001...");
+
+        IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
+
+        try
+        {
+            while (true)
+            {
+                // 异步接收数据
+                byte[] receivedBytes = await server.ReceiveAsync();
+                string message = Encoding.UTF8.GetString(receivedBytes);
+                Console.WriteLine($"收到来自 {remoteEndPoint.Address}:{remoteEndPoint.Port} 的消息: {message}");
+
+                // 回复客户端
+                string response = $"服务器已收到UDP消息: {message}";
+                byte[] responseBytes = Encoding.UTF8.GetBytes(response);
+                await server.SendAsync(responseBytes, responseBytes.Length, remoteEndPoint);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"UDP服务器错误: {ex.Message}");
+        }
+        finally
+        {
+            server.Close();
+        }
+    }
+}
+
+// 使用示例
+// await UdpServerExample.StartAsync();
+```
+
+#### UDP客户端示例
+
+```csharp
+using System;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading.Tasks;
+
+public class UdpClientExample
+{
+    public static async Task StartAsync()
+    {
+        using (UdpClient client = new UdpClient())
+        {
+            IPEndPoint serverEndPoint = new IPEndPoint(IPAddress.Loopback, 9001);
+
+            // 发送UDP消息
+            string message = "Hello UDP Server!";
+            byte[] messageBytes = Encoding.UTF8.GetBytes(message);
+            await client.SendAsync(messageBytes, messageBytes.Length, serverEndPoint);
+            Console.WriteLine($"已发送UDP消息: {message}");
+
+            // 接收回复
+            client.Client.ReceiveTimeout = 5000;
+            IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
+            byte[] receivedBytes = await client.ReceiveAsync();
+            string response = Encoding.UTF8.GetString(receivedBytes);
+            Console.WriteLine($"收到UDP回复: {response}");
+        }
+    }
+}
+
+// 使用示例
+// await UdpClientExample.StartAsync();
+```
+
+### <a id="http-communication"></a>HTTP通信
+
+HTTP是Web通信的基础协议，C#提供了多种方式来实现HTTP通信，包括HttpClient、HttpWebRequest等。
+
+#### HttpClient示例
+
+HttpClient是.NET 4.5引入的现代化HTTP客户端，它支持异步操作，是推荐的HTTP通信方式。
+
+```csharp
+using System;
+using System.Net.Http;
+using System.Threading.Tasks;
+
+public class HttpClientExample
+{
+    private static readonly HttpClient _client = new HttpClient();
+
+    public static async Task GetAsync()
+    {
+        try
+        {
+            // 发送GET请求
+            HttpResponseMessage response = await _client.GetAsync("https://jsonplaceholder.typicode.com/posts/1");
+            
+            // 确保请求成功
+            response.EnsureSuccessStatusCode();
+            
+            // 读取响应内容
+            string responseBody = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"GET请求成功，响应内容: {responseBody}");
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteLine($"GET请求失败: {ex.Message}");
+        }
+    }
+
+    public static async Task PostAsync()
+    {
+        try
+        {
+            // 创建请求内容
+            var postData = new {
+                title = "测试标题",
+                body = "测试内容",
+                userId = 1
+            };
+            
+            // 序列化对象为JSON
+            string json = Newtonsoft.Json.JsonConvert.SerializeObject(postData);
+            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            
+            // 发送POST请求
+            HttpResponseMessage response = await _client.PostAsync("https://jsonplaceholder.typicode.com/posts", content);
+            
+            response.EnsureSuccessStatusCode();
+            
+            string responseBody = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"POST请求成功，响应内容: {responseBody}");
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteLine($"POST请求失败: {ex.Message}");
+        }
+    }
+
+    public static async Task PutAsync()
+    {
+        try
+        {
+            var putData = new {
+                id = 1,
+                title = "更新后的标题",
+                body = "更新后的内容",
+                userId = 1
+            };
+            
+            string json = Newtonsoft.Json.JsonConvert.SerializeObject(putData);
+            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            
+            HttpResponseMessage response = await _client.PutAsync("https://jsonplaceholder.typicode.com/posts/1", content);
+            
+            response.EnsureSuccessStatusCode();
+            
+            string responseBody = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"PUT请求成功，响应内容: {responseBody}");
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteLine($"PUT请求失败: {ex.Message}");
+        }
+    }
+
+    public static async Task DeleteAsync()
+    {
+        try
+        {
+            HttpResponseMessage response = await _client.DeleteAsync("https://jsonplaceholder.typicode.com/posts/1");
+            
+            response.EnsureSuccessStatusCode();
+            Console.WriteLine($"DELETE请求成功，状态码: {response.StatusCode}");
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteLine($"DELETE请求失败: {ex.Message}");
+        }
+    }
+}
+
+// 使用示例
+// await HttpClientExample.GetAsync();
+// await HttpClientExample.PostAsync();
+// await HttpClientExample.PutAsync();
+// await HttpClientExample.DeleteAsync();
+```
+
+### <a id="websocket-communication"></a>WebSocket通信
+
+WebSocket提供了全双工的通信方式，允许服务器主动向客户端推送数据。C#中可以使用ClientWebSocket和WebSocket类来实现WebSocket通信。
+
+#### WebSocket服务器示例（使用ASP.NET Core）
+
+```csharp
+// 在ASP.NET Core控制器中
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+
+public class ChatHub : Hub
+{
+    public async Task SendMessage(string user, string message)
+    {
+        // 广播消息给所有客户端
+        await Clients.All.SendAsync("ReceiveMessage", user, message);
+    }
+
+    public async Task SendPrivateMessage(string user, string receiver, string message)
+    {
+        // 发送私聊消息
+        await Clients.User(receiver).SendAsync("ReceivePrivateMessage", user, message);
+    }
+
+    public override async Task OnConnectedAsync()
+    {
+        // 客户端连接时的处理
+        await Clients.All.SendAsync("UserConnected", Context.ConnectionId);
+        await base.OnConnectedAsync();
+    }
+
+    public override async Task OnDisconnectedAsync(Exception exception)
+    {
+        // 客户端断开连接时的处理
+        await Clients.All.SendAsync("UserDisconnected", Context.ConnectionId);
+        await base.OnDisconnectedAsync(exception);
+    }
+}
+
+// Startup.cs中配置SignalR
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddSignalR();
+    // 其他配置...
+}
+
+public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+{
+    // 其他配置...
+    app.UseEndpoints(endpoints =>
+    {
+        endpoints.MapHub<ChatHub>("/chathub");
+        // 其他端点...
+    });
+}
+```
+
+#### WebSocket客户端示例
+
+```csharp
+using System;
+using System.Net.WebSockets;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
+public class WebSocketClientExample
+{
+    public static async Task StartAsync()
+    {
+        using (ClientWebSocket client = new ClientWebSocket())
+        {
+            // 连接到WebSocket服务器
+            Uri serverUri = new Uri("wss://echo.websocket.org");
+            await client.ConnectAsync(serverUri, CancellationToken.None);
+            Console.WriteLine("WebSocket客户端已连接");
+
+            // 发送消息
+            string message = "Hello WebSocket!";
+            byte[] buffer = Encoding.UTF8.GetBytes(message);
+            await client.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
+            Console.WriteLine($"已发送WebSocket消息: {message}");
+
+            // 接收消息
+            buffer = new byte[1024];
+            WebSocketReceiveResult result = await client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            string response = Encoding.UTF8.GetString(buffer, 0, result.Count);
+            Console.WriteLine($"收到WebSocket回复: {response}");
+
+            // 关闭连接
+            await client.CloseAsync(WebSocketCloseStatus.NormalClosure, "正常关闭", CancellationToken.None);
+            Console.WriteLine("WebSocket连接已关闭");
+        }
+    }
+}
+
+// 使用示例
+// await WebSocketClientExample.StartAsync();
+```
+
+### <a id="named-pipes"></a>命名管道通信
+
+命名管道是Windows操作系统提供的一种进程间通信机制，它允许同一台计算机上的不同进程或不同计算机上的进程进行通信。
+
+#### 命名管道服务器示例
+
+```csharp
+using System;
+using System.IO.Pipes;
+using System.Text;
+using System.Threading.Tasks;
+
+public class NamedPipeServerExample
+{
+    public static async Task StartAsync()
+    {
+        while (true)
+        {
+            // 创建命名管道服务器
+            using (NamedPipeServerStream pipeServer = new NamedPipeServerStream(
+                "TestPipe",
+                PipeDirection.InOut,
+                NamedPipeServerStream.MaxAllowedServerInstances,
+                PipeTransmissionMode.Message))
+            {
+                Console.WriteLine("命名管道服务器已启动，等待客户端连接...");
+                
+                // 等待客户端连接
+                await pipeServer.WaitForConnectionAsync();
+                Console.WriteLine("客户端已连接");
+
+                try
+                {
+                    // 读取客户端消息
+                    byte[] buffer = new byte[1024];
+                    int bytesRead = await pipeServer.ReadAsync(buffer, 0, buffer.Length);
+                    string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                    Console.WriteLine($"收到客户端消息: {message}");
+
+                    // 回复客户端
+                    string response = $"服务器已收到消息: {message}";
+                    byte[] responseBytes = Encoding.UTF8.GetBytes(response);
+                    await pipeServer.WriteAsync(responseBytes, 0, responseBytes.Length);
+                    pipeServer.Flush();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"通信错误: {ex.Message}");
+                }
+            }
+        }
+    }
+}
+
+// 使用示例
+// await NamedPipeServerExample.StartAsync();
+```
+
+#### 命名管道客户端示例
+
+```csharp
+using System;
+using System.IO.Pipes;
+using System.Text;
+using System.Threading.Tasks;
+
+public class NamedPipeClientExample
+{
+    public static async Task StartAsync()
+    {
+        // 创建命名管道客户端
+        using (NamedPipeClientStream pipeClient = new NamedPipeClientStream(
+            ".",
+            "TestPipe",
+            PipeDirection.InOut,
+            PipeOptions.Asynchronous))
+        {
+            Console.WriteLine("正在连接到命名管道服务器...");
+            
+            // 连接到服务器
+            await pipeClient.ConnectAsync();
+            Console.WriteLine("已连接到命名管道服务器");
+
+            // 发送消息
+            string message = "Hello Named Pipe Server!";
+            byte[] buffer = Encoding.UTF8.GetBytes(message);
+            await pipeClient.WriteAsync(buffer, 0, buffer.Length);
+            pipeClient.Flush();
+            Console.WriteLine($"已发送消息: {message}");
+
+            // 接收回复
+            buffer = new byte[1024];
+            int bytesRead = await pipeClient.ReadAsync(buffer, 0, buffer.Length);
+            string response = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+            Console.WriteLine($"收到回复: {response}");
+        }
+    }
+}
+
+// 使用示例
+// await NamedPipeClientExample.StartAsync();
+```
+
+### <a id="wcf-communication"></a>WCF通信
+
+WCF（Windows Communication Foundation）是.NET框架中的一种通信技术，它提供了统一的编程模型，用于构建面向服务的应用程序。
+
+#### WCF服务契约示例
+
+```csharp
+using System.ServiceModel;
+
+// 定义服务契约
+[ServiceContract]
+public interface ICalculatorService
+{
+    [OperationContract]
+    int Add(int a, int b);
+    
+    [OperationContract]
+    int Subtract(int a, int b);
+    
+    [OperationContract]
+    int Multiply(int a, int b);
+    
+    [OperationContract]
+    double Divide(int a, int b);
+}
+
+// 实现服务契约
+public class CalculatorService : ICalculatorService
+{
+    public int Add(int a, int b)
+    {
+        return a + b;
+    }
+    
+    public int Subtract(int a, int b)
+    {
+        return a - b;
+    }
+    
+    public int Multiply(int a, int b)
+    {
+        return a * b;
+    }
+    
+    public double Divide(int a, int b)
+    {
+        if (b == 0)
+            throw new FaultException("除数不能为零");
+        
+        return (double)a / b;
+    }
+}
+```
+
+#### WCF服务配置（app.config）
+
+```xml
+<configuration>
+  <system.serviceModel>
+    <services>
+      <service name="CalculatorService" behaviorConfiguration="CalculatorServiceBehavior">
+        <endpoint address="" binding="wsHttpBinding" contract="ICalculatorService">
+          <identity>
+            <dns value="localhost" />
+          </identity>
+        </endpoint>
+        <endpoint address="mex" binding="mexHttpBinding" contract="IMetadataExchange" />
+        <host>
+          <baseAddresses>
+            <add baseAddress="http://localhost:8000/CalculatorService" />
+          </baseAddresses>
+        </host>
+      </service>
+    </services>
+    <behaviors>
+      <serviceBehaviors>
+        <behavior name="CalculatorServiceBehavior">
+          <serviceMetadata httpGetEnabled="True" />
+          <serviceDebug includeExceptionDetailInFaults="False" />
+        </behavior>
+      </serviceBehaviors>
+    </behaviors>
+  </system.serviceModel>
+</configuration>
+```
+
+#### WCF客户端调用示例
+
+```csharp
+using System;
+using System.ServiceModel;
+
+// 使用svcutil.exe生成客户端代理
+// svcutil.exe http://localhost:8000/CalculatorService?wsdl
+
+public class WcfClientExample
+{
+    public static void Start()
+    {
+        // 创建WCF客户端
+        CalculatorServiceClient client = new CalculatorServiceClient();
+        
+        try
+        {
+            // 调用WCF服务方法
+            int addResult = client.Add(10, 5);
+            Console.WriteLine($"10 + 5 = {addResult}");
+            
+            int subtractResult = client.Subtract(10, 5);
+            Console.WriteLine($"10 - 5 = {subtractResult}");
+            
+            int multiplyResult = client.Multiply(10, 5);
+            Console.WriteLine($"10 * 5 = {multiplyResult}");
+            
+            double divideResult = client.Divide(10, 5);
+            Console.WriteLine($"10 / 5 = {divideResult}");
+        }
+        catch (FaultException ex)
+        {
+            Console.WriteLine($"WCF服务调用失败: {ex.Message}");
+        }
+        finally
+        {
+            client.Close();
+        }
+    }
+}
+```
+
+### <a id="grpc-communication"></a>gRPC通信
+
+gRPC是一种高性能、开源的远程过程调用（RPC）框架，它基于HTTP/2协议，使用Protocol Buffers作为序列化机制。
+
+#### gRPC服务定义（.proto文件）
+
+```proto
+// calculator.proto
+syntax = "proto3";
+
+option csharp_namespace = "GrpcCalculator";
+
+package calculator;
+
+// 定义计算器服务
+service Calculator {
+  // 定义Add方法
+  rpc Add (AddRequest) returns (AddResponse);
+  
+  // 定义Subtract方法
+  rpc Subtract (SubtractRequest) returns (SubtractResponse);
+  
+  // 定义Multiply方法
+  rpc Multiply (MultiplyRequest) returns (MultiplyResponse);
+  
+  // 定义Divide方法
+  rpc Divide (DivideRequest) returns (DivideResponse);
+}
+
+// Add请求消息
+message AddRequest {
+  int32 a = 1;
+  int32 b = 2;
+}
+
+// Add响应消息
+message AddResponse {
+  int32 result = 1;
+}
+
+// Subtract请求消息
+message SubtractRequest {
+  int32 a = 1;
+  int32 b = 2;
+}
+
+// Subtract响应消息
+message SubtractResponse {
+  int32 result = 1;
+}
+
+// Multiply请求消息
+message MultiplyRequest {
+  int32 a = 1;
+  int32 b = 2;
+}
+
+// Multiply响应消息
+message MultiplyResponse {
+  int32 result = 1;
+}
+
+// Divide请求消息
+message DivideRequest {
+  int32 a = 1;
+  int32 b = 2;
+}
+
+// Divide响应消息
+message DivideResponse {
+  double result = 1;
+}
+```
+
+#### gRPC服务实现
+
+```csharp
+using Grpc.Core;
+using GrpcCalculator;
+
+public class CalculatorServiceImpl : Calculator.CalculatorBase
+{
+    public override Task<AddResponse> Add(AddRequest request, ServerCallContext context)
+    {
+        int result = request.A + request.B;
+        return Task.FromResult(new AddResponse { Result = result });
+    }
+
+    public override Task<SubtractResponse> Subtract(SubtractRequest request, ServerCallContext context)
+    {
+        int result = request.A - request.B;
+        return Task.FromResult(new SubtractResponse { Result = result });
+    }
+
+    public override Task<MultiplyResponse> Multiply(MultiplyRequest request, ServerCallContext context)
+    {
+        int result = request.A * request.B;
+        return Task.FromResult(new MultiplyResponse { Result = result });
+    }
+
+    public override Task<DivideResponse> Divide(DivideRequest request, ServerCallContext context)
+    {
+        if (request.B == 0)
+        {
+            throw new RpcException(new Status(StatusCode.InvalidArgument, "除数不能为零"));
+        }
+        double result = (double)request.A / request.B;
+        return Task.FromResult(new DivideResponse { Result = result });
+    }
+}
+```
+
+#### gRPC服务器启动
+
+```csharp
+using Grpc.Core;
+
+public class GrpcServerExample
+{
+    public static void Start()
+    {
+        const int Port = 50051;
+
+        Server server = new Server
+        {
+            Services = { Calculator.BindService(new CalculatorServiceImpl()) },
+            Ports = { new ServerPort("localhost", Port, ServerCredentials.Insecure) }
+        };
+
+        server.Start();
+        Console.WriteLine($"gRPC服务器已启动，监听端口 {Port}...");
+        Console.WriteLine("按任意键停止服务器...");
+        Console.ReadKey();
+
+        server.ShutdownAsync().Wait();
+    }
+}
+
+// 使用示例
+// GrpcServerExample.Start();
+```
+
+#### gRPC客户端调用
+
+```csharp
+using Grpc.Core;
+using GrpcCalculator;
+
+public class GrpcClientExample
+{
+    public static void Start()
+    {
+        Channel channel = new Channel("localhost:50051", ChannelCredentials.Insecure);
+        Calculator.CalculatorClient client = new Calculator.CalculatorClient(channel);
+
+        try
+        {
+            // 调用Add方法
+            AddRequest addRequest = new AddRequest { A = 10, B = 5 };
+            AddResponse addResponse = client.Add(addRequest);
+            Console.WriteLine($"10 + 5 = {addResponse.Result}");
+
+            // 调用Subtract方法
+            SubtractRequest subtractRequest = new SubtractRequest { A = 10, B = 5 };
+            SubtractResponse subtractResponse = client.Subtract(subtractRequest);
+            Console.WriteLine($"10 - 5 = {subtractResponse.Result}");
+
+            // 调用Multiply方法
+            MultiplyRequest multiplyRequest = new MultiplyRequest { A = 10, B = 5 };
+            MultiplyResponse multiplyResponse = client.Multiply(multiplyRequest);
+            Console.WriteLine($"10 * 5 = {multiplyResponse.Result}");
+
+            // 调用Divide方法
+            DivideRequest divideRequest = new DivideRequest { A = 10, B = 5 };
+            DivideResponse divideResponse = client.Divide(divideRequest);
+            Console.WriteLine($"10 / 5 = {divideResponse.Result}");
+        }
+        catch (RpcException ex)
+        {
+            Console.WriteLine($"gRPC调用失败: {ex.Status.Detail}");
+        }
+        finally
+        {
+            channel.ShutdownAsync().Wait();
+        }
+    }
+}
+
+// 使用示例
+// GrpcClientExample.Start();
+```
+
+### <a id="message-queues"></a>消息队列
+
+消息队列是一种异步通信机制，它允许应用程序之间通过消息进行通信，而不需要直接调用彼此。常见的消息队列系统包括RabbitMQ、Azure Service Bus、Apache Kafka等。
+
+#### RabbitMQ示例
+
+```csharp
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
+using System;
+using System.Text;
+
+public class RabbitMqExample
+{
+    private const string QueueName = "test_queue";
+    private const string ExchangeName = "test_exchange";
+    private const string RoutingKey = "test_routing_key";
+
+    // 发送消息
+    public static void SendMessage()
+    {
+        var factory = new ConnectionFactory() { HostName = "localhost" };
+        using (var connection = factory.CreateConnection())
+        using (var channel = connection.CreateModel())
+        {
+            // 声明交换机
+            channel.ExchangeDeclare(exchange: ExchangeName, type: ExchangeType.Direct);
+            
+            // 声明队列
+            channel.QueueDeclare(queue: QueueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
+            
+            // 绑定队列到交换机
+            channel.QueueBind(queue: QueueName, exchange: ExchangeName, routingKey: RoutingKey);
+            
+            // 发送消息
+            string message = "Hello RabbitMQ!";
+            var body = Encoding.UTF8.GetBytes(message);
+            channel.BasicPublish(exchange: ExchangeName, routingKey: RoutingKey, basicProperties: null, body: body);
+            Console.WriteLine($"已发送消息: {message}");
+        }
+    }
+
+    // 接收消息
+    public static void ReceiveMessages()
+    {
+        var factory = new ConnectionFactory() { HostName = "localhost" };
+        using (var connection = factory.CreateConnection())
+        using (var channel = connection.CreateModel())
+        {
+            channel.QueueDeclare(queue: QueueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
+            
+            var consumer = new EventingBasicConsumer(channel);
+            consumer.Received += (model, ea) =>
+            {
+                var body = ea.Body.ToArray();
+                var message = Encoding.UTF8.GetString(body);
+                Console.WriteLine($"收到消息: {message}");
+            };
+            
+            channel.BasicConsume(queue: QueueName, autoAck: true, consumer: consumer);
+            
+            Console.WriteLine("正在等待消息...");
+            Console.WriteLine("按任意键退出");
+            Console.ReadKey();
+        }
+    }
+}
+
+// 使用示例
+// RabbitMqExample.SendMessage();
+// RabbitMqExample.ReceiveMessages();
+```
+
+## 通信编程总结
+
+C#提供了丰富的通信编程API，从低级别的Socket编程到高级别的框架如WCF和gRPC，开发者可以根据具体需求选择合适的通信方式：
+
+- **Socket编程**：适用于需要精细控制网络通信的场景
+- **TcpClient/TcpListener**：适用于简单的TCP通信场景
+- **HttpClient**：适用于HTTP/HTTPS通信，特别是REST API调用
+- **WebSocket**：适用于需要双向实时通信的场景，如聊天应用、实时数据推送
+- **命名管道**：适用于同一台计算机上的进程间通信
+- **WCF**：适用于构建面向服务的应用程序，支持多种通信协议
+- **gRPC**：适用于高性能、跨语言的分布式系统
+- **消息队列**：适用于异步通信、解耦系统组件的场景
+
+选择合适的通信方式需要考虑多种因素，包括性能要求、可靠性要求、跨平台需求、开发复杂度等。在实际开发中，应根据具体项目需求选择最适合的通信技术。
 
 ## <a id="attributes-detail"></a>C#特性（Attributes）详解
 

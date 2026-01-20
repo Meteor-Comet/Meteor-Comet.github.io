@@ -8203,6 +8203,77 @@ public void MyMethod() { }
 
 MethodInfo method = typeof(MyClass).GetMethod("MyMethod");
 AuthorAttribute methodAttr = method.GetCustomAttribute<AuthorAttribute>();
+
+// 获取属性上的特性
+public class Person
+{
+    [Required(ErrorMessage = "姓名不能为空")]
+    [StringLength(50, ErrorMessage = "姓名不能超过50个字符")]
+    public string Name { get; set; }
+    
+    [Range(18, 120, ErrorMessage = "年龄必须在18-120之间")]
+    public int Age { get; set; }
+    
+    [EmailAddress(ErrorMessage = "请输入有效的邮箱地址")]
+    public string Email { get; set; }
+}
+
+// 获取所有属性
+PropertyInfo[] properties = typeof(Person).GetProperties();
+foreach (PropertyInfo property in properties)
+{
+    Console.WriteLine($"\n属性名: {property.Name}");
+    
+    // 获取属性上的所有特性
+    object[] propAttributes = property.GetCustomAttributes(true);
+    foreach (Attribute attr in propAttributes)
+    {
+        Console.WriteLine($"  特性类型: {attr.GetType().Name}");
+        
+        // 处理Required特性
+        if (attr is RequiredAttribute requiredAttr)
+        {
+            Console.WriteLine($"  错误信息: {requiredAttr.ErrorMessage}");
+        }
+        
+        // 处理StringLength特性
+        if (attr is StringLengthAttribute stringLengthAttr)
+        {
+            Console.WriteLine($"  最大长度: {stringLengthAttr.MaximumLength}");
+            Console.WriteLine($"  错误信息: {stringLengthAttr.ErrorMessage}");
+        }
+        
+        // 处理Range特性
+        if (attr is RangeAttribute rangeAttr)
+        {
+            Console.WriteLine($"  最小值: {rangeAttr.Minimum}");
+            Console.WriteLine($"  最大值: {rangeAttr.Maximum}");
+            Console.WriteLine($"  错误信息: {rangeAttr.ErrorMessage}");
+        }
+        
+        // 处理EmailAddress特性
+        if (attr is EmailAddressAttribute emailAttr)
+        {
+            Console.WriteLine($"  错误信息: {emailAttr.ErrorMessage}");
+        }
+    }
+}
+
+// 获取特定属性的特定特性
+PropertyInfo nameProperty = typeof(Person).GetProperty("Name");
+RequiredAttribute nameRequiredAttr = nameProperty.GetCustomAttribute<RequiredAttribute>();
+if (nameRequiredAttr != null)
+{
+    Console.WriteLine($"\nName属性的Required特性: {nameRequiredAttr.ErrorMessage}");
+}
+
+// 获取属性的多个特性
+PropertyInfo emailProperty = typeof(Person).GetProperty("Email");
+Attribute[] emailAttributes = emailProperty.GetCustomAttributes(typeof(ValidationAttribute), true) as Attribute[];
+foreach (Attribute attr in emailAttributes)
+{
+    Console.WriteLine($"\nEmail属性的验证特性: {attr.GetType().Name}");
+}
 ```
 
 #### 实现特性驱动的验证

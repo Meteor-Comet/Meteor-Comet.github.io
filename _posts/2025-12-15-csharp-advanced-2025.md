@@ -8690,32 +8690,90 @@ Console.WriteLine($"是否实现接口: {type.IsAssignableFrom(typeof(IDisposabl
 
 #### 获取类型的成员
 
+通过反射获取类型成员是反射机制的核心功能之一，它允许我们在运行时动态检查类型的结构。
+
 ```csharp
+// 获取Person类型的Type对象
 Type type = typeof(Person);
 
-// 获取所有公共成员
+// 获取类型的所有公共成员（包括继承的成员）
+// MemberInfo是所有成员信息类型的基类，包含成员的基本信息
 MemberInfo[] allMembers = type.GetMembers();
 
-// 获取特定类型的成员
+// 获取特定类型的公共成员
+// PropertyInfo：表示属性信息，用于获取和设置属性值
 PropertyInfo[] properties = type.GetProperties();
+// MethodInfo：表示方法信息，用于调用方法
 MethodInfo[] methods = type.GetMethods();
+// FieldInfo：表示字段信息，用于获取和设置字段值
 FieldInfo[] fields = type.GetFields();
+// ConstructorInfo：表示构造函数信息，用于创建实例
 ConstructorInfo[] constructors = type.GetConstructors();
+// EventInfo：表示事件信息，用于添加或移除事件处理程序
 EventInfo[] events = type.GetEvents();
 
-// 使用BindingFlags控制搜索
+// 使用BindingFlags控制搜索范围和条件
+// BindingFlags枚举用于指定反射如何搜索成员
+// - Public：搜索公共成员
+// - NonPublic：搜索非公共成员（私有、保护、内部）
+// - Instance：搜索实例成员
+// - Static：搜索静态成员
 BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
 
+// 获取所有属性（包括公共和非公共、实例和静态）
 PropertyInfo[] allProperties = type.GetProperties(flags);
+// 获取所有方法（包括公共和非公共、实例和静态）
 MethodInfo[] allMethods = type.GetMethods(flags);
+// 获取所有字段（包括公共和非公共、实例和静态）
 FieldInfo[] allFields = type.GetFields(flags);
 
-// 获取特定成员
+// 获取特定名称的成员
+// 获取名为"Name"的公共属性
 PropertyInfo nameProperty = type.GetProperty("Name");
+// 获取ToString方法（继承自Object）
 MethodInfo toStringMethod = type.GetMethod("ToString");
+// 获取名为"_id"的非公共实例字段
 FieldInfo idField = type.GetField("_id", BindingFlags.NonPublic | BindingFlags.Instance);
+// 获取接收string和int参数的构造函数
 ConstructorInfo constructor = type.GetConstructor(new Type[] { typeof(string), typeof(int) });
 ```
+
+**成员类型说明：**
+
+| 成员类型 | 描述 | 主要用途 |
+|---------|------|---------|
+| `PropertyInfo` | 属性信息 | 获取/设置属性值、获取属性元数据 |
+| `MethodInfo` | 方法信息 | 调用方法、获取方法参数和返回值信息 |
+| `FieldInfo` | 字段信息 | 获取/设置字段值、获取字段元数据 |
+| `ConstructorInfo` | 构造函数信息 | 创建类的实例 |
+| `EventInfo` | 事件信息 | 添加/移除事件处理程序 |
+| `MemberInfo` | 成员基类 | 提供成员的通用信息 |
+
+**BindingFlags枚举完整值：**
+
+| 标志 | 描述 | 用途 |
+|------|------|------|
+| `Default` | 表示默认绑定标志 | 不常用，通常使用其他特定标志组合 |
+| `IgnoreCase` | 搜索时忽略名称的大小写 | 允许以不区分大小写的方式查找成员 |
+| `DeclaredOnly` | 只搜索类型本身声明的成员，不包括继承的成员 | 限制搜索范围到当前类型 |
+| `Instance` | 搜索实例成员 | 用于获取实例字段、属性、方法等 |
+| `Static` | 搜索静态成员 | 用于获取静态字段、属性、方法等 |
+| `Public` | 搜索公共成员 | 用于获取公共访问级别的成员 |
+| `NonPublic` | 搜索非公共成员（私有、保护、内部） | 用于获取私有、保护或内部访问级别的成员 |
+| `FlattenHierarchy` | 搜索基类中的公共和保护静态成员 | 用于在继承层次结构中搜索静态成员 |
+| `InvokeMethod` | 用于InvokeMember，指示要调用方法 | 仅用于Type.InvokeMember方法 |
+| `CreateInstance` | 用于InvokeMember，指示要创建实例 | 仅用于Type.InvokeMember方法 |
+| `GetField` | 用于InvokeMember，指示要获取字段 | 仅用于Type.InvokeMember方法 |
+| `SetField` | 用于InvokeMember，指示要设置字段 | 仅用于Type.InvokeMember方法 |
+| `GetProperty` | 用于InvokeMember，指示要获取属性 | 仅用于Type.InvokeMember方法 |
+| `SetProperty` | 用于InvokeMember，指示要设置属性 | 仅用于Type.InvokeMember方法 |
+| `PutDispProperty` | 用于InvokeMember，指示要调用IDispatch的PutProperty | 仅用于COM互操作场景 |
+| `PutRefDispProperty` | 用于InvokeMember，指示要调用IDispatch的PutRefProperty | 仅用于COM互操作场景 |
+| `ExactBinding` | 用于InvokeMember，指示参数类型必须完全匹配 | 要求精确的参数类型匹配 |
+| `SuppressChangeType` | 用于InvokeMember，指示不要将参数类型转换为匹配参数类型 | 禁用参数类型自动转换 |
+| `OptionalParamBinding` | 用于InvokeMember，指示方法可以有可选参数 | 用于处理带有可选参数的方法 |
+| `IgnoreReturn` | 用于InvokeMember，指示忽略方法的返回值 | 调用方法但不关心返回结果 |
+| `DoNotWrapExceptions` | 用于InvokeMember，指示不要将异常包装在TargetInvocationException中 | 直接抛出原始异常 |
 
 ### <a id="assembly-operations"></a>程序集（Assembly）操作
 

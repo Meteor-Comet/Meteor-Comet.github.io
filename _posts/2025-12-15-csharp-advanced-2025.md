@@ -9662,25 +9662,21 @@ public async Task ProcessMultipleAsync()
 
 #### 4. 取消操作
 
-使用`CancellationToken`支持取消异步操作。
+`CancellationTokenSource`（简称cts）和`CancellationToken`是.NET中用于支持异步操作取消的核心机制。它们提供了一种优雅的方式来取消长时间运行的操作，避免资源浪费。
+
+##### CancellationTokenSource基础
+
+`CancellationTokenSource`用于创建和管理`CancellationToken`，后者被传递给异步方法以支持取消。
 
 ```csharp
-public async Task ProcessDataAsync(CancellationToken cancellationToken)
-{
-    for (int i = 0; i < 100; i++)
-    {
-        // 检查是否已取消
-        cancellationToken.ThrowIfCancellationRequested();
-        
-        await DoWorkAsync();
-    }
-}
-
-// 使用CancellationTokenSource
+// 创建CancellationTokenSource
 CancellationTokenSource cts = new CancellationTokenSource();
 
+// 获取CancellationToken
+CancellationToken token = cts.Token;
+
 // 启动异步操作
-Task task = ProcessDataAsync(cts.Token);
+Task task = LongRunningOperationAsync(token);
 
 // 取消操作
 cts.Cancel();
@@ -9689,11 +9685,610 @@ try
 {
     await task;
 }
+catch (OperationCanceledException ex)
+{
+    Console.WriteLine($"操作已取消: {ex.Message}");
+}
+
+async Task LongRunningOperationAsync(CancellationToken cancellationToken)
+{
+    for (int i = 0; i < 100; i++)
+    {
+        // 方式1：抛出OperationCanceledException
+        cancellationToken.ThrowIfCancellationRequested();
+        
+        // 方式2：手动检查并处理
+        if (cancellationToken.IsCancellationRequested)
+        {
+            Console.WriteLine("操作被取消，执行清理逻辑");
+            break;
+        }
+        
+        await Task.Delay(100); // 模拟耗时操作
+        Console.WriteLine($"进度: {i + 1}%");
+    }
+}
+```
+
+##### CancellationTokenSource高级用法
+
+###### 1. 超时自动取消
+
+```csharp
+// 创建3秒后自动取消的CancellationTokenSource
+CancellationTokenSource timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+
+// 或者后续设置超时
+timeoutCts = new CancellationTokenSource();
+timeoutCts.CancelAfter(TimeSpan.FromSeconds(3));
+
+try
+{
+    await LongRunningOperationAsync(timeoutCts.Token);
+    Console.WriteLine("操作成功完成");
+}
+catch (OperationCanceledException)
+{
+    Console.WriteLine("操作超时被取消");
+}
+```
+
+###### 2. 链接多个CancellationTokenSource
+
+```csharp
+// 主取消源
+CancellationTokenSource mainCts = new CancellationTokenSource();
+
+// 超时取消源
+CancellationTokenSource timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+
+// 链接两个取消源，任何一个取消都会触发
+CancellationTokenSource linkedCts = CancellationTokenSource.CreateLinkedTokenSource(mainCts.Token, timeoutCts.Token);
+
+try
+{
+    await LongRunningOperationAsync(linkedCts.Token);
+}
+catch (OperationCanceledException)
+{
+    if (mainCts.IsCancellationRequested)
+        Console.WriteLine("操作被手动取消");
+    else if (timeoutCts.IsCancellationRequested)
+        Console.WriteLine("操作超时被取消");
+}
+
+// 手动取消
+// mainCts.Cancel();
+```
+
+###### 3. 注册取消回调
+
+```csharp
+CancellationTokenSource cts = new CancellationTokenSource();
+
+// 注册取消回调
+CancellationTokenRegistration registration = cts.Token.Register(() =>
+{
+    Console.WriteLine("取消回调被触发，执行清理逻辑");
+    // 可以在这里执行资源清理、日志记录等操作
+});
+
+try
+{
+    await LongRunningOperationAsync(cts.Token);
+}
 catch (OperationCanceledException)
 {
     Console.WriteLine("操作已取消");
 }
+finally
+{
+    // 取消注册（可选，尤其是在using块外使用时）
+    registration.Dispose();
+    cts.Dispose();
+}
 ```
+
+###### 4. 异步方法中的取消协作
+
+```csharp
+async Task DownloadFileAsync(string url, string destination, CancellationToken cancellationToken)
+{
+    using (HttpClient client = new HttpClient())
+    {
+        // 使用支持取消的异步方法
+        using (HttpResponseMessage response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken))
+        {
+            response.EnsureSuccessStatusCode();
+            
+            using (Stream contentStream = await response.Content.ReadAsStreamAsync(cancellationToken))
+            using (FileStream fileStream = new FileStream(destination, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
+            {
+                // 使用CopyToAsync，它支持取消
+                await contentStream.CopyToAsync(fileStream, 8192, cancellationToken);
+            }
+        }
+    }
+}
+```
+
+##### CancellationToken最佳实践
+
+1. **始终接受CancellationToken参数**：为所有长时间运行的异步方法添加可选的`CancellationToken`参数
+
+```csharp
+// 推荐写法
+async Task DoWorkAsync(CancellationToken cancellationToken = default)
+{
+    // 方法实现
+}
+```
+
+2. **适当检查取消状态**：在耗时操作开始前、循环迭代中、I/O操作前后检查取消状态
+
+3. **使用支持取消的异步方法**：优先使用内置支持`CancellationToken`的.NET方法，如`Task.Delay`、`HttpClient.GetAsync`等
+
+4. **正确处理OperationCanceledException**：取消操作不是错误，应适当处理
+
+5. **释放资源**：确保在取消时正确释放资源
+
+6. **避免过度检查**：在非常频繁的循环中，适当减少检查频率
+
+7. **使用using语句**：正确释放`CancellationTokenSource`
+
+```csharp
+using (CancellationTokenSource cts = new CancellationTokenSource())
+{
+    // 使用cts
+}
+```
+
+##### 完整示例：用户取消的文件下载
+
+```csharp
+class FileDownloader
+{
+    public async Task DownloadAsync(string url, string destination, IProgress<int> progress = null, CancellationToken cancellationToken = default)
+    {
+        using (HttpClient client = new HttpClient())
+        {
+            using (HttpResponseMessage response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken))
+            {
+                response.EnsureSuccessStatusCode();
+                
+                long? totalBytes = response.Content.Headers.ContentLength;
+                long downloadedBytes = 0;
+                
+                using (Stream contentStream = await response.Content.ReadAsStreamAsync(cancellationToken))
+                using (FileStream fileStream = new FileStream(destination, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
+                {
+                    byte[] buffer = new byte[8192];
+                    int bytesRead;
+                    
+                    while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) > 0)
+                    {
+                        await fileStream.WriteAsync(buffer, 0, bytesRead, cancellationToken);
+                        
+                        downloadedBytes += bytesRead;
+                        
+                        // 报告进度
+                        if (totalBytes.HasValue && progress != null)
+                        {
+                            int percent = (int)((downloadedBytes * 100) / totalBytes.Value);
+                            progress.Report(percent);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// 使用示例
+async Task Main()
+{
+    var downloader = new FileDownloader();
+    var progress = new Progress<int>(percent =>
+    {
+        Console.WriteLine($"下载进度: {percent}%");
+    });
+    
+    using (CancellationTokenSource cts = new CancellationTokenSource())
+    {
+        // 模拟用户在2秒后取消
+        _ = Task.Delay(2000).ContinueWith(_ =>
+        {
+            Console.WriteLine("用户取消了下载");
+            cts.Cancel();
+        });
+        
+        try
+        {
+            await downloader.DownloadAsync(
+                "https://example.com/large-file.zip",
+                "large-file.zip",
+                progress,
+                cts.Token);
+            Console.WriteLine("下载完成");
+        }
+        catch (OperationCanceledException)
+        {
+            Console.WriteLine("下载已取消");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"下载出错: {ex.Message}");
+        }
+    }
+}
+```
+
+##### CancellationToken在UI中的应用
+
+在WinForm、WPF等UI应用中，`CancellationTokenSource`常用于处理用户取消操作，如取消按钮点击：
+
+```csharp
+private CancellationTokenSource _cts;
+
+private async void btnStart_Click(object sender, EventArgs e)
+{
+    btnStart.Enabled = false;
+    btnCancel.Enabled = true;
+    
+    // 创建新的CancellationTokenSource
+    _cts = new CancellationTokenSource();
+    
+    try
+    {
+        var progress = new Progress<int>(value =>
+        {
+            progressBar.Value = value;
+        });
+        
+        await LongRunningOperationAsync(progress, _cts.Token);
+        MessageBox.Show("操作完成");
+    }
+    catch (OperationCanceledException)
+    {
+        MessageBox.Show("操作已取消");
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show($"错误: {ex.Message}");
+    }
+    finally
+    {
+        _cts.Dispose();
+        _cts = null;
+        btnStart.Enabled = true;
+        btnCancel.Enabled = false;
+    }
+}
+
+private void btnCancel_Click(object sender, EventArgs e)
+{
+    // 取消操作
+    _cts?.Cancel();
+}
+
+async Task LongRunningOperationAsync(IProgress<int> progress, CancellationToken cancellationToken)
+{
+    for (int i = 0; i <= 100; i += 5)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        await Task.Delay(200);
+        progress.Report(i);
+    }
+}
+```
+
+通过合理使用`CancellationTokenSource`和`CancellationToken`，可以使异步操作更加健壮、高效，并提供更好的用户体验。
+
+#### 5. 异步异常捕获
+
+异步操作中的异常处理是一个重要话题，特别是当涉及到父task和子task之间的异常传播时。
+
+##### 基本的异步异常捕获
+
+在异步方法中，可以使用标准的`try-catch`块来捕获异常：
+
+```csharp
+async Task DoWorkAsync()
+{
+    try
+    {
+        await Task.Delay(100);
+        throw new InvalidOperationException("异步操作中的异常");
+    }
+    catch (InvalidOperationException ex)
+    {
+        Console.WriteLine($"捕获到异常: {ex.Message}");
+    }
+}
+
+// 调用异步方法
+try
+{
+    await DoWorkAsync();
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"调用者捕获到异常: {ex.Message}");
+}
+```
+
+##### 父Task与子Task的异常关系
+
+当一个Task内部创建并等待其他Task时，会形成父Task与子Task的关系。异常在这种关系中的传播方式取决于Task的创建方式。
+
+###### 1. 同步等待子Task（使用await）
+
+当使用`await`关键字等待子Task时，子Task的异常会直接冒泡到父Task：
+
+```csharp
+async Task ParentTaskAsync()
+{
+    Console.WriteLine("父Task开始");
+    
+    try
+    {
+        await ChildTaskAsync(); // 同步等待子Task
+        Console.WriteLine("父Task完成");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"父Task捕获到子Task的异常: {ex.Message}");
+    }
+}
+
+async Task ChildTaskAsync()
+{
+    Console.WriteLine("子Task开始");
+    await Task.Delay(100);
+    throw new Exception("子Task抛出异常");
+}
+
+// 输出:
+// 父Task开始
+// 子Task开始
+// 父Task捕获到子Task的异常: 子Task抛出异常
+```
+
+###### 2. 异步创建子Task（使用Task.Run但不await）
+
+当使用`Task.Run`创建子Task但不立即等待时，子Task的异常不会自动传播到父Task，除非显式等待：
+
+```csharp
+async Task ParentTaskAsync()
+{
+    Console.WriteLine("父Task开始");
+    
+    // 创建子Task但不等待
+    Task childTask = Task.Run(async () =>
+    {
+        Console.WriteLine("子Task开始");
+        await Task.Delay(100);
+        throw new Exception("子Task抛出异常");
+    });
+    
+    // 做一些其他工作
+    await Task.Delay(50);
+    Console.WriteLine("父Task继续执行");
+    
+    try
+    {
+        await childTask; // 显式等待子Task，此时异常会传播
+        Console.WriteLine("父Task完成");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"父Task捕获到子Task的异常: {ex.Message}");
+    }
+}
+
+// 输出:
+// 父Task开始
+// 子Task开始
+// 父Task继续执行
+// 父Task捕获到子Task的异常: 子Task抛出异常
+```
+
+##### 异常冒泡机制
+
+在异步编程中，异常冒泡遵循以下规则：
+
+1. **使用await时**：子Task的异常会直接冒泡到父Task，父Task的`try-catch`可以捕获到
+2. **使用Task.Wait()或Task.Result时**：异常会被包装在`AggregateException`中抛出
+3. **未等待的Task**：异常会被存储在Task对象中，直到Task被等待或其异常被观察到
+4. **子Task异常**：当父Task包含多个子Task时，所有异常会被包装在`AggregateException`中
+
+###### AggregateException处理
+
+当使用`Task.Wait()`、`Task.Result`或`Task.WaitAll()`时，多个异常会被包装在`AggregateException`中：
+
+```csharp
+async Task HandleMultipleExceptionsAsync()
+{
+    Task task1 = Task.Run(() =>
+    {
+        throw new InvalidOperationException("异常1");
+    });
+    
+    Task task2 = Task.Run(() =>
+    {
+        throw new ArgumentException("异常2");
+    });
+    
+    // 使用Task.WaitAll()等待多个Task
+    try
+    {
+        Task.WaitAll(task1, task2);
+    }
+    catch (AggregateException ex)
+    {
+        Console.WriteLine($"捕获到AggregateException，包含{ex.InnerExceptions.Count}个异常:");
+        
+        // 遍历所有内部异常
+        foreach (Exception innerEx in ex.InnerExceptions)
+        {
+            Console.WriteLine($"- {innerEx.GetType().Name}: {innerEx.Message}");
+        }
+        
+        // 仅处理特定类型的异常
+        ex.Handle(innerEx =>
+        {
+            if (innerEx is InvalidOperationException)
+            {
+                Console.WriteLine($"已处理InvalidOperationException: {innerEx.Message}");
+                return true; // 返回true表示已处理
+            }
+            return false; // 返回false表示未处理，会重新抛出
+        });
+    }
+}
+```
+
+###### Task.WhenAll()与异常
+
+`Task.WhenAll()`与`Task.WaitAll()`的异常处理不同：
+
+- `Task.WaitAll()`：阻塞调用线程，异常包装在`AggregateException`中
+- `Task.WhenAll()`：异步等待，只抛出第一个异常，其他异常会被忽略
+
+```csharp
+async Task CompareWaitAllAndWhenAll()
+{
+    Task task1 = Task.Run(() => { throw new Exception("异常1"); });
+    Task task2 = Task.Run(() => { throw new Exception("异常2"); });
+    
+    // 使用Task.WhenAll()
+    try
+    {
+        await Task.WhenAll(task1, task2);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Task.WhenAll()抛出: {ex.Message}"); // 只抛出第一个异常
+    }
+    
+    // 使用Task.WaitAll()
+    try
+    {
+        Task.WaitAll(task1, task2);
+    }
+    catch (AggregateException ex)
+    {
+        Console.WriteLine($"Task.WaitAll()抛出AggregateException，包含{ex.InnerExceptions.Count}个异常");
+    }
+}
+```
+
+##### 未观察到的异常
+
+在.NET 4.0中，未观察到的Task异常会导致应用程序崩溃。从.NET 4.5开始，未观察到的异常会被`TaskScheduler.UnobservedTaskException`事件捕获，默认不会导致应用程序崩溃，但会被记录到事件日志。
+
+```csharp
+// 注册未观察到的异常事件
+TaskScheduler.UnobservedTaskException += (sender, e) =>
+{
+    Console.WriteLine($"捕获到未观察到的Task异常: {e.Exception.Message}");
+    e.SetObserved(); // 标记异常为已观察
+};
+
+// 创建并启动Task，但不等待（会产生未观察到的异常）
+Task.Run(() =>
+{
+    throw new Exception("未观察到的异常");
+});
+
+// 强制垃圾回收，触发未观察到的异常事件
+GC.Collect();
+GC.WaitForPendingFinalizers();
+```
+
+##### 异步异常处理最佳实践
+
+1. **始终等待Task**：避免创建未观察到的异常
+2. **使用await而非Task.Wait()或Task.Result**：避免死锁和AggregateException包装
+3. **使用Task.WhenAll()处理多个异步操作**：异步等待多个Task，提高性能
+4. **正确处理AggregateException**：当使用同步等待时，记得遍历内部异常
+5. **注册UnobservedTaskException事件**：捕获未观察到的异常，便于调试
+6. **在异步方法中使用try-catch**：在适当的层级处理异常，提高代码可读性
+7. **避免在finally块中使用await**：finally块中的await可能导致异常丢失
+
+##### 完整示例：父Task与子Task异常处理
+
+```csharp
+async Task ParentChildExceptionDemo()
+{
+    Console.WriteLine("=== 父Task与子Task异常处理演示 ===");
+    
+    // 创建三个子Task，其中两个会抛出异常
+    Task task1 = ChildTaskAsync(1, false); // 成功
+    Task task2 = ChildTaskAsync(2, true);  // 抛出异常
+    Task task3 = ChildTaskAsync(3, true);  // 抛出异常
+    
+    // 方式1：使用await Task.WhenAll()
+    Console.WriteLine("\n--- 方式1：使用await Task.WhenAll() ---");
+    try
+    {
+        await Task.WhenAll(task1, task2, task3);
+        Console.WriteLine("所有Task成功完成");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Task.WhenAll()捕获到: {ex.Message}");
+        // 检查其他Task的状态
+        Console.WriteLine($"Task1状态: {task1.Status}");
+        Console.WriteLine($"Task2状态: {task2.Status}");
+        Console.WriteLine($"Task3状态: {task3.Status}");
+    }
+    
+    // 方式2：分别等待每个Task
+    Console.WriteLine("\n--- 方式2：分别等待每个Task ---");
+    List<Task> tasks = new List<Task>
+    {
+        ChildTaskAsync(4, false),
+        ChildTaskAsync(5, true),
+        ChildTaskAsync(6, true)
+    };
+    
+    foreach (Task task in tasks)
+    {
+        try
+        {
+            await task;
+            Console.WriteLine($"Task {GetTaskId(task)} 成功");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Task {GetTaskId(task)} 失败: {ex.Message}");
+        }
+    }
+}
+
+async Task ChildTaskAsync(int id, bool throwException)
+{
+    Console.WriteLine($"ChildTask {id} 开始");
+    await Task.Delay(100);
+    
+    if (throwException)
+    {
+        throw new Exception($"ChildTask {id} 抛出异常");
+    }
+    
+    Console.WriteLine($"ChildTask {id} 完成");
+}
+
+// 辅助方法：获取Task的ID（简化示例）
+int GetTaskId(Task task)
+{
+    // 实际应用中，应该通过其他方式跟踪Task ID
+    return task.GetHashCode() % 1000;
+}
+```
+
+通过理解异步异常的传播机制和正确的处理方式，可以编写更加健壮、可靠的异步代码，避免隐藏的bug和难以调试的问题。
 
 ### <a id="async-winform"></a>异步编程与WinForm集成
 
@@ -11021,31 +11616,66 @@ for (int i = 0; i < 10; i++)
 
 #### SemaphoreSlim（轻量级信号量）
 
-`SemaphoreSlim`是`Semaphore`的轻量级版本，性能更好。
+`SemaphoreSlim`是`Semaphore`的轻量级、高性能版本，专为.NET Framework 4.0及以上设计，提供异步支持。它控制同时访问资源的线程数量，适用于高并发场景。
+
+##### SemaphoreSlim与Semaphore的区别
+
+| 特性 | SemaphoreSlim | Semaphore |
+|------|---------------|-----------|
+| 性能 | 更高，轻量级实现 | 较低，基于内核对象 |
+| 异步支持 | 原生支持异步等待 | 不支持异步等待 |
+| 等待超时 | 支持 | 支持 |
+| 取消支持 | 支持CancellationToken | 不支持 |
+| 命名信号量 | 不支持 | 支持（跨进程） |
+
+##### 基本用法
 
 ```csharp
-// 创建SemaphoreSlim
+// 创建SemaphoreSlim，初始计数3，最大计数3
 SemaphoreSlim semaphore = new SemaphoreSlim(3, 3);
 
-// 异步等待
+// 异步等待获取信号量
 async Task DoWorkAsync()
 {
-    await semaphore.WaitAsync(); // 异步等待
+    Console.WriteLine($"线程 {Thread.CurrentThread.ManagedThreadId} 等待获取信号量");
+    await semaphore.WaitAsync(); // 异步等待，不阻塞调用线程
+    try
+    {
+        Console.WriteLine($"线程 {Thread.CurrentThread.ManagedThreadId} 获取到信号量，开始工作");
+        await Task.Delay(1000); // 模拟耗时操作
+        Console.WriteLine($"线程 {Thread.CurrentThread.ManagedThreadId} 完成工作");
+    }
+    finally
+    {
+        semaphore.Release(); // 释放信号量，允许其他线程获取
+        Console.WriteLine($"线程 {Thread.CurrentThread.ManagedThreadId} 释放信号量");
+    }
+}
+
+// 同步等待获取信号量
+void DoWork()
+{
+    semaphore.Wait(); // 同步等待，会阻塞调用线程
     try
     {
         // 临界区代码
-        await Task.Delay(1000);
     }
     finally
     {
         semaphore.Release();
     }
 }
+```
 
-// 同步等待
-void DoWork()
+##### 高级用法
+
+###### 1. 带超时的等待
+
+```csharp
+// 异步等待1秒，超时返回false
+bool acquired = await semaphore.WaitAsync(TimeSpan.FromSeconds(1));
+if (acquired)
 {
-    semaphore.Wait(); // 同步等待
     try
     {
         // 临界区代码
@@ -11054,6 +11684,118 @@ void DoWork()
     {
         semaphore.Release();
     }
+}
+else
+{
+    Console.WriteLine("超时未获取到信号量");
+}
+
+// 同步等待1秒
+acquired = semaphore.Wait(TimeSpan.FromSeconds(1));
+```
+
+###### 2. 支持取消操作
+
+```csharp
+CancellationTokenSource cts = new CancellationTokenSource();
+
+// 异步等待并支持取消
+try
+{
+    await semaphore.WaitAsync(cts.Token);
+    try
+    {
+        // 临界区代码
+    }
+    finally
+    {
+        semaphore.Release();
+    }
+}
+catch (OperationCanceledException)
+{
+    Console.WriteLine("等待已取消");
+}
+
+// 取消等待
+cts.Cancel();
+```
+
+###### 3. 释放多个计数
+
+```csharp
+// 释放2个计数，允许2个线程同时获取
+int previousCount = semaphore.Release(2);
+Console.WriteLine($"释放前计数: {previousCount}, 释放后计数: {previousCount + 2}");
+```
+
+###### 4. 获取当前计数
+
+```csharp
+int currentCount = semaphore.CurrentCount;
+Console.WriteLine($"当前信号量计数: {currentCount}");
+```
+
+##### 应用场景
+
+1. **限制并发请求数**：例如限制同时处理的HTTP请求数
+2. **资源池管理**：例如数据库连接池、线程池
+3. **限流**：防止系统过载，保护关键资源
+4. **并行任务控制**：控制同时执行的并行任务数量
+
+##### 最佳实践
+
+1. 始终在`finally`块中释放信号量，确保即使发生异常也能正确释放
+2. 避免长时间持有信号量，将临界区代码保持尽可能小
+3. 适当设置初始计数和最大计数，根据系统资源和负载调整
+4. 对于跨进程场景，使用`Semaphore`而非`SemaphoreSlim`
+5. 结合`CancellationToken`使用，支持优雅取消
+
+##### 完整示例：并发请求限流
+
+```csharp
+class RequestThrottler
+{
+    // 限制最多3个并发请求
+    private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(3, 3);
+    
+    public async Task ProcessRequestAsync(int requestId, CancellationToken cancellationToken = default)
+    {
+        Console.WriteLine($"请求 {requestId} 等待处理");
+        
+        // 异步等待获取信号量，支持取消
+        await _semaphore.WaitAsync(cancellationToken);
+        
+        try
+        {
+            Console.WriteLine($"请求 {requestId} 开始处理");
+            // 模拟请求处理耗时
+            await Task.Delay(1000, cancellationToken);
+            Console.WriteLine($"请求 {requestId} 处理完成");
+        }
+        finally
+        {
+            _semaphore.Release();
+            Console.WriteLine($"请求 {requestId} 释放资源");
+        }
+    }
+}
+
+// 使用示例
+async Task Main()
+{
+    var throttler = new RequestThrottler();
+    var tasks = new List<Task>();
+    
+    // 模拟10个并发请求
+    for (int i = 1; i <= 10; i++)
+    {
+        int requestId = i;
+        tasks.Add(throttler.ProcessRequestAsync(requestId));
+    }
+    
+    await Task.WhenAll(tasks);
+    Console.WriteLine("所有请求处理完成");
 }
 ```
 

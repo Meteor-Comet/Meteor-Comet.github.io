@@ -904,6 +904,61 @@ chain(5);
 // 平方: 25
 ```
 
+##### 委托链的高级特性
+
+1. **空委托处理**
+
+```csharp
+// 安全调用委托链
+NumberHandler safeChain = null;
+// 直接调用空委托会引发NullReferenceException
+try
+{
+    safeChain(5);
+} catch (NullReferenceException)
+{
+    Console.WriteLine("直接调用空委托引发异常");
+}
+
+// 使用?.Invoke()安全调用
+safeChain?.Invoke(5); // 不会引发异常
+
+// 初始化时提供一个空委托，避免空检查
+safeChain = delegate { };
+// 或者使用Lambda表达式
+safeChain = _ => { };
+safeChain(5); // 安全调用
+```
+
+2. **多播委托的返回值**
+
+```csharp
+// 委托链返回值
+Func<int, int> func1 = x => x + 1;
+Func<int, int> func2 = x => x * 2;
+Func<int, int> funcChain = func1 + func2;
+
+// 调用委托链，只会返回最后一个委托的结果
+int result = funcChain(5); // 结果为10，即(5 * 2)
+Console.WriteLine(result);
+```
+
+3. **委托链的执行顺序**
+
+```csharp
+// 委托链的执行顺序是添加顺序
+Action step1 = () => Console.WriteLine("步骤1");
+Action step2 = () => Console.WriteLine("步骤2");
+Action step3 = () => Console.WriteLine("步骤3");
+
+Action workflow = step1 + step2 + step3;
+workflow(); // 按顺序执行步骤1、步骤2、步骤3
+
+// 更改执行顺序
+workflow = step3 + step1 + step2;
+workflow(); // 按顺序执行步骤3、步骤1、步骤2
+```
+
 #### 事件
 
 事件使用`event`关键字声明，它是对委托的封装，提供了更安全的访问控制。
@@ -951,6 +1006,7 @@ public class OrderService
     public void ShipOrder(int orderId, decimal amount)
     {
         Console.WriteLine($"订单 {orderId} 已发货");
+        // 触发事件
         OnOrderShipped(new OrderEventArgs(orderId, amount));
     }
 }
@@ -987,6 +1043,433 @@ orderService.ShipOrder(1001, 99.99m);
 // 订单 1001 已发货
 // 发送发货邮件: 订单 1001 (金额: 99.99)
 ```
+
+##### 事件的高级用法
+
+1. **自定义事件访问器**
+
+```csharp
+public class CustomEventPublisher
+{
+    // 自定义事件存储
+    private EventHandler<EventArgs> _customEvent;
+    
+    // 自定义事件访问器
+    public event EventHandler<EventArgs> CustomEvent
+    {
+        add
+        {
+            Console.WriteLine("订阅者添加了事件处理程序");
+            _customEvent += value;
+        }
+        remove
+        {
+            Console.WriteLine("订阅者移除了事件处理程序");
+            _customEvent -= value;
+        }
+    }
+    
+    public void RaiseEvent()
+    {
+        _customEvent?.Invoke(this, EventArgs.Empty);
+    }
+}
+
+// 使用自定义事件访问器
+var publisher = new CustomEventPublisher();
+publisher.CustomEvent += (sender, e) => Console.WriteLine("事件处理1");
+publisher.CustomEvent += (sender, e) => Console.WriteLine("事件处理2");
+publisher.RaiseEvent();
+publisher.CustomEvent -= (sender, e) => Console.WriteLine("事件处理1"); // 注意：这种方式无法移除匿名方法
+```
+
+2. **静态事件**
+
+```csharp
+public static class GlobalEvents
+{
+    public static event EventHandler ApplicationStarted;
+    public static event EventHandler ApplicationStopped;
+    
+    public static void OnApplicationStarted()
+    {
+        ApplicationStarted?.Invoke(null, EventArgs.Empty);
+    }
+    
+    public static void OnApplicationStopped()
+    {
+        ApplicationStopped?.Invoke(null, EventArgs.Empty);
+    }
+}
+
+// 使用静态事件
+GlobalEvents.ApplicationStarted += (sender, e) => Console.WriteLine("应用程序已启动");
+GlobalEvents.OnApplicationStarted();
+```
+
+3. **线程安全的事件**
+
+```csharp
+public class ThreadSafeEventPublisher
+{
+    private readonly object _eventLock = new object();
+    private EventHandler<EventArgs> _threadSafeEvent;
+    
+    public event EventHandler<EventArgs> ThreadSafeEvent
+    {
+        add
+        {
+            lock (_eventLock)
+            {
+                _threadSafeEvent += value;
+            }
+        }
+        remove
+        {
+            lock (_eventLock)
+            {
+                _threadSafeEvent -= value;
+            }
+        }
+    }
+    
+    public void RaiseEvent()
+    {
+        // 复制到局部变量，避免多线程问题
+        EventHandler<EventArgs> handler;
+        lock (_eventLock)
+        {
+            handler = _threadSafeEvent;
+        }
+        handler?.Invoke(this, EventArgs.Empty);
+    }
+}
+```
+
+4. **弱事件模式**
+
+```csharp
+// 弱事件模式可以避免内存泄漏，当订阅者被销毁时，会自动从事件中移除
+public class WeakEventPublisher
+{
+    // 使用WeakReference存储订阅者
+    private List<WeakReference<EventHandler<EventArgs>>> _weakHandlers = new List<WeakReference<EventHandler<EventArgs>>>();
+    
+    public event EventHandler<EventArgs> WeakEvent
+    {
+        add
+        {
+            _weakHandlers.Add(new WeakReference<EventHandler<EventArgs>>(value));
+        }
+        remove
+        {
+            // 实际实现中需要遍历并比较委托
+        }
+    }
+    
+    public void RaiseEvent()
+    {
+        var handlersToRemove = new List<WeakReference<EventHandler<EventArgs>>>();
+        
+        foreach (var weakHandler in _weakHandlers)
+        {
+            if (weakHandler.TryGetTarget(out var handler))
+            {
+                handler?.Invoke(this, EventArgs.Empty);
+            }
+            else
+            {
+                // 订阅者已被垃圾回收，标记移除
+                handlersToRemove.Add(weakHandler);
+            }
+        }
+        
+        // 清理已被回收的订阅者
+        foreach (var handlerToRemove in handlersToRemove)
+        {
+            _weakHandlers.Remove(handlerToRemove);
+        }
+    }
+}
+```
+
+##### 事件的最佳实践
+
+1. **遵循.NET事件命名约定**
+
+```csharp
+// 事件命名：动词或动词短语
+public event EventHandler Started;
+public event EventHandler<DataReceivedEventArgs> DataReceived;
+
+// 触发事件的方法命名：On+事件名
+protected virtual void OnStarted(EventArgs e)
+{
+    Started?.Invoke(this, e);
+}
+
+protected virtual void OnDataReceived(DataReceivedEventArgs e)
+{
+    DataReceived?.Invoke(this, e);
+}
+```
+
+2. **使用EventHandler和EventHandler<TEventArgs>**
+
+```csharp
+// 推荐：使用标准的EventHandler委托
+event EventHandler SimpleEvent;
+
+// 推荐：使用泛型EventHandler<TEventArgs>委托
+event EventHandler<CustomEventArgs> CustomEvent;
+
+// 不推荐：自定义委托类型（除非有特殊需求）
+delegate void MyCustomEventHandler(object sender, CustomEventArgs e);
+event MyCustomEventHandler MyCustomEvent;
+```
+
+3. **使用不可变的事件参数**
+
+```csharp
+// 不可变事件参数
+public class ImmutableEventArgs : EventArgs
+{
+    public int Id { get; }
+    public string Name { get; }
+    
+    public ImmutableEventArgs(int id, string name)
+    {
+        Id = id;
+        Name = name;
+    }
+}
+```
+
+4. **避免在事件处理程序中抛出异常**
+
+```csharp
+// 发布者应该考虑订阅者抛出异常的情况
+public void SafeRaiseEvent()
+{
+    var handler = MyEvent;
+    if (handler == null) return;
+    
+    // 逐一调用每个事件处理程序，捕获异常
+    foreach (Delegate d in handler.GetInvocationList())
+    {
+        try
+        {
+            d.DynamicInvoke(this, EventArgs.Empty);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"事件处理程序抛出异常: {ex.Message}");
+            // 可以选择记录日志，但不应该中断其他订阅者
+        }
+    }
+}
+```
+
+5. **事件聚合器模式**
+
+```csharp
+// 事件聚合器用于解耦事件发布者和订阅者
+public class EventAggregator
+{
+    private readonly Dictionary<Type, List<WeakReference>> _handlers = new Dictionary<Type, List<WeakReference>>();
+    
+    public void Subscribe<T>(Action<T> handler) where T : EventArgs
+    {
+        var eventType = typeof(T);
+        if (!_handlers.ContainsKey(eventType))
+        {
+            _handlers[eventType] = new List<WeakReference>();
+        }
+        _handlers[eventType].Add(new WeakReference(handler));
+    }
+    
+    public void Publish<T>(T eventArgs) where T : EventArgs
+    {
+        var eventType = typeof(T);
+        if (!_handlers.ContainsKey(eventType)) return;
+        
+        var handlersToRemove = new List<WeakReference>();
+        
+        foreach (var weakRef in _handlers[eventType])
+        {
+            if (weakRef.TryGetTarget(out var handlerObj) && handlerObj is Action<T> handler)
+            {
+                try
+                {
+                    handler(eventArgs);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"事件处理程序抛出异常: {ex.Message}");
+                }
+            }
+            else
+            {
+                handlersToRemove.Add(weakRef);
+            }
+        }
+        
+        foreach (var handlerToRemove in handlersToRemove)
+        {
+            _handlers[eventType].Remove(handlerToRemove);
+        }
+    }
+}
+
+// 使用事件聚合器
+var aggregator = new EventAggregator();
+
+// 订阅事件
+aggregator.Subscribe<OrderEventArgs>(args =>
+{
+    Console.WriteLine($"订单 {args.OrderId} 已创建，金额: {args.TotalAmount}");
+});
+
+// 发布事件
+aggregator.Publish(new OrderEventArgs(1001, 99.99m));
+```
+
+##### 事件的应用场景
+
+1. **UI事件处理**
+
+```csharp
+// WinForm或WPF中的事件处理
+public partial class MainForm : Form
+{
+    public MainForm()
+    {
+        InitializeComponent();
+        
+        // 订阅按钮点击事件
+        btnSubmit.Click += BtnSubmit_Click;
+        
+        // 订阅文本框文本改变事件
+        txtInput.TextChanged += TxtInput_TextChanged;
+    }
+    
+    private void BtnSubmit_Click(object sender, EventArgs e)
+    {
+        // 处理按钮点击
+    }
+    
+    private void TxtInput_TextChanged(object sender, EventArgs e)
+    {
+        // 处理文本改变
+    }
+}
+```
+
+2. **状态变化通知**
+
+```csharp
+// 状态机状态变化事件
+public class StateMachine
+{
+    public enum State { Idle, Running, Paused, Completed }
+    
+    private State _currentState;
+    
+    public event EventHandler<StateChangedEventArgs> StateChanged;
+    
+    public State CurrentState
+    {
+        get => _currentState;
+        private set
+        {
+            if (_currentState != value)
+            {
+                var oldState = _currentState;
+                _currentState = value;
+                OnStateChanged(new StateChangedEventArgs(oldState, value));
+            }
+        }
+    }
+    
+    protected virtual void OnStateChanged(StateChangedEventArgs e)
+    {
+        StateChanged?.Invoke(this, e);
+    }
+    
+    public void Start() => CurrentState = State.Running;
+    public void Pause() => CurrentState = State.Paused;
+    public void Resume() => CurrentState = State.Running;
+    public void Stop() => CurrentState = State.Completed;
+}
+
+public class StateChangedEventArgs : EventArgs
+{
+    public StateMachine.State OldState { get; }
+    public StateMachine.State NewState { get; }
+    
+    public StateChangedEventArgs(StateMachine.State oldState, StateMachine.State newState)
+    {
+        OldState = oldState;
+        NewState = newState;
+    }
+}
+
+// 使用状态机事件
+var stateMachine = new StateMachine();
+stateMachine.StateChanged += (sender, e) =>
+{
+    Console.WriteLine($"状态从 {e.OldState} 变为 {e.NewState}");
+};
+stateMachine.Start(); // 状态从 Idle 变为 Running
+stateMachine.Pause(); // 状态从 Running 变为 Paused
+stateMachine.Stop();  // 状态从 Paused 变为 Completed
+```
+
+3. **消息通知系统**
+
+```csharp
+// 简单的消息总线
+public static class MessageBus
+{
+    public static event Action<string, object> MessagePublished;
+    
+    public static void Publish(string messageType, object payload)
+    {
+        MessagePublished?.Invoke(messageType, payload);
+    }
+    
+    public static void Subscribe(string messageType, Action<string, object> handler)
+    {
+        MessagePublished += (type, payload) =>
+        {
+            if (type == messageType)
+            {
+                handler(type, payload);
+            }
+        };
+    }
+}
+
+// 使用消息总线
+MessageBus.Subscribe("UserCreated", (type, payload) =>
+{
+    if (payload is User user)
+    {
+        Console.WriteLine($"用户 {user.Name} 已创建");
+    }
+});
+
+// 发布消息
+MessageBus.Publish("UserCreated", new User { Id = 1, Name = "张三" });
+
+public class User
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+}
+```
+
+通过理解委托和事件的高级特性和最佳实践，可以编写出更加灵活、可维护和高性能的事件驱动代码。事件驱动编程是现代C#开发的核心模式之一，广泛应用于UI开发、分布式系统和异步编程等领域。
 
 ### <a id="expression-trees"></a>表达式树
 

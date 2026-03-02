@@ -1,12 +1,16 @@
 ---
 layout:     post
 title:      "Java常用API"
+subtitle:   "Java核心类库与API使用指南"
 date:       2025-05-15 20:00:00
 author:     "Comet"
+header-style: text
 tags:
     - Java
     - API
     - 学习日志
+    - 类库
+    - 编程基础
 ---
 
 # Java常用API学习日志

@@ -1,12 +1,16 @@
 ---
 layout:     post
 title:      "JavaSE"
+subtitle:   "Java标准版核心语法与API完整教程"
 date:       2025-04-10 20:00:00
 author:     "Comet"
+header-style: text
 tags:
     - Java
     - 全栈
     - 学习日志
+    - JavaSE
+    - 编程语言
 ---
 
 # JavaSE学习日志

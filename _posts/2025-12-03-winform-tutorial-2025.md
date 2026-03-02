@@ -1,8 +1,17 @@
 ---
 layout: post
 title:  "C# WinForm 入门 - 2025"
+subtitle: "Windows桌面应用程序开发完整教程"
 date:   2025-12-03 10:00:00 +0800
+author:     "Comet"
 categories: C# WinForm Windows
+header-style: text
+tags:
+    - C#
+    - WinForm
+    - Windows
+    - 桌面开发
+    - 学习日志
 ---
 
 # C# WinForm 入门 - 2025

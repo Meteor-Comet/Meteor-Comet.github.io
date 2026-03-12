@@ -29,6 +29,9 @@ tags:
 - [8. 数据库的心脏：事务 (Transaction) 与 4大隔离级别(锁)](#8-数据库的心脏事务-transaction-与-4大隔离级别锁)
 - [9. 隐形看门狗：触发器 (Trigger) 深度剖析](#9-隐形看门狗触发器-trigger-深度剖析)
 - [10. 极致调优：索引 (Index) 的聚簇本质与执行计划调优](#10-极致调优索引-index-的聚簇本质与执行计划调优)
+- [11. 高阶查询艺术：CTE 递归、PIVOT 行列转换与 CROSS/OUTER APPLY](#11-高阶查询艺术cte-递归pivot-行列转换与-crossouter-apply)
+- [12. 终极数据操纵：MERGE（Upsert）与 临时表/表变量体系](#12-终极数据操纵mergeupsert与-临时表表变量体系)
+- [13. 极客防身术：随心所欲的动态 SQL 与执行提示 (Query Hints)](#13-极客防身术随心所欲的动态-sql-与执行提示-query-hints)
 
 ---
 
@@ -740,6 +743,160 @@ WITH (DROP_EXISTING = ON);
 -- SELECT Phone, Status FROM Employee WHERE Email = 'jack@exp.net';
 ```
 
-对于索引的极致把控是在一个表上不多建一个垃圾索引，也绝不漏掉一个有几十万查询量 `Join/Where` 支撑的核心复合查询带包含索引，这考验着一个高级数据库或者首席后台实战选手的顶级功底经验。
+对于索引的极致把控是在一个表上不多建一个垃圾索引，也绝不漏掉一个有几十万查询量 `Join/Where` 支撑的核心复合查询带包含索引，这考验着高级数据库选手的顶级功底经验。
 
-至此，关于所有 T-SQL 从开辟疆土的基础操作一直讲到了索引内聚机密并发与内存调度的超详细长篇大论在此划上封顶句号，能够消化到这里的开发者已经具备独立承担任何大规模应用关系型架构设计和极高复杂操作纠错调参的顶级素质了！
+---
+
+## 11. 高阶查询艺术：CTE 递归、PIVOT 行列转换与 CROSS/OUTER APPLY
+
+真正的报表查询和复杂运算往往超出了常规 `JOIN` 的能力范畴，我们需要极其高段位的操作手段。
+
+### 11.1 无限套娃：递归 CTE (Recursive CTE)
+在构建菜单树、组织架构图、评论盖楼等具有“无限层级引用”的场景中，传统的自连接无法穷尽所有的层级。T-SQL 的递归 CTE 可以完美地通过一次查询把所有层深的树状图全部遍历拉出。
+
+```sql
+-- 测试用：创建一个自己引用自己的员工上下级树表
+-- CREATE TABLE OrgChart (EmpId INT, EmpName NVARCHAR(50), BossId INT NULL);
+-- INSERT INTO OrgChart VALUES (1, '大老板', NULL), (2, '销售总监', 1), (3, '研发总监', 1), (4, '销售经理A', 2), (5, '前端程序员', 3);
+
+-- 使用递归 CTE 拉出包含树层级和全部从属路线的高级结果集
+WITH RecursiveOrgCTE AS 
+(
+    -- 1. [锚点成员] 定位起点：也就是找到所有根本没有上司的顶级大老板作为第 1 级
+    SELECT EmpId, EmpName, BossId, 1 AS TierLevel, CAST(EmpName AS NVARCHAR(MAX)) AS 'Chain'
+    FROM OrgChart 
+    WHERE BossId IS NULL
+
+    UNION ALL 
+
+    -- 2. [递归成员] 不断自我循环：拿着上面的结果 CTE 的表名 (RecursiveOrgCTE) 去内部连表！
+    SELECT o.EmpId, o.EmpName, o.BossId, 
+           cte.TierLevel + 1 AS TierLevel, -- 层级逐级递增
+           cte.Chain + ' -> ' + o.EmpName AS 'Chain' -- 把名字像珠子一样顺势串起来
+    FROM OrgChart o
+    INNER JOIN RecursiveOrgCTE cte ON o.BossId = cte.EmpId -- 将员工的 BossId 指向上一步拿出来的老大的 EmpId
+)
+SELECT * FROM RecursiveOrgCTE
+ORDER BY TierLevel ASC;
+```
+
+### 11.2 PIVOT 与 UNPIVOT：数据透视表行列魔术
+当我们接到 DBA 需求，要求把“竖着存储的各月份销售额清单”硬生生用 SQL 语句变成“每一个月份变成一个单独的一字排开的动态横向列头”时（常用于财务年终导出报表），`PIVOT` 是绝对王者。
+
+```sql
+-- 原始表大概长这样： 销售员(Name) | 月份(Month) | 业绩(Amount) [是竖向无穷多行的]
+-- 希望输出长这样：  | Name | 1月 | 2月 | 3月 | 4月 |
+
+SELECT * FROM 
+(
+    SELECT Name, Month, Amount 
+    FROM SalesRecord 
+    WHERE Year = 2025
+) AS SourceTable -- 原片基础提取集
+PIVOT 
+(
+    -- PIVOT 魔术引擎启动：把所有相同的 Month 下的 Amount 进行挤压求和
+    SUM(Amount) 
+    -- 强行把原本作为内容存在的 [1月, 2月] 数据值变成了真正的列名字母！
+    FOR Month IN ([1月], [2月], [3月], [4月], [5月], [6月]) 
+) AS PivotTable;
+```
+*(注意：反向操作则是使用 `UNPIVOT`，将横向的宽表炸毁还原成符合第一范式的无穷纵列表。)*
+
+### 11.3 APPLY 算子：CROSS APPLY 与 OUTER APPLY
+很多时候我们需要在连表时（比如通过 `JOIN` 某一个**返回表格结构结果的函数 TVF**），把主外表某一列带入进后面那张函数表当做条件参数，`JOIN` 根本做不到，这时候必须动用 `APPLY`。
+
+*   **`CROSS APPLY`**: 相当于 `INNER JOIN` 的强化版，左边找不到右边的匹配就整行丢弃。
+*   **`OUTER APPLY`**: 相当于 `LEFT JOIN` 的强化版，就算函数没返回，左边主表数据依然而然健在，并把右表空白全铺 `NULL`。
+
+```sql
+-- 获取每个部门下，工资排名稳居前两名（Top 2）的绝顶高手的资料，并拼接在一起。
+-- 这个用单纯的 JOIN 是极其难写的，有了 APPLY 以及传递参数就变得极为简单：
+
+SELECT d.DeptName, TopEmp.EmpName, TopEmp.Salary
+FROM Department d
+CROSS APPLY 
+(
+    -- 每从外部读取到一条 Department 部门信息，执行器都会携带它的 d.DeptId 钻进这个子盒子里执行一遍这个拿 Top 2 的独立运算！
+    SELECT TOP 2 EmpName, Salary 
+    FROM Employee e 
+    WHERE e.DeptId = d.DeptId AND e.IsDeleted = 0
+    ORDER BY Salary DESC
+) AS TopEmp;
+```
+
+---
+
+## 12. 终极数据操纵：MERGE（Upsert）与 临时表/表变量体系
+
+### 12.1 MERGE 巨型缝合怪：无敌的修改合并（有则更新，无则插入）
+以前我们做“如果这行存在咱们就 `UPDATE` 刷新字段值，如果不存在这人咱们就 `INSERT` 插一条新记录”，要在程序里查询和写入交织跑很多遍。`MERGE` 提供了源表对目标表的终极毁灭级一体覆盖能力。
+
+```sql
+-- 常用于定时同步任务，将昨天的销售新流水增量集合（Source）合并贴死到主库汇总表（Target）里
+MERGE INTO MainSummaryTable AS target
+USING DailyImportTable AS source 
+    ON target.UniqueId = source.UniqueId
+WHEN MATCHED THEN
+    -- 如果找到了两边共有的身份证 ID，就做定向刷新
+    UPDATE SET target.TotalSales = target.TotalSales + source.LastSales,
+               target.LastUpdate = GETDATE()
+WHEN NOT MATCHED BY TARGET THEN 
+    -- 目标主机上根本没这个人，判定为纯全新增加新员工
+    INSERT (UniqueId, TotalSales, LastUpdate) 
+    VALUES (source.UniqueId, source.LastSales, GETDATE())
+WHEN NOT MATCHED BY SOURCE THEN
+    -- 甚至支持反向处理：如果是主库里有但新进表里反而消失了的人员（可能离职了），在此地强行打上死亡标记
+    UPDATE SET target.IsActive = 0; 
+    -- (注意：最后必须跟上一个英文半角分号)
+```
+
+### 12.2 #Temp 临时表 vs @Table 表变量：生命周期的抉择
+SQL Server 提供了两种短命数据表容器，了解差异能大幅减少内存耗尽并极大提高几万数据处理时的性能：
+
+*   **本地临时表 (以 `#` 开头，如 `#TempOrders`)**
+    存在于系统的 `tempdb` 硬盘块（部分驻留内存）。
+    **绝对优势**：你可以为临时表建立多栏的高级**物理聚集索引**（Primary Key）和统计信息字典。在大几十万数据量级时使用它进行二次 `JOIN` 过滤是极为靠谱的快操作。它的生命周期伴随你的那个调用 Session 结束自动火葬销毁。
+
+*   **表变量 (以 `@` 声明，如 `DECLARE @TblOrders TABLE (...)`)**
+    纯粹生存在当前批处理进程极易挥发的直接内存中。
+    **绝对优势**：它甚至不发生写锁、不写大量的回滚事务日志负担。但**缺点极其严重**：它没有统计信息指引图谱！优化器看到一亿条的表变量也会傻乎乎把它估算成了**只有 1 行数据**。如果在大型关联时用它，极容易逼得执行计划错乱死锁崩溃。适合存储不到 1 百或者几百条的超小型临时数组 ID。
+
+```sql
+-- 1. 表变量：轻盈小巧 (不用 DROP)
+DECLARE @LocalIdList TABLE (Id INT PRIMARY KEY, Val NVARCHAR(20));
+INSERT INTO @LocalIdList VALUES (1, 'A'), (2, 'B');
+
+-- 2. 临时物理表：能抗下几十万数据大旗 (用完最佳习惯还是手工 DROP TABLE #HeavyDataTable 释放硬盘)
+CREATE TABLE #HeavyDataTable (
+    OrderNo VARCHAR(50) NOT NULL PRIMARY KEY INDEX IX_OrderTree, -- 直建树状索引！
+    Amt DECIMAL(18,2)
+);
+INSERT INTO #HeavyDataTable SELECT OrderNo, Amount FROM OldHistory WHERE CreateY = 2025;
+```
+
+---
+
+## 13. 极客防身术：随心所欲的动态 SQL 与执行提示 (Query Hints)
+
+### 13.1 掌控优化器大脑：查询提示 Query Hints
+我们深知 SQL 是一门“说明你想干什么，路线图让底下的老爷爷（执行器）自动计算”的声明语句。
+但某些特殊情况底下老爷爷确实脑抽了导致了极度荒谬的极慢的死锁路线，我们可以利用语句末尾的 `OPTION` 强制进行执行级别的脑干劫持干预。
+
+*   **`WITH (NOLOCK)`**: 最常用大杀器。在你写 `SELECT` 拿大量数据的末尾贴上这句。强行指令引擎：**不准向正在执行修改的人要访问锁，无视其他人挂起的防守动作，横冲直撞去扫盘！**虽然极度可能拿到“脏读”甚至不完整的一半的修改鬼魂数据，但对于那些允许一点统计误差的总控报表中心等不敏感的地方，它让速度起死回生。
+*   **`OPTION (RECOMPILE)`**: 对抗“参数嗅探（Parameter Sniffing）”的终极解药。有时候因为你之前传了个冷门参数使得存储过程给算了一条蠢到家的极其缓慢的老路线锁死了缓存。你在结尾挂上这句后，将命令它：**不要去读缓存以前的那张图纸路线结构！今天带进来的这个参数，给我当场硬着头皮重新在脑子里构思一条最佳寻找路线重新跑！**
+
+```sql
+-- 强行穿刺读取那些正在被执行 UPDATE 锁着的数据项 (极其不安全，但极快无阻塞)
+SELECT COUNT(1) FROM HeavyLogs WITH (NOLOCK) WHERE CreateDate > '2025-01-01';
+
+-- 当天重新强制分析新传入的参数 @DeptId，废除曾经该存储过程缓存的全部老式查询路线规划
+SELECT * FROM Employee WHERE DeptId = @DeptId 
+OPTION (RECOMPILE); 
+```
+
+---
+
+至此，关于所有 T-SQL 从开辟疆土的基础核心，讲到了索引内聚并发锁，甚至是一网打尽了 `CTE 递归`、`MERGE 合体`、`PIVOT 数据透视` 以及强制突破优化器的脑干封印指令 `Query Hints`。整篇笔记已然升华为超强火力压制的万字长篇大论封顶句号。
+
+能够完全消化、吸收并能真切地在 C# 代码及数据库内部实施以上防线技术的开发者，已经具备在复杂的大型高并发、高可用电商及后端中枢业务生态体系下，扛下绝对首席核心关系型数据库架构以及深度调优专家的技术水准水准了！

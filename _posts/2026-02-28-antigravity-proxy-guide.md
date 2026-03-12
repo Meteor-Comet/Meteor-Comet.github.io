@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Google Antigravity 代理使用指南 - 2026"
+title:  "Google Antigravity 代理使用 - 2026"
 subtitle: "Gemini 3 IDE登录与使用问题完整解决方案"
 date:   2026-02-28 10:00:00 +0800
 author:     "Comet"
@@ -15,7 +15,7 @@ tags:
     - 问题记录
 ---
 
-# Google Antigravity 代理使用指南
+# Google Antigravity 代理指南
 
 ## 前言
 

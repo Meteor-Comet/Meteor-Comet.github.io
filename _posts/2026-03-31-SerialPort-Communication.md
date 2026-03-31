@@ -69,6 +69,34 @@ tags:
 
 **C# 开发避坑指南**：在 C# 中，如果我们调用 `BitConverter.GetBytes(0x1234)` 试图把这个 `short` 转为可发送的字节数组。由于 Windows 默认是“小端模式”，它返回的字节数组元素顺序其实是 `[0x34, 0x12]`。如果你对接的外部硬件手册上写着“请使用高位在前模式”，那么你在把数组扔进串口发送区前，**必须要执行一次 `Array.Reverse()` 将其翻转**！
 
+### 2.1 实战：如何用代码优雅地剥取出高低位？
+
+在大部分的高性能工控代码中，资深开发者往往**不会使用 `BitConverter`**，因为它会产生额外的数组内存分配（GC 压力），而是直接使用底层的**位运算 (Bitwise Operations)** 进行拆解，这种方式不仅能达到极限性能，还能自由决定发送顺序！
+
+> **为什么用位移 (`>>`) 和 按位与 (`&`)？**
+> 对于 `0x1234` 这个 16 位整数，它在底层二进制是 `00010010 00110100`。
+> 我们只需要把它“按位右移”或者跟 `0xFF` (全1) 进行过滤，就能精准提纯出对应的字节。
+
+**代码示例：**
+```csharp
+// 假设我们的原始业务数据是 4660 (十六进制是 0x1234)
+short rawData = 0x1234; 
+
+// 【获取高位 (MSB)】
+// 原理：将整体向右平移 8 个坑位，原来的高 8 位就顺势滑落到了地位，变成了独立的 byte。
+byte msb = (byte)(rawData >> 8);  // 结果变为: 0x12
+
+// 【获取低位 (LSB)】
+// 原理：0xFF 的二进制是 11111111。用它进行按位与(&)操作，就像一个“漏网”，直接滤除高8位，只留下最底下8位。
+byte lsb = (byte)(rawData & 0xFF); // 结果变为: 0x34
+
+// 发送时，如果是手册要求“高位在前”，你的发送缓冲区数组就这么写：
+byte[] sendBuffer = new byte[] { msb, lsb }; // [0x12, 0x34]
+
+// 反过来，如果是硬件返回给你了高低位，你需要组合成业务十进制数据：
+short combineResult = (short)((msb << 8) | lsb); 
+```
+
 ---
 
 ## 3. 通信的语言：16进制(Hex)与ASCII
@@ -139,7 +167,55 @@ tags:
 2.  **异或校验 (XOR / BCC)**
     *   将整串所有包含内容的字节逐一进行二进制上的“按位异或运算”（C# 中对应 `^` 操作符）。多用在低性能的简单电子秤或者极简家用传感器协议中。
 3.  **循环冗余校验 (CRC, Cyclic Redundancy Check) [最重要]**
-    *   工业自动化界的“神级防弹衣”与万金油，最为严格且极其普遍。它不是简单相加，而是将所有的字节拼成一个巨大的长多项式组合，随后与一个工业规定的**多项式基准除数**进行不断地移位与“模二除法”。求出最终那个无法被整除的“余数”，通常占 2 个字节。在 C# 开发中查表法实现 `CRC-16` 高速校验基本是标配基本功。
+    *   工业自动化界的“神级防弹衣”与万金油，最为严格且极其普遍。它不是简单相加，而是将所有的字节拼成一个巨大的长多项式组合，随后与一个工业规定的**多项式基准除数**进行不断地移位与“模二除法”。求出最终那个无法被整除的“余数”，通常占 2 个字节。
+
+### 5.1 实战：CRC16 校验码生成与追加机制
+
+在实际开发中，如果使用纯逻辑计算 CRC 会因为每 1 bit 都要进行无尽迭代导致极度耗时，因此 C# 底层开发标准姿势是使用著名的**“查表法 (Lookup Table)”**进行 O(1) 级别的空间换时间秒级运算。
+
+> **CRC 追加法则注意事项：**
+> 算出来的 16 位 CRC 码往往自己也分高低位！在 Modbus-RTU 行业标准中，追加在火车车厢尾部的 CRC 必须是 **“低位在前，高位在后 (LSB First)”** 发送！这与常规业务数据的高位前置常常相反，极容易让新手掉坑！
+
+**C# 查表法生成 CRC16 完整代码：**
+```csharp
+public static class CrcTool
+{
+    // 经典的 Modbus CRC16 标准静态查表码 (为了节省运算时间构建的空间字典)，这里只作片段展示：
+    private static readonly byte[] aucCRCHi = {
+        0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, //... (剩余248个字典映射码省略)
+    };
+    private static readonly byte[] aucCRCLo = {
+        0x00, 0xC0, 0xC1, 0x01, 0xC3, 0x03, 0x02, 0xC2, //...
+    };
+
+    /// <summary>
+    /// 为纯净的一句话数据帧，自动打上两个字节的通信签名封条！
+    /// </summary>
+    public static byte[] AppendCrc16(byte[] frameWithoutCrc)
+    {
+        byte crcHi = 0xFF; // 定义缓存高位字节
+        byte crcLo = 0xFF; // 定义缓存低位字节
+        
+        // 核心：遍历整列火车里每一个车厢的 byte，去查字典打散扰乱它
+        foreach (byte b in frameWithoutCrc)
+        {
+            int index = crcLo ^ b;
+            crcLo = (byte)(crcHi ^ aucCRCHi[index]);
+            crcHi = aucCRCLo[index];
+        }
+
+        // 把原火车车厢拉长2节，用来接驳装入校验码
+        byte[] finalFrame = new byte[frameWithoutCrc.Length + 2];
+        Array.Copy(frameWithoutCrc, finalFrame, frameWithoutCrc.Length);
+
+        // ※ 核心避坑：Modbus RTU 强制规定，尾部 2 个字节校验码必须是 [低位先装, 高位后装]！
+        finalFrame[finalFrame.Length - 2] = crcLo; 
+        finalFrame[finalFrame.Length - 1] = crcHi; 
+
+        return finalFrame; // 这个包含了封条的数组就可以交给 SerialPort.Write() 抛发出去了！
+    }
+}
+```
 
 ---
 

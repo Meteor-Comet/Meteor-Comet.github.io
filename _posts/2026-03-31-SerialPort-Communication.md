@@ -475,65 +475,113 @@ public partial class SerialToolForm : Form
 Install-Package NModbus4
 ```
 
-### 9.2 实战代码：创建 Modbus Master 主站应用
-NModbus4 的架构设计具有很好的解耦性。它本身没有强依赖于某一种底层传输协议，而是以接口的形式**包装你现有的通信流（如原生 `SerialPort` 或 `TcpClient`）**。以下是基于 WinForm 串口操控的代码演示：
+### 9.2 NModbus4 核心参数配置与 API 查阅字典
+
+在动手编写具体业务代码之前，我们需要先全局俯瞰 NModbus4 提供给我们的主控制引擎方法及其核心配置体系：
+
+#### 【1. 主站引擎创建 API (工厂模式)】
+NModbus4 通过 `ModbusSerialMaster` 和 `ModbusIpMaster` 静态工厂类来实现对不同底层通讯管道的包装兼容。
+*   **`ModbusSerialMaster.CreateRtu(IStreamResource streamResource)`**
+    *   **作用**：基于串口（如已实例化的 `SerialPort`）创建严格遵循 Modbus-RTU 标准协议的主站端引擎实例。
+*   **`ModbusSerialMaster.CreateAscii(IStreamResource streamResource)`**
+    *   **作用**：基于串口通道资源创建 Modbus-ASCII 文本协议主站引擎。
+*   **`ModbusIpMaster.CreateIp(TcpClient tcpClient)`**
+    *   **作用**：基于 TCP 网络通信通道（已实例化的 `TcpClient` 套接层）产生支持工业以太网协议的主站通信引擎。
+
+#### 【2. 传输层 (Transport) 核心防护属性】
+一旦获取到主站代理对象 `master`，为了抵御外部硬件或网线被拔的死机等异常情况，我们**必须**设定其内部 `Transport` 相关的传输阈值：
+*   **`master.Transport.ReadTimeout`**：读指令无响应的超时截断时间（单位：毫秒）。如果给下位机发了功能码却迟迟得不到回应包，超时后触发异常。必须配置（如 `1000` 或 `2000` ms，视硬件总线负载情况拟定）。
+*   **`master.Transport.WriteTimeout`**：写指令发出时，底层物理层堵塞无法送达的超时时间（毫秒）。
+*   **`master.Transport.Retries`**：当出现响应残缺或底盘 CRC 校验失败时的自主重试次数（框架默认为 3 次）。
+*   **`master.Transport.WaitToRetryMilliseconds`**：发生通信错误并企图内部发起重试指令前，必须强制静默休眠进行时钟缓冲的时间跨度（防止由于总线冲突造成的立即重试导致波形碰撞灾难进一步加剧）。
+
+#### 【3. 数据读写操控 API】
+以下是主站调用下位机存储区的高频方法汇总（所有方法皆支持 `Async` 异步无阻塞后缀版本，推荐在带 UI 的独立线程环境中默认使用其异步版本）：
+
+##### 读区指令大类：
+*   **`ReadCoils(byte slaveAddress, ushort startAddress, ushort numberOfPoints)`**
+    *   **触发功能码**：`0x01`（获取多路离散线圈通断状态）。
+    *   **返回类型**：`bool[]` 数组。
+*   **`ReadInputs(byte slaveAddress, ushort startAddress, ushort numberOfPoints)`**
+    *   **触发功能码**：`0x02`（获取设备外部死规矩绑定的离散输入物理针脚信号源状态）。
+    *   **返回类型**：`bool[]` 数组。
+*   **`ReadHoldingRegisters(byte slaveAddress, ushort startAddress, ushort numberOfPoints)`**
+    *   **触发功能码**：`0x03`（最核心的高频命令！用于获取存储于内部的可修改工作参数与保持寄存指标）。
+    *   **返回类型**：`ushort[]` 数组（返回 16 位无符号短整型的切片连块结合）。
+*   **`ReadInputRegisters(byte slaveAddress, ushort startAddress, ushort numberOfPoints)`**
+    *   **触发功能码**：`0x04`（用于连续获取外部只读测量硬件传感探头的实时模拟量波形值等输入寄存器）。
+    *   **返回类型**：`ushort[]` 数组。
+
+##### 写区指令大类：
+*   **`WriteSingleCoil(byte slaveAddress, ushort coilAddress, bool value)`**
+    *   **触发功能码**：`0x05`（强控单体物理线圈开闭状态变更，如一键远程启停水泵电机则传入 `true`，停止则传入 `false`）。
+*   **`WriteSingleRegister(byte slaveAddress, ushort registerAddress, ushort value)`**
+    *   **触发功能码**：`0x06`（强行下达数值修改要求并覆订单个寄存器的原有物理参数数据底盘）。
+*   **`WriteMultipleCoils(byte slaveAddress, ushort startAddress, bool[] data)`**
+    *   **触发功能码**：`0x0F` (十进制 15)（通过一列车厢一次性灌入并强改沿途多个线圈硬件状态，该重载由于并行发送，极大节约了多次单一命令轮询造成的单线带宽高延迟）。
+*   **`WriteMultipleRegisters(byte slaveAddress, ushort startAddress, ushort[] data)`**
+    *   **触发功能码**：`0x10` (十进制 16)（批量灌入数据组并替换连续多项寄存器配置参数）。
+*   **`ReadWriteMultipleRegisters(byte slaveAddress, ushort startReadAddress, ushort numberOfPointsToRead, ushort startWriteAddress, ushort[] writeData)`**
+    *   **触发功能码**：`0x17` (十进制 23)（**高阶复合操作**：在一条总计物理报文中同时实现写特定内存组参数并同步索求读取另一块独立内存组的值效果，专用于要求极限苛刻的光速轮询伺服机控制通信环路）。
+
+### 9.3 最终整合：基于 API 查阅字典打造 WinForm 高可靠通信类
+
+有了前面系统的类库与理论配置储备支撑，现在不妨正式基于 WinForm 场景的串口通道，写下一个极其完备、兼具通信抗噪及生命周期管理特性的稳定 `Modbus RTU` 连击收发引擎段代码块演示：
 
 ```csharp
 using Modbus.Device;
 using System.IO.Ports;
 using System;
+using System.Threading.Tasks;
 
-// ... 业务一般在后台线程异步触发，不可堵死主线程 ...
+// ... 注意，阻塞型的调用方法必须脱离 UI 主线程（如搭配 Task.Run 裹入任务包装），以防阻塞导致 Windows “由于未响应导致闪退”假象 ...
 
-// 第一步：先打开系统级的纯物理底层串口通讯
+// 1. 启动并配置宣告底层基础串行通信设施口信息：
 SerialPort port = new SerialPort("COM1", 9600, Parity.None, 8, StopBits.One);
 try
 {
-    port.Open(); // 开启本地串口硬件资源
+    port.Open(); // 强制侵占锁定串行物理硬件资源握手对象
     
-    // 第二步：使用 NModbus4 封装基础串口对象
-    // 这将把普通的串口通道转化为封装了 Modbus-RTU 协议的主站管理实例
+    // 2. 利用 NModbus4 工厂模式静态构筑桥接通信引擎：
     IModbusSerialMaster master = ModbusSerialMaster.CreateRtu(port);
     
-    // 【通信防护策略】：设置超时时间（单位毫秒），以便在硬件无响应时及时切断并抛出异常
-    master.Transport.ReadTimeout = 1000;
-    master.Transport.WriteTimeout = 1000;
+    // 3. 通信稳定防护界限伞构建：设置物理层通信容忍缓冲限度：
+    master.Transport.ReadTimeout = 1000;  // 必须加，防死卡顿！
+    master.Transport.WriteTimeout = 1000; // 同上必设。
+    master.Transport.Retries = 3;         // 通信容错重压请求上限 
 
-    byte slaveId = 1; // 目标下位机的地址编号
+    byte slaveId = 1; // 明确当前总线操作对象索引从地址。
 
-    // ===================================
-    // 场景 1：读取设备的线圈/开关状态
-    // ===================================
-    // 含义：向 1 号从站发请求，从 0 开始连续读取 5 个线圈开闭状态：
+    // === 下达物理功能操作指控信函 ===
+
+    // 【情景 A】监控巡检器：拉取第 0 至 4 号（总共跨度为 5 个阵列长度）的线圈开合当前状况
     bool[] coilsInfo = master.ReadCoils(slaveId, 0, 5); 
-    Console.WriteLine($"0号继电器的状态反馈为：{coilsInfo[0]}");
+    Console.WriteLine($"0号节点控制门的状态截取信号为反馈值即刻为：{coilsInfo[0]}");
 
-    // ===================================
-    // 场景 2：直接读取设备保持寄存器内的配置参数
-    // ===================================
-    // 底层它会自动封装功能码并发起请求，同时内建的 CRC 算法会自动执行校验
-    // 在接收到回复的字节流对时，NModbus4 内部会自动实现位移 (high<<8)|low 还原工作
+    // 【情景 B】获取测量仪数值：抽取位置索引记录为 100 基础起始基准上的单个保持寄存器的内部承装记录值数据
     ushort[] registers = master.ReadHoldingRegisters(slaveId, 100, 1);
-    Console.WriteLine($"当前获取到 100地址上，其寄存参数值为十进制整数：{registers[0]}");
+    Console.WriteLine($"截获在序号 100 的索引寄存器内部所含定额数值为：{registers[0]}");
 
-    // ===================================
-    // 场景 3：下达控制指令，写单个物理线圈状态
-    // ===================================
-    master.WriteSingleCoil(slaveId, 2, true); // 底层自动封装投递协议手册上的 0x05 号控制功能码。
+    // 【情景 C】遥感操控硬件阀门：暴力要求将内部物理结构排行列里的第 2 号物理线圈控制枢纽当即接通（置高动作触发合闸运转）
+    master.WriteSingleCoil(slaveId, 2, true); 
 
-    // ===================================
-    // 场景 4：修改设备运行参数，覆写单一寄存器数值
-    // ===================================
+    // 【情景 D】运行时状态校准下达：强制把位于参数空间 50 号的配置预置参数直接改写成指令常数 8848 取代原封存在内的固化芯片老旧定额
     master.WriteSingleRegister(slaveId, 50, 8848); 
     
 }
+catch (TimeoutException tEx)
+{
+    // 如果 ReadTimeout 生效捕获了未曾响应的断点危机，其往往可以指示对方节点处于拔电，物理线体中断或者是单纯拨错了发送从设备ID导致的下位机协议未理会！
+    Console.WriteLine($"传输超时触发安全下挂切断（请优先系统排查排查连接性质量是否过关）：{tEx.Message}");
+}
 catch (Exception ex)
 {
-    Console.WriteLine($"与底层硬件通信出现异常：{ex.Message}");
+    // 这个位置往往抛出的是严重的硬件物理访问性灾难事件
+    Console.WriteLine($"底层总线条遭遇极其严峻的崩溃错误级：{ex.Message}");
 }
 finally
 {
-    // 收尾工作：无论执行是否抛出异常，通常在此环节都需要释放掉物理连接端口
+    // 收尾的硬法则原则：当一个完整通讯执行交互流程落幕或因为任何突发导致错误结束释放，务必第一时间对导线的排他使用特权进行切断废除。
     if (port.IsOpen) 
     {
         port.Close();
@@ -542,42 +590,7 @@ finally
 }
 ```
 
-### 9.3 NModbus4 核心 API 方法查阅字典
-
-以下是 NModbus4 主站应用中最常用的数据读写 API 梳理（以下所有方法在实际框架中皆支持 `Async` 异步后缀版本，如 `ReadCoilsAsync` ，推荐在 UI 程序中优先使用异步版本以防阻塞主线程）：
-
-#### 【读取类指令】
-*   **`ReadCoils(byte slaveAddress, ushort startAddress, ushort numberOfPoints)`**
-    *   **底层触发功能码**：`0x01`
-    *   **应用场景**：读取离散线圈状态（开关量输出）。
-    *   **返回类型**：`bool[]` 数组，代表各个线圈是处于闭合 `true` 还是断开 `false`。
-*   **`ReadInputs(byte slaveAddress, ushort startAddress, ushort numberOfPoints)`**
-    *   **底层触发功能码**：`0x02`
-    *   **应用场景**：读取离散输入状态（由外部物理环境决定，软件层只读）。
-    *   **返回类型**：`bool[]` 数组。
-*   **`ReadHoldingRegisters(byte slaveAddress, ushort startAddress, ushort numberOfPoints)`**
-    *   **底层触发功能码**：`0x03`
-    *   **应用场景**：读取保持寄存器（高频操作。常用于获取连续的设备工作参数、预留配方设定值等）。
-    *   **返回类型**：`ushort[]` 数组（16位无符号整型集合）。
-*   **`ReadInputRegisters(byte slaveAddress, ushort startAddress, ushort numberOfPoints)`**
-    *   **底层触发功能码**：`0x04`
-    *   **应用场景**：读取输入寄存器（读取设备内部经过测量且不可被外因随意修改的实时反馈数据，如当前的实时电压波形）。
-    *   **返回类型**：`ushort[]` 数组。
-
-#### 【写入类指令】
-*   **`WriteSingleCoil(byte slaveAddress, ushort coilAddress, bool value)`**
-    *   **底层触发功能码**：`0x05`
-    *   **应用场景**：向特定物理地址强制下达单个线圈的通断状态。常用于单一指令的启停动作，例如点击 UI 按钮启动电机运转。
-*   **`WriteSingleRegister(byte slaveAddress, ushort registerAddress, ushort value)`**
-    *   **底层触发功能码**：`0x06`
-    *   **应用场景**：向机器的指定地址修改覆写单个寄存器的参数数值。
-*   **`WriteMultipleCoils(byte slaveAddress, ushort startAddress, bool[] data)`**
-    *   **底层触发功能码**：`0x0F` (十进制的 15)
-    *   **应用场景**：并行批量写入多个线圈状态。避免高频调用的性能损耗，一键同步上百个开关阀门集。
-*   **`WriteMultipleRegisters(byte slaveAddress, ushort startAddress, ushort[] data)`**
-    *   **底层触发功能码**：`0x10` (十进制的 16)
-    *   **应用场景**：并行批量写入并覆盖整个区间的多个寄存器参数。例如生产流线上，一键由上位机数据库下发同步一整套包含数十项配方的运转设定。
-
 ---
 
-理解了前 7 章中探讨的高低位拆解、查表法 CRC 以及报文机制后，你就能深刻体会到像 `NModbus4` 这类框架在底层做了多少基础数据处理的工作。它内部彻底静默地为你解决了所有数据帧的拼接、跨字节组合校验以及超时处理。当你充分掌握了底层交互原理，不仅在使用此类通信库时具备强大的排错能力，在面对协议架构扩展（如将总线平滑升级至网络端 `Modbus TCP` 连接模式）时也能得心应手。
+理解了前面 7 章长达万字所极力梳理那些生涩难懂的高阶位图拆解位移运算算法、精妙查表化简法 CRC 通信验证签名流程、以及工控电波传输中的包体拼装反转后，你自然就会极其深刻地意识到类似于这般的 `NModbus4` 高级工业通信调度组件框架内到底是顶替了研发人员去承载多么夸张密集的脏压解封底层转换处理任务负载力。
+该封装包底层深处可以说是完全静默在内存流中完美自洽处理与消弭了上万条报表数组功能拼接碎片化验证、系统端小头位序自反翻转还原补偿运算与错误隔离机制拦截校验响应处理逻辑。当你完完全全洞悉和吸收全套的这种通信协议发展更迭机制之后再去把玩这种通信中间件依赖包时不仅自然而然会觉得自身对于业务通信排异调试掌控侦查力拔升出了质的门槛碾压力等级；假之未来需要将物理 RS 局域连根迁移拓展成为通过 TCP/IP 网络端构建巨无霸互联系统的万物联网级别 `Modbus Ip Master` 云架构通信模式重组基建需求时，你也同样能体会出对于其接口的调转实现不过也就是举重若轻地彻底维度降维操作打击过程而已！

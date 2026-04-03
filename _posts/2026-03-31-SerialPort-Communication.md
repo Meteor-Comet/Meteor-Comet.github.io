@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "串口通信与 Modbus 协议全栈指南：从底层理论到 C# NModbus4 实战"
-subtitle: "全景式解析高低位/字节序/CRC校验，全面覆盖 WinForm 原生收发与企业级 NModbus4 架构集成"
+title:  "工业级通信与 Modbus 协议全栈指南：从底层串口理论到高并发 Socket 架构实战"
+subtitle: "全景解析高低位/CRC校验与 NModbus 集成；深潜 ISO 模型、纯 C# async 异步 Socket 与彻底防范通信四大内存并发天坑"
 date:   2026-03-31 10:00:00 +0800
 author:     "Comet"
 categories: 通信 硬件 C#

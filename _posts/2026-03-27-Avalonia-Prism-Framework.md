@@ -21,7 +21,7 @@ tags:
 本文将提供一份超越官方基础文档的“万字级长文”实战解析。
 我们将把跨平台明星框架 **Avalonia UI** 的核心驱动引擎分为两部分进行极致拆解：
 第一部分，深入剖析 Avalonia 官方首推的响应式 MVVM 框架 **ReactiveUI** 的所有核心 API 及在复杂前端场景中的应用；
-第二部分，探讨面对几百个复杂页面与外部插件系统的大型商业应用时，如何引入 **Prism (Prism.DryIoc.Avalonia)** 作为扩展底座，完成视图路由、依赖注入、跨窗口弹层以及终极模块化 (Modularity)。
+第二部分，探讨面对几百个复杂页面与外部插件系统的大型商业应用时，如何引入 **Prism (Prism.DryIoc.Avalonia)** 作为扩展底座，完成视图路由、依赖注入、跨窗口弹层以及拓展模块化 (Modularity) 机制。
 
 ---
 
@@ -31,7 +31,7 @@ tags:
 - [二、 ReactiveUI 核心实战：从属性到命令的全景 API](#二-reactiveui-核心实战从属性到命令的全景-api)
   - [2.1 响应式对象基石：ReactiveObject 与底层机制](#21-响应式对象基石reactiveobject-与底层机制)
   - [2.2 ReactiveCommand 异步命令深度剖析](#22-reactivecommand-异步命令深度剖析)
-  - [2.3 ObservableAsPropertyHelper (OAPH)：只读派生属性的终极方案](#23-observableaspropertyhelper-oaph只读派生属性的终极方案)
+  - [2.3 ObservableAsPropertyHelper (OAPH)：只读派生属性的推荐方案](#23-observableaspropertyhelper-oaph只读派生属性的推荐方案)
   - [2.4 神级监听与数据流转变幻：WhenAnyValue 核心原理](#24-神级监听与数据流转变幻whenanyvalue-核心原理)
   - [2.5 ReactiveUI 结合 DynamicData 进行巨量集合管理](#25-reactiveui-结合-dynamicdata-进行巨量集合管理)
 - [三、 进阶扩展：Avalonia 与 Prism 框架的微核架构搭建](#三-进阶扩展avalonia-与-prism-框架的微核架构搭建)
@@ -41,7 +41,7 @@ tags:
   - [3.4 路由系统 (Navigation) 的全场景使用机制](#34-路由系统-navigation-的全场景使用机制)
   - [3.5 绝对解耦的弹层服务 (DialogService)](#35-绝对解耦的弹层服务-dialogservice)
   - [3.6 事件聚合器 (EventAggregator) 的极致运用](#36-事件聚合器-eventaggregator-的极致运用)
-  - [3.7 终极架构之巅：模块化应用树 (Modularity)](#37-终极架构之巅模块化应用树-modularity)
+  - [3.7 进阶架构解耦：模块化应用树 (Modularity)](#37-进阶架构解耦模块化应用树-modularity)
 - [四、 总结：从轻量跨平台到重工业巨构的进阶法则](#四-总结从轻量跨平台到重工业巨构的进阶法则)
 
 ---
@@ -150,11 +150,11 @@ public class LoginViewModel : ReactiveObject
 }
 ```
 
-### 2.3 ObservableAsPropertyHelper (OAPH)：只读派生属性的终极方案
+### 2.3 ObservableAsPropertyHelper (OAPH)：只读派生属性的推荐方案
 
 传统 MVVM 让人痛苦的场景：`FirstName` 和 `LastName`，你要一个只读的前台属性 `FullName`。在以往，你必须分别监听 FirstName 和 LastName，手写 `PropertyChanged("FullName")`，逻辑丑陋。
 
-ReactiveUI 发明了 **OAPH：基于流派生只读属性** 的黑魔法：`ToProperty()`。
+ReactiveUI 提供了 **OAPH：基于流派生只读属性** 的核心方法：`ToProperty()`。
 
 ```csharp
 public class ProfileViewModel : ReactiveObject
@@ -500,13 +500,13 @@ _eventAggr.GetEvent<SongChangedEvent>().Subscribe(
     false,
     
     // 高级 API 选项3：只有发生什么样的特指内容你才关心并继续拦截动作？过滤管道！
-    song => song.Duration > 60 // 小于一分钟的切歌广播不处理！神级过滤器！
+    song => song.Duration > 60 // 过滤掉小于 60 秒的数据
 );
 ```
 *(注意：也可以使用 ReactiveUI 提供的系统内核即 `MessageBus.Current.SendMessage(...)`。在多半情境下两者可平替，但基于 Prism 生态大型开发大家更偏向于 `EventAggregator`)*。
 
-### 3.7 终极架构之巅：模块化应用树 (Modularity)
-大型 Avalonia 甚至可以允许一个上层的团队完全看不到底层的代码。我们可以将其拆给单独独立在外的类库 (DLL) 以便插件式热插拔，这就成了顶级微前端系统。
+### 3.7 进阶架构解耦：模块化应用树 (Modularity)
+大型 Avalonia 甚至可以允许一个上层的团队完全看不到底层的代码。我们可以将其拆给单独独立在外的类库 (DLL) 以便插件式热插拔，这就构建了插拔式微内核架构系统。
 
 比如有个类库项目：`CometApp.FinanceModule.dll` 负责财务功能。
 

@@ -910,7 +910,12 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
+
+// ---------- [维度 6: 生命周期] CancellationToken 终止令牌 ----------
+// 任何合格的异步后端体系都必须具备全链路强制取消能力。
+// 结合 CancellationToken，可以在宿主端点停止服务或用户点击“断开”时，立刻截停并释放底层的 ReceiveAsync 原生等待线程。
 
 // ---------- [维度 5: 沟通桥梁] IProgress 契约 ----------
 public class NetworkMessage
@@ -966,7 +971,7 @@ public class AdvancedSocketServer
         _progress = progress;
     }
 
-    public async Task ProcessClientAsync(Socket client)
+    public async Task ProcessClientAsync(Socket client, CancellationToken cancellationToken)
     {
         // TLV 契约：2 字节 Type + 4 字节 Length
         const int HEADER_SIZE = 6; 
@@ -976,8 +981,8 @@ public class AdvancedSocketServer
         {
             while (true)
             {
-                // 1. 物理链路读取头部
-                int headerRead = await ReadExactAsync(client, headerBuffer, HEADER_SIZE);
+                // 1. 物理链路读取头部，通过传入 CancellationToken，随时响应外部的强制下线中断
+                int headerRead = await ReadExactAsync(client, headerBuffer, HEADER_SIZE, cancellationToken);
                 if (headerRead == 0) break; // 客户端断开
 
                 Span<byte> headerSpan = headerBuffer.AsSpan(0, HEADER_SIZE);
@@ -988,7 +993,7 @@ public class AdvancedSocketServer
                 byte[] bodyBuffer = ArrayPool<byte>.Shared.Rent(payloadLength);
                 try
                 {
-                    int bodyRead = await ReadExactAsync(client, bodyBuffer, payloadLength);
+                    int bodyRead = await ReadExactAsync(client, bodyBuffer, payloadLength, cancellationToken);
                     if (bodyRead == 0) break; 
 
                     ReadOnlySpan<byte> bodySpan = bodyBuffer.AsSpan(0, payloadLength);
@@ -1002,6 +1007,10 @@ public class AdvancedSocketServer
                 }
             }
         }
+        catch (OperationCanceledException)
+        {
+            _progress?.Report(new NetworkMessage { Content = "服务宿主已主动申请中止该通信链路。" });
+        }
         catch (Exception ex)
         {
             _progress?.Report(new NetworkMessage { Content = $"连接异常: {ex.Message}" });
@@ -1013,13 +1022,14 @@ public class AdvancedSocketServer
         }
     }
 
-    // 严谨的长度读取助手，防止粘包或断帧
-    private async Task<int> ReadExactAsync(Socket socket, byte[] buffer, int size)
+    // 严谨的长度读取助手，支持 Cancellation 取消令牌防阻塞
+    private async Task<int> ReadExactAsync(Socket socket, byte[] buffer, int size, CancellationToken token)
     {
         int totalRead = 0;
         while (totalRead < size)
         {
-            int r = await socket.ReceiveAsync(new ArraySegment<byte>(buffer, totalRead, size - totalRead), SocketFlags.None);
+            // 在现代 .NET 中，利用 Memory<byte> 才能完整激活传入 CancellationToken 的原生支持
+            int r = await socket.ReceiveAsync(buffer.AsMemory(totalRead, size - totalRead), SocketFlags.None, token);
             if (r == 0) return 0;
             totalRead += r;
         }
@@ -1028,7 +1038,26 @@ public class AdvancedSocketServer
 }
 ```
 
-在 UI 层（如 WPF 的 `MainWindow.xaml.cs`）使用此结构时，只需声明 `var progress = new Progress<NetworkMessage>(msg => textBlock.Text = msg.Content);`。通过这种完全解耦的设计，底层网络工程师只管收发分包，架构师负责维护路由规则，而前端开发者只通过 `IProgress` 安全地更新控件，共同达成高效、稳定的企业级协作。
+在 UI 层（如 WPF 的 `MainWindow.xaml.cs`）组装调用这个结构时，只需声明：
+```csharp
+// 1. 挂载路由规则与前台跨线程通信更新钩子
+var progress = new Progress<NetworkMessage>(msg => textBlock.Text = msg.Content);
+var router = new MessageRouter();
+router.Register(0x01, new TemperatureHandler());
+
+var server = new AdvancedSocketServer(router, progress);
+
+// 2. 派发专门的取消掌控源
+CancellationTokenSource _cts = new CancellationTokenSource();
+
+// 用户点击连接（或接收到新客户端）时，启动后台挂载并丢入 Cancellation 凭证
+_ = Task.Run(() => server.ProcessClientAsync(clientSocket, _cts.Token));
+
+// 用户点击关闭连接大红按钮时，底层处于挂起等待的 ReceiveAsync 瞬间解锁并抛出中止异常！
+_cts.Cancel();
+```
+
+通过这种结合 `CancellationToken` 取消源的完全解耦设计，底层网络工程师只管收发分包，架构师负责维护路由规则，而前端开发者只通过触发 `Cancel()` 控制生杀大权、通过 `IProgress` 安全地更新控件，共同达成高效、稳定的企业级协作。
 
 ### 总结
 

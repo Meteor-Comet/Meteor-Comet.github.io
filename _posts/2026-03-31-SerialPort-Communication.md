@@ -1059,6 +1059,129 @@ _cts.Cancel();
 
 通过这种结合 `CancellationToken` 取消源的完全解耦设计，底层网络工程师只管收发分包，架构师负责维护路由规则，而前端开发者只通过触发 `Cancel()` 控制生杀大权、通过 `IProgress` 安全地更新控件，共同达成高效、稳定的企业级协作。
 
+---
+
+## 15. C# 网络通信深入：直连设备与网关转发实战
+
+在掌握了底层的网络框架结构后，对于工业设备的网络通信，通常需要区分设备本身的硬件联网能力。这主要可以分为以下两种核心拓扑场景：
+
+*   **场景A：设备支持直连网络（当成服务器）**。此时设备自身拥有带独立 IP 的网卡，它本身就运行着一个 TCP 服务端。我们的软件不需要中转，直接与其所在 IP 及对应端口产生交互。
+*   **场景B：设备作为被代理客户端（借由网关转发）**。设备自身极其简陋，仅具备 RS-485 物理串口，需要将设备的串口引线接驳到具备以太网能力的代理服务器（即**串口转网口器**，常被称为 DTU 网关）。我们的 C# 客户端只能与该网关的虚拟化 IP 通信，网关随后将电平数据重构转移至目标设备。
+
+---
+
+### 15.1 场景 A：无中转的 Socket 直连设备交互
+在这个情境下，我们的 Socket 客户端把请求报文直接发送给指定网络设备的 TCP 被暴露接口。由于整个信道是双工自由的，发送指令完成后，代码必须自行开辟异步轮询任务等待设备的应答报文回传。
+
+> **⚠️ 核心重点区分：Modbus TCP 报文与 Modbus RTU 报文结构**  
+> 虽然同样是读写设备的寄存器，一旦走网络流直连协议，就不能随意沿用串口时代的组包规则：
+> 1. 原本最长尾部的 **2 字节 CRC16 校验码**，在 Modbus TCP 中已被完全抛弃剥离。（因为 TCP 底层的链路容错报文重传功能本身能够确保不破损）。
+> 2. 原本在串口 RTU 只有单字节从站 ID (`0x01`) 的报头位置，取而代之的是长达 **6 字节的 MBAP (Modbus Application Protocol) 头部**。
+> MBAP 必须精确包含：`事务处理标识符(2 Bytes) + 协议标识符(2 Bytes，常规设为 0x0000) + 长度(2 Bytes，指明从单元标识符往后的整体字节数)` 拼接待发数据帧。
+
+#### 实战演练 1：纯源生 Socket 向直连设备发报
+当我们尝试自行维护连接与报文解析，并规避第三方封装库时的原生请求流程：
+```csharp
+using System.Net.Sockets;
+using System.Threading.Tasks;
+
+public async Task StraightConnectAndFetchAsync()
+{
+    using TcpClient client = new TcpClient();
+    await client.ConnectAsync("192.168.1.50", 502); 
+    using NetworkStream stream = client.GetStream();
+
+    // 构建一个完整的 Modbus TCP 读取线圈指令 (请求 0 号设备，读取功能码 0x01 的开关数，读3个引脚) 
+    // 组成分析：[ 00 01 (自增事务ID) ] [ 00 00 (强制规定TCP为0) ] [ 00 06 (往后跟6个字节) ] 
+    //            + [ 00 (站号) ] [ 01 (功能码) ] [ 00 00 00 03 (起始位+读取数量) ]
+    byte[] tcpFrameRequest = { 0x00, 0x01, 0x00, 0x00, 0x00, 0x06, 0x00, 0x01, 0x00, 0x00, 0x00, 0x03 };
+    
+    // 1. 发射请求给设备
+    await stream.WriteAsync(tcpFrameRequest, 0, tcpFrameRequest.Length);
+    
+    // 2. 独立异步留待接收设备的应答报文 
+    // 注意实际由于网络延迟，读到的包可能会被分割，需参照上文五维体系架构进行切分与解析。
+    byte[] responseBuffer = new byte[1024];
+    int bytesRead = await stream.ReadAsync(responseBuffer, 0, responseBuffer.Length);
+}
+```
+
+#### 实战演练 2：利用 NModbus4 极简网络连接
+利用前文介绍的 `NModbus4` 时我们讲解了串口（RTU）调用，面对直连网络硬件，你可以直接切用它的 `ModbusIpMaster` 工厂对象：
+```csharp
+using Modbus.Device;
+using System.Net.Sockets;
+using System.Threading.Tasks;
+
+public async Task RequestDeviceViaModbusIpAsync()
+{
+    using TcpClient client = new TcpClient("192.168.1.50", 502);
+    // 引擎更迭：直接产生用于网口传输且拥有自动构建 MBAP 头部序列化特性的网络端
+    IModbusMaster ipMaster = ModbusIpMaster.CreateIp(client);
+    
+    // 底层的重试机制、MBAP组装与TCP包防波浪校验，均已被框架静默抽象。
+    ushort[] holdingRegisters = await ipMaster.ReadHoldingRegistersAsync(1, 100, 5); 
+}
+```
+
+---
+
+### 15.2 场景 B：基于服务器转发的中继网关架构
+大部分传统现场传感器和执行器通常没有独立的网卡配置，我们依靠 485 总线串接它们至工业透传服务器（DTU网络转化）的硬件线路上。
+
+这种**“串口转网口”服务器**主要承担的职责流程如下：
+1. **客户端网口请求汇聚**：接收从远端 Socket 客户端（或上位机平台网络中心）下发的网络封包含。
+2. **协议合并提取落盘**：收到请求包后，执行电控逻辑转换工作，通过底层的 RS-485 串行母排发射端直接将信号向下驱动至连接的硬件串列网络里。
+3. **设备应答回收（串口上提）**：传感器设备接收通信特征字后按需返回应答，最底层信号由串口返回到该转换服务器的串行接受母排。
+4. **服务器解包回传（网络响应）**：服务器内部重装数据信息组帧为合法的 TCP 帧态，反弹发回给之前请求对应地址来源的 `Socket` 网络客户端。
+
+这种架构下，开发者需要意识到代码中除了计算基本的网络信道延时，还必须叠加串联“转换传输周期与底层设备轮询的时间差”，因此对容错及 `ReadTimeout` 的阈值容忍判定需适当设置拉宽跨度容忍间隙防除异常切断。
+
+---
+
+### 15.3 实战演练：空气质量变送器数据采集机制与大小端处理
+根据底层物理类型转换体系，我们需要关注网络环境中结合实际环境监控如空气质量及温湿度采集的重构工作。
+
+部分 Modbus 反馈模型中的一个独立状态参数往往使用占用两字节跨度容量的 `short` / `ushort` 返回组建。同时结合[计算机大端和小端 (Endianness) 结构特征](https://blog.csdn.net/chongjian1990/article/details/149027534)，针对由 `byte[]` 体系转化而回的值则需要代码执行更为紧凑的策略应用：
+
+#### 1. 底层存储类型简要分析
+可参阅 [C# 中整型的互换原语机制特性](https://blog.csdn.net/qq_59062726/article/details/136805567) 了解详细的隐性装箱细节。
+* **`byte`**：占据基础的 8 个二进制位长度。
+* **`short` (带符号位的16位数)** 与 **`ushort` (全正数值的无符号16位数)**：占用对应 2 个基本字节位，此类跨度正好是仪器存储基础传感输出最常见配置标准位。
+
+#### 2. C#获取流并转换解析机制展示：
+假设我们已经通过 Socket 环境读取取得了传感设备响应流装入包含真实寄存器参数的两段 `byte`。由于大部分仪器报文传输遵守 **网络通讯大端模式 (Big-Endian)** 优先出栈，而我们上位机常用的 x86 或 x64 CPU 的默认装载是计算用的低优先级位先处理的小端流架构 (Little-Endian)。因此我们不可直接执行直接的数据转类型：
+
+```csharp
+using System;
+
+public class EnvironmentSensorParser
+{
+    // 获取从机 TCP/串口 转换穿透回传的物理原始温度流，比如由两个字节构成的连续位偏移位置信息
+    public float ParseTemperaturePayload(byte[] rawPayload, int startOffset)
+    {
+        // 定制切片数组阶段：从给定切面提取装载信息的物理参数承载（占用2个字节位）
+        byte[] tempSlice = { rawPayload[startOffset], rawPayload[startOffset + 1] };
+        
+        // 【防御卡点】：检验操作环境架构是否需要换向执行，防错乱读取！
+        // 若当前宿主系统位权序列符合计算低阶端为头流结构的小端模式情况：
+        if (BitConverter.IsLittleEndian)
+        {
+            // 通过环境判定后调用基础底层函数将 硬件设备网络流通发来的 高位先行倒排序转换为正确计算架构
+            Array.Reverse(tempSlice); 
+        }
+
+        // 纠正执行整合还原：利用 BitConverter 将安全的端序队列还原构建回原生 16 位整型的内存格式数据
+        ushort numericValue = BitConverter.ToUInt16(tempSlice, 0);
+
+        // 工业传感器通常带有数值转换刻度补偿值，这往往是传递缩小系数放大值反馈（例如真实状况 28.5摄氏度，而上报流发出的则是 285）。
+        return numericValue / 10f;
+    }
+}
+```
+
+针对以上严谨组合步骤处理，便可规避常见的网络报文错乱现象与硬件传输偏移计算故障，并最终稳固打造包含无论是系统直签直连协议还是透过物理透转中介站模式的稳固工业端业务层架构设计。
+
 ### 总结
 
 *   **入门级**：会写 `Connect`、`Send`、`Receive`，知道用 `byte[]` 互传数据通信。

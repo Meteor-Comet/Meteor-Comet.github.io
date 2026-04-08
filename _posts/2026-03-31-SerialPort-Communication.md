@@ -875,7 +875,7 @@ public class PureClient
 
 ---
 
-## 13. 现代 C# 通信性能双引擎：详解 ArrayPool 与 Span<T>
+## 13. 现代 C# 通信性能双引擎：详解 ArrayPool 与 Span\<T\>
 
 在上述的实战架构演进中，我们多次利用到了 `ArrayPool` 以及 `Span` 进行内存的管理干预。对于习惯了传统 .NET 编程（如大量分配 `new[]` 与通过 `LINQ` 切片等）的开发者来说，掌握这两项现代核心技术对于写出高性能互联通信程序至关重要。
 

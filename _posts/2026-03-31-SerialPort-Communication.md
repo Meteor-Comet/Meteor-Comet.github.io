@@ -1459,6 +1459,108 @@ public class EnvironmentSensorParser
 
 针对以上严谨组合步骤处理，便可规避常见的网络报文错乱现象与硬件传输偏移计算故障，并最终稳固打造包含无论是系统直签直连协议还是透过物理透转中介站模式的稳固工业端业务层架构设计。
 
+### 16.4 工业级网关核心防重载架构：数据映射缓存式 (Polling DataStore) 中转机制
+
+在 **16.2 节**中提及的这种“网关代发透传”结构，通常只适合请求量较小的简单场景。但一旦遇到**高并发、高频极速调度的严苛网络挑战**，传统透传中转就会面临崩溃：
+
+**致命瓶颈：为什么“单纯透明透传”会走向死胡同？**
+* **串口物理单行道**：底层 RS-485 乃至 232 本质是半双工信道，必须排队“一发一收”，绝不容许并行干扰。
+* **高并发网络请求轰炸**：假设局域网内有 10 个以上客户端正以极高频（例如 100ms 一次）向“通讯机/网关”索取现场数据，如果网关“接到请求马上透传给串口”，瞬间如洪水般的指令会被挤占向速率极慢（如 9600 bps）的底层导线中。一方面会导致队列深卡甚至超时闪退，另一方面极高频的回响探测很可能直接把脆弱的下位机单片机打到死机瘫痪！
+
+**完美救赎：建立“中转站主动轮询”与“内存池缓存 (DataStore) 隔离”设计**
+这正是成熟工业网关广泛采用的核心设计哲学：让网关中转服务成为拥有强大护城河的**内存集散列阵**！
+
+1. **下端平稳轮询 (Polling)**：
+   网关启动一条专属的后台循环调度线，以**极其稳健、有序的长频节奏**（譬如安全地每 1000 毫秒才去底层串口巡查拉取一次各项核心机器参数），并在成功返回后，将被更新拉回来的最纯净数据存装到网关自身系统所驻留的大内存 `DataStore` 缓存池阵列里不断去覆盖陈旧的数值。
+2. **上端即读即回 (极速并发)**：
+   此时无论是处于网段外头的 1 个节点网络查询器，还是成千上百个正在同时通过 TCP(或UDP) 向网关砸来探读指令池的客户端群，网关接到这些网络封包时，**根本无需再次下发触发底层那慢如牛车的串口查询指令流**。它们需要的只是参数而已，而这些参数已经摆在极速运作的电子内存上。网关能在短短十来微秒的时间刻度内瞬间命中结果立刻反向群发馈送回应给索取端。高频网络压力在这招之下瞬间被消弭化解于无形。
+
+> **🌟 在 NModbus4 架构体系内的极速应用实现**：
+> 要借助您自建的机制实现此效果，你可以完美利用库中赐予的绝佳原生基础件 `DataStore`。
+> 我们只需要启调一条 `Task.Run()` 使用 `ModbusSerialMaster` 做死循环每间隔 1 秒拉取赋值于它：`_dataStore.HoldingRegisters[x] = 底层新值`。
+> 再在外侧面对大量索求网络的开放端暴露出 `ModbusTcpSlave` / `ModbusUdpSlave` 服务，只需将我们那个刚刚被不断刷洗保活值的 `_dataStore` 对象属性直接对接依附在两者身上作为共享数据驱动池。此等操作，高压的并发重流危机也便自此不复存在！
+
+#### 核心疑问剖析：既然中转站已经在实时轮询了，为什么客户端还要开个定时器去“自动读取”？
+很多初学者在这里会产生疑惑：“既然网关已经在后台玩命一样拼命刷新数据了，客户端难道不能躺平直接等数据推过来吗？”
+答案是：**不能。因为 Modbus 协议天生不支持“主动推送”！**
+
+这其实是由两种截然不同的架构决定的：
+1. **中转站的实时读取（为了保证数据的“保鲜”）**：中转站的轮询是为了将底层串口数据抓上来，并替换掉自己内存 (`DataStore`) 里的旧值。如果不做实时抓取，客户端任何时候来打听，网关给的永远是一小时前的发霉旧参数。
+2. **客户端的实时读取（为了刷新前端 UI 画面）**：Modbus TCP 骨子里依旧是个**“问答机制 (Request-Response)”**协议。它不是 WebSocket，也不是 MQTT订阅发布机制，工业设备永远高傲且沉默。中转站（Slave服务端）绝对不会主动向客户端（Master端）发击网络包。客户端要想让自己的 UI 界面心跳动起来，必须自己开启一个定时器，不断向中转站发出探求包。
+   *不同之处在于，此时客户端查询的是极为极速的网关内存，而不是慢吞吞的硬件串口，因此哪怕每一毫秒查询一次整个流程都是零卡顿！*
+
+#### 网关缓存式中转极简代码原型 (C#)
+
+利用 `NModbus4` 实装以上神级架构的核心剥离代码如下，可以直接用于各位工程师搭建属于自己的 DTU 中控平台架构：
+
+```csharp
+using Modbus.Data;
+using Modbus.Device;
+using System.IO.Ports;
+using System.Net;
+using System.Net.Sockets;
+using System.Threading.Tasks;
+
+public class GatewayManager
+{
+    private DataStore _dataStore;
+    private ModbusSlave _tcpSlave;
+
+    public void StartGateway()
+    {
+        // 1. 创建全军最高级别的数据中转枢纽 (内存数据库)
+        _dataStore = DataStoreFactory.CreateDefaultDataStore();
+
+        // 2. 开启网络大门 (TCP 被动对外接客)
+        TcpListener tcpListener = new TcpListener(IPAddress.Any, 502);
+        
+        // 重要防坑：防止死点残留导致强制重启报错 "一个端口只能用一次 (AddressAlreadyInUse)"
+        tcpListener.Server.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+        
+        _tcpSlave = ModbusTcpSlave.CreateTcp(slaveId: 1, tcpListener);
+        _tcpSlave.DataStore = _dataStore; // 【核心】：将内存池绑给接客网络服务！
+        
+        // 开始异步运行网络监听，脱离主线程
+        Task.Run(() => _tcpSlave.Listen());
+
+        // 3. 启动绝密刺客任务去底层抓取数据（这里以单发轮询示范）
+        StartHardwarePollingTask();
+    }
+
+    private void StartHardwarePollingTask()
+    {
+        Task.Run(async () =>
+        {
+            using SerialPort port = new SerialPort("COM1", 9600, Parity.None, 8, StopBits.One);
+            port.Open();
+            
+            IModbusSerialMaster hardwareMaster = ModbusSerialMaster.CreateRtu(port);
+            hardwareMaster.Transport.ReadTimeout = 1000;
+
+            while (true) // 永动机
+            {
+                try
+                {
+                    // [主站身份]：在底层的土路上向真实的下级机器要起步从 0 跨度长度为 10 的寄存器参数值
+                    ushort[] rawData = hardwareMaster.ReadHoldingRegisters(1, 0, 10);
+                    
+                    // 将热乎的新鲜数据强行覆盖抹入系统的网关大内存池内
+                    for (int i = 0; i < rawData.Length; i++)
+                    {
+                        // NModbus4 底层设计约定 DataStore 内部位图下标默认以 1 开始算 (因此+1)
+                        _dataStore.HoldingRegisters[0 + i + 1] = rawData[i];
+                    }
+                }
+                catch { /* 屏蔽因为串口偶发掉线等硬物理干扰导致的系统假死闪退故障 */ }
+
+                // 强制要求喘息，以防把慢速物理导线给打满打卡死！
+                await Task.Delay(1000); 
+            }
+        });
+    }
+}
+```
+
 ---
 
 ## 17. 附录参考：NModbus4 跨栈驱动 RTU、TCP 与 UDP 参数全解

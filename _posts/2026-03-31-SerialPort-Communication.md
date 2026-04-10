@@ -1861,7 +1861,7 @@ UdpReceiveResult result = await client.ReceiveAsync();
 在 C# 网络编程中，开发者经常会在 `Socket` 与它的高级封装类（`TcpListener`、`TcpClient`、`UdpClient`）之间产生选择困惑。本节将严格按照“流程、容器、参数”，对这两种写法的每一行进行深度拆解对比。
 
 ### 19.1 一、 TCP 服务端对比：监听与接收
-**目标流程**：在本地 `502` 端口开启服务 $\rightarrow$ 等待客户端连入 $\rightarrow$ 接收数据到内存。
+**目标流程**：在本地 `502` 端口开启服务 -> 等待客户端连入 -> 接收数据到内存。
 
 #### 1. 使用原生 Socket 实现
 ```csharp
@@ -1917,7 +1917,7 @@ int count = stream.Read(buffer, 0, buffer.Length);
 ---
 
 ### 19.2 二、 TCP 客户端对比：连接与发送
-**目标流程**：连接到远端 `192.168.1.100:502` $\rightarrow$ 发送一段 RTU 报文。
+**目标流程**：连接到远端 `192.168.1.100:502` -> 发送一段 RTU 报文。
 
 #### 1. 使用原生 Socket 实现
 ```csharp

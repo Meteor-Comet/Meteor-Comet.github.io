@@ -878,6 +878,93 @@ public class ModernTcpApp
 
 这些类库体系与后续文章将展示的高级防粘包 `ArrayPool` 和 `Span` 切分策略完全兼容。在目前 95% 以上的大型商业项目里，“网流管线派 (`NetworkStream`)”始终占据着统治地位。
 
+### 11.4 界面交互实战：一键启停 TCP 服务器的单按钮状态机
+
+在 WinForms 或 WPF 的界面开发中，新手经常会在“启动/关闭服务器”的按钮事件中遇到报错（例如因端口已占用引发的 `AddressAlreadyInUse`，或因为使用阻塞同步方法导致界面卡死）。
+以下是一个符合工业控制平台标准的、自带“防抱死保护机制”和优雅启停逻辑的完整操作规范：
+
+```csharp
+private TcpListener _server;
+private CancellationTokenSource _cts;
+private bool _isServerRunning = false;
+
+// UI 层按钮双切事件（例如命名为 btnToggleServer）
+private async void btnToggleServer_Click(object sender, EventArgs e)
+{
+    // [机制 1] 防爆冲机制：暂时禁用按钮，防止用户极快地双击点碎逻辑引发状态错乱
+    btnToggleServer.Enabled = false;
+
+    if (!_isServerRunning)
+    {
+        // ---------------- 【服务器拉起流程】 ----------------
+        try
+        {
+            _server = new TcpListener(IPAddress.Any, 502);
+            // 极度重要的防残余策略：如果服务刚被强行退出，再次打开能无视遗留占用强制复用
+            _server.Server.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            
+            _server.Start();
+            _isServerRunning = true;
+            _cts = new CancellationTokenSource(); // 生成管理这届生命周期的终止令牌
+            
+            btnToggleServer.Text = "关闭服务器";
+            btnToggleServer.BackColor = Color.LightGreen;
+            
+            // [机制 2] 脱离主线程！专门指派地下作业组去无限循环接驳新连入设备
+            _ = Task.Run(() => AcceptClientsLoopAsync(_cts.Token));
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"网络中枢挂载受阻: {ex.Message}");
+            _isServerRunning = false;
+        }
+    }
+    else
+    {
+        // ---------------- 【服务器勒停流程】 ----------------
+        try
+        {
+            // 通过令牌通知远端正在读取数据的 Task 和连入接驳循环中断任务
+            _cts?.Cancel();
+            
+            // 平推摧毁监听地基引发下属 SocketException
+            _server?.Stop();
+        }
+        catch { /* 关闭时即使拔错也应当把抛错直接吃掉或做简单记录 */ }
+        finally
+        {
+            _isServerRunning = false;
+            
+            btnToggleServer.Text = "启动服务器";
+            btnToggleServer.BackColor = Color.LightGray;
+        }
+    }
+
+    // 状态轮转结束，把操作权重新赋予给用户
+    btnToggleServer.Enabled = true;
+}
+
+private async Task AcceptClientsLoopAsync(CancellationToken token)
+{
+    // 只要生命令牌不被叫停就一直敞开接客大门
+    while (!token.IsCancellationRequested)
+    {
+        try
+        {
+            // 挂起死等新设备网络连入。当外部调用 _server.Stop() 时此方法将立刻引发报错被炸醒出循环！
+            TcpClient client = await _server.AcceptTcpClientAsync();
+            
+            // 收到一个设备后，将它单独推入另外的分会场进行解析，主循环继续立刻轮转等待下个！
+            _ = Task.Run(() => { /* 处理连入客户的网络数据... */ });
+        }
+        catch (ObjectDisposedException) { break; } // _server.Stop() 常规划引发的对象销毁
+        catch (SocketException) { break; }         // 底座连根拔出的强行 Socket 脱落
+    }
+}
+```
+通过运用这套极其成熟的状态布尔锁以及底层捕获 `Stop()` 所引发异常的防阻断机制，无论现场作业人员怎样疯狂狂点控制系统按钮，你的后端程序都能保持坚如磐石的状态轮换控制并自动回收网络端口与对象，避免界面锁死或内存残留。
+
+
 ---
 
 ## 12. 广域网另一极：UDP 高速无连接通信与 TCP 对比

@@ -2132,7 +2132,67 @@ udp.Send(data, data.Length, broadcastEP);
 *   `udp.Send(data, data.Length, broadcastEP);`: 发送动作。
     *   **封装对比**：调用 `Send` 方法，内部自动包装并执行了原生 Socket 的 `SendTo` 操作。
 
-### 19.4 总结关联
+### 19.4 四、 UDP 接收与响应对比：无连接服务端侦听
+**目标流程**：在本地 `8888` 端口开启监听 -> 接收任意来源的 UDP 报文 -> 获取发送方的 IP 与端口信息。
+
+#### 1. 使用原生 Socket 实现
+```csharp
+Socket udpServer = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+IPEndPoint localEP = new IPEndPoint(IPAddress.Any, 8888);
+udpServer.Bind(localEP);
+
+byte[] buffer = new byte[1024];
+EndPoint remoteEP = new IPEndPoint(IPAddress.Any, 0); // 用于存放发送方的终点容器
+int count = udpServer.ReceiveFrom(buffer, ref remoteEP);
+```
+**逐行深度解析**：
+*   `Socket udpServer = new ...`: 实例化 UDP 引擎并配置 `Dgram` (数据报)。
+*   `udpServer.Bind(localEP);`: 绑定本地端口 `8888`，声明程序监听进入该端口的网络数据。
+*   `EndPoint remoteEP = ...`: 构建一个空的端点对象，功能类似于来访登记表。
+*   `udpServer.ReceiveFrom(buffer, ref remoteEP);`: 接收动作（阻塞等待）。
+    *   **机制核心**：通过 `ref` 传入空端点。一旦收到网络数据包，操作系统不但会将数据载荷存入 `buffer`，还会把来源地址赋予 `remoteEP`，从而实现数据与来源的精确追踪对应。
+
+#### 2. 使用 UdpClient 实现
+```csharp
+UdpClient udp = new UdpClient(8888);
+IPEndPoint remoteEP = new IPEndPoint(IPAddress.Any, 0);
+byte[] data = udp.Receive(ref remoteEP);
+```
+**逐行深度解析**：
+*   `UdpClient udp = new UdpClient(8888);`: 初始化时直接传入数字端口，底层自动完成了 `Socket` 的建立和 `Bind()` 绑定状态。
+*   `IPEndPoint remoteEP = ...`: 定义空的来源地址追踪容器。
+*   `byte[] data = udp.Receive(ref remoteEP);`: 接收动作（阻塞等待）。
+    *   **封装差异**：返回值直接是一块刚好等于数据有效载荷大小的新 `byte[]` 数组。底层的 `1024` 缓冲区分配等底层细节被自动屏蔽（由于省去了每次判断 count 的手动提纯，开发便利性极高，但也意味着高频接收会产生较高的临时 GC 内存分配）。
+
+---
+
+### 19.5 五、 UDP 单播对比：定向点对点发送
+**目标流程**：不维持握手连接状态，精准将数据单次发往远端的 `192.168.1.100:502` 目标机器。
+
+#### 1. 使用原生 Socket 实现
+```csharp
+Socket udpClient = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+byte[] data = Encoding.UTF8.GetBytes("Command");
+IPEndPoint targetEP = new IPEndPoint(IPAddress.Parse("192.168.1.100"), 502);
+udpClient.SendTo(data, targetEP);
+```
+**对比说明**：和前一节的广播使用毫无代码结构上的差异，唯独 `SendTo` 中指定的终点从全局属性变为了一个含有具体 IP 数字的单点目标。
+
+#### 2. 使用 UdpClient 实现
+```csharp
+UdpClient udp = new UdpClient();
+// 开启面向底层的“伪连接”，告知底层接下来的默认通讯抛射点
+udp.Connect("192.168.1.100", 502); 
+byte[] data = Encoding.UTF8.GetBytes("Command");
+udp.Send(data, data.Length);
+```
+**逐行深度解析**：
+*   `udp.Connect("192.168.1.100", 502);`: 这是一个极具迷惑性的 API 命名设计。由于 UDP 本质上没有物理的三次握手环节，调用 `Connect` 方法实际上不会在物理网线产生任何比特流交流！它只是**在客户端程序内存中将目标 IP 设为常驻的发送默认值**。
+*   `udp.Send(data, data.Length);`: 由于前面已经调用了伪 `Connect`，所以此处短化版本的 `Send` 方法省略了目标 `IPEndPoint` 参数，表面上达到了类似 `TcpClient.GetStream().Write` 的业务手感。这是框架封装旨在统一全栈网络流调用体验的巧妙设计。
+
+---
+
+### 19.6 总结关联
 
 *   **容器维度**：原生 `Socket` 始终在直接操作 `byte[]` 缓冲区；而高级封装类将其升级为了 `NetworkStream` 流容器，方便与其他 C# 流架构（如文件流、内存流等）进行极度顺滑的生态组合。
 *   **流程维度**：封装类将繁杂的“参数组装、AddressFamily、强类型转换、连接”完全压缩进了构造函数或 `Start()` 初始阶段中，极大减少了业务代码量，使得工程师的开发心智能全部收束在“网络数据解析本身”。

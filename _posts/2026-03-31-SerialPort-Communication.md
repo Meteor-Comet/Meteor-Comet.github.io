@@ -2969,3 +2969,85 @@ await Task.WhenAll(tasks);
 │  └── TLS 加密 + PKI 设备认证                                 │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+### 20.10 终极速查字典：MQTT 核心 API 大全与各代版本演进对比
+
+在 C# 工业通信开发中，MQTTnet 无疑是目前最具代表性的开发库。随着业务的发展，无论是在 **MQTTnet 官方 SDK 的代码结构上**，还是在 **MQTT 通信协议本身** 上，都经历了巨大的迭代。为了在后续开发中不陷入陈旧的坑底，以下汇总列出了新旧系统交替中最核心的 API 演进字典。
+
+#### 1. SDK 架构 API 演进：旧版 (v3.x 体系) VS 现代版本 (v4.x/v5.x 体系)
+
+在较新的版本之后，所有依赖于 `UseXxxHandler` 的老旧事件委托写法被官方全面清除，改为通过 `Task`-based 的异步事件流机制（`XxxAsync += ...`）。
+
+| 核心调度行为 | 上古写法 (维护老旧系统时最常见) | 现代版本 API (当前推荐标准) |
+| :--- | :--- | :--- |
+| **客户端接收报文** | `client.UseApplicationMessageReceivedHandler(e => { ... });` | `client.ApplicationMessageReceivedAsync += e => { ...; return Task.CompletedTask; };` |
+| **客户端掉线重连配置** | `client.UseDisconnectedHandler(async e => { await client.ConnectAsync(...); });` | `client.DisconnectedAsync += async e => { await client.ConnectAsync(...); };` |
+| **客户端连接成功触发** | `client.UseConnectedHandler(e => { ... });` | `client.ConnectedAsync += e => { ...; return Task.CompletedTask; };` |
+| **服务端启动伺服** | `await server.StartAsync(new MqttServerOptionsBuilder().Build());` | `await server.StartAsync(serverOptions);` |
+| **服务端拦截通讯** | `server.UseApplicationMessageReceivedHandler(...)` | `server.InterceptingPublishAsync += e => { ...; return Task.CompletedTask; };` |
+| **服务端客机验证** | `server.UseClientConnectedHandler(...)` | `server.ValidatingConnectionAsync += e => { e.ReasonCode = ...; return Task.CompletedTask; };` |
+
+#### 2. 通信协议演进：经典早期 API (MQTT 3.1.1) VS 新代专属前沿特性 (MQTT 5.0)
+
+若是平台配置强制指定使用更高段位的协定 (`WithProtocolVersion(MqttProtocolVersion.V500)`)，您将瞬间解锁旧版物理隔离层所不具备的四大核心 API 参数武器：
+
+##### 【连接篇：参数分离的高级生命周期重连】
+*   **旧版本 API (MQTT 3.1.1)**：唯一的清理入口。
+    ```csharp
+    var ops = new MqttClientOptionsBuilder()
+        .WithCleanSession(true) // 每次断开直接被动丢弃服务端残余连接内所有的离线订阅缓存
+        .Build();
+    ```
+*   **5.x 版本 API (MQTT 5.0 专享)**：完美分离了“初始启动”与“中途意外重连”。
+    ```csharp
+    var ops = new MqttClientOptionsBuilder()
+        .WithCleanStart(true) // 针对第一次启动的完全清洁
+        .WithSessionExpiryInterval(3600) // 哪怕短线，Broker 也会将当前会话和重要订阅缓存挂起维持 3600 秒不动
+        .Build();
+    ```
+
+##### 【属性绑定篇：多维标识用户附属属性 API】
+*   **背景短板**：旧版 API 若要在报文外额外传输“控制权限字段”、“Token 身份设备号”，开发者被迫必须去改写和污染核心负荷区 `Payload` 的 JSON。
+*   **5.x 版本 API (MQTT 5.0 专享)**：新增原生的无限拓展 `UserProperty` 投递入口：
+    ```csharp
+    var message = new MqttApplicationMessageBuilder()
+        .WithTopic("smart/factory/room1")
+        .WithPayload("25") // 极简纯粹的数据载荷
+        .WithUserProperty("Encryption", "AES256") // 5.x 独立字段：就像 HTTP Header 一般任意无限附加拓展头！
+        .WithUserProperty("Operator", "Admin-01") 
+        .Build();
+    ```
+
+##### 【吞吐优化极致篇：带内别名绑定 API】
+*   **背景短板**：工业传感中往往会带着非常漫长复杂的路径 Topic (例如 `cn/sh/factoryA/line4/robotic/temp`)。每一帧的头部中如果带着这段近 40 字节的信息进行毫秒射击，将吞噬巨大的通讯额度与处理损耗。
+*   **5.x 版本 API (MQTT 5.0 专享)**：支持动态寻址替换：
+    ```csharp
+    // 初始化上行：下发全称并为其约定配置标记为 1 号
+    var message = new MqttApplicationMessageBuilder()
+        .WithTopic("cn/sh/factoryA/line4/robotic/temp") 
+        .WithTopicAlias(1) 
+        .Build();
+    
+    // 之后疯狂的高频数据涌入时：Topic 地址参数传入空壳代码！网络驱动底层仅传一个短小精干的数字 1 来实施映射！省流爆炸！
+    var fastMessage = new MqttApplicationMessageBuilder()
+        .WithTopic("") 
+        .WithTopicAlias(1) 
+        .WithPayload("25")
+        .Build();
+    ```
+
+##### 【容错监控篇：指令响应回执状态枚举 API】
+*   **旧版本 API (MQTT 3.1.1)**：发布者发出的请求哪怕未被分发（或因为服务端身份鉴定失败被私自丢弃封杀），客机端的发布 `PublishAsync` 仍然视为结束，如同丢失在黑洞，全无底层消息反馈。
+*   **5.x 版本 API (MQTT 5.0 专享)**：通过全面内置反馈机制，每一次行为都附带完整的全景结果枚举码：
+    ```csharp
+    var result = await client.PublishAsync(message);
+    if (result.ReasonCode != MqttClientPublishReasonCode.Success)
+    {
+        // 5.x 带来的全景安全：直接提取出业务失败溯源，例如 NotAuthorized(无权限)、TopicFilterInvalid 等
+        Console.WriteLine($"数据派发中途遇阻结束，服务端物理级真实回复状况为：{result.ReasonCode}");
+    }
+    ```
+
+具备判断和自由套用这二条主脉络（客户端框架版本体系 以及 MQTT 协议通信制式）能力之后，能够帮助您接管旧有设备兼容的同时更加平滑稳固地设计下一代架构基础。

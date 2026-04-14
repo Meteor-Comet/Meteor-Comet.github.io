@@ -1314,6 +1314,148 @@ Span<byte> functionCode = span.Slice(1, 1);
 **规范协同工作流**：
 在等待 IO 层面上（例如异步 `NetworkStream.ReadAsync(Memory<byte>)`），首选传递 `Memory<T>` 容忍异步挂起。当获得字节数据，重新跨入解析内部函数的同步步骤域后，调用 `.Span` 属性将其瞬间转换回 `Span<T>` 展开极致的算法结构切分处理操作。
 
+#### 第四代终极形态：ReadOnlySequence<T>（非连续内存的逻辑链条）
+
+你问出这个问题，说明你已经触碰到了 C# 网络编程的**"终极形态"**。前三代都有一个极其严苛的物理前提：**连续内存（Contiguous Memory）**。但是，真实的 TCP 网络环境是残酷的，这就引出了 `ReadOnlySequence<T>` 诞生的根本原因——**数据跨越了缓冲区的物理边界（碎片化）**。
+
+**痛点：连续内存的崩溃瞬间**
+
+假设你的服务器收到了一个 8 字节的 Modbus 报文，但此时你的底层大水缸（buffer[4096]）只剩下最后 3 个字节的空间了。操作系统的网卡驱动会怎么做？它会把报文的前 3 个字节塞进水缸末尾，然后再开辟一个新水缸，把剩下的 5 个字节塞进新水缸开头。
+
+```
+内存块 A（旧水缸）：[...其他数据...] [01] [03] [04]
+内存块 B（新水缸）：[00] [1E] [00] [28] [8C] [D6] [...空...]
+                     ↑__________________↑
+                     这8个字节实际是完整的 Modbus 报文
+                     但在物理内存上根本不挨着！
+```
+
+**前三代武器全部阵亡**：你无法用一个 `Span<byte>` 或 `Memory<byte>` 去同时框住这 8 个字节，因为它们在物理内存条上根本不挨着！强行读取需要自己写恶心的拼接代码，产生垃圾（违背零分配追求）。
+
+**第四代指挥官：ReadOnlySequence<T>**
+
+它的本质是一个可以**跨越多个物理内存块的"逻辑视图"**。你可以把它理解为一条铁链，把一块块断开的 `Memory<byte>` 串联起来，让你在代码里**"感觉"**它们是连续的。
+
+```
+ReadOnlySequence<T> 内部结构：
+┌─────────────────────────────────────────────────────────┐
+│  Segment 1 (Memory<byte>) → Segment 2 (Memory<byte>) → ... │
+│  链表结构：记录每块的起始/结束位置和下一块指针           │
+└─────────────────────────────────────────────────────────┘
+```
+
+**为什么它这么重要？** 微软为配合它，专门在 .NET Core 3.0 引入了 `System.IO.Pipelines`（管道模型）。**ASP.NET Core (Kestrel 服务器) 能处理每秒千万级并发的底层秘密，就是全面使用了 Pipelines + ReadOnlySequence！**
+
+**四代内存神器终极对比**：
+
+| 特性 | ArraySegment<T> | Span<T> | Memory<T> | ReadOnlySequence<T> |
+|:----:|:---------------:|:-------:|:---------:|:-------------------:|
+| **内存连续性** | 绝对连续 | 绝对连续 | 绝对连续 | 可以不连续（多片段组成） |
+| **存储位置** | 堆/栈均可 | 只能在栈 | 堆/栈均可 | 堆/栈均可 |
+| **async/await** | 兼容 | ❌ 绝对不兼容 | 兼容 | 兼容 |
+| **典型场景** | 老代码兼容 | 高性能同步解析 | 异步等待 IO | TCP 粘包/拆包/跨边界 |
+| **形象比喻** | 一段胶带 | 一把手术刀 | 一个密封盒 | 一条铁链 |
+
+**工业级用法：SequenceReader 搭配食用**
+
+当你拿到一条 `ReadOnlySequence<byte>` 时，不能直接像数组那样 `[index]` 取值（因为底层不连续）。微软为它专门配备了搭档：`SequenceReader<T>`。
+
+```csharp
+// 假设这是从 PipeReader 读出的数据，可能跨越了 3 个内存块
+ReadOnlySequence<byte> sequence = buffer; 
+
+// 把它丢给阅读器
+SequenceReader<byte> reader = new SequenceReader<byte>(sequence);
+
+// 尝试读取大端的 16 位整数
+// 阅读器极其智能：
+//   - 如果这 2 个字节刚好在同一个内存块 → 直接用 Span 读取（性能极高）
+//   - 如果这 2 个字节刚好跨越了内存块（一块末尾，一块开头）→ 底层自动帮你安全拼接并读取！
+if (reader.TryReadBigEndian(out short registerValue))
+{
+    Console.WriteLine($"读出数值: {registerValue}");
+}
+
+// 读取变长字符串（先读长度，再读内容）
+if (reader.TryReadBigEndian(out int stringLength) && 
+    reader.TryReadBytes(stringLength, out var text))
+{
+    Console.WriteLine($"字符串: {Encoding.UTF8.GetString(text)}");
+}
+```
+
+**跨内存边界缓冲区可视化模型**：
+
+```
+真实 TCP 粘包场景：
+
+Buffer A (4096字节)                    Buffer B (4096字节)
+┌─────────────────────────┐            ┌─────────────────────────┐
+│ [其他数据] [01] [03]    │            │ [04] [00] [1E] [00]... │
+│                         │            │                         │
+│     ↑                   │            │  ↑                      │
+│     └── TCP报文头部 3B ──┘            │  └── TCP报文体 5B ────┘│
+│                                     │                         │
+└─────────────────────────────────────┴─────────────────────────┘
+           ↑___________________________________________↑
+                          逻辑上连续的 8 字节报文
+
+用 Span<byte> ❌ 无法同时框住
+用 Memory<byte> ❌ 无法同时框住
+用 ReadOnlySequence<byte> ✅ 可以用一条铁链串联 A 和 B
+用 SequenceReader<byte> ✅ 可以优雅地读取，不产生任何额外分配
+```
+
+**Pipeline 完整解析流程**：
+
+```csharp
+async Task ProcessPipelineAsync(PipeReader reader)
+{
+    while (true)
+    {
+        // 1. 从管道读取数据（可能跨越多个内存块）
+        ReadResult result = await reader.ReadAsync();
+        ReadOnlySequence<byte> buffer = result.Buffer;
+
+        // 2. 尝试解析完整报文
+        while (TryParseMessage(ref buffer, out var message))
+        {
+            // 处理业务
+            ProcessMessage(message);
+        }
+
+        // 3. 标记已消费的位置（管道自动回收）
+        reader.AdvanceTo(buffer.Start, buffer.End);
+
+        // 4. 客户端断开
+        if (result.IsCompleted) break;
+    }
+}
+
+bool TryParseMessage(ref ReadOnlySequence<byte> buffer, out var message)
+{
+    var reader = new SequenceReader<byte>(buffer);
+
+    // 读取固定头：2 字节 Type + 4 字节 Length
+    if (!reader.TryReadBigEndian(out short type) || 
+        !reader.TryReadBigEndian(out int length))
+        return false;  // 数据不完整，等待更多数据
+
+    // 验证数据完整性
+    if (length > buffer.Length)
+        return false;  // 粘包：还需要更多数据
+
+    // 读取负载
+    var payload = reader.Sequence.Slice(reader.Position, length);
+    message = new Message { Type = type, Payload = payload };
+
+    // 移动读位置
+    reader.Advance(length);
+    buffer = reader.Sequence;
+    return true;
+}
+```
+
 ---
 
 ## 15. 工业级网络中间件：五维架构体系代码实战

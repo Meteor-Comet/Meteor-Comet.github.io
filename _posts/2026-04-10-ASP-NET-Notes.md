@@ -1568,37 +1568,67 @@ public class ProductsApiTests : IClassFixture<ApiTestFixture>
 
 ### 生产发布：IIS (Internet Information Services) 托管实战
 
-在工业控制与传统的 Windows 环境下，使用 IIS 托管 ASP.NET Core Web API 依然是主流且稳健的方案。与传统的 ASP.NET (Framework) 不同，ASP.NET Core 在 IIS 中是以反向代理的形式运行的。
+将 ASP.NET Core API 部署到 IIS 与传统的 ASP.NET (.NET Framework) 有很大不同。ASP.NET Core 并不直接运行在 IIS 工作进程中，而是通过 **IIS AspNetCore 模块 (ANCM)** 进行反向代理。以下是完整的配置流程：
 
-#### 1. 准备环境：安装 Hosting Bundle
-在目标 Windows Server 上，必须安装 **.NET Core Hosting Bundle**。该软件包含：
-*   **.NET Runtime**：运行应用所需的核心库。
-*   **ASP.NET Core Module (ANCM)**：IIS 与 Kestrel 之间的桥梁。
-> **验证**：安装完成后，在终端运行 `iisreset` 或查看 IIS 模块列表，确认是否存在 `AspNetCoreModuleV2`。
+#### 1. 环境准备（服务器端）
+在配置 IIS 之前，必须安装 **.NET Core Hosting Bundle**（托管捆绑包）。它包含了让 IIS 识别并运行 .NET Core 程序所需的运行时和 IIS 模块。
+*   **下载与安装**：下载对应版本的 Hosting Bundle。
+*   **服务重启**：安装完成后，打开 CMD 输入 `iisreset` 重启 IIS 服务。
+*   **检查验证**：打开 IIS 管理器，点击服务器节点 -> “模块”，确保列表中出现了 `AspNetCoreModuleV2`。
 
-#### 2. IIS 配置关键点
-*   **启用 IIS 功能**：确保在“启用或关闭 Windows 功能”中勾选了 `Internet Information Services` 及其下的 `常见 HTTP 功能` 和 `应用程序开发功能`（特别是 WebSocket 协议，如果需要）。
-*   **创建应用程序池**：
-    *   **.NET CLR 版本**：选择 **无托管代码 (No Managed Code)**。因为 ASP.NET Core 拥有自己的运行时，IIS 应用池仅负责进程启动和管理。
-    *   **受管管道模式**：集成 (Integrated)。
-*   **创建网站**：物理路径指向你的发布文件夹，绑定端口（如 80 或 443）。
+#### 2. 发布程序 (Publish)
+不要直接拷贝源代码或生成后的 bin 文件夹。你需要执行正式的“发布”操作：
+*   在 Visual Studio 中右键点击项目 -> **发布 (Publish)**。
+*   **部署模式**：建议选择“框架依赖 (Framework-Dependent)”。
+*   **目标运行时**：可移植 (Portable) 或 `win-x64`。
+*   **产物**：发布后会得到一个包含 `.dll`、`web.config` 和 `appsettings.json` 的文件夹。
 
-#### 3. 文件夹权限设置
-IIS 进程标识（通常是 `IIS AppPool\你的应用池名`）必须具备对发布文件夹的 **读取** 和 **执行** 权限。
-*   右键文件夹 -> 安全 -> 编辑 -> 添加 -> 输入 `IIS AppPool\YourAppPoolName`。
+#### 3. IIS 站点配置
+*   **步骤 A：创建应用程序池**
+    *   名称：建议与项目同名。
+    *   **.NET CLR 版本**：必须选择 **无托管代码 (No Managed Code)**。
+    *   *原因：IIS 此时仅充当反向代理，不负责解析 .NET 逻辑，逻辑由 Kestrel 引擎执行。*
+*   **步骤 B：添加网站**
+    *   **物理路径**：指向发布产生的文件夹。
+    *   **应用程序池**：选择刚才创建的“无托管代码”池。
+    *   **绑定**：设置对应的 IP、端口或域名。
 
-#### 4. 发布应用
-使用 CLI 或 Visual Studio 进行发布：
-```bash
-# 生成发布包（自包含或框架依赖）
-dotnet publish -c Release -o C:\inetpub\myapi --runtime win-x64 --self-contained false
+#### 4. 权限配置（关键环节）
+若出现 500.19 或 500.30 错误，通常是权限不足。需为发布文件夹授权：
+1.  右键文件夹 -> 属性 -> 安全 -> 编辑 -> 添加。
+2.  输入 `IIS AppPool\你的应用程序池名称`（例如 `IIS AppPool\MyApi`）。
+3.  赋予 **“读取和执行”**、**“列出文件夹内容”** 和 **“读取”** 权限。
+
+#### 5. 详解 web.config 参数
+发布后生成的 `web.config` 是 IIS 与程序之间的“翻译官”：
+```xml
+<configuration>
+  <system.webServer>
+    <handlers>
+      <add name="aspNetCore" path="*" verb="*" modules="AspNetCoreModuleV2" resourceType="Unspecified" />
+    </handlers>
+    <aspNetCore processPath="dotnet" 
+                arguments=".\YourApp.dll" 
+                stdoutLogEnabled="false" 
+                stdoutLogFile=".\logs\stdout" 
+                hostingModel="inprocess" />
+  </system.webServer>
+</configuration>
 ```
-*   **web.config**：发布后会自动生成 `web.config` 文件，该文件定义了 ANCM 如何处理请求。
+*   **hostingModel="inprocess"**：进程内托管。这是 .NET Core 3.0+ 的默认值，性能最高（API 直接在 `w3wp.exe` 中运行）。
+*   **stdoutLogEnabled="true"**：若启动失败且无报错，请将其设为 `true`，错误信息将记录到 `logs` 文件夹中。
 
-#### 5. 进程内 (In-Process) 与 进程外 (Out-Of-Process) 托管
-*   **In-Process (推荐)**：性能最高。API 直接在 `w3wp.exe` 进程内运行，省去了 Kestrel 的一次 HTTP 转发。
-    *   配置方式：`web.config` 中 `hostingModel="inprocess"`。
-*   **Out-Of-Process**：API 在独立进程中运行，IIS 仅作为反向代理。
+#### 6. 常见问题排查 (Troubleshooting)
+
+| 现象 | 可能原因 | 解决方法 |
+| :--- | :--- | :--- |
+| **500.19** | web.config 格式错误或未安装 Hosting Bundle | 检查 XML 语法；确认 Hosting Bundle 已安装并重启 IIS。 |
+| **500.30** | 运行时故障（程序启动即崩溃） | 在发布目录手动运行 `dotnet YourApp.dll` 查看控制台输出报错。 |
+| **404** | 路由配置不正确或环境限制 | 确认请求路径；检查 Swagger 是否被 `app.Environment.IsDevelopment()` 限制（生产环境默认不可见）。 |
+| **503** | 应用程序池崩溃或未启动 | 检查应用池状态，确认其配置为“无托管代码”。 |
+
+> **💡 特别提示：关于 Swagger 首页**
+> 默认情况下，`Program.cs` 里的条件判断会阻止 Swagger 在生产环境运行。若需在服务器访问 Swagger，请移除 `if (app.Environment.IsDevelopment())` 限制，或将服务器环境变量设置为 `Development`。
 
 ---
 

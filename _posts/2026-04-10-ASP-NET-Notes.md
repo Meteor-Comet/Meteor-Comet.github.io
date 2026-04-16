@@ -1,20 +1,21 @@
 ---
 layout: post
-title:  "ASP.NET 开发笔记：核心架构与 Web 应用实战"
-subtitle: "探索 ASP.NET Core 高性能跨平台 Web 应用程序开发框架及其在工业互联网中的应用"
+title:  "ASP.NET 开发笔记：Web API 构建与 IIS 生产级发布全解析"
+subtitle: "从核心架构、请求管道到 IIS 托管实战，构建高性能且稳健的工业级 Web 服务"
 date:   2026-04-10 10:00:00 +0800
 author:     "Comet"
 catalog:    true
 header-style: text
 tags:
     - ASP.NET
-    - Web
+    - WebAPI
+    - IIS
     - C#
 ---
 
 # ASP.NET Web API 核心实战指南
 
-ASP.NET Core 是一款由微软开发的高性能、开源且跨平台的框架，广泛应用于构建现代 Web 应用程序。在工业物联网（IIoT）与企业级开发中，Web API 作为数据交互的核心，其稳定性和性能至关重要。
+ASP.NET Core 是一款由微软开发的高性能、开源且跨平台的框架。在工业互联网与 Windows 生态应用中，利用 IIS (Internet Information Services) 托管 Web API 是确保服务端稳定、安全且易于维护的最佳实践。
 
 ---
 
@@ -1565,148 +1566,64 @@ public class ProductsApiTests : IClassFixture<ApiTestFixture>
 
 ---
 
-### 生产发布：Docker 容器化与 Nginx 反向代理配置
+### 生产发布：IIS (Internet Information Services) 托管实战
 
-#### 多阶段 Dockerfile
+在工业控制与传统的 Windows 环境下，使用 IIS 托管 ASP.NET Core Web API 依然是主流且稳健的方案。与传统的 ASP.NET (Framework) 不同，ASP.NET Core 在 IIS 中是以反向代理的形式运行的。
 
+#### 1. 准备环境：安装 Hosting Bundle
+在目标 Windows Server 上，必须安装 **.NET Core Hosting Bundle**。该软件包含：
+*   **.NET Runtime**：运行应用所需的核心库。
+*   **ASP.NET Core Module (ANCM)**：IIS 与 Kestrel 之间的桥梁。
+> **验证**：安装完成后，在终端运行 `iisreset` 或查看 IIS 模块列表，确认是否存在 `AspNetCoreModuleV2`。
+
+#### 2. IIS 配置关键点
+*   **启用 IIS 功能**：确保在“启用或关闭 Windows 功能”中勾选了 `Internet Information Services` 及其下的 `常见 HTTP 功能` 和 `应用程序开发功能`（特别是 WebSocket 协议，如果需要）。
+*   **创建应用程序池**：
+    *   **.NET CLR 版本**：选择 **无托管代码 (No Managed Code)**。因为 ASP.NET Core 拥有自己的运行时，IIS 应用池仅负责进程启动和管理。
+    *   **受管管道模式**：集成 (Integrated)。
+*   **创建网站**：物理路径指向你的发布文件夹，绑定端口（如 80 或 443）。
+
+#### 3. 文件夹权限设置
+IIS 进程标识（通常是 `IIS AppPool\你的应用池名`）必须具备对发布文件夹的 **读取** 和 **执行** 权限。
+*   右键文件夹 -> 安全 -> 编辑 -> 添加 -> 输入 `IIS AppPool\YourAppPoolName`。
+
+#### 4. 发布应用
+使用 CLI 或 Visual Studio 进行发布：
+```bash
+# 生成发布包（自包含或框架依赖）
+dotnet publish -c Release -o C:\inetpub\myapi --runtime win-x64 --self-contained false
+```
+*   **web.config**：发布后会自动生成 `web.config` 文件，该文件定义了 ANCM 如何处理请求。
+
+#### 5. 进程内 (In-Process) 与 进程外 (Out-Of-Process) 托管
+*   **In-Process (推荐)**：性能最高。API 直接在 `w3wp.exe` 进程内运行，省去了 Kestrel 的一次 HTTP 转发。
+    *   配置方式：`web.config` 中 `hostingModel="inprocess"`。
+*   **Out-Of-Process**：API 在独立进程中运行，IIS 仅作为反向代理。
+
+---
+
+### 可选进阶：Docker 容器化部署
+
+对于需要快速横向扩展或跨平台一致性的场景，Docker 依然是首选方案。
+
+#### 多阶段 Dockerfile 优化
 ```dockerfile
-# 阶段一：构建
+# 构建阶段
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-
-# 先复制 csproj，利用 Docker 层缓存避免每次重新还原包
 COPY ["MyApi/MyApi.csproj", "MyApi/"]
 RUN dotnet restore "MyApi/MyApi.csproj"
-
 COPY . .
-WORKDIR "/src/MyApi"
-RUN dotnet publish "MyApi.csproj" -c Release -o /app/publish \
-    --no-restore \
-    /p:UseAppHost=false
+RUN dotnet publish "MyApi/MyApi.csproj" -c Release -o /app/publish
 
-# 阶段二：运行（最小化镜像）
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+# 运行阶段
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
-
-# 安全：非 root 用户运行
-RUN adduser --disabled-password --gecos '' appuser && chown -R appuser /app
-USER appuser
-
 COPY --from=build /app/publish .
-
-ENV ASPNETCORE_URLS=http://+:8080
-ENV ASPNETCORE_ENVIRONMENT=Production
-EXPOSE 8080
-
+USER 1000 # 安全：非 root 运行
 ENTRYPOINT ["dotnet", "MyApi.dll"]
-```
-
-#### docker-compose.yml（本地开发）
-
-```yaml
-version: '3.8'
-services:
-  api:
-    build: .
-    ports:
-      - "8080:8080"
-    environment:
-      - ConnectionStrings__Default=Server=db;Database=MyDb;User=sa;Password=YourStrong@Passw0rd;
-      - ConnectionStrings__Redis=redis:6379
-      - ASPNETCORE_ENVIRONMENT=Development
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_started
-    restart: unless-stopped
-
-  db:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    environment:
-      - ACCEPT_EULA=Y
-      - SA_PASSWORD=YourStrong@Passw0rd
-    ports:
-      - "1433:1433"
-    healthcheck:
-      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "$$SA_PASSWORD" -Q "SELECT 1"
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./certs:/etc/nginx/certs:ro
-    depends_on:
-      - api
-```
-
-#### Nginx 反向代理配置
-
-```nginx
-upstream aspnet_api {
-    server api:8080;
-    keepalive 32;
-}
-
-server {
-    listen 80;
-    server_name api.example.com;
-    return 301 https://$host$request_uri;
-}
-
-server {
-    listen 443 ssl http2;
-    server_name api.example.com;
-
-    ssl_certificate     /etc/nginx/certs/fullchain.pem;
-    ssl_certificate_key /etc/nginx/certs/privkey.pem;
-    ssl_protocols       TLSv1.2 TLSv1.3;
-    ssl_ciphers         HIGH:!aNULL:!MD5;
-
-    # 安全响应头
-    add_header X-Frame-Options DENY;
-    add_header X-Content-Type-Options nosniff;
-    add_header X-XSS-Protection "1; mode=block";
-    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains";
-
-    location / {
-        proxy_pass          http://aspnet_api;
-        proxy_http_version  1.1;
-        proxy_set_header    Upgrade $http_upgrade;
-        proxy_set_header    Connection keep-alive;
-        proxy_set_header    Host $host;
-        proxy_set_header    X-Real-IP $remote_addr;
-        proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header    X-Forwarded-Proto $scheme;
-        proxy_cache_bypass  $http_upgrade;
-        proxy_read_timeout  60s;
-        proxy_send_timeout  60s;
-        client_max_body_size 50m;
-    }
-}
-```
-
-**处理转发头（Program.cs）：** 在 Nginx 后面部署时，需要让 ASP.NET Core 正确识别客户端真实 IP 和协议：
-
-```csharp
-// 必须在所有其他中间件之前
-app.UseForwardedHeaders(new ForwardedHeadersOptions
-{
-    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-});
 ```
 
 ---
 
-> **章节小结**：ASP.NET Web API 是一个层次分明、高度可扩展的框架。掌握请求管道的流向是一切的基础——从 URL 进入路由匹配，经过中间件层层处理，到 Filter Pipeline 的精细控制，再到 Controller 的业务执行，最终通过格式化层返回规范化的 HTTP 响应。在此基础上，叠加 JWT 安全、版本管理、限流、可观测性等生产级特性，配合 Docker 容器化部署，即可构建出健壮、可维护的企业级 REST API。
+> **章节总结**：ASP.NET Web API 是工业物联网中纵向数据整合的关键环节。在完成从路由器匹配、模型绑定、业务逻辑到安全认证的开发逻辑后，针对具体的交付环境选择合适的部署策略至关重要。对于传统 Windows 生态，基于 **IIS + Hosting Bundle** 的静态托管方案凭借其在负载均衡、权限集成及管理便利性上的优势，是实现高可靠 Web 服务的首选路径；而对于现代化弹性扩展需求，Docker 与反向代理的组合则提供了更强的环境一致性保障。掌握这一全链路知识，是完成从“写代码”到“交付服务”转变的核心跨越。

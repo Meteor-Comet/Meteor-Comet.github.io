@@ -1564,6 +1564,125 @@ public class ProductsApiTests : IClassFixture<ApiTestFixture>
 }
 ```
 
+### 工控跨界：Web API 与 TCP 通信集成实战
+
+在工业 4.0 场景中，ASP.NET Core Web API 经常充当“北向接口”网关，负责将 HTTP 指令转换为底层 TCP/Socket 报文发往 PLC 或传感器，并将处理结果返回给 Web 前端或 App。
+
+#### 1. 标准化统一返回体 (ApiResult)
+在进行跨协议处理时，定义一个标准化的返回结构至关重要，这能确保前端无论在请求成功还是逻辑失败（如 TCP 超时）时都能获得一致的解析方式。
+
+```csharp
+public class ApiResult<T>
+{
+    public bool Success { get; set; }
+    public string? Message { get; set; }
+    public T? Data { get; set; }
+    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+
+    // 静态快捷方法
+    public static ApiResult<T> Ok(T data) => new() { Success = true, Data = data };
+    public static ApiResult<T> Fail(string msg) => new() { Success = false, Message = msg };
+}
+```
+
+#### 2. TCP 通信服务管理器 (Singleton)
+TCP 连接属于昂贵的系统资源，不宜在每次 HTTP 请求中 `new TcpClient()`。建议使用单例模式或长连接管理器进行维护。
+
+```csharp
+public interface ITcpDeviceService
+{
+    Task<string> GetDeviceStatusAsync(string ip, int port);
+}
+
+public class TcpDeviceService : ITcpDeviceService
+{
+    private readonly ILogger<TcpDeviceService> _logger;
+
+    public TcpDeviceService(ILogger<TcpDeviceService> logger) => _logger = logger;
+
+    public async Task<string> GetDeviceStatusAsync(string ip, int port)
+    {
+        try
+        {
+            using var client = new TcpClient();
+            // 设置 3 秒超时
+            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3)); 
+            await client.ConnectAsync(ip, port, cts.Token);
+
+            using var stream = client.GetStream();
+            
+            // 发送查询指令（例如 0x01 表示读状态）
+            byte[] command = { 0x01 };
+            await stream.WriteAsync(command, 0, command.Length, cts.Token);
+
+            // 读取响应
+            byte[] buffer = new byte[1024];
+            int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, cts.Token);
+            
+            return Encoding.UTF8.GetString(buffer, 0, bytesRead);
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogWarning("TCP 连接超时: {IP}:{Port}", ip, port);
+            throw new Exception("设备响应超时");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "TCP 通信异常");
+            throw;
+        }
+    }
+}
+```
+
+#### 3. Controller 层集成
+将 TCP 服务注入控制器，并将通信逻辑包装在统一返回体中。
+
+```csharp
+[ApiController]
+[Route("api/[controller]")]
+public class DeviceController : ControllerBase
+{
+    private readonly ITcpDeviceService _tcpService;
+
+    public DeviceController(ITcpDeviceService tcpService) => _tcpService = tcpService;
+
+    /// <summary>
+    /// 调用底层 TCP 协议获取设备实时状态
+    /// </summary>
+    [HttpGet("{ip}/status")]
+    public async Task<ActionResult<ApiResult<string>>> GetStatus(string ip, [FromQuery] int port = 502)
+    {
+        try
+        {
+            // 执行 TCP 通信
+            var status = await _tcpService.GetDeviceStatusAsync(ip, port);
+            
+            // 返回标准化的成功结构
+            return Ok(ApiResult<string>.Ok(status));
+        }
+        catch (Exception ex)
+        {
+            // 返回标准化的逻辑失败结构（200 OK，但 Success 为 false）
+            // 或者根据需求返回 500
+            return Ok(ApiResult<string>.Fail(ex.Message));
+        }
+    }
+}
+```
+
+#### 4. 核心 API 详解与避坑指南
+
+*   **TcpClient 与 NetworkStream**：
+    *   `client.GetStream()` 获取的是全双工流。
+    *   **切记**：`NetworkStream` 不支持 `Seek`（无法跳着读），必须按顺序读取。
+*   **异步读写 (`ReadAsync`/`WriteAsync`)**：
+    *   在高并发 API 场景下，绝对严禁使用 `Read()`/`Write()` 同步方法，否则会迅速阻塞线程池，导致 API 响应能力彻底崩溃。
+*   **超时控制 (`CancellationToken`)**：
+    *   TCP 通信受物理网络影响极大。必须通过 `CancellationTokenSource` 强制设置通信上限，防止一个挂起的 TCP 连接无休止地占用 HTTP 等待线程。
+*   **字节序处理**：
+    *   工业协议（如 Modbus）多为大端序。在 Web API 中组包或拆包时，务必使用 `BinaryPrimitives` 或 `EndianBitConverter` 进行字节转换，防止高低位颠倒导致数据解析错误。
+
 ---
 
 ### 生产发布：IIS (Internet Information Services) 托管实战

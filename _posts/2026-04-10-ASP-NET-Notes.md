@@ -31,9 +31,10 @@ tags:
   - [2.2 客户端错误系列 (Client Error - 4xx)](#22-客户端错误系列-client-error---4xx)
   - [2.3 服务器错误系列 (Server Error - 5xx)](#23-服务器错误系列-server-error---5xx)
   - [2.4 特殊资源处理：重定向、流式文件与物理路径](#24-特殊资源处理重定向流式文件与物理路径)
-- [三、 协议实战：Minimal API 与 属性化路由高级技巧](#三-协议实战minimal-api-与-属性化路由高级技巧)
-  - [3.1 路由约束：在分发层拦截非法请求](#31-路由约束在分发层拦截非法请求)
-  - [3.2 深度绑定：[From...] 指定参数来源的最佳实践](#32-深度绑定from-指定参数来源的最佳实践)
+- [三、 路由与终点映射：Minimal API 与 Controller 深度实战](#三-路由与终点映射minimal-api-与-controller-深度实战)
+  - [3.1 路由约束：分发层的“逻辑熔断器”](#31-路由约束分发层的逻辑熔断器)
+  - [3.2 Controller 属性路由 (Attribute Routing)](#32-controller-属性路由-attribute-routing)
+  - [3.3 深度模型绑定：[From...] 指定参数来源](#33-深度模型绑定from-指定参数来源)
 - [四、 企业级基础设施：后台任务、安全与性能](#四-企业级基础设施后台任务安全与性能)
   - [4.1 持续服务：BackgroundService 工业数据轮询](#41-持续服务backgroundservice-工业数据轮询)
   - [4.2 零反射优化：JSON Source Generators](#42-零反射优化json-source-generators)
@@ -113,19 +114,63 @@ app.Run();
 
 ---
 
-## 三、 协议实战：Minimal API 与 属性化路由高级技巧
+## 三、 路由与终点映射：Minimal API 与 Controller 深度实战
 
-### 3.1 路由约束：在分发层拦截非法请求
+路由系统是 Web API 的“神经中枢”，负责将 HTTP 请求精确分发至逻辑端点。ASP.NET Core 支持 Minimal API 的“编程式”映射与 Controller 的“声明式”特性映射。
+
+### 3.1 路由约束：分发层的“逻辑熔断器”
+路由约束允许在请求进入业务层之前就拦截非法输入。
+
 ```csharp
-app.MapGet("/dev/{id:int:min(1000)}", (int id) => ...); // 限制最小 ID
-app.MapGet("/data/{protocol:regex(^(modbus|mqtt)$)}", ...); // 正则匹配
+// Minimal API 约束
+app.MapGet("/dev/{id:int:min(1000)}", (int id) => ...); 
+app.MapGet("/data/{protocol:regex(^(modbus|mqtt)$)}", ...);
+
+// Controller 属性约束
+[HttpGet("{id:guid}")] // 仅匹配 Guid 格式
+public IActionResult GetById(Guid id) => ...;
 ```
 
-### 3.2 深度绑定：[From...] 指定参数来源
-*   `[FromRoute]`：精确匹配 URL 变量。
-*   `[FromQuery]`：匹配查询字符串。
-*   `[FromBody]`：报文正文（JSON）。
-*   `[FromHeader]`：提取头信息。
+### 3.2 Controller 属性路由 (Attribute Routing)
+在企业级控制器开发中，属性路由是管理复杂 API 路径的标准做法。
+
+#### A. 层次化路由与 Token 替换
+利用 `[controller]` 和 `[action]` 占位符，可以实现代码重命名的自动适应：
+
+```csharp
+[ApiController]
+[Route("api/v1/[controller]")] // 类级别：api/v1/Device
+public class DeviceController : ControllerBase
+{
+    // 最终路由：GET api/v1/Device/Status
+    [HttpGet("[action]")] 
+    public IActionResult Status() => Ok("Online");
+
+    // 最终路由：GET api/v1/Device/101
+    [HttpGet("{id:int}")] 
+    public IActionResult GetById(int id) => Ok();
+}
+```
+
+#### B. 多路径映射与默认值
+单个 Action 可以响应多个路由模板，并灵活配置默认参数：
+
+```csharp
+[HttpGet("info/{id?}")]         // id 为可选参数
+[HttpGet("find/{id=DEFAULT}")] // id 缺省时为 "DEFAULT"
+public IActionResult GetInfo(string id) => Ok(id);
+```
+
+### 3.3 深度模型绑定：[From...] 指定参数来源
+当模型结构复杂或存在参数冲突时，必须显式指定数据来源：
+
+| 注解 | 提取范围 | 工业实战场景 |
+| :--- | :--- | :--- |
+| **[FromRoute]** | URL 路径变量 | 获取特定传感器 ID |
+| **[FromQuery]** | URL 查询字符串 | 分页、过滤条件、排序依据 |
+| **[FromBody]** | 请求报文体 (JSON) | 提交复杂的配置对象、上报批次数据 |
+| **[FromHeader]** | HTTP 请求头 | 提取独立设备鉴权 Key 或版本标签 |
+| **[FromForm]** | 表单数据 | 传统表单提交（较少用于纯 API） |
 
 ---
 

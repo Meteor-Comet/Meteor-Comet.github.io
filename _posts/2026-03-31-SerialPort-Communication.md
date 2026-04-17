@@ -3038,15 +3038,78 @@ await Task.WhenAll(tasks);
     ```
 
 ##### 【容错监控篇：指令响应回执状态枚举 API】
-*   **旧版本 API (MQTT 3.1.1)**：发布者发出的请求哪怕未被分发（或因为服务端身份鉴定失败被私自丢弃封杀），客机端的发布 `PublishAsync` 仍然视为结束，如同丢失在黑洞，全无底层消息反馈。
-*   **5.x 版本 API (MQTT 5.0 专享)**：通过全面内置反馈机制，每一次行为都附带完整的全景结果枚举码：
+*   **旧版本 API (MQTT 3.1.1)**：发布者发出的请求哪怕未被分发（或因为服务端身份鉴定失被定丢弃），客机端的发布 `PublishAsync` 仍然视为结束，全无底层消息反馈。
+*   **5.x 版本 API (MQTT 5.0 专享)**：通过全面内置反馈机制，每一次行为都附带完整的结果枚举码：
     ```csharp
     var result = await client.PublishAsync(message);
     if (result.ReasonCode != MqttClientPublishReasonCode.Success)
     {
-        // 5.x 带来的全景安全：直接提取出业务失败溯源，例如 NotAuthorized(无权限)、TopicFilterInvalid 等
-        Console.WriteLine($"数据派发中途遇阻结束，服务端物理级真实回复状况为：{result.ReasonCode}");
+        // 5.x 的直接反馈：提取出业务失败溯源，例如 NotAuthorized(无权限)、TopicFilterInvalid 等
+        Console.WriteLine($"数据派发中途遇阻结束，服务端真实回复状况为：{result.ReasonCode}");
     }
     ```
 
-$content
+## 21. 工业数据上报：HttpClient 与 Web API 集成
+
+在工业物联网场景中，上位机常通过 SerialPort 或 Modbus 采集本地硬件数据，随后通过 HTTP 协议将数据汇总上报至云端或企业内部的 Web API 接口。
+
+### 21.1 客户端生命周期管理
+对于基于 WinForms / WPF 的桌面端应用，控制 `HttpClient` 的实例化方式是维持网络稳定性的前提：
+*   **长连接复用（推荐）**：使用 `private static readonly HttpClient _client = new HttpClient();`。
+*   **设计逻辑**：`HttpClient` 实例被设计为复用对象。在循环数据采集或高频上报任务中，反复由于 `using` 语句创建并销毁该实例会导致底层的 TCP 套接字未能立刻释放，长时间处于 `TIME_WAIT` 状态，极易耗尽可能用的通信端口。
+
+### 21.2 WinForms 下的异步请求模式
+工业通信应用通常具有长期的主干线程维持通信，因此网络上报不能阻塞系统的 UI 线程。
+*   **异步操作**：需要在事件交互函数中使用 `async/await`。
+
+```csharp
+private async void OnDataArrived(object sender, SerialDataReceivedEventArgs e) 
+{
+    // 1. 同步读取本地硬件数据
+    string rawData = serialPort1.ReadExisting();
+    
+    // 2. 将数据执行异步网络传输 (此步骤不阻塞界面重绘)
+    await PostDataToCloudAsync(rawData); 
+    
+    // 3. UI 状态指示 (任务完成后自动恢复回 UI 主线程环境)
+    txtLog.Text = "数据上传成功";
+}
+```
+
+### 21.3 标准的请求构建与结果处理
+编写稳定的 HTTP 客户端上传逻辑，通常包含以下步骤：
+1.  **URL 与查询参数构建**：使用拼接字符串如 `$"api/upload?sensorId={id}&page={page}"` 发送特定的附属标识。
+2.  **响应状态验证**：优先调用 `response.EnsureSuccessStatusCode()`。当 Web 服务器返回非正常代码（如 500、404）时，方法将立即抛出异常，防止解析出错的报文体。
+3.  **JSON 序列化操作**：
+    *   读取数据：`await response.Content.ReadAsStringAsync()`。
+    *   实体转换：使用 `JsonConvert.DeserializeObject<T>` 将接收的 JSON 数据结构转化为 C# 对象以便后续处理（例如 `Newtonsoft.Json` 类库）。
+
+### 21.4 HttpClient 通信错误处理
+现场网络环境并不绝对稳定，程序需要设定合理的应对机制：
+*   **硬超时控制**：必须为 `HttpClient` 设置明确的 `Timeout` 属性（如设置为 5 到 10 秒）。
+*   **异常捕获**：使用 `try-catch` 包裹请求范围，并至少拦截 `TaskCanceledException` (超时错误) 以及 `HttpRequestException` (网络中断或服务器无响应)。
+
+```csharp
+private static readonly HttpClient _httpClient = new HttpClient() 
+{ 
+    Timeout = TimeSpan.FromSeconds(5) 
+};
+
+public async Task UploadSensorDataAsync(string data)
+{
+    try 
+    {
+        var payload = new StringContent(data, Encoding.UTF8, "application/json");
+        var response = await _httpClient.PostAsync("http://server-ip/api/data", payload);
+        response.EnsureSuccessStatusCode();
+    }
+    catch (TaskCanceledException)
+    {
+        Console.WriteLine("请求在限时内未获回应 (Timeout)");
+    }
+    catch (HttpRequestException ex)
+    {
+        Console.WriteLine($"无法连接目标接口: {ex.Message}");
+    }
+}
+```

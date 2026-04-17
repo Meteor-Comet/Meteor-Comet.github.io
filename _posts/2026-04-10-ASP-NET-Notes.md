@@ -205,7 +205,69 @@ var result = await JsonSerializer.DeserializeAsync<T>(stream);
 ```
 
 ### 5.4 HttpClient 方法全攻略：参数、Body 与 Header 传递
-（参考上文代码示例，涵盖 GET/POST/PUT/DELETE 及 Header 注入...）
+
+在实际生产中，我们需要根据 RESTful 规范，利用不同的谓词与服务端交互。以下是基于 `System.Net.Http.Json` 扩展库的最佳实践。
+
+#### 1. GET 请求与查询参数
+对于简单的查询，直接拼接 URL；对于复杂参数，推荐使用 `QueryBuilder` 或手动构建 URI。
+
+```csharp
+// 基础：直接拼接 URL 参数
+var results = await client.GetFromJsonAsync<List<Device>>("api/devices?type=sensor&active=true");
+
+// 进阶：获取特定 ID (Restful 路径)
+int deviceId = 101;
+var device = await client.GetFromJsonAsync<Device>($"api/devices/{deviceId}");
+```
+
+#### 2. POST 请求与 JSON 载荷
+使用 `PostAsJsonAsync` 可以自动处理对象序列化与 `Content-Type: application/json` 请求头。
+
+```csharp
+var newDevice = new Device { Name = "Temp-01", Type = "Sensor" };
+
+// 发送 POST 请求
+var response = await client.PostAsJsonAsync("api/devices", newDevice);
+
+// 验证并处理结果
+if (response.IsSuccessStatusCode) {
+    var savedDevice = await response.Content.ReadFromJsonAsync<Device>();
+    Console.WriteLine($"创建成功，ID: {savedDevice.Id}");
+}
+```
+
+#### 3. PUT 与 DELETE 操作
+*   **PUT**：通常用于全量更新资源。
+*   **DELETE**：根据路径 ID 删除资源。
+
+```csharp
+// PUT：更新资源
+await client.PutAsJsonAsync($"api/devices/{id}", updatedData);
+
+// DELETE：删除资源
+await client.DeleteAsync($"api/devices/{id}");
+```
+
+#### 4. 请求头注入 (Authorization/Custom Headers)
+*   **全局 Header**（针对所有请求）：在创建 Client 后立即设置。
+*   **单次 Header**（仅针对本次请求）：使用 `HttpRequestMessage`。
+
+```csharp
+// --- 全局注入 (如 Bearer Token) ---
+client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "YOUR_TOKEN");
+client.DefaultRequestHeaders.Add("X-Project-Id", "SCADA-01");
+
+// --- 单次请求注入 (高级用法) ---
+using var request = new HttpRequestMessage(HttpMethod.Post, "api/upload");
+request.Headers.Add("X-Transaction-Id", Guid.NewGuid().ToString()); // 仅本次有效
+request.Content = JsonContent.Create(new { Data = "SomePayload" });
+
+var response = await client.SendAsync(request);
+```
+
+#### 5. 性能提示
+*   **重复利用序列化配置**：若 API 遵循驼峰命名（CamelCase），确保 `JsonSerializerOptions` 在全局重用，避免重复创建开销。
+*   **处理 204 No Content**：对于 `Delete` 或某些 `Put` 响应，Content 为空，直接调用 `ReadFromJsonAsync` 会报错，应先检查 `StatusCode`。
 
 ---
 

@@ -192,12 +192,54 @@ request.Content = new StringContent("{\"cmd\":\"reboot\"}", Encoding.UTF8, "appl
 var response = await _client.SendAsync(request);
 ```
 
-### 6.4 内容载体：HttpContent 字典 (JSON, Multipart, Stream)
-根据数据类型的不同，合理选择 Content 类：
-*   **JsonContent (.NET 5+)**：最简方案 `JsonContent.Create(obj)` 自动处理序列化。
-*   **FormUrlEncodedContent**：模拟网页表单登录的关键载体。
-*   **MultipartFormDataContent**：用于**混合上报**（如同时发送 JSON 结构体和一张设备抓拍图）。
-*   **StreamContent**：百万级数据量导出或大文件下刷时的极致方案。
+### 6.4 内容载体：HttpContent 深度解析 (JSON, Multipart, Stream)
+
+在 `PostAsync` 或 `SendAsync` 中，`HttpContent` 决定了报文实体的格式。正确配置参数（如 Encoding 和 MediaType）是服务端能否解析成功的关键。
+
+#### A. JsonContent —— 现代 API 的标准载体
+自 .NET 5 引入，它内置了 `System.Text.Json` 序列化，性能优于手动序列化。
+
+```csharp
+// 自动将对象序列化为 JSON 并设置 Content-Type: application/json; charset=utf-8
+var content = JsonContent.Create(new { DeviceId = 101, Value = 25.4 });
+```
+
+#### B. StringContent —— 底层控制与兼容性
+当你需要完全控制原始字符串（如自定义加密报文）时使用。
+*   **参数解释**：
+    *   `content`: 原始字符串。
+    *   `encoding`: 字符编码（强烈建议 `Encoding.UTF8`）。
+    *   `mediaType`: 告知服务端如何解析（如 `"application/json"`、`"text/plain"`）。
+
+```csharp
+var content = new StringContent("{\"raw\":\"data\"}", Encoding.UTF8, "application/json");
+```
+
+#### C. MultipartFormDataContent —— 混合上报实战
+常用于**图文并茂**的数据上报，例如：发送一个传感器 JSON 状态，并附带一张现场抓拍的图片。
+
+```csharp
+using var multipart = new MultipartFormDataContent();
+
+// 1. 添加普通字段 (类似表单 name="metadata")
+multipart.Add(new StringContent("{\"room\":\"lab\"}"), "metadata");
+
+// 2. 添加文件流 (参数: HttpContent, 参数名, 文件名)
+var fileContent = new StreamContent(File.OpenRead("photo.jpg"));
+fileContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
+multipart.Add(fileContent, "device_image", "capture.jpg");
+
+await _client.PostAsync(url, multipart);
+```
+
+#### D. StreamContent —— 大数据量与 Zero-Allocation
+在上位机导出 GB 级日志或上传大量传感数据时，严禁先读入内存。
+*   **实战**：直接将底层 `FileStream` 或 `NetworkStream` 包装后发出，实现高效流式传输。
+
+```csharp
+using var fs = File.OpenRead("large_data.bin");
+var content = new StreamContent(fs); // 直接从磁盘读取并在网络流中发送，内存占用极低
+```
 
 ### 6.5 弹性控制：CancellationToken 与 CompletionOption 内存优化
 在不稳定的工业网络或内存受限环境中，以下参数是系统的“保险丝”：

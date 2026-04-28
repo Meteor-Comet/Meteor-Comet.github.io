@@ -20,9 +20,9 @@ tags:
 ## 目录
 
 - [1. Prism框架概念与核心内容](#1-prism框架概念与核心内容)
-- [2. Prism框架使用步骤与模板](#2-prism框架使用步骤与模板)
-- [3. Prism的绑定、命令与视图模型定位器](#3-prism的绑定命令与视图模型定位器)
-- [4. 区域管理器 (RegionManager) 与视图注入](#4-区域管理器-regionmanager-与视图注入)
+- [2. Prism框架启动与 App.xaml.cs 核心注册详解](#2-prism框架启动与-appxamlcs-核心注册详解)
+- [3. Prism的命名约定、定位器与基础 MVVM](#3-prism的命名约定定位器与基础-mvvm)
+- [4. 区域管理器 (RegionManager) 与区域适配器](#4-区域管理器-regionmanager-与区域适配器)
 - [5. 导航功能（跳转、传参、日志、守卫）](#5-导航功能跳转传参日志守卫)
 - [6. 事件聚合器 (EventAggregator)](#6-事件聚合器-eventaggregator)
 - [7. 对话框服务 (DialogService)](#7-对话框服务-dialogservice)
@@ -54,83 +54,177 @@ Prism 的核心内容包括以下几个方面：
 
 ---
 
-## 2. Prism框架使用步骤与模板
+## 2. Prism框架启动与 App.xaml.cs 核心注册详解
 
-### A. 使用Prism的两种方式
-1.  **通过普通的WPF模板改写（不推荐生产使用）**
-    *   新建标准 WPF 应用。
-    *   通过 NuGet 引入 `Prism.DryIoc`（或 Prism.Unity）。
-    *   修改 `App.xaml`，将应用的根节点换成基于 Prism 的 `PrismApplication` 并且在 C# 代码中重写 `CreateShell()` 和 `RegisterTypes()` 方法。
-    *   *一般在学习和研究底层逻辑时才使用此方式。*
+在 Prism 框架体系中，`App.xaml` 和 `App.xaml.cs` 是整个应用程序的发动机，负责接管原生 WPF 的启动流程，并初始化依赖注入容器（IOC）。掌握这一部分是 Prism 进阶的最关键一步。
 
-2.  **Prism Template Pack 项目模板 (推荐方式)**
-    *   这是一个 Visual Studio 的扩展插件（安装 “Prism Template Pack”）。
-    *   安装之后，在新建项目时可以直接选择 `Prism Blank App (WPF)` 项目模板创建 Prism 项目，这会自动为你配置好依赖注入容器和 App 壳基础代码。
+### 2.1 改造原生的 App.xaml
+要使用 Prism，必须剥夺 WPF 原生的启动权。我们需要将根节点 `Application` 替换为 `prism:PrismApplication`，并**严格删除 `StartupUri="MainWindow.xaml"` 属性**，因为主窗体的创建将由 Prism 的依赖注入容器接管。
 
-### B. Prism框架的约定命名规则
-Prism 的核心理念之一是**约定优于配置** (Convention over Configuration)。
+```xaml
+<prism:PrismApplication x:Class="MyPrismApp.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:prism="http://prismlibrary.com/">
+    <Application.Resources>
+        <!-- 全局样式和资源字典在此处引入 -->
+    </Application.Resources>
+</prism:PrismApplication>
+```
 
-1.  **视图 (View) 必须放到 `Views` 文件夹中**。
-2.  **视图模型 (ViewModel) 必须放到 `ViewModels` 文件夹中**。
-3.  **命名映射约定**：如果 View 叫做 `MainWindow`，那么它的 ViewModel 必须叫做 `MainWindowViewModel`。如果 View 是 `StudentView`，则 ViewModel 叫做 `StudentViewModel`。
+### 2.2 App.xaml.cs 核心引导程序：CreateShell 与 RegisterTypes
+修改 `App.xaml.cs` 使其继承自 `PrismApplication`。此时你必须实现两个抽象方法：`CreateShell`（创建主窗体）和 `RegisterTypes`（依赖注入与服务大管家）。
 
-遵守这个约定，Prism 自带的 **ViewModelLocator** 才会自动帮你去对应的文件夹中找对应的 ViewModel 并赋值给 View 的 `DataContext`。
+```csharp
+using Prism.Ioc;
+using Prism.Unity; // 核心：使用的是基于 Unity 或 DryIoc 的 Prism 容器引擎版本
+using System.Windows;
+using MyPrismApp.Views;
+using MyPrismApp.Services;
+
+namespace MyPrismApp
+{
+    public partial class App : PrismApplication
+    {
+        /// <summary>
+        /// 1. 指定应用程序的启动主窗体 (Shell)
+        /// </summary>
+        protected override Window CreateShell()
+        {
+            // 绝对不能用 new MainWindow()！
+            // 必须通过 IOC 容器解析，这样 MainWindow 及其 ViewModel 构造函数里的依赖才会被自动注入。
+            return Container.Resolve<MainWindow>();
+        }
+
+        /// <summary>
+        /// 2. 核心大管家：在此处统一注册所有业务服务、导航页面和弹窗。
+        /// 这是 Prism 强解耦特性的生命线，也是各模块互通的基础。
+        /// </summary>
+        protected override void RegisterTypes(IContainerRegistry containerRegistry)
+        {
+            // ==============================================
+            // A. 注册基础业务服务 (依赖注入 Service)
+            // ==============================================
+            
+            // 瞬态 (Transient)：每次被请求时，都会创建一个全新的实例
+            containerRegistry.Register<ILogService, LogService>();
+            
+            // 单例 (Singleton)：全局唯一的实例，整个程序生命周期共享一个对象
+            containerRegistry.RegisterSingleton<IUserService, UserService>();
+            
+            // 实例注册：将程序启动时已经实例化的一个现成对象，注册为单例直接托管给容器
+            // var localConfig = new ConfigLoader().Load();
+            // containerRegistry.RegisterInstance<IConfig>(localConfig);
+
+            // ==============================================
+            // B. 注册基于 Region 路由的导航页面 (Navigation)
+            // ==============================================
+            
+            // 必考点！只有在这里注册过的 View，才能在 RequestNavigate 导航时被识别。
+            // 默认路由别名为视图类名，例如下面注册后，路由地址就是 "ViewA"
+            containerRegistry.RegisterForNavigation<ViewA>();
+            
+            // 进阶：显式指定 ViewModel，并起一个方便好记的路由别名 "StudentPage"
+            containerRegistry.RegisterForNavigation<StudentView, StudentViewModel>("StudentPage");
+
+            // ==============================================
+            // C. 注册对话框弹窗视图 (Dialog)
+            // ==============================================
+            
+            // 专供 IDialogService 调用的独立弹窗页面，也必须提前注册
+            containerRegistry.RegisterDialog<AlertDialog, AlertDialogViewModel>();
+            containerRegistry.RegisterDialog<ConfirmDialog>("ConfirmWindow");
+        }
+        
+        /// <summary>
+        /// 3. (可选) 注册/覆盖区域适配器
+        /// </summary>
+        protected override void ConfigureRegionAdapterMappings(RegionAdapterMappings regionAdapterMappings)
+        {
+            base.ConfigureRegionAdapterMappings(regionAdapterMappings);
+            // 注册针对特定控件 (如 StackPanel) 的自定义区域适配器
+            // regionAdapterMappings.RegisterMapping(typeof(StackPanel), Container.Resolve<StackPanelRegionAdapter>());
+        }
+
+        /// <summary>
+        /// 4. (可选) 配置模块化目录 (详情见第8章)
+        /// </summary>
+        protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)
+        {
+            base.ConfigureModuleCatalog(moduleCatalog);
+            // moduleCatalog.AddModule<SomeModule>();
+        }
+    }
+}
+```
+
+通过这一套流程，Prism 彻底接管了应用程序的生命周期、窗口创建机制以及内部服务的装配。
+
+### 2.3 进阶实战：在主窗体弹出前阻塞显示登录窗体
+
+在企业级应用开发中，最常见的需求是：**程序启动时先弹出登录框，如果登录成功才显示主界面，失败则直接退出程序。**
+理解 `PrismApplication` 内部的启动顺序非常关键，它的调用链路为：`Initialize()` -> `CreateShell()` -> `InitializeShell()` -> `OnInitialized()`。
+既然在 `CreateShell` 阶段主窗体已经被实例化，如果在主窗体正式呈现给用户之前进行拦截，最佳的重写位置是 **`InitializeShell()`** 方法。
+
+**完整实现示例：**
+
+```csharp
+public partial class App : PrismApplication
+{
+    // ... 前文的 CreateShell 和 RegisterTypes 代码保持不变 ...
+
+    /// <summary>
+    /// 拦截壳窗体的初始化过程，执行前置的条件弹窗逻辑（如：登录验证）
+    /// </summary>
+    protected override void InitializeShell(Window shell)
+    {
+        // 此时 CreateShell() 已经执行，但主窗体 shell 还没有被真正 Show() 出来。
+        // 我们利用 IOC 容器解析出一个纯净的登录窗体（前提是 LoginWindow 必须已被注册或能够被容器解析）
+        var loginWindow = Container.Resolve<LoginWindow>();
+        
+        // 使用 ShowDialog() 阻塞当前启动线程，等待用户的登录操作
+        bool? loginResult = loginWindow.ShowDialog();
+
+        if (loginResult == true)
+        {
+            // 登录成功！调用基类方法。
+            // 基类底层的默认实现为：Application.Current.MainWindow = shell; shell.Show();
+            base.InitializeShell(shell); 
+        }
+        else
+        {
+            // 登录失败或用户主动点击了关闭，直接终结整个应用程序
+            Application.Current.Shutdown();
+        }
+    }
+    
+    /// <summary>
+    /// 在容器初始化完毕、且主窗体 Shell 显示之后触发。
+    /// 常用来做初始化完成后的首次默认路由跳转。
+    /// </summary>
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        
+        // 例如：登录成功显示主界面后，默认往主窗体的 ContentRegion 推入后台首页仪表盘
+        // Container.Resolve<IRegionManager>().RequestNavigate("ContentRegion", "DashboardView");
+    }
+}
+```
+
+这是一套在 Prism 中极度优雅的拦截方案。它既保证了登录窗体（`LoginWindow`）能充分享受 Prism 强大的 IOC 依赖注入红利，又在架构上保证了未认证用户绝对无法接触到主窗体及任何核心服务资源。
 
 ---
 
-## 3. Prism的绑定、命令与视图模型定位器
+## 3. Prism的命名约定、定位器与基础 MVVM
 
-### 3.1 属性绑定 (`BindableBase`)
-要让属性支持双向绑定，ViewModel 需要继承 `BindableBase` 基类，并使用 `SetProperty` 方法。
+### 3.1 约定优于配置 (Convention over Configuration)
+Prism 通过一套强有力的命名约定，自动消灭了传统 WPF 中需要手动绑定 `DataContext` 的繁琐代码：
+1. **文件夹约定**：视图文件必须存放在 `Views` 文件夹中，视图模型必须存放在 `ViewModels` 文件夹中。
+2. **命名映射约定**：后缀映射。如果 View 命名为 `MainWindow`，其 ViewModel 必须命名为 `MainWindowViewModel`。如果 View 叫 `StudentView`，则对应 `StudentViewModel`。
 
-```csharp
-public class MainWindowViewModel : BindableBase
-{
-    private string _title = "Prism Application";
-    public string Title
-    {
-        get { return _title; }
-        set { SetProperty(ref _title, value); }
-    }
-}
-```
-
-### 3.2 命令注入 (`DelegateCommand`)
-使用 `DelegateCommand` 替代原生的 `ICommand`，大大简化了命令的编写。也可以使用异步命令。
-
-```csharp
-public class MainWindowViewModel : BindableBase
-{
-    public DelegateCommand ClickCommand { get; private set; }
-    public DelegateCommand<string> PassParamCommand { get; private set; }
-
-    public MainWindowViewModel()
-    {
-        ClickCommand = new DelegateCommand(ExecuteClick, CanExecuteClick);
-        PassParamCommand = new DelegateCommand<string>(ExecutePassParam);
-    }
-
-    private void ExecuteClick()
-    {
-        // 按钮点击执行的方法
-    }
-
-    private bool CanExecuteClick()
-    {
-        // 可以根据条件返回 True 或 False，用以控制按钮是否可用
-        return true; 
-    }
-
-    private void ExecutePassParam(string param)
-    {
-        // 带参数的命令执行
-    }
-}
-```
-
-### 3.3 ViewModelLocator 视图模型定位器
-视图模型定位器是 Prism 用于“自动查找 View 的 DataContext” 的机制。
-只要你遵循了上文提到的 [Views+ViewModels 命名约定]，在 XAML 中，只需注入下面的附加属性，Prism 就会利用反射自动装配：
+### 3.2 视图模型定位器 (ViewModelLocator)
+当遵循了上述约定后，只需要在 XAML 根节点中挂载一行附加属性，Prism 便会利用反射黑魔法，自动在 IOC 容器中实例化 ViewModel 并挂载到视图的 `DataContext` 上：
 
 ```xaml
 <Window x:Class="MyPrismApp.Views.MainWindow"
@@ -142,57 +236,130 @@ public class MainWindowViewModel : BindableBase
 </Window>
 ```
 
-#### 覆盖约定的 `ViewModelLocationProvider`
-如果你的项目没法按约定命名，可以通过 `ViewModelLocationProvider` 在代码中手动注册对应关系（推荐在 `App.xaml.cs` 里的重写中配置）：
+**如何覆盖默认约定？**
+如果在老旧项目中无法遵循文件夹和命名规范，可以在 `App.xaml.cs` 中重写 `ConfigureViewModelLocator` 强行手动拉郎配：
 
 ```csharp
 protected override void ConfigureViewModelLocator()
 {
     base.ConfigureViewModelLocator();
+    // 强制声明：遇到 MainWindow 视图时，无论它在哪，都给它强制挂载 CustomMainWindowViewModel
     ViewModelLocationProvider.Register<MainWindow, CustomMainWindowViewModel>();
+}
+```
+
+### 3.3 属性绑定 (`BindableBase`)
+要让属性支持双向 UI 刷新通知，ViewModel 必须继承 `BindableBase` 基类，并使用 `SetProperty` 方法以触发底层的 `INotifyPropertyChanged`。
+
+```csharp
+public class MainWindowViewModel : BindableBase
+{
+    private string _title = "Prism Application";
+    public string Title
+    {
+        get => _title;
+        set => SetProperty(ref _title, value); 
+    }
+}
+```
+
+### 3.4 命令注入 (`DelegateCommand`)
+Prism 的 `DelegateCommand` 替代了原生臃肿的 `ICommand`，大大简化了命令交互的编写，并支持响应属性变化。
+
+```csharp
+public class MainWindowViewModel : BindableBase
+{
+    public DelegateCommand ClickCommand { get; private set; }
+    public DelegateCommand<string> PassParamCommand { get; private set; }
+
+    public MainWindowViewModel()
+    {
+        ClickCommand = new DelegateCommand(ExecuteClick, CanExecuteClick);
+        // ObservesProperty 的高级应用：当 Title 属性变化时，自动重新评估该按钮是否允许被点击！
+        ClickCommand.ObservesProperty(() => Title); 
+        
+        PassParamCommand = new DelegateCommand<string>(ExecutePassParam);
+    }
+
+    private void ExecuteClick() { /* 按钮点击执行的方法 */ }
+    
+    private bool CanExecuteClick() => !string.IsNullOrEmpty(Title);
+    
+    private void ExecutePassParam(string param) { /* 带参数的命令执行 */ }
 }
 ```
 
 ---
 
-## 4. 区域管理器 (RegionManager) 与视图注入
+## 4. 区域管理器 (RegionManager) 与区域适配器
 
-### C. 区域和导航的核心
-`RegionManager` 是 Prism 处理复杂界面的核心所在，它提供了一种高度低耦合的方式来组装 UI：将界面切分成多个“占位符”（区域），然后把具体的用户控件（Views）动态注入到这些占位符中。
+### 4.1 区域 (Region) 概念
+`RegionManager` 是 Prism 处理复杂界面组装的核心。它允许我们将主窗体挖出若干个“占位坑位”（即区域 Region），然后在运行时将具体的 UI 用户控件（Views）动态注入到这些坑位中。这种“搭积木”的设计实现了界面极度低耦合。
 
-#### 4.1 如何定义区域？
-在 XAML 文件的容器控件上设置附加属性 `prism:RegionManager.RegionName`。
+### 4.2 如何定义区域？
+在 XAML 文件的容器控件上设置附加属性 `prism:RegionManager.RegionName` 即可开辟坑位：
 
 ```xaml
 <Window x:Class="MyPrismApp.Views.MainWindow" ... >
     <Grid>
-        <!-- 这里定义了一个名为 "ContentRegion" 的区域 -->
-        <ContentControl prism:RegionManager.RegionName="ContentRegion" />
+        <!-- 定义了顶部导航区 -->
+        <ContentControl prism:RegionManager.RegionName="HeaderRegion" Height="60"/>
+        
+        <!-- 定义了主体内容展示区 -->
+        <ContentControl prism:RegionManager.RegionName="MainContentRegion" />
     </Grid>
 </Window>
 ```
-**注意（区域适配器提醒）**：并不是所有的控件都能当成区域！默认情况下，只有 `ContentControl`、`ItemsControl`（如 ListBox） 和 `Selector` （如 TabControl）可以直接通过 RegionName 当作区域。如果你想把其他的容器（如 `StackPanel` 或 `Window` 自身）当做区域，必须自定义继承并实现 **RegionAdapterBase** 区域适配器，然后将其注册到容器里。
 
-#### 4.2 View Injection (视图注入) 
-在后台代码或 ViewModel 中，能够通过 IOC 容器拿到 `IRegionManager`，它可以对页面进行灵活管理：包括向区域添加页面、命名区域和执行导航。
+### 4.3 区域适配器 (RegionAdapter) - 极其重要的高级防坑指南
+**避坑警告**：并不是所有的 UI 控件都能被贴上 `RegionName` 标签当做区域！
+默认情况下，Prism 引擎只认识三种支持做区域的控件：
+1. `ContentControl` (用来装载单页)
+2. `ItemsControl` (用来装载多页，如 ListBox)
+3. `Selector` (如 TabControl)
 
-**如何向区域中动态添加页面？**
+如果你的美工设计了一个流式布局 `WrapPanel`，你想把四个独立的看板部件注入进去，若直接写 `prism:RegionManager.RegionName="DashRegion"` **程序会直接抛出异常崩溃**。
+此时必须手写区域适配器来教会 Prism 如何往里面塞内容：
 
 ```csharp
-// 在 ViewModel 的构造函数中通过 IOC 注入 IRegionManager
+// 1. 继承 RegionAdapterBase 并指定目标控件类型为 StackPanel 或 WrapPanel
+public class StackPanelRegionAdapter : RegionAdapterBase<StackPanel>
+{
+    public StackPanelRegionAdapter(IRegionBehaviorFactory regionBehaviorFactory) 
+        : base(regionBehaviorFactory) { }
+
+    // 核心逻辑：定义当有新视图注入该区域时，目标控件应该如何把视图接纳进来
+    protected override void Adapt(IRegion region, StackPanel regionTarget)
+    {
+        // 监控区域内部视图集合的变化
+        region.Views.CollectionChanged += (s, e) =>
+        {
+            if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+            {
+                // 当有新视图通过导航或 RegisterViewWithRegion 注入时，将其添加为子元素
+                foreach (FrameworkElement element in e.NewItems)
+                    regionTarget.Children.Add(element);
+            }
+        };
+    }
+
+    protected override IRegion CreateRegion() => new AllActiveRegion();
+}
+```
+写完后，**必须回到 `App.xaml.cs` 中的 `ConfigureRegionAdapterMappings` 方法里将其注册**（见本文 2.2 节代码），至此，你才能安全地在 `StackPanel` 上使用 `RegionName`。
+
+### 4.4 视图注入 (View Injection) 
+在 ViewModel 中，能够通过 IOC 容器拿到 `IRegionManager`，它管理着所有的区域坑位。
+
+**如何向区域中静态注册页面？**
+
+```csharp
 public MainWindowViewModel(IRegionManager regionManager)
 {
     _regionManager = regionManager;
-    AddViewToRegion();
-}
-
-private readonly IRegionManager _regionManager;
-
-private void AddViewToRegion()
-{
-    // 向名单为 'ContentRegion' 的区域中直接注册/添加一个视图(UserControl)
-    // 注意：RegisterViewWithRegion 主要用于初始静态加载，使用导航往往更灵活
-    _regionManager.RegisterViewWithRegion("ContentRegion", typeof(ViewA));
+    // 一启动，就向名单为 'HeaderRegion' 的区域中注入 HeaderView 实例
+    // 注意：RegisterViewWithRegion 主要用于启动时的固定框架静态加载。对于功能切换，使用后续的【导航】功能。
+    _regionManager.RegisterViewWithRegion("HeaderRegion", typeof(HeaderView));
 }
 ```
 

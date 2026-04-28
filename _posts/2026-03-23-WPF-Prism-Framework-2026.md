@@ -56,7 +56,7 @@ Prism 的核心内容包括以下几个方面：
 
 ## 2. Prism框架启动与 App.xaml.cs 核心注册详解
 
-在 Prism 框架体系中，`App.xaml` 和 `App.xaml.cs` 是整个应用程序的发动机，负责接管原生 WPF 的启动流程，并初始化依赖注入容器（IOC）。掌握这一部分是 Prism 进阶的最关键一步。
+在 Prism 框架体系中，`App.xaml` 和 `App.xaml.cs` 是整个应用程序的核心入口，负责接管原生 WPF 的启动流程，并初始化依赖注入容器（IOC）。掌握这一部分是 Prism 进阶的关键一步。
 
 ### 2.1 改造原生的 App.xaml
 要使用 Prism，必须剥夺 WPF 原生的启动权。我们需要将根节点 `Application` 替换为 `prism:PrismApplication`，并**严格删除 `StartupUri="MainWindow.xaml"` 属性**，因为主窗体的创建将由 Prism 的依赖注入容器接管。
@@ -97,8 +97,8 @@ namespace MyPrismApp
         }
 
         /// <summary>
-        /// 2. 核心大管家：在此处统一注册所有业务服务、导航页面和弹窗。
-        /// 这是 Prism 强解耦特性的生命线，也是各模块互通的基础。
+        /// 2. 核心注册方法：在此处统一注册所有业务服务、导航页面和弹窗。
+        /// 这是 Prism 实现强解耦的核心，也是各模块互通的基础。
         /// </summary>
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
@@ -120,7 +120,7 @@ namespace MyPrismApp
             // B. 注册基于 Region 路由的导航页面 (Navigation)
             // ==============================================
             
-            // 必考点！只有在这里注册过的 View，才能在 RequestNavigate 导航时被识别。
+            // 注意：只有在这里注册过的 View，才能在 RequestNavigate 导航时被识别。
             // 默认路由别名为视图类名，例如下面注册后，路由地址就是 "ViewA"
             containerRegistry.RegisterForNavigation<ViewA>();
             
@@ -212,7 +212,7 @@ public partial class App : PrismApplication
 }
 ```
 
-这是一套在 Prism 中极度优雅的拦截方案。它既保证了登录窗体（`LoginWindow`）能充分享受 Prism 强大的 IOC 依赖注入红利，又在架构上保证了未认证用户绝对无法接触到主窗体及任何核心服务资源。
+这是一种在 Prism 中的标准拦截方案。它既保证了登录窗体（`LoginWindow`）能够充分享受 Prism 的 IOC 依赖注入功能，又在架构上保证了未认证用户无法接触到主窗体及任何核心服务资源。
 
 ---
 
@@ -224,7 +224,7 @@ Prism 通过一套强有力的命名约定，自动消灭了传统 WPF 中需要
 2. **命名映射约定**：后缀映射。如果 View 命名为 `MainWindow`，其 ViewModel 必须命名为 `MainWindowViewModel`。如果 View 叫 `StudentView`，则对应 `StudentViewModel`。
 
 ### 3.2 视图模型定位器 (ViewModelLocator)
-当遵循了上述约定后，只需要在 XAML 根节点中挂载一行附加属性，Prism 便会利用反射黑魔法，自动在 IOC 容器中实例化 ViewModel 并挂载到视图的 `DataContext` 上：
+当遵循了上述约定后，只需要在 XAML 根节点中挂载一行附加属性，Prism 便会利用反射机制，自动在 IOC 容器中实例化 ViewModel 并挂载到视图的 `DataContext` 上：
 
 ```xaml
 <Window x:Class="MyPrismApp.Views.MainWindow"
@@ -237,7 +237,7 @@ Prism 通过一套强有力的命名约定，自动消灭了传统 WPF 中需要
 ```
 
 **如何覆盖默认约定？**
-如果在老旧项目中无法遵循文件夹和命名规范，可以在 `App.xaml.cs` 中重写 `ConfigureViewModelLocator` 强行手动拉郎配：
+如果在老旧项目中无法遵循文件夹和命名规范，可以在 `App.xaml.cs` 中重写 `ConfigureViewModelLocator` 进行手动配置：
 
 ```csharp
 protected override void ConfigureViewModelLocator()
@@ -311,8 +311,8 @@ public class MainWindowViewModel : BindableBase
 </Window>
 ```
 
-### 4.3 区域适配器 (RegionAdapter) - 极其重要的高级防坑指南
-**避坑警告**：并不是所有的 UI 控件都能被贴上 `RegionName` 标签当做区域！
+### 4.3 区域适配器 (RegionAdapter)
+**注意**：并不是所有的 UI 控件都支持通过 `RegionName` 标签作为区域使用。
 默认情况下，Prism 引擎只认识三种支持做区域的控件：
 1. `ContentControl` (用来装载单页)
 2. `ItemsControl` (用来装载多页，如 ListBox)
@@ -491,7 +491,7 @@ public class ViewBViewModel : BindableBase, INavigationAware
 
 ## 6. 事件聚合器 (EventAggregator)
 
-事件聚合器是**多模块、强解耦场景下的消息总线神器**。
+事件聚合器是**多模块、强解耦场景下的消息总线机制**。
 有些视图完全不相互认识，甚至跨越了不能互相引用的不同模块类库。想要相互发消息（例如在“导航栏模块”发一个用户注销消息，在“主工作区模块”要清空数据），只能通过 `IEventAggregator` 进行全局广播。
 
 ### 6.1 定义事件载体
@@ -673,4 +673,4 @@ protected override IModuleCatalog CreateModuleCatalog()
 ```
 
 ### 最终总结
-Prism 的这套大闭环架构：利用 `RegionManager` 将整个应用进行解耦拆块区域化，借助 `Modularity` 将业务逻辑物理分拆成不同的 dll，再通过 `View Injection` 、支持带参数和拦截器的 **Navigation机制**、能打破所有防线的 **EventAggregator 消息系统** 以及解耦友善的 **DialogService** 在各个模块之间互通有无。掌握这些，即可架构出现代最完善的大型桌面客户端。
+Prism 的这套大闭环架构：利用 `RegionManager` 将整个应用进行解耦拆块区域化，借助 `Modularity` 将业务逻辑物理分拆成不同的 dll，再通过 `View Injection` 、支持带参数和拦截器的 **Navigation机制**、实现跨模块通信的 **EventAggregator 消息系统** 以及解耦友善的 **DialogService** 在各个模块之间互通有无。掌握这些，即可架构出现代完善的大型桌面客户端。

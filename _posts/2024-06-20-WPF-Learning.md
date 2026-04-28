@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  "WPF学习指南 - 2026"
+title:  "WPF学习指南"
 subtitle: "Windows Presentation Foundation完整开发教程"
-date:   2026-01-23 10:00:00 +0800
+date:   2024-06-20 10:00:00 +0800
 author:     "Comet"
 categories: C# WPF Windows
 header-style: text
@@ -15,7 +15,7 @@ tags:
     - 学习日志
 ---
 
-# WPF - 2026
+# WPF 全面指南
 
 ## 目录
 

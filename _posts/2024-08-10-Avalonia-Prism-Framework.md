@@ -2,7 +2,7 @@
 layout: post
 title:  "Avalonia全景指南：ReactiveUI精讲与Prism企业级架构深度扩展"
 subtitle: "从属性绑定到模块化注入：一万字超长干货解析Avalonia生态核心API与所有应用场景"
-date:   2026-03-27 10:00:00 +0800
+date:   2024-08-10 10:00:00 +0800
 author:     "Comet"
 categories: C# Avalonia ReactiveUI Prism
 header-style: text

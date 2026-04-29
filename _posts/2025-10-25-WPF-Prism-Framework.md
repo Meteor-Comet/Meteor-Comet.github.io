@@ -2,7 +2,7 @@
 layout: post
 title:  "WPF Prism框架学习笔记"
 subtitle: "深入理解与实战Prism这一强大的WPF MVVM框架"
-date:   2024-07-25 10:00:00 +0800
+date:   2025-10-25 10:00:00 +0800
 author:     "Comet"
 categories: C# WPF Prism
 header-style: text

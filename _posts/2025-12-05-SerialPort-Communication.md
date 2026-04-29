@@ -2,7 +2,7 @@
 layout: post
 title:  "工业级通信与 Modbus 协议全栈指南：从底层串口理论到高并发 Socket 架构实战"
 subtitle: "全景解析高低位/CRC校验与 NModbus 集成；探讨 ISO 模型、C# async 异步 Socket 与核心防范通信并发内存问题"
-date:   2024-09-05 10:00:00 +0800
+date:   2025-12-05 10:00:00 +0800
 author:     "Comet"
 categories: 通信 硬件 C#
 header-style: text

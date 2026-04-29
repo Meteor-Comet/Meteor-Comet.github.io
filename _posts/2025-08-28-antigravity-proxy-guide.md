@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  "Google Antigravity 代理使用 - 2026"
+title: "Google Antigravity 代理使用"
 subtitle: "Gemini 3 IDE登录与使用问题完整解决方案"
-date:   2026-02-28 10:00:00 +0800
+date: 2025-08-28 10:00:00 +0800
 author:     "Comet"
 categories: AI Antigravity Gemini 工具
 header-style: text

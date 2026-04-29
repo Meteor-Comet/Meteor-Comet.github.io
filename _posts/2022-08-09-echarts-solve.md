@@ -1,7 +1,7 @@
 ---
 layout:     post
 title:      "pyecharts图形在jupyter中不显示的解决办法"
-date:       2024-8-9 18:30:00
+date: 2022-08-09 18:30:00
 author:     "Comet"
 header-style: text
 tags:

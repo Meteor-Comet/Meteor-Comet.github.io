@@ -2,7 +2,7 @@
 layout: post
 title: "MySQL窗口函数"
 subtitle: "OVER / PARTITION BY / ORDER BY / FRAME / LAG / LEAD "
-date: 2025-06-19 18:00:00
+date: 2023-06-19 18:00:00
 author: "Comet"
 catalog: true
 tags:

@@ -2,8 +2,9 @@
 layout: post
 title: "VPN节点搭建完整教程"
 subtitle: "从VPS购买到Netflix解锁"
-date: 2024-08-01 12:00:00
+date: 2022-08-01 12:00:00
 author: "Comet"
+hidden:  true
 catalog: true
 tags:
     - VPN

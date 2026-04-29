@@ -2,7 +2,7 @@
 layout:     post
 title:      "pyecharts配置项"
 subtitle:   "pyecharts图表配置参数完整指南"
-date:       2024-8-10 18:30:00
+date: 2022-08-10 18:30:00
 author:     "Comet"
 header-style: text
 tags:

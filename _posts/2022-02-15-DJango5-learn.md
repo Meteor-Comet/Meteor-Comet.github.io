@@ -2,7 +2,7 @@
 layout:     post
 title:      "DJango5学习日志"
 subtitle:   "Django5 Web框架完整教程"
-date:       2024-2-15 20:00:00
+date: 2022-02-15 20:00:00
 author:     "Comet"
 header-img: "img/in-post/dJango.jpg"
 header-style: text

@@ -2,7 +2,7 @@
 layout: post
 title: "MySQL查询日志与性能监控"
 subtitle: "慢查询日志 / SHOW PROFILES / 性能监控 / 查询优化"
-date: 2025-06-20 12:00:00
+date: 2023-06-20 12:00:00
 author: "Comet"
 catalog: true
 tags:

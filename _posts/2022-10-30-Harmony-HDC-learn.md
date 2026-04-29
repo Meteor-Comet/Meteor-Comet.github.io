@@ -2,7 +2,7 @@
 layout:     post
 title:      "鸿蒙开发设备调试工具HDC学习日志"
 subtitle:    "原文：https://blog.csdn.net/ToBeTheEnder/article/details/139325200"
-date:       2024-10-30 20:00:00
+date: 2022-10-30 20:00:00
 author:     "Comet"
 header-img: "img/in-post/HarmonyOS.jpg"
 tags:

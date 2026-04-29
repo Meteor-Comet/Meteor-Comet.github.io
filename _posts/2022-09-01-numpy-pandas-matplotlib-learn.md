@@ -2,7 +2,7 @@
 layout: post
 title: "Python数据分析三剑客：NumPy、Pandas、Matplotlib详解"
 subtitle: "数据科学 / 数据分析 / 机器学习 / Python编程"
-date: 2024-09-01 12:00:00
+date: 2022-09-01 12:00:00
 author: "Comet"
 catalog: true
 tags:

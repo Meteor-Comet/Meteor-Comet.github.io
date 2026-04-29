@@ -2,7 +2,7 @@
 layout:     post
 title:      "pyecharts示例图"
 subtitle:   "pyecharts各类图表代码示例与效果展示"
-date:       2024-8-11 18:30:00
+date: 2022-08-11 18:30:00
 author:     "Comet"
 header-style: text
 tags:

@@ -2,7 +2,7 @@
 layout: post
 title: "MySQL视图、存储过程、触发器详解"
 subtitle: "数据库对象 / 视图 / 存储过程 / 触发器 / 数据库编程"
-date: 2025-02-01 12:00:00
+date: 2023-02-01 12:00:00
 author: "Comet"
 catalog: true
 tags:

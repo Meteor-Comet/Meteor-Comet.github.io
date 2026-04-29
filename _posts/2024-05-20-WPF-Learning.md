@@ -2,7 +2,7 @@
 layout: post
 title:  "WPF学习指南"
 subtitle: "Windows Presentation Foundation完整开发教程"
-date:   2025-09-20 10:00:00 +0800
+date: 2024-05-20 10:00:00 +0800
 author:     "Comet"
 categories: C# WPF Windows
 header-style: text

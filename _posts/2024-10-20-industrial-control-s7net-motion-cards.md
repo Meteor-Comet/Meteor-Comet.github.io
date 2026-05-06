@@ -245,8 +245,13 @@ private void btnXPositive_PreviewKeyDown(object sender, KeyEventArgs e)
     // 2. 配置点动参数
     mc.TJogPrm jogPrm;
     mc.GT_GetJogPrm(axisX, out jogPrm);
-    jogPrm.acc = 0.5; // 加速度 0.5 脉冲/毫秒平方
-    jogPrm.dec = 0.5; // 减速度
+    // 【TJogPrm 结构体参数详解】
+    // acc (double): 加速度，单位通常为 pulse/ms^2 (脉冲每平方毫秒)
+    // dec (double): 减速度，单位为 pulse/ms^2
+    // smooth (double): 平滑系数(0~1)，用于在加减速拐点做 S 型曲线平滑，值越大越平滑但跟随滞后越长
+    jogPrm.acc = 0.5; 
+    jogPrm.dec = 0.5; 
+    jogPrm.smooth = 0.5; // 可选的平滑过渡
     mc.GT_SetJogPrm(axisX, ref jogPrm);
 
     // 3. 设定恒定速度 (假设 100 脉冲/毫秒，正数代表正向跑)
@@ -277,7 +282,91 @@ private void StopJogAxis(short axis)
 }
 ```
 
-### 2.3 多轴插补模式 (Interpolation / Crd) 
+### 2.3 Trap 模式 (点位定位：最常用的绝对/相对运动)
+
+**场景描述**：这是工控中最核心的模式。机台要从当前工位“走到”绝对坐标 50000 的位置，要求起步有加速，中途匀速，快到终点时自动减速刹车（呈现梯形速度曲线）。
+
+**【API 与参数详解】**
+*   `GT_PrfTrap(short axis)`: 设定轴为梯形点位模式。
+*   `GT_SetTrapPrm(short axis, ref TTrapPrm prm)`: 配置梯形曲线的核心参数。
+    *   **【TTrapPrm 结构体详解】**:
+        *   `acc` (double): 加速度 (pulse/ms^2)，决定起步有多猛。
+        *   `dec` (double): 减速度 (pulse/ms^2)，决定刹车有多急。
+        *   `smoothTime` (short): 平滑时间 (ms)。极其重要！如果不设置，电机会在加速瞬间产生极其刺耳的“嘎噔”异响。设为 10~50ms 可在加减速拐点形成 S 曲线，大幅度保护机械寿命。
+        *   `velStart` (double): 起步初速，通常设为 0 以防刚性冲击。
+*   `GT_SetPos(short axis, int pos)`: 设定目标位置的绝对刻度（或者相对刻度，取决于底层配置）。
+*   `GT_SetVel(short axis, double vel)`: 设定此段路程的最高巡航速度。
+
+**【梯形点位移动场景示例】**
+
+```csharp
+public void MoveToAbsolutePosition(short axis, int targetPos)
+{
+    // 1. 设置该轴为梯形点位定位模式
+    mc.GT_PrfTrap(axis);
+
+    // 2. 灌入梯形结构体参数
+    mc.TTrapPrm trapPrm;
+    mc.GT_GetTrapPrm(axis, out trapPrm); // 先获取底层默认参数
+    trapPrm.acc = 1.0;          // 设定加速度
+    trapPrm.dec = 1.0;          // 设定减速度
+    trapPrm.smoothTime = 25;    // 设定 25ms 的 S 型平滑过度，让起步如丝般顺滑
+    mc.GT_SetTrapPrm(axis, ref trapPrm);
+
+    // 3. 压入终点坐标与速度
+    mc.GT_SetPos(axis, targetPos);
+    mc.GT_SetVel(axis, 50.0); // 巡航速度设定为 50 pulse/ms
+
+    // 4. 呼叫底层起跑
+    mc.GT_Update(1 << (axis - 1));
+}
+```
+
+### 2.4 PT 模式 (Position-Time 位置-时间模式)
+
+**场景描述**：当传统的 Trap 模式无法满足需求（例如：你需要让电机的位移曲线呈现出一种极为变态的非线性自定义波形，或者用于电子凸轮追剪、飞锯），你可以使用 PT 模式。它允许你直接向板卡发送一连串的 `(位置增量, 耗时)` 数据对，板卡会在底层严格按照你的时间表无缝切过这些点。
+
+**【API 与参数详解】**
+*   `GT_PrfPt(short axis, short mode)`: 设置为 PT 模式。
+*   `GT_PtSpace(short axis, out short pSpace)`: 查询底层 PT 缓冲区的剩余空间。因为 FIFO 通常很小（只能容纳 32 组点），长路径必须边跑边塞。
+*   `GT_PtData(short axis, double pos, short time, short type)`: 压入数据点。
+    *   `pos` (double): 在这段时间内要求电机走的**位移增量**（脉冲数）。
+    *   `time` (short): 走完这段位移必须花费的**绝对时间**（毫秒）。
+    *   `type` (short): 线型规划枚举。`PT_MODE_STATIC` (普通匀速) 或 `PT_MODE_DYNAMIC`。
+*   `GT_PtStart(int mask, int option)`: 启动指定轴的 PT 引擎开始消耗队列。
+
+**【PT 模式自定义正弦波震动曲线示例】**
+
+```csharp
+public void StartCustomPtCurve(short axis)
+{
+    // 1. 清空底层缓冲并设置为 PT 模式 (mode 1 指静态模式)
+    mc.GT_PtClear(axis);
+    mc.GT_PrfPt(axis, 1);
+
+    // 2. 压入自定义数据
+    // 假设我们要模拟一段正弦波振动，自行计算出每次 10ms 需要走的增量 posDelta
+    for(int i = 0; i < 50; i++)
+    {
+        short space;
+        mc.GT_PtSpace(axis, out space); // 查询剩余空间
+        
+        if (space > 0) // 确保板卡 FIFO 还没塞满
+        {
+            // 通过数学公式计算位移：一个周期波的增量
+            double posDelta = Math.Sin(i * 0.1) * 100; 
+            
+            // 压入指令：强制驱动器花费恰好 10ms 走完 posDelta 的距离
+            mc.GT_PtData(axis, posDelta, 10, mc.PT_MODE_STATIC);
+        }
+    }
+
+    // 3. 开始严格按时间序列执行
+    mc.GT_PtStart(1 << (axis - 1), 0);
+}
+```
+
+### 2.5 多轴插补模式 (Interpolation / Crd) 
 
 **场景描述**：自动点胶机，需要控制胶枪在 XY 平面上走一个完美的矩形或圆弧路径。此时单独控制 X 和 Y 是没用的（跑出来是锯齿），必须让固高底层 DSP 芯片将两轴联动（插补）。
 

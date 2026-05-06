@@ -224,13 +224,20 @@ private void FormMain_Load(object sender, EventArgs e)
 *   `GT_SetVel(short axis, double vel)`: 设置点动的方向与速度（正数为正转，负数为反转）。
 *   `GT_Update(int mask)`: 【极度重要】固高卡的大多数设置指令只是放在缓冲区，必须调用 Update 发送掩码，才会真正起跑！掩码采用位运算：轴1是 `1<<0`(1)，轴2是 `1<<1`(2)，轴3是 `1<<2`(4)。
 
-**【WinForm 按键按下与松开场景示例】**
+**【WPF 键盘点动与安全失焦防护场景示例】**
+
+> **🔥 避坑指南 (极度危险的 MouseDown 陷阱)**：
+> 很多新手喜欢用鼠标的 `MouseDown` 和 `MouseUp` 来做 Jog。但如果在鼠标按下期间，**窗口被其他软件覆盖、弹出了弹窗导致焦点丢失，或者鼠标拖到窗体外松开，MouseUp 事件将永远不会触发**，机器轴会像脱缰的野马一样直接撞向机械硬限位！
+> 工业级标准做法是：使用 `PreviewKeyDown` / `PreviewKeyUp`（原生支持物理按键操作）配合窗口或按钮的 `LostFocus` 事件，一旦失去焦点必须强制发送停轴指令。
 
 ```csharp
-// 鼠标【按下】按键事件 (开始正向转动)
-private void btnXPositive_MouseDown(object sender, MouseEventArgs e)
+// 键盘/鼠标【按下】事件 (开始正向转动)
+private void btnXPositive_PreviewKeyDown(object sender, KeyEventArgs e)
 {
-    short axisX = 1; // 假设 X 轴映射在轴 1
+    // 拦截长按键盘时产生的连续重复触发信号
+    if (e.IsRepeat) return; 
+
+    short axisX = 1; // 假设 X 轴映射在物理轴 1
     
     // 1. 设定为点动模式
     mc.GT_PrfJog(axisX);
@@ -242,20 +249,31 @@ private void btnXPositive_MouseDown(object sender, MouseEventArgs e)
     jogPrm.dec = 0.5; // 减速度
     mc.GT_SetJogPrm(axisX, ref jogPrm);
 
-    // 3. 设定速度 (假设 100 脉冲/毫秒，正数代表正向跑)
+    // 3. 设定恒定速度 (假设 100 脉冲/毫秒，正数代表正向跑)
     mc.GT_SetVel(axisX, 100);
 
     // 4. 触发物理运行！(1 << (1-1) 即 1)
     mc.GT_Update(1 << (axisX - 1)); 
 }
 
-// 鼠标【松开】按键事件 (要求立即停止)
-private void btnXPositive_MouseUp(object sender, MouseEventArgs e)
+// 键盘【抬起】事件 (要求平滑停止)
+private void btnXPositive_PreviewKeyUp(object sender, KeyEventArgs e)
 {
-    short axisX = 1;
-    // 在 Jog 模式下，将速度设为 0 并 Update，电机就会根据设定的减速度平滑刹车
-    mc.GT_SetVel(axisX, 0);
-    mc.GT_Update(1 << (axisX - 1));
+    StopJogAxis(1);
+}
+
+// 【保命核心】控件或窗口失去焦点时，无条件强制刹车！
+private void btnXPositive_LostFocus(object sender, RoutedEventArgs e)
+{
+    StopJogAxis(1); // 哪怕没有触发 KeyUp，失焦也立刻停机
+}
+
+// 独立的平滑停止函数
+private void StopJogAxis(short axis)
+{
+    // 在 Jog 模式下，将目标速度设为 0 并 Update，电机就会根据设定的 dec (减速度) 完美平滑刹车
+    mc.GT_SetVel(axis, 0);
+    mc.GT_Update(1 << (axis - 1));
 }
 ```
 

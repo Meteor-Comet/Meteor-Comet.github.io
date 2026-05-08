@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "MySQL查询日志与性能监控"
-subtitle: "慢查询日志 / SHOW PROFILES / 性能监控 / 查询优化"
+title: "MySQL 查询日志与性能诊断"
+subtitle: "慢查询日志 / EXPLAIN 执行计划 / SHOW PROFILES / Performance Schema"
 date: 2023-06-20 12:00:00
 author: "Comet"
 catalog: true
@@ -9,462 +9,431 @@ tags:
     - MySQL
     - 性能优化
     - 慢查询日志
-    - SHOW PROFILES
+    - EXPLAIN
     - 查询监控
-    - 学习日志
 ---
 
-## 学习目标
-- 掌握MySQL慢查询日志的配置与分析方法
-- 熟悉SHOW PROFILES和SHOW PROFILE的使用
-- 了解MySQL性能监控的各种工具和方法
-- 学会使用查询日志进行SQL优化
-- 掌握性能问题诊断和解决技巧
+## 目录
 
-## 学习计划
-1. MySQL慢查询日志配置与分析
-2. SHOW PROFILES和SHOW PROFILE详解
-3. EXPLAIN执行计划分析
-4. 通用查询日志和错误日志
-5. 性能监控工具使用
-6. 查询优化实战案例
-7. 日志管理和维护
-8. 性能问题诊断流程
+1. [慢查询日志（Slow Query Log）](#1-慢查询日志slow-query-log)
+   - [1.1 配置参数](#11-配置参数)
+   - [1.2 持久化配置（my.cnf）](#12-持久化配置mycnf)
+   - [1.3 日志格式解读](#13-日志格式解读)
+   - [1.4 mysqldumpslow 分析工具](#14-mysqldumpslow-分析工具)
+2. [SHOW PROFILES 执行剖析](#2-show-profiles-执行剖析)
+   - [2.1 启用与查看](#21-启用与查看)
+   - [2.2 SHOW PROFILE 详细分析](#22-show-profile-详细分析)
+3. [EXPLAIN 执行计划](#3-explain-执行计划)
+   - [3.1 基本语法](#31-基本语法)
+   - [3.2 核心字段详解](#32-核心字段详解)
+   - [3.3 type 访问类型一览](#33-type-访问类型一览)
+   - [3.4 Extra 字段说明](#34-extra-字段说明)
+   - [3.5 EXPLAIN ANALYZE（MySQL 8.0+）](#35-explain-analyzemysql-80)
+4. [日志类型总览](#4-日志类型总览)
+   - [4.1 通用查询日志](#41-通用查询日志)
+   - [4.2 错误日志](#42-错误日志)
+   - [4.3 二进制日志（Binlog）](#43-二进制日志binlog)
+5. [系统状态与 Performance Schema](#5-系统状态与-performance-schema)
+   - [5.1 SHOW STATUS 关键指标](#51-show-status-关键指标)
+   - [5.2 Performance Schema 常用查询](#52-performance-schema-常用查询)
+   - [5.3 information_schema 表统计](#53-information_schema-表统计)
+6. [查询优化实战](#6-查询优化实战)
+   - [6.1 慢 JOIN 查询优化](#61-慢-join-查询优化)
+   - [6.2 复合索引命中](#62-复合索引命中)
+   - [6.3 IN 子查询转 JOIN](#63-in-子查询转-join)
+7. [日志管理与维护](#7-日志管理与维护)
+   - [7.1 日志轮转（logrotate）](#71-日志轮转logrotate)
+   - [7.2 日志清理](#72-日志清理)
+8. [性能问题诊断流程](#8-性能问题诊断流程)
+9. [最佳实践速查](#9-最佳实践速查)
 
 ---
 
-## 1. MySQL慢查询日志（Slow Query Log）
+## 1. 慢查询日志（Slow Query Log）
 
-### 1.1 慢查询日志概述
-慢查询日志记录执行时间超过指定阈值的SQL语句，是性能优化的核心工具。
+慢查询日志记录执行时间超过阈值的 SQL，是线上性能排障的首选入口。
 
-### 1.2 配置参数
-{% highlight sql %}
--- 查看当前慢查询配置
+### 1.1 配置参数
+
+```sql
+-- 查看当前配置
 SHOW VARIABLES LIKE '%slow_query%';
 SHOW VARIABLES LIKE '%long_query_time%';
 
--- 启用慢查询日志
+-- 动态开启
 SET GLOBAL slow_query_log = 'ON';
-
--- 设置慢查询阈值（秒）
-SET GLOBAL long_query_time = 2;
-
--- 设置慢查询日志文件路径
+SET GLOBAL long_query_time = 2;                            -- 阈值，单位：秒
 SET GLOBAL slow_query_log_file = '/var/log/mysql/slow.log';
 
--- 记录未使用索引的查询
+-- 记录未命中索引的查询（不管是否超时）
 SET GLOBAL log_queries_not_using_indexes = 'ON';
 
--- 记录慢管理语句
+-- 记录慢管理语句（ALTER TABLE 等）
 SET GLOBAL log_slow_admin_statements = 'ON';
-{% endhighlight %}
+```
 
-### 1.3 配置文件设置
-在 `my.cnf` 或 `my.ini` 中添加：
-{% highlight ini %}
+### 1.2 持久化配置（my.cnf）
+
+```ini
 [mysqld]
-# 慢查询日志配置
-slow_query_log = 1
-slow_query_log_file = /var/log/mysql/slow.log
-long_query_time = 2
+slow_query_log          = 1
+slow_query_log_file     = /var/log/mysql/slow.log
+long_query_time         = 2
 log_queries_not_using_indexes = 1
-log_slow_admin_statements = 1
-{% endhighlight %}
+log_slow_admin_statements     = 1
+```
 
-### 1.4 慢查询日志格式
-> Time: 2025-06-20T10:30:15.123456Z
->
-> User@Host: root[root] @ localhost [127.0.0.1]  Id: 12345
->
-> Query_time: 5.234567  Lock_time: 0.000123  Rows_sent: 1000  Rows_examined: 50000
->
-> `SET timestamp=1624186215;`
->
-> `SELECT * FROM users WHERE email LIKE '%@gmail.com';`
+修改后执行 `FLUSH LOGS;` 或重启 mysqld 生效。
 
-### 1.5 使用mysqldumpslow分析
-- **查看慢查询统计**: `mysqldumpslow /var/log/mysql/slow.log`
-- **按查询时间排序**: `mysqldumpslow -t 10 /var/log/mysql/slow.log`
-- **按执行次数排序**: `mysqldumpslow -s c -t 10 /var/log/mysql/slow.log`
-- **按锁定时间排序**: `mysqldumpslow -s l -t 10 /var/log/mysql/slow.log`
-- **显示完整SQL**: `mysqldumpslow -a /var/log/mysql/slow.log`
-- **过滤特定数据库**: `mysqldumpslow -g "database_name" /var/log/mysql/slow.log`
+### 1.3 日志格式解读
+
+```
+# Time: 2023-06-20T10:30:15.123456Z
+# User@Host: root[root] @ localhost [127.0.0.1]  Id: 12345
+# Query_time: 5.234567  Lock_time: 0.000123  Rows_sent: 1000  Rows_examined: 50000
+SET timestamp=1687257015;
+SELECT * FROM users WHERE email LIKE '%@gmail.com';
+```
+
+| 字段 | 含义 |
+|------|------|
+| `Query_time` | 总执行时间 |
+| `Lock_time` | 等锁时间 |
+| `Rows_sent` | 实际返回行数 |
+| `Rows_examined` | 扫描行数（越大越危险）|
+
+`Rows_examined / Rows_sent` 比值越高，说明索引效率越低。
+
+### 1.4 mysqldumpslow 分析工具
+
+```bash
+# 显示耗时 TOP 10
+mysqldumpslow -t 10 /var/log/mysql/slow.log
+
+# 按执行次数排序 TOP 10
+mysqldumpslow -s c -t 10 /var/log/mysql/slow.log
+
+# 按锁等待时间排序
+mysqldumpslow -s l -t 10 /var/log/mysql/slow.log
+
+# 不抽象参数，显示原始 SQL
+mysqldumpslow -a /var/log/mysql/slow.log
+
+# 过滤指定数据库
+mysqldumpslow -g "mydb" /var/log/mysql/slow.log
+```
 
 ---
 
-## 2. SHOW PROFILES和SHOW PROFILE
+## 2. SHOW PROFILES 执行剖析
 
-### 2.1 启用Profiling
-{% highlight sql %}
--- 启用profiling
+SHOW PROFILES 是会话级别的轻量诊断工具，可以拆分每个查询在各阶段花费的时间。
+
+> ⚠️ MySQL 8.0 开始 SHOW PROFILES 被标记为废弃，推荐迁移到 Performance Schema。但在 5.7 以下环境中仍然是最方便的工具。
+
+### 2.1 启用与查看
+
+```sql
+-- 仅对当前会话生效
 SET profiling = 1;
 
--- 查看profiling状态
-SHOW VARIABLES LIKE 'profiling';
-{% endhighlight %}
-
-### 2.2 SHOW PROFILES
-显示最近执行的查询列表：
-{% highlight sql %}
+-- 执行若干 SQL 后查看列表
 SHOW PROFILES;
-{% endhighlight %}
-输出示例：
+```
 
-| Query_ID | Duration   | Query                           |
-|---------:|-----------:|---------------------------------|
-| 1        | 0.00012345 | SELECT 1                        |
-| 2        | 0.00123456 | SELECT * FROM users LIMIT 10    |
-| 3        | 0.12345678 | SELECT * FROM orders WHERE ...  |
+| Query_ID | Duration   | Query                         |
+|---------:|-----------:|-------------------------------|
+| 1        | 0.00012345 | SELECT 1                      |
+| 2        | 0.00123456 | SELECT * FROM users LIMIT 10  |
+| 3        | 0.12345678 | SELECT * FROM orders WHERE …  |
 
-### 2.3 SHOW PROFILE
-分析特定查询的详细执行信息：
-{% highlight sql %}
--- 分析最近一次查询
+### 2.2 SHOW PROFILE 详细分析
+
+```sql
+-- 查看最近一次查询各阶段耗时
 SHOW PROFILE;
 
--- 分析指定Query_ID的查询
+-- 查看指定 Query_ID
 SHOW PROFILE FOR QUERY 3;
 
--- 显示特定类型的详细信息
-SHOW PROFILE CPU, BLOCK IO, SWAPS FOR QUERY 3;
+-- 同时展示 CPU 和块 IO 消耗
+SHOW PROFILE CPU, BLOCK IO FOR QUERY 3;
 
--- 显示所有可用类型
+-- 展示全部类型
 SHOW PROFILE ALL FOR QUERY 3;
-{% endhighlight %}
+```
 
-### 2.4 PROFILE类型说明
-- **ALL**: 显示所有信息
-- **BLOCK IO**: 块I/O操作
-- **CONTEXT SWITCHES**: 上下文切换
-- **CPU**: CPU使用情况
-- **IPC**: 进程间通信
-- **MEMORY**: 内存使用
-- **PAGE FAULTS**: 页错误
-- **SOURCE**: 源代码位置
-- **SWAPS**: 交换操作
+**常用 Profile 类型：**
+
+| 类型 | 含义 |
+|------|------|
+| `CPU` | CPU 用户态/内核态时间 |
+| `BLOCK IO` | 块设备读写次数 |
+| `CONTEXT SWITCHES` | 上下文切换次数 |
+| `MEMORY` | 内存分配（部分版本支持）|
+| `SWAPS` | 交换操作次数 |
+
+重点关注状态中的 **`Sending data`**（实际读取和发送数据）和 **`Sorting result`**（排序），这两个通常是性能大头。
 
 ---
 
-## 3. EXPLAIN执行计划分析
+## 3. EXPLAIN 执行计划
 
-### 3.1 EXPLAIN概述
-EXPLAIN是MySQL中分析SQL执行计划的核心工具，帮助理解查询的执行方式和性能瓶颈。
+EXPLAIN 是分析单条 SQL 的核心手段，无需修改数据即可预判 MySQL 的执行策略。
 
-### 3.2 基本语法
-{% highlight sql %}
--- 基本EXPLAIN语法
+### 3.1 基本语法
+
+```sql
+-- 标准表格输出
 EXPLAIN SELECT * FROM users WHERE id = 1;
 
--- 显示详细信息
+-- JSON 格式，包含 cost 信息
 EXPLAIN FORMAT=JSON SELECT * FROM users WHERE id = 1;
 
--- 显示树形结构
+-- 树形结构（MySQL 8.0.18+）
 EXPLAIN FORMAT=TREE SELECT * FROM users WHERE id = 1;
 
--- 分析实际执行
+-- 实际执行并附带真实统计数据（MySQL 8.0.18+）
 EXPLAIN ANALYZE SELECT * FROM users WHERE id = 1;
-{% endhighlight %}
+```
 
-### 3.3 EXPLAIN输出字段详解
+### 3.2 核心字段详解
 
-#### 3.3.1 核心字段
+| 字段 | 含义 |
+|------|------|
+| `id` | 查询序号，数字越大优先级越高；相同则从上到下执行 |
+| `select_type` | 查询类型：SIMPLE / PRIMARY / SUBQUERY / DERIVED / UNION |
+| `table` | 当前行操作的表名或别名 |
+| `partitions` | 命中的分区（分区表才有值）|
+| `type` | **访问类型**（见下节）|
+| `possible_keys` | 优化器候选的索引列表 |
+| `key` | 优化器最终选择的索引 |
+| `key_len` | 使用索引的字节长度（可推断使用了联合索引的几列）|
+| `ref` | 与索引列比较的列或常量 |
+| `rows` | 预估扫描行数 |
+| `filtered` | 经 WHERE 过滤后的行比例（%）|
+| `Extra` | 额外信息（见下节）|
 
-| id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra |
-|---:|:------------|:------|:-----------|:-----|:--------------|:----|:--------|:----|----:|---------:|:------|
+### 3.3 type 访问类型一览
 
-#### 3.3.2 字段说明
-- **id**: 查询标识符，数字越大优先级越高
-- **select_type**: 查询类型
-  - SIMPLE: 简单查询
-  - PRIMARY: 主查询
-  - SUBQUERY: 子查询
-  - DERIVED: 派生表
-  - UNION: 联合查询
-  - UNION RESULT: 联合结果
+性能从好到差依次排列：
 
-- **table**: 表名或别名
-- **partitions**: 分区信息
-- **type**: 访问类型（性能从好到差）
-  - system: 表中只有一行
-  - const: 主键或唯一索引等值查询
-  - eq_ref: 唯一索引扫描
-  - ref: 非唯一索引扫描
-  - range: 索引范围扫描
-  - index: 全索引扫描
-  - ALL: 全表扫描
+| type | 说明 |
+|------|------|
+| `system` | 表只有一行，特殊情况 |
+| `const` | 主键或唯一索引等值查询，结果最多一行 |
+| `eq_ref` | 被驱动表通过唯一索引与驱动表关联 |
+| `ref` | 普通索引等值查询 |
+| `fulltext` | 全文索引 |
+| `range` | 索引范围扫描（BETWEEN / IN / > / < 等）|
+| `index` | 全索引扫描（比 ALL 少，因为只扫索引树）|
+| `ALL` | 全表扫描，**生产环境大表应尽力避免** |
 
-- **possible_keys**: 可能使用的索引
-- **key**: 实际使用的索引
-- **key_len**: 索引长度
-- **ref**: 索引比较的列
-- **rows**: 预计扫描的行数
-- **filtered**: 过滤后的行数百分比
-- **Extra**: 额外信息
+> 线上要求：至少达到 `range` 级别，核心查询应达到 `ref` 或 `const`。
 
-### 3.4 常见Extra字段说明
-{% highlight sql %}
--- 使用索引覆盖
-EXPLAIN SELECT id, name FROM users WHERE id = 1;
--- Extra: Using index
+### 3.4 Extra 字段说明
 
--- 使用临时表
-EXPLAIN SELECT * FROM users ORDER BY name;
--- Extra: Using filesort
+| Extra | 含义 | 是否需要关注 |
+|-------|------|-------------|
+| `Using index` | 覆盖索引，无需回表 | ✅ 最优 |
+| `Using where` | Server 层用 WHERE 过滤 | ℹ️ 正常 |
+| `Using index condition` | 索引条件下推（ICP）| ✅ 好 |
+| `Using temporary` | 使用了临时表 | ⚠️ 需优化 |
+| `Using filesort` | 需要额外排序，无法用索引 | ⚠️ 需优化 |
+| `Using join buffer` | JOIN 使用了 Block Nested Loop | ⚠️ 需优化 |
+| `Select tables optimized away` | MIN/MAX 优化，直接查索引 | ✅ 最优 |
 
--- 使用索引条件
-EXPLAIN SELECT * FROM users WHERE name LIKE 'John%';
--- Extra: Using index condition
+`Using temporary` 和 `Using filesort` 同时出现是需要立刻处理的信号。
 
--- 使用WHERE过滤
-EXPLAIN SELECT * FROM users WHERE age > 18;
--- Extra: Using where
+### 3.5 EXPLAIN ANALYZE（MySQL 8.0+）
 
--- 使用JOIN缓冲区
-EXPLAIN SELECT * FROM users u JOIN orders o ON u.id = o.user_id;
--- Extra: Using join buffer
-{% endhighlight %}
+EXPLAIN ANALYZE 会**真正执行**查询，并返回预估值与实际值的对比，是排查执行计划偏差的利器。
 
-### 3.5 执行计划分析案例
-
-#### 3.5.1 索引使用分析
-{% highlight sql %}
--- 创建测试表
-CREATE TABLE test_users (
-    id INT PRIMARY KEY,
-    name VARCHAR(50),
-    email VARCHAR(100),
-    age INT,
-    INDEX idx_name (name),
-    INDEX idx_email (email),
-    INDEX idx_age (age)
-);
-
--- 分析不同查询的执行计划
-EXPLAIN SELECT * FROM test_users WHERE id = 1;
--- type: const, key: PRIMARY
-
-EXPLAIN SELECT * FROM test_users WHERE name = 'John';
--- type: ref, key: idx_name
-
-EXPLAIN SELECT * FROM test_users WHERE age > 18;
--- type: range, key: idx_age
-
-EXPLAIN SELECT * FROM test_users WHERE email LIKE '%@gmail.com';
--- type: ALL, key: NULL (全表扫描)
-{% endhighlight %}
-
-#### 3.5.2 JOIN查询分析
-{% highlight sql %}
--- 分析JOIN查询
-EXPLAIN SELECT u.name, o.order_date 
-FROM test_users u 
-JOIN orders o ON u.id = o.user_id 
-WHERE u.age > 18;
-
--- 分析LEFT JOIN
-EXPLAIN SELECT u.name, COUNT(o.id) 
-FROM test_users u 
-LEFT JOIN orders o ON u.id = o.user_id 
+```sql
+EXPLAIN ANALYZE SELECT u.name, COUNT(o.id)
+FROM users u
+LEFT JOIN orders o ON u.id = o.user_id
 GROUP BY u.id;
-{% endhighlight %}
+```
 
-#### 3.5.3 子查询分析
-{% highlight sql %}
--- 分析IN子查询
-EXPLAIN SELECT * FROM test_users 
-WHERE id IN (SELECT user_id FROM orders WHERE amount > 1000);
+输出示例：
+```
+-> Table scan on <temporary>  (cost=2.50..5.00 rows=3) (actual time=0.048..0.052 rows=3 loops=1)
+    -> Aggregate using temporary table  (actual time=0.043..0.043 rows=3 loops=1)
+        -> Nested loop left join  (cost=1.25 rows=3) (actual time=0.019..0.030 rows=4 loops=1)
+```
 
--- 分析EXISTS子查询
-EXPLAIN SELECT * FROM test_users u 
-WHERE EXISTS (SELECT 1 FROM orders o WHERE o.user_id = u.id);
-{% endhighlight %}
-
-### 3.6 性能优化建议
-
-#### 3.6.1 索引优化
-{% highlight sql %}
--- 避免全表扫描
-EXPLAIN SELECT * FROM test_users WHERE name LIKE '%John%';
--- 优化：使用前缀索引或全文索引
-
--- 复合索引顺序
-CREATE INDEX idx_name_age ON test_users(name, age);
-EXPLAIN SELECT * FROM test_users WHERE name = 'John' AND age > 18;
--- 注意：复合索引的顺序很重要
-{% endhighlight %}
-
-#### 3.6.2 查询优化
-{% highlight sql %}
--- 避免SELECT *
-EXPLAIN SELECT id, name FROM test_users WHERE age > 18;
--- 比 SELECT * 更高效
-
--- 使用LIMIT
-EXPLAIN SELECT * FROM test_users ORDER BY name LIMIT 10;
--- 减少排序开销
-{% endhighlight %}
-
-### 3.7 EXPLAIN ANALYZE（MySQL 8.0+）
-{% highlight sql %}
--- 显示实际执行时间
-EXPLAIN ANALYZE SELECT * FROM test_users WHERE age > 18;
-
--- 输出示例
--- -> Filter: (test_users.age > 18)  (cost=1.25 rows=5) (actual time=0.123..0.456 rows=3 loops=1)
---     -> Table scan on test_users  (cost=1.25 rows=10) (actual time=0.098..0.234 rows=10 loops=1)
-{% endhighlight %}
+关注 `rows=预估` vs `actual rows=真实值`，偏差大说明统计信息过旧，可执行 `ANALYZE TABLE 表名;` 更新。
 
 ---
 
-## 4. 通用查询日志和错误日志
+## 4. 日志类型总览
 
 ### 4.1 通用查询日志
-记录所有SQL语句：
-{% highlight sql %}
--- 启用通用查询日志
+
+记录**所有**进入 MySQL 的 SQL，包括连接、断开和每条语句。线上谨慎开启，I/O 压力极大。
+
+```sql
 SET GLOBAL general_log = 'ON';
 SET GLOBAL general_log_file = '/var/log/mysql/general.log';
 
--- 查看配置
 SHOW VARIABLES LIKE 'general_log%';
-{% endhighlight %}
+```
 
 ### 4.2 错误日志
-记录MySQL错误和警告：
-{% highlight sql %}
--- 查看错误日志位置
+
+```sql
+-- 查看路径
 SHOW VARIABLES LIKE 'log_error';
 
--- 查看错误日志级别
+-- 日志详细程度（1=错误，2=警告，3=通知）
 SHOW VARIABLES LIKE 'log_error_verbosity';
-{% endhighlight %}
+```
 
-### 4.3 二进制日志
-{% highlight sql %}
--- 查看二进制日志配置
+### 4.3 二进制日志（Binlog）
+
+用于主从复制和时间点恢复，不直接用于查询性能排障。
+
+```sql
 SHOW VARIABLES LIKE 'log_bin%';
 
--- 查看二进制日志文件
+-- 查看所有 binlog 文件
 SHOW BINARY LOGS;
 
--- 查看二进制日志事件
-SHOW BINLOG EVENTS IN 'mysql-bin.000001';
-{% endhighlight %}
+-- 查看指定文件的事件
+SHOW BINLOG EVENTS IN 'mysql-bin.000001' LIMIT 20;
+```
 
 ---
 
-## 5. 性能监控工具
+## 5. 系统状态与 Performance Schema
 
-### 5.1 系统状态监控
-{% highlight sql %}
--- 查看系统状态
-SHOW STATUS;
+### 5.1 SHOW STATUS 关键指标
 
--- 查看特定状态变量
+```sql
+-- 总慢查询数（自启动以来累计）
 SHOW STATUS LIKE 'Slow_queries';
-SHOW STATUS LIKE 'Questions';
-SHOW STATUS LIKE 'Uptime';
 
--- 查看线程状态
+-- 总请求数
+SHOW STATUS LIKE 'Questions';
+
+-- 临时表相关（大量磁盘临时表是问题信号）
+SHOW STATUS LIKE 'Created_tmp%';
+
+-- 排序操作
+SHOW STATUS LIKE 'Sort%';
+
+-- 当前连接数
+SHOW STATUS LIKE 'Threads_connected';
+SHOW VARIABLES LIKE 'max_connections';
+
+-- 查看线程详情（找长时间运行的查询）
 SHOW PROCESSLIST;
 
--- 查看InnoDB状态
+-- InnoDB 锁等待详情
 SHOW ENGINE INNODB STATUS;
-{% endhighlight %}
+```
 
-### 5.2 性能模式（Performance Schema）
-{% highlight sql %}
--- 启用性能模式
-UPDATE performance_schema.setup_instruments 
-SET ENABLED = 'YES', TIMED = 'YES';
+### 5.2 Performance Schema 常用查询
 
--- 查看等待事件
-SELECT * FROM performance_schema.events_waits_current;
+```sql
+-- 查询耗时最长的 SQL TOP 10
+SELECT DIGEST_TEXT, COUNT_STAR, AVG_TIMER_WAIT / 1e12 AS avg_sec
+FROM performance_schema.events_statements_summary_by_digest
+ORDER BY AVG_TIMER_WAIT DESC
+LIMIT 10;
 
--- 查看语句事件
-SELECT * FROM performance_schema.events_statements_current;
+-- 查看当前等待事件
+SELECT * FROM performance_schema.events_waits_current
+WHERE EVENT_NAME != 'idle';
 
--- 查看连接信息
-SELECT * FROM performance_schema.accounts;
-{% endhighlight %}
+-- 查看锁等待
+SELECT * FROM performance_schema.data_lock_waits;
+```
 
-### 5.3 信息模式查询
-{% highlight sql %}
--- 查看表统计信息
-SELECT * FROM information_schema.TABLE_STATISTICS;
+### 5.3 information_schema 表统计
 
--- 查看索引统计信息
-SELECT * FROM information_schema.STATISTICS 
-WHERE TABLE_SCHEMA = 'your_database';
-
--- 查看表大小
-SELECT 
-    table_schema,
-    table_name,
-    ROUND(((data_length + index_length) / 1024 / 1024), 2) AS 'Size (MB)'
-FROM information_schema.tables 
+```sql
+-- 查看各表大小（MB）
+SELECT
+    table_schema                AS `数据库`,
+    table_name                  AS `表名`,
+    ROUND(data_length  / 1024 / 1024, 2) AS `数据(MB)`,
+    ROUND(index_length / 1024 / 1024, 2) AS `索引(MB)`,
+    ROUND((data_length + index_length) / 1024 / 1024, 2) AS `总计(MB)`
+FROM information_schema.tables
 WHERE table_schema = 'your_database'
 ORDER BY (data_length + index_length) DESC;
-{% endhighlight %}
+
+-- 查看索引信息
+SELECT INDEX_NAME, COLUMN_NAME, CARDINALITY, NON_UNIQUE
+FROM information_schema.STATISTICS
+WHERE TABLE_SCHEMA = 'your_database'
+  AND TABLE_NAME   = 'users'
+ORDER BY INDEX_NAME, SEQ_IN_INDEX;
+```
 
 ---
 
-## 6. 查询优化实战案例
+## 6. 查询优化实战
 
-### 6.1 案例1：慢查询分析
-{% highlight sql %}
--- 原始慢查询
-SELECT u.*, o.order_date, o.amount 
-FROM users u 
-LEFT JOIN orders o ON u.id = o.user_id 
-WHERE u.email LIKE '%@gmail.com' 
+### 6.1 慢 JOIN 查询优化
+
+```sql
+-- ❌ 问题查询：SELECT * + LIKE '%xxx%' + LEFT JOIN 无 LIMIT
+SELECT u.*, o.order_date, o.amount
+FROM users u
+LEFT JOIN orders o ON u.id = o.user_id
+WHERE u.email LIKE '%@gmail.com'
 ORDER BY o.order_date DESC;
 
--- 优化后查询
-SELECT u.id, u.name, u.email, o.order_date, o.amount 
-FROM users u 
-INNER JOIN orders o ON u.id = o.user_id 
-WHERE u.email LIKE '%@gmail.com' 
-ORDER BY o.order_date DESC 
+-- ✅ 优化：指定列、改 INNER JOIN、加 LIMIT
+SELECT u.id, u.name, u.email, o.order_date, o.amount
+FROM users u
+INNER JOIN orders o ON u.id = o.user_id
+WHERE u.email LIKE 'support@%'      -- 改为前缀匹配，可命中索引
+ORDER BY o.order_date DESC
 LIMIT 100;
-{% endhighlight %}
+```
 
-### 6.2 案例2：索引优化
-{% highlight sql %}
--- 查看查询执行计划
-EXPLAIN SELECT * FROM orders 
-WHERE user_id = 123 AND order_date > '2025-01-01';
+### 6.2 复合索引命中
 
--- 创建复合索引
+```sql
+-- 查看执行计划
+EXPLAIN SELECT * FROM orders
+WHERE user_id = 123 AND order_date > '2023-01-01';
+-- 若 key 为 NULL，说明缺少索引
+
+-- 创建复合索引（注意顺序：等值列在前）
 CREATE INDEX idx_user_date ON orders(user_id, order_date);
 
--- 再次查看执行计划
-EXPLAIN SELECT * FROM orders 
-WHERE user_id = 123 AND order_date > '2025-01-01';
-{% endhighlight %}
+-- 再次 EXPLAIN 确认 type 变为 range，key 变为 idx_user_date
+EXPLAIN SELECT * FROM orders
+WHERE user_id = 123 AND order_date > '2023-01-01';
+```
 
-### 6.3 案例3：子查询优化
-{% highlight sql %}
--- 原始子查询
-SELECT * FROM users 
+### 6.3 IN 子查询转 JOIN
+
+```sql
+-- ❌ IN 子查询：优化器可能生成较差的计划
+SELECT * FROM users
 WHERE id IN (SELECT user_id FROM orders WHERE amount > 1000);
 
--- 优化为JOIN
-SELECT DISTINCT u.* 
-FROM users u 
-INNER JOIN orders o ON u.id = o.user_id 
+-- ✅ 改写为 JOIN：更可控
+SELECT DISTINCT u.*
+FROM users u
+INNER JOIN orders o ON u.id = o.user_id
 WHERE o.amount > 1000;
-{% endhighlight %}
+```
 
 ---
 
-## 7. 日志管理和维护
+## 7. 日志管理与维护
 
-### 7.1 日志轮转
-{% highlight bash %}
-# 使用logrotate配置
-cat > /etc/logrotate.d/mysql << EOF
+### 7.1 日志轮转（logrotate）
+
+```bash
+cat > /etc/logrotate.d/mysql << 'EOF'
 /var/log/mysql/*.log {
     daily
     rotate 7
@@ -472,123 +441,88 @@ cat > /etc/logrotate.d/mysql << EOF
     delaycompress
     missingok
     notifempty
-    create 644 mysql mysql
+    create 640 mysql mysql
     postrotate
         mysqladmin flush-logs
     endscript
 }
 EOF
-{% endhighlight %}
+```
 
 ### 7.2 日志清理
-{% highlight sql %}
--- 清理慢查询日志
+
+动态关闭 → 手动清空/归档文件 → 重新开启，是最稳妥的步骤：
+
+```sql
+-- 关闭慢查询日志
 SET GLOBAL slow_query_log = 'OFF';
--- 备份并清空日志文件
+-- （Shell 层备份并清空文件）
 SET GLOBAL slow_query_log = 'ON';
 
--- 清理通用查询日志
+-- 清理通用查询日志（同理）
 SET GLOBAL general_log = 'OFF';
--- 备份并清空日志文件
 SET GLOBAL general_log = 'ON';
-{% endhighlight %}
-
-### 7.3 日志监控脚本
-{% highlight bash %}
-#!/bin/bash
-# 监控慢查询数量
-SLOW_QUERIES=$(mysql -e "SHOW STATUS LIKE 'Slow_queries'" | awk 'NR==2 {print $2}')
-echo "Slow queries: $SLOW_QUERIES"
-
-# 监控查询总数
-TOTAL_QUERIES=$(mysql -e "SHOW STATUS LIKE 'Questions'" | awk 'NR==2 {print $2}')
-echo "Total queries: $TOTAL_QUERIES"
-
-# 计算慢查询比例
-if [ $TOTAL_QUERIES -gt 0 ]; then
-    RATIO=$(echo "scale=4; $SLOW_QUERIES / $TOTAL_QUERIES * 100" | bc)
-    echo "Slow query ratio: ${RATIO}%"
-fi
-{% endhighlight %}
+```
 
 ---
 
 ## 8. 性能问题诊断流程
 
-### 8.1 诊断步骤
-1. **收集信息**
-   - 查看慢查询日志
-   - 检查SHOW PROCESSLIST
-   - 分析SHOW PROFILE结果
+```
+发现慢 SQL / 告警
+        │
+        ▼
+SHOW PROCESSLIST  ──→  是否有长时间阻塞？
+        │                       │ YES → SHOW ENGINE INNODB STATUS 查锁
+        │ NO
+        ▼
+查慢查询日志
+  mysqldumpslow 找 Top SQL
+        │
+        ▼
+EXPLAIN 分析执行计划
+  type 是否为 ALL / index？
+        │ YES → 添加/调整索引
+        │ NO  ↓
+EXPLAIN ANALYZE
+  实际 rows 与预估差距大？
+        │ YES → ANALYZE TABLE 更新统计信息
+        │ NO  ↓
+SHOW PROFILE / Performance Schema
+  找具体耗时阶段（Sending data / Sorting）
+        │
+        ▼
+针对瓶颈：重写 SQL / 调整 buffer_pool / 升级配置
+```
 
-2. **识别瓶颈**
-   - CPU密集型 vs I/O密集型
-   - 锁等待 vs 资源竞争
-   - 网络延迟 vs 磁盘I/O
+**常用快速检查命令：**
 
-3. **优化策略**
-   - 索引优化
-   - 查询重写
-   - 配置调优
-   - 硬件升级
-
-### 8.2 常见性能问题
-{% highlight sql %}
--- 检查锁等待
+```sql
+-- 锁等待
 SHOW ENGINE INNODB STATUS;
 
--- 检查临时表使用
-SHOW STATUS LIKE 'Created_tmp%';
+-- 磁盘临时表占比高（> 10% 需关注）
+SHOW STATUS LIKE 'Created_tmp_disk_tables';
+SHOW STATUS LIKE 'Created_tmp_tables';
 
--- 检查排序操作
-SHOW STATUS LIKE 'Sort%';
+-- 排序溢出到磁盘
+SHOW STATUS LIKE 'Sort_merge_passes';
 
--- 检查连接数
+-- 连接使用率
 SHOW STATUS LIKE 'Threads_connected';
 SHOW VARIABLES LIKE 'max_connections';
-{% endhighlight %}
-
-### 8.3 性能基准测试
-{% highlight sql %}
--- 使用sysbench进行基准测试
--- 安装sysbench后执行：
-sysbench --test=oltp --mysql-host=localhost --mysql-user=root --mysql-password=password --mysql-db=test --oltp-table-size=1000000 prepare
-sysbench --test=oltp --mysql-host=localhost --mysql-user=root --mysql-password=password --mysql-db=test --oltp-table-size=1000000 --num-threads=8 run
-{% endhighlight %}
+```
 
 ---
 
-## 9. 最佳实践
+## 9. 最佳实践速查
 
-### 9.1 慢查询日志配置
-- 设置合理的 `long_query_time` 阈值（建议1-2秒）
-- 定期分析慢查询日志
-- 启用 `log_queries_not_using_indexes`
-- 配置日志轮转避免文件过大
-
-### 9.2 性能监控
-- 定期检查关键性能指标
-- 设置性能告警阈值
-- 建立性能基准和趋势分析
-- 记录性能变更历史
-
-### 9.3 查询优化
-- 使用EXPLAIN分析执行计划
-- 避免SELECT *，只查询需要的列
-- 合理使用索引，避免过度索引
-- 优化JOIN操作，避免笛卡尔积
-- 使用LIMIT限制结果集大小
-
----
-
-## 总结
-- MySQL查询日志是性能优化的核心工具
-- 慢查询日志帮助识别性能瓶颈
-- SHOW PROFILES提供详细的查询执行信息
-- 结合多种监控工具进行全面的性能分析
-- 建立系统化的性能监控和优化流程
-
-## 参考资料
-- MySQL官方文档：Query Log
-- MySQL性能优化最佳实践
-- 数据库性能调优实战指南
+| 场景 | 建议 |
+|------|------|
+| 慢查询阈值 | 生产环境设 1~2s；初排查可临时设 0.1s |
+| 索引设计 | 等值列 > 范围列；低区分度列（如 status）放后面 |
+| 避免索引失效 | 不在索引列上做函数、隐式转换、`LIKE '%xx'` |
+| 查询设计 | 禁止 `SELECT *`；大结果集必须加 `LIMIT` |
+| 统计信息 | 大批量导入后执行 `ANALYZE TABLE`，保证执行计划准确 |
+| 监控告警 | 对 `Slow_queries` 增长速率、`Threads_connected` 设阈值告警 |
+| 日志维护 | 开启 logrotate，避免慢查询日志撑满磁盘 |

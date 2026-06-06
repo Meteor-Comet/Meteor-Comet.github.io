@@ -494,7 +494,7 @@ namespace BoTech
 #### 4.2.2 `mFunction.OverTime`
 * **功能**：判定给定时间戳是否已超出限定时长。
 * **原型**：`public static bool OverTime(long StartTime, int SleepTime)`
-* **参数**：`StartTime`：开始 of Tick 值；`SleepTime`：限定的超时时间（ms）。
+* **参数**：`StartTime`：起始 Tick 值；`SleepTime`：限定的超时时间（ms）。
 * **返回值**：已超时返回 `true`，未超时返回 `false`。
 * **代码示例**：
   ```csharp

@@ -62,13 +62,25 @@ BoTech 框架是一款基于多线程并发、状态机流控制和点位/参数
 
 参数配置窗口 `Frm_Par` 包含多个 TabPage，它们展示和修改底层同一个全局参数数据源 `mFunction.mParList`：
 
-```mermaid
-graph TD
-    XML[(ParData.xml 数据库)] <-->|系统启动读取/保存| GlobalList[mFunction.mParList 内存数组]
-    Excel[(ParList.xlsx 表格模板)] -->|AutoSetup 自动建库| XML
-    GlobalList <-->|映射 0-49, 150-179| TabPage1[TabPage 1: PropertyGrid 属性网格]
-    GlobalList <-->|映射 0-55| TabPage2[TabPage 2: TextBox 文本框组]
-    GlobalList <-->|映射 100-131| TabPage4[TabPage 4: Checkbox 使能页]
+```text
+  【数据源头】
+  Excel 模板 (ParList.xlsx) 
+         │
+         │ AutoSetup 自动建库同步
+         ▼
+  【持久化数据库】
+  XML 配置文件 (ParData.xml)
+         ▲
+         │ 系统启动读取 / 运行时保存
+         ▼
+  【内存数据源】
+  全局参数数组 (mFunction.mParList)
+         │
+         ├─────── 映射 0-49, 150-179 ───────► TabPage 1: PropertyGrid 属性网格
+         │
+         ├─────── 映射 0-55 ────────────────► TabPage 2: TextBox 文本框组
+         │
+         └─────── 映射 100-131 ─────────────► TabPage 4: Checkbox 使能页
 ```
 
 #### 2.1.1 TabPage 1: 属性网格配置 (PropertyGrid)

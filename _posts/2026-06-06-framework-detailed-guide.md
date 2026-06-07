@@ -47,6 +47,8 @@ tags:
    - [4.6 mFunction 核心工具类与系统状态变量说明](#46-mfunction-核心工具类与系统状态变量说明)
 5. [机械臂基类开发最佳实践](#5-机械臂基类开发最佳实践)
    - [5.1 线程安全的安全移动方法设计 (SafeMoveTo)](#51-线程安全的安全移动方法设计-safemoveto)
+   - [5.2 框架底层原生运动控制 API 详解](#52-框架底层原生运动控制-api-详解)
+   - [5.3 为什么封装 SafeMoveTo 自定义安全移动函数](#53-为什么封装-safemoveto-自定义安全移动函数)
 
 
 ## 1. 软件框架设计概述
@@ -86,8 +88,8 @@ BoTech 框架是一款基于多线程并发、状态机流控制和点位/参数
   * **卡号** / **轴号**：该轴接在 `CardPar.xlsx` 中配置的哪张板卡（卡号）以及哪一个物理轴通道（轴号，通常为 1~8）。
   * **脉冲当量计算参数**（`每圈脉冲`、`减速比`、`导程(mm/°)`）：
     用于进行物理单位与脉冲数的自动转换。转换公式为：
-    $$\text{脉冲比例 (Pulse Ratio)} = \frac{\text{每圈脉冲} \times \text{减速比}}{\text{导程}}$$
-    *例如：伺服电机每圈脉冲为 10000，直连无减速比，丝杠导程为 10mm，则脉冲比例为 $10000 \times 1 / 10 = 1000\text{ Pulse/mm}$。当代码调用 `MotionAbsMove(轴X, 50, -1)` 移动 50mm 时，底层驱动会自动发送 $50 \times 1000 = 50000$ 个脉冲，实现对开发者的物理单位黑盒化。*
+    $$	ext{脉冲比例 (Pulse Ratio)} = rac{	ext{每圈脉冲} 	imes 	ext{减速比}}{	ext{导程}}$$
+    *例如：伺服电机每圈脉冲为 10000，直连无减速比，丝杠导程为 10mm，则脉冲比例为 $10000 	imes 1 / 10 = 1000	ext{ Pulse/mm}$。当代码调用 `MotionAbsMove(轴X, 50, -1)` 移动 50mm 时，底层驱动会自动发送 $50 	imes 1000 = 50000$ 个脉冲，实现对开发者的物理单位黑盒化。*
   * **速度规划参数**（`加速度`、`减速度`、`回零速度(mm/s)`）：
     定义轴在执行运动指令时的默认加减速斜率以及回零寻找 Index 信号时的物理速度，保证轴在起停时的平稳度。
 
@@ -1294,3 +1296,60 @@ protected bool SafeMoveTo(ValueType stationId, int pointIdx, double safeZ = 0.0,
 }
 ```
 通过调用 `SafeMoveTo`，可以将原本需要 5~6 个步骤的轴控制时序合并为单一步骤调用，极大简化了自动流程的开发，提升了代码的健壮性。
+
+### 5.2 框架底层原生运动控制 API 详解
+
+在框架底层的 `Zcm.Moving` 类（即工站中的 `pMove` 对象）中，提供了若干套底层的阻塞或非阻塞的运动控制 API。我们在开发高阶机械轴任务时，应当根据不同的使用场景（如：常规点位对位、离线对位、带纠偏偏置对位等）灵活选择使用。
+
+#### 5.2.1 原生阻塞型运动 API (`WaitDone`)
+`WaitDone` 系列方法会同步阻塞当前工站线程，直到轴运动就位或检测到运动超时报警。
+
+1. **多轴示教点联动（带 Z 轴安全高度）**
+   ```csharp
+   public bool WaitDone(
+       int StationNum, 
+       int PointNum, 
+       bool MultiAxisSync, 
+       double ZLiftHeight, 
+       int PosDelayTime, 
+       int MaxWaitTime, 
+       double LowSpeedApproachDist = 0.0, 
+       double LowSpeedApproachSpeed = 0.0, 
+       double LowSpeedLiftDist = 0.0, 
+       double LowSpeedLiftSpeed = 0.0
+   )
+   ```
+   * **使用场景**：从当前位置安全移动 to 另一个示教点（例如：从取料位置移动至拍照位置）。
+   * **运行逻辑**：
+     1. 若 `MultiAxisSync` 为 `true`，且 `ZLiftHeight`（安全抬升高度）设置合理（如 0.0），Z 轴会首先快速上升至 `ZLiftHeight`；
+     2. X, Y 等平面轴联动，同步移至目标示教点的 XY 坐标；
+     3. 待 XY 轴完全就位后，Z 轴再次下降至该示教点的目标 Z 轴坐标就位。
+   * **优点**：单行调用，自带防碰撞和 Z 轴优先抬高逻辑。
+   * **局限**：**不支持实时坐标偏置参数（如相机纠偏的 OffsetX/OffsetY）**。
+
+2. **逻辑单轴绝对运动**
+   ```csharp
+   public bool WaitDone(ValueType AxisNum, double TargetPos, double Speed, int PosDelayTime, int MaxWaitTime)
+   ```
+   * **使用场景**：在知道某个单轴目标坐标时单独移动该轴（例如：Z 轴单独回零后的安全抬升）。
+   * **运行逻辑**：控制 `AxisNum` 指定的轴以 `Speed`（通常传 -1 使用参数配置速度）移动至 `TargetPos`，并最多等待 `MaxWaitTime` 毫秒就位。
+
+#### 5.2.2 原生非阻塞型运动 API (`StaXYMove` 系列)
+如果您需要在示教点的基础坐标上增加相机的对位偏置，且希望自行控制多轴联动的时序，可以使用 `StaXYMove` 等异步控制 API。
+* **双轴平移异步偏置运动**：
+  `public bool StaXYMove(ValueType StaID, ValueType PosIndex, double Vel, double OffsetX, double OffsetY)`
+* **三轴联移异步偏置运动**：
+  `public bool StaXYRMove(ValueType StaID, ValueType PosIndex, double Vel, double OffsetX, double OffsetY, double OffsetR)`
+  > [!NOTE]
+  > 这些方法仅负责异步下发 XY(R) 轴的定位指令并叠加偏置，并不会自动执行 Z 轴防撞抬起，也不会同步阻塞等待轴到位。
+
+---
+
+### 5.3 为什么封装 `SafeMoveTo` 自定义安全移动函数
+
+如 5.2 节所述，底层的 `pMove.WaitDone` 存在设计上的“互斥性”：
+1. **多轴示教点联动 `WaitDone`** 能够安全自动地处理 Z 轴升降，但**不支持纠偏偏移量**；
+2. **非阻塞的 `StaXYRMove`** 支持纠偏偏移量，但**不支持安全 Z 轴防撞和到位检测**；
+3. **单轴 `WaitDone`** 支持纠偏坐标，但需要连续编写 4 步同步时序，流程非常繁琐。
+
+为了合并这一缺陷，我们在 `Task_机械轴基类` 中封装了 `SafeMoveTo` 方法。它将“Z轴安全上升 -> XY轴纠偏联移（支持 Offset） -> Z轴下降到位”的 4 步过程，通过单行代码进行了底层安全封装，既避免了 XY 轴在大行程移动时撞击治具，又简化了自动流程的实现。

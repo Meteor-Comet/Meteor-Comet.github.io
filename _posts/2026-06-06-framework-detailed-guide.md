@@ -36,6 +36,8 @@ tags:
    - [3.2 自动运行状态机开发模板](#32-自动运行状态机开发模板)
    - [3.3 步序控制与更新机制 (SetStep)](#33-步序控制与更新机制-setstep)
    - [3.4 超时计时器重置与防虚警防呆逻辑](#34-超时计时器重置与防虚警防呆逻辑)
+   - [3.5 流水线（Conveyor）与工站绑定逻辑](#35-流水线conveyor与工站绑定逻辑)
+   - [3.6 工站间与工站同轴（任务）间的通信与顺序控制逻辑](#36-工站间与工站同轴任务间的通信与顺序控制逻辑)
 4. [框架常用 API 函数参考手册](#4-框架常用-api-函数参考手册)
    - [4.1 运动控制类 (Motion Control)](#41-运动控制类-motion-control)
    - [4.2 系统、超时与日志 (System/Utility/Logs)](#42-系统超时与日志-systemutilitylogs)
@@ -51,7 +53,7 @@ tags:
 
 BoTech 框架是一款基于多线程并发、状态机流控制和点位/参数示教的模块化工业控制系统。其核心架构由以下三层构成：
 
-1. **界面层 (Form/UI)**：提供以主界面、手动调试界面、参数配置页面和示教界面为核心的 HMI。
+1. **界面层 (Form/UI)**：提供以主界面、手动调试界面、参数配置页面和示教界面为核心 of HMI。
 2. **逻辑控制层 (Tasks)**：每个独立的物理机构或工位继承自 `mWorkShare` 基类，在独立的线程中以状态机形式运行。各工站通过高内聚、低耦合的设计实现协作。
 3. **硬件抽象与辅助层 (Assist/DLLs)**：封装运动控制卡（如固高卡等）、数字 I/O 读写、TCP/IP/串口网络通讯、数据库读写、文件存储、日志追踪以及多工站防撞干涉区管理。
 
@@ -246,7 +248,7 @@ Excel 与 `EnumName.cs` 内枚举项的精确映射如下：
 
 ---
 
-### 2.5 HMI UI 诊断监控与 I/O 硬件 of 交互联系
+### 2.5 HMI UI 诊断监控与 I/O 硬件的交互联系
 
 配置完毕的 I/O 映射在软件 UI 界面上有极佳的关联性：
 1. **监控界面动态渲染**：
@@ -254,7 +256,7 @@ Excel 与 `EnumName.cs` 内枚举项的精确映射如下：
 2. **点动控制 (DO 手动调试)**：
    在“手动调试”或“IO监控”界面点击某个输出按钮时，系统会截获该按钮绑定的 `OutNo` 逻辑编号。在手动模式下，系统执行 `WriteDo(编号, 1)`（底层硬件操作是在配置卡号和序号对应的引脚输出高电平），且按钮变绿。
 3. **输入反馈 (DI 实时点亮)**：
-   系统会在后台开启一个 10ms 级别的扫描线程，高频读取 `ParInput.xml` 里配置的所有卡号和引脚状态。一旦传感器触发（引脚变高电平），UI 监控上对应的指示灯会点亮成绿色；离开后熄灭。这为电气调试和故障排查提供了极其便捷的可视化支持。
+   系统会在后台开启一个 10ms 级别的扫描线程，高频读取 `ParInput.xml` 里配置的所有卡号 and 引脚状态。一旦传感器触发（引脚变高电平），UI 监控上对应的指示灯会点亮成绿色；离开后熄灭。这为电气调试和故障排查提供了极其便捷的可视化支持。
 
 ---
 
@@ -506,6 +508,171 @@ namespace BoTech
   mFunction.ConveyorData[MainConvId].StartTime = mFunction.GetTickCount();
   ```
   这样可以确保超时判定时间（如 `OverTime`）纯粹计算该硬件动作本身的响应时间，彻底消除由于物流积压或辅助夹具动作缓慢引起的虚警。
+
+### 3.5 流水线（Conveyor）与工站绑定逻辑
+
+BoTech 框架在多工站流线型设备开发中，采用了流水线段（Conveyor Segment）与工站任务（Task）松耦合绑定的设计模式：
+
+1. **流水线配置装载**：
+   * 软件启动时，`Setup_Load.cs` 会通过 `mFunction.ReadXml` 读取 `bin\Debug\RBF\Conveyor.xml` 配置文件，将其装载到全局流水线对象数组 `mFunction.ConveyorData` 中。
+   * 流水线按照物理分段（段1、段2、段3等）进行逻辑编号管理。
+2. **工站的流线段绑定**：
+   * 每个继承自 `mWorkShare` 的工站（如 `Task01_入料扫码站`、`Task02_螺丝站`）在 `Initialize` 方法中，都会显式调用绑定流线函数：
+     ```csharp
+     this.BindConv(short ConvID, short[] StateConvIds);
+     ```
+     例如，螺丝工位调用 `this.BindConv(2, null)`，表示该工站主动作序列被绑定至 **流线段2** 上。
+   * 绑定后，工站可以通过继承获得的 `MainConvId`（此处为 `2`）直观地索引全局流线 `mFunction.ConveyorData[MainConvId]` 并管理其状态。
+3. **流线动作线程与当站处理交互**：
+   * 每一段流水线的马达启停、气缸阻挡以及产品流入到位，都由 `A0.Conveyors.cs` 中的 `nConvEvent` 独立状态机在后台高频轮询控制。
+   * **物料流入与锁定**：当产品流入到位后，流水线状态机将该段流线的自定义状态 `CustStatus` 修改为 `"WAITING_FOR_ASSEMBLY"`（等待装配/工作开始），并在此阻塞等待。
+   * **工站唤醒与交付**：工站自身的 `AutoRun()` 状态机在检测到位信号和 `"WAITING_FOR_ASSEMBLY"` 后，将状态机切入工作流程，将 `CustStatus` 设为 `"工作中"` 或 `"处理中"`。工作完成后，工站将 `CustStatus` 修改为 `"ASSEMBLY_COMPLETED"`（装配完成/工作完毕）。
+   * **流出与放行**：流水线状态机捕获到 `"ASSEMBLY_COMPLETED"` 后，自动执行降顶升、缩阻挡动作，并开启滚筒电机将产品放行输送至下一段。
+
+### 3.6 工站间与工站同轴（任务）间的通信与顺序控制逻辑
+
+在自动运行过程中，工站之间的物料移交以及工站与机械轴之间的工作调度，依靠**流线状态监听**与**任务交互标志（TasksInteraction）**来实现有序控制：
+
+#### 3.6.1 上下游工站之间的通信（顺序流转）
+
+上游工位在完成本工位的作业后，不能直接放行，必须首先确认**下游工位处于空闲状态**。以“扫码站（工位1）”与“螺丝站（工位2）”为例，流转和判定顺序如下：
+
+1. **下游空闲判定**：上游工位1通过直接检查下游工位2流线状态的自定义属性 `CustStatus` 来进行通信。若为空值或 `null`，代表工位2目前无料且空闲，允许放行：
+   ```csharp
+   // 检查工位2的状态属性是否为空，若为空说明工位2目前无料且空闲
+   if (string.IsNullOrEmpty(mFunction.ConveyorData[2].CustStatus))
+   {
+       // 下游空闲，允许放行！工位1阻挡气缸缩回，电机起转，将载具送出
+       SetStep(ref StaInfo, (int)步序.气缸缩回, true);
+   }
+   ```
+2. **放行物理动作**：
+   * 缩回工位1阻挡气缸：`mDoDiWaitDone(OutNo.流线1阻挡气缸, 0, InNo.流线1阻挡缩回信号, 1, 10, 3000, true)`
+   * 开启工位1电机送走产品：`mGlobal.mDoSet(OutNo.流线1_扫码滚筒电机M0); mGlobal.mDoSet(OutNo.流线1_扫码滚筒电机M3);`
+   * 等待工位1到位信号消失（载具离开）：`if (!mGlobal.ReadDi_Bool(InNo.流线1到位信号))`
+3. **流入状态交接与条码传递**：
+   * 当载具完全流出工位1且触发工位2的流入传感器（`InNo.流线2流入信号`）时，`A0.Conveyors.cs` 中的 `ConvEvent.Data_Change` 会被后台线程触发，执行段间数据交接。
+   * 此时，工位1在内存中的条码、测量数据、扫码判定结果等物理信息被自动克隆/移交至工位2的内存缓冲数据结构（`mConvData[2]`）中，同时清空工位1的遗留数据（`mConvData[1].Clear()`）。
+4. **提前防撞与提前阻挡**：
+   * 在工位1的 `等产品到达工位2` 步序中，当检测到产品触发 `InNo.流线2流入信号` 且工位1阻挡气缸处于缩回状态时，延迟微调时间（如 350ms）后，工位1**提前升起阻挡气缸**，确保后续载具不会撞板：
+     ```csharp
+     if (mGlobal.ReadDi_Bool(InNo.流线2流入信号) && MotionDll.ReadDo((short)OutNo.流线1阻挡气缸) == 0)
+     {
+         Thread.Sleep(350); 
+         mGlobal.mDoSet(OutNo.流线1阻挡气缸); // 提前伸出阻挡气缸！
+     }
+     ```
+5. **到位唤醒下游**：
+   * 载具继续前行至工位2的到位传感器（`InNo.流线2到位信号`）时，工位2的主控任务检测到到位信号为 `true`。
+   * 工位1检测到工位2到位信号为 `true` 之后，确信产品已成功交接：
+     * 关闭工位1的所有传送电机：`mGlobal.mDoReset(OutNo.流线1_扫码滚筒电机M0);`
+     * 复位工位1流线状态为置空释放：`mFunction.ConveyorData[MainConvId].CustStatus = "";`
+     * 返回第一步等待下一次放料循环。
+   * 工位2主控任务将 `ConveyorData[2].CustStatus` 修改为 `"工作中"`（表示占位），并关闭滚筒电机、升起顶升和夹具定位产品，随后转入工艺工作（打螺丝）。
+
+下面是**工站间物料流转与状态握手时序图**：
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Station1 as 工位1 (主程序)
+    participant Conv1 as 流线1状态机 (后台)
+    participant Conv2 as 流线2状态机 (后台)
+    participant Station2 as 工位2 (主程序)
+
+    Note over Station1: 扫码完成，CustStatus="ASSEMBLY_COMPLETED"
+    Station1->>Station1: 轮询检查下游状态：IsNullOrEmpty(mFunction.ConveyorData[2].CustStatus)
+    Note over Station2: 初始状态，CustStatus="" (空闲)
+    Station1->>Station1: 检测到工位2空闲，缩回阻挡，开启电机放行
+    Note over Conv1, Conv2: 载具在流线滚筒上向工位2传输
+    Station1->>Station1: 检测到到位信号消失 (流线1到位=0)
+    Note over Conv2: 载具到达流线2流入传感器
+    Conv2->>Conv2: 触发 Data_Change，拷贝数据至mConvData[2]，清空mConvData[1]
+    Note over Station1: 延时350ms，提前升起阻挡气缸防撞
+    Station1->>Station1: 开启阻挡气缸1
+    Note over Conv2: 载具到达流线2到位传感器
+    Station1->>Station1: 检测到流线2到位=1，关闭电机1，置空流线1 of CustStatus=""
+    Note over Station1: 工位1恢复空闲，可接收新料
+    Station2->>Station2: 检测到位信号和WAINTING_FOR_ASSEMBLY，关闭电机2，升起定位夹具
+    Station2->>Station2: 修改流线2状态 CustStatus="工作中"
+    Note over Station2: 工位2开始打螺丝动作
+```
+
+#### 3.6.2 工站与机械轴之间的通信（任务协程）
+
+对于打螺丝、CCD拍照等包含运动轴组的工站，主工站（如 `Task02_螺丝站`）与机械轴（如 `Task04_右机械轴`、`Task05_左机械轴`）属于独立的两个任务线程，它们通过 `TasksInteraction` 全局握手标志位实现同步：
+
+1. **主工站触发机械手工作**：
+   * 当载具夹紧定位完毕后，主工站清空历史完成状态，并向机械手广播“允许工作”的标志位：
+     ```csharp
+     GetTasksInteraction(TasksInteraction.右轴螺丝工作完成_标志, true); // 清空历史
+     GetTasksInteraction(TasksInteraction.左轴螺丝工作完成_标志, true); // 清空历史
+     SetTasksInteractionTrue(TasksInteraction.StaAssembly_Allow_Robot);
+     ```
+2. **机械手任务响应并锁存**：
+   * 机械轴类（继承自 `Task_机械轴基类`）在自己的自动循环中配置了 `启动触发标志`（即 `TasksInteraction.StaAssembly_Allow_Robot`）。
+   * 检测到该标志为 `true` 后，两轴的任务线程被同步唤醒，脱离等待，前往吸取螺丝或执行视觉纠偏与锁付。
+3. **防重复触发拦截（清除触发标志）**：
+   * 为了防止多轴机械手在完成动作返回时二次触发，主工站检测到左右两轴都已经脱离初始等待步骤（例如 `StepIdx >= 20`）且处于工作状态后，会立即将触发标志抹除：
+     ```csharp
+     if (!已经清除启动信号 && 右轴已经启动 && 左轴已经启动)
+     {
+         SetTasksInteractionFalse(TasksInteraction.StaAssembly_Allow_Robot);
+         已经清除启动信号 = true;
+     }
+     ```
+4. **工作完成反馈**：
+   * 机械轴执行完锁付动作，并在XY轴和Z轴完全退回到避让待机位置（确信物理上完全避让载具和顶升气缸）之后，各自将自己的完成标志置为 `true`：
+     ```csharp
+     // 右轴任务在其结束步序置位：SetTasksInteractionTrue(TasksInteraction.右轴螺丝工作完成_标志);
+     // 左轴任务同理置位：SetTasksInteractionTrue(TasksInteraction.左轴螺丝工作完成_标志);
+     ```
+5. **主工站汇合与确认**：
+   * 主工站以非阻塞形式轮询判断两轴的完成标志。同时开启最大 90 秒打螺丝超时保护监控，防止卡死报警：
+     ```csharp
+     if (GetTasksInteraction(TasksInteraction.右轴螺丝工作完成_标志, false) == true &&
+         GetTasksInteraction(TasksInteraction.左轴螺丝工作完成_标志, false) == true)
+     {
+         // 自动清除该完成标志位，表示双轴作业顺利结束
+         GetTasksInteraction(TasksInteraction.右轴螺丝工作完成_标志, true);
+         GetTasksInteraction(TasksInteraction.左轴螺丝工作完成_标志, true);
+         // 工位进入等下游空闲放料状态
+         SetStep(ref StaInfo, (int)步序.等工位3空闲, true);
+     }
+     else if (mFunction.OverTime(mFunction.ConveyorData[MainConvId].StartTime, 90000))
+     {
+         // 超时处理，去异常页报警
+         SetStep(ref StaInfo, (int)步序.异常, true);
+     }
+     ```
+
+下面是**工位与机械轴多线程协同握手时序图**：
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Master as 螺丝主站 (Task02)
+    participant AxisL as 左机械轴 (Task05)
+    participant AxisR as 右机械轴 (Task04)
+
+    Note over Master: 载具定位夹紧完毕
+    Master->>Master: 清空左右轴历史完成标志
+    Master->>AxisL: 置位广播信号 StaAssembly_Allow_Robot = true
+    Master->>AxisR: (并发接收) StaAssembly_Allow_Robot = true
+    Note over AxisL: 等待启动信号步序检测到 true
+    Note over AxisR: 等待启动信号步序检测到 true
+    AxisL->>AxisL: 启动：前往拍照并打螺丝 (StepIdx=20)
+    AxisR->>AxisR: 启动：前往拍照并打螺丝 (StepIdx=20)
+    Note over Master: 检测到左轴和右轴均已进入 StepIdx >= 20
+    Master->>Master: 复位广播信号 StaAssembly_Allow_Robot = false (防二次触发)
+    Note over AxisL: 完成螺丝锁付，返回安全待机位置
+    AxisL->>Master: 发送左轴完成信号 LeftAxisDone = true
+    Note over AxisR: 完成螺丝锁付，返回安全待机位置
+    AxisR->>Master: 发送右轴完成信号 RightAxisDone = true
+    Note over Master: 轮询并检测到 LeftAxisDone=true && RightAxisDone=true
+    Master->>Master: 消费并自动清除两个完成标志
+    Note over Master: 重置定位气缸，进入等下游放行步骤
+```
 
 ---
 

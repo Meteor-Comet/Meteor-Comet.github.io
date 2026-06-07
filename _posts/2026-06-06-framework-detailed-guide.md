@@ -607,17 +607,17 @@ sequenceDiagram
      ```csharp
      GetTasksInteraction(TasksInteraction.右轴螺丝工作完成_标志, true); // 清空历史
      GetTasksInteraction(TasksInteraction.左轴螺丝工作完成_标志, true); // 清空历史
-     SetTasksInteractionTrue(TasksInteraction.StaAssembly_Allow_Robot);
+     SetTasksInteractionTrue(TasksInteraction.组装允许机械手_标志);
      ```
 2. **机械手任务响应并锁存**：
-   * 机械轴类（继承自 `Task_机械轴基类`）在自己的自动循环中配置了 `启动触发标志`（即 `TasksInteraction.StaAssembly_Allow_Robot`）。
+   * 机械轴类（继承自 `Task_机械轴基类`）在自己的自动循环中配置了 `启动触发标志`（即 `TasksInteraction.组装允许机械手_标志`）。
    * 检测到该标志为 `true` 后，两轴的任务线程被同步唤醒，脱离等待，前往吸取螺丝或执行视觉纠偏与锁付。
 3. **防重复触发拦截（清除触发标志）**：
    * 为了防止多轴机械手在完成动作返回时二次触发，主工站检测到左右两轴都已经脱离初始等待步骤（例如 `StepIdx >= 20`）且处于工作状态后，会立即将触发标志抹除：
      ```csharp
      if (!已经清除启动信号 && 右轴已经启动 && 左轴已经启动)
      {
-         SetTasksInteractionFalse(TasksInteraction.StaAssembly_Allow_Robot);
+         SetTasksInteractionFalse(TasksInteraction.组装允许机械手_标志);
          已经清除启动信号 = true;
      }
      ```
@@ -657,14 +657,14 @@ sequenceDiagram
 
     Note over Master: 载具定位夹紧完毕
     Master->>Master: 清空左右轴历史完成标志
-    Master->>AxisL: 置位广播信号 StaAssembly_Allow_Robot = true
-    Master->>AxisR: (并发接收) StaAssembly_Allow_Robot = true
+    Master->>AxisL: 置位广播信号 组装允许机械手_标志 = true
+    Master->>AxisR: (并发接收) 组装允许机械手_标志 = true
     Note over AxisL: 等待启动信号步序检测到 true
     Note over AxisR: 等待启动信号步序检测到 true
     AxisL->>AxisL: 启动：前往拍照并打螺丝 (StepIdx=20)
     AxisR->>AxisR: 启动：前往拍照并打螺丝 (StepIdx=20)
     Note over Master: 检测到左轴和右轴均已进入 StepIdx >= 20
-    Master->>Master: 复位广播信号 StaAssembly_Allow_Robot = false (防二次触发)
+    Master->>Master: 复位广播信号 组装允许机械手_标志 = false (防二次触发)
     Note over AxisL: 完成螺丝锁付，返回安全待机位置
     AxisL->>Master: 发送左轴完成信号 LeftAxisDone = true
     Note over AxisR: 完成螺丝锁付，返回安全待机位置
@@ -1069,7 +1069,7 @@ case (int)步序.等相机数据:
 ##### 1. 底层存储与工作原理
 * **定义位置**：所有交互信号均声明于 `4.Assist/6.mEnum.cs` 的 `public enum TasksInteraction` 枚举中。
 * **寄存器机制**：系统启动后，内存中开辟了一段 `bool?`（Nullable Boolean）类型的寄存器数组。当执行 `SetTasksInteractionTrue(id)` 或 `GetTasksInteraction(id)` 时，框架使用 `Convert.ToInt32(id)` 对枚举值进行整型强转，直接作为寄存器数组的物理索引，保证了在高频多线程轮询下的无锁高性能访问。
-* **框架级变动日志**：为了便于流程死锁排查，每当调用 `SetTasksInteractionTrue` 或 `SetTasksInteractionFalse` 使得信号值变更时，底层会**自动调用 `AddLog`** 输出带时间戳的变动日志，高亮显示在主界面的“运行日志”窗口中（例如：“*线程交互变量: StaAssembly_Allow_Robot, set value is true*”）。
+* **框架级变动日志**：为了便于流程死锁排查，每当调用 `SetTasksInteractionTrue` 或 `SetTasksInteractionFalse` 使得信号值变更时，底层会**自动调用 `AddLog`** 输出带时间戳的变动日志，高亮显示在主界面的“运行日志”窗口中（例如：“*线程交互变量: 组装允许机械手_标志, set value is true*”）。
 
 ##### 2. 交互 API 的参数细节与核心防呆规范
 在 `mWorkShare` 业务逻辑开发中，应严格遵守以下 API 调用规则：
@@ -1088,7 +1088,7 @@ case (int)步序.等相机数据:
 * **第一阶段：主站复位与就位**
   系统启动或复位（`Homing`）时，主工站必须主动将所有握手信号初始化为 `false`，清空一切历史状态：
   ```csharp
-  SetTasksInteractionFalse(TasksInteraction.StaAssembly_Allow_Robot);
+  SetTasksInteractionFalse(TasksInteraction.组装允许机械手_标志);
   SetTasksInteractionFalse(TasksInteraction.右轴螺丝工作完成_标志);
   SetTasksInteractionFalse(TasksInteraction.左轴螺丝工作完成_标志);
   ```
@@ -1097,15 +1097,15 @@ case (int)步序.等相机数据:
   ```csharp
   GetTasksInteraction(TasksInteraction.右轴螺丝工作完成_标志, true); // 清空历史残留
   GetTasksInteraction(TasksInteraction.左轴螺丝工作完成_标志, true);
-  SetTasksInteractionTrue(TasksInteraction.StaAssembly_Allow_Robot);  // 广播启动信号
+  SetTasksInteractionTrue(TasksInteraction.组装允许机械手_标志);  // 广播启动信号
   ```
   **防二次触发锁**：一旦检测到左、右轴均已读取信号并脱离了等待状态（例如 StepIdx >= 20），主工站必须**立即**执行：
   ```csharp
-  SetTasksInteractionFalse(TasksInteraction.StaAssembly_Allow_Robot); // 清除启动信号
+  SetTasksInteractionFalse(TasksInteraction.组装允许机械手_标志); // 清除启动信号
   ```
   如果不及时清除该启动信号，那么当左、右轴执行完毕并返回到等待原点时，检测到该启动信号依然为 `true`，会再次被错误启动，造成二次拧紧的事故。
 * **第三阶段：辅轴独立动作与完成置位**
-  左、右机械轴在各自的 `AutoRun()` 步骤中，轮询检查 `启动触发标志`（即绑定的 `StaAssembly_Allow_Robot`）：
+  左、右机械轴在各自的 `AutoRun()` 步骤中，轮询检查 `启动触发标志`（即绑定的 `组装允许机械手_标志`）：
   ```csharp
   if (GetTasksInteraction(启动触发标志, false) == true)
   {
@@ -1139,7 +1139,7 @@ case (int)步序.等相机数据:
 | 交互信号枚举值 | 触发源 (置为 true) | 消费源 (判定并置为 false) | 业务协同物理目的 |
 | :--- | :--- | :--- | :--- |
 | **`料盘已经准备好_标志`** | 上料仓站（满盘到位升起，允许吸取） | 机械臂搬运站 | 允许搬运轴前往上料位置吸取载具或料盘。 |
-| **`StaAssembly_Allow_Robot`** | 组装螺丝主工站（载具到位夹紧） | 左机械轴、右机械轴 | 广播启动信号，通知左右两个打螺丝轴同步脱离等待步序，前往吸取螺丝并拧紧。 |
+| **`组装允许机械手_标志`** | 组装螺丝主工站（载具到位夹紧） | 左机械轴、右机械轴 | 广播启动信号，通知左右两个打螺丝轴同步脱离等待步序，前往吸取螺丝并拧紧。 |
 | **`右轴螺丝工作完成_标志`** | 右机械轴（拧紧完毕且回退安全原点） | 组装螺丝主工站 | 反馈右轴动作结束。主工站轮询此标志，确信右轴已完全退出工作干涉区。 |
 | **`左轴螺丝工作完成_标志`** | 左机械轴（拧紧完毕且回退安全原点） | 组装螺丝主工站 | 反馈左轴动作结束。主工站轮询此标志，确信左轴已完全退出工作干涉区。 |
 | **`切换料盘标志_To上料仓`** | 托盘空盘传感器触发 | 料仓升降轴 | 通知料仓轴自动升降，将满盘切入上料高度。 |
@@ -1201,6 +1201,17 @@ case (int)步序.等相机数据:
     // 判断是否在虚拟仿真运行模式下
     if (mFunction.GetParValue<string>(UserPar.Machine_runMode) == "OffLine_VirtualRun") { ... }
     ```
+
+  > [!TIP]
+  > **延时参数化与拍率优化最佳实践**：
+  > 为了便于在设备调试阶段微调气缸响应、光源稳定及动作时间，本框架将常用的硬编码 `Thread.Sleep` 延时全部抽象为 `UserPar` 并在 Excel 中配置，以便在线修改：
+  > * **`扫码光源稳定延时`** (`UserPar.扫码光源稳定延时` / 默认 `500ms`，上限 `2000ms`, 下限 `0ms`)
+  > * **`流线1气缸弹出延时`** (`UserPar.流线1气缸弹出延时` / 默认 `350ms`，上限 `1500ms`, 下限 `50ms`)
+  > * **`CCD光源稳定延时`** (`UserPar.CCD光源稳定延时` / 默认 `1000ms`，上限 `3000ms`, 下限 `0ms`)
+  > * **`电批吸料稳定延时`** (`UserPar.电批吸料稳定延时` / 默认 `200ms`，上限 `1000ms`, 下限 `50ms`)
+  > * **`电批放料稳定延时`** (`UserPar.电批放料稳定延时` / 默认 `150ms`，上限 `1000ms`, 下限 `10ms`)
+  > * **`电批锁附时间`** (`UserPar.电批锁附时间` / 默认 `1500ms`，上限 `5000ms`, 下限 `200ms`)
+  > 通过上述延时参数的上下限管控（例如：流线1气缸弹出延时限制最低 `50ms` 以防气缸在物料离开前误弹出堵死流线），既保证了机构响应拍率，又实现了防呆保护。
 
 * **`mFunction.GetTickCount()`**：
   * **功能**：获取高精度自系统启动以来的毫秒时间戳（Tick 数值），主要用于超时计算。

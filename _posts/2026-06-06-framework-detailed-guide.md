@@ -315,13 +315,13 @@ public override void AutoRun()
 }
 ```
 
-#### 2.7.3 相机跳步逻辑 (`Spare7` 索引 107 - 启用左相机 / `Spare15` 索引 115 - 启用右相机)
+#### 2.7.3 相机跳步逻辑 (`Enable_CCD` 索引 104 - 启用相机功能)
 用于屏蔽视觉定位，直接以零偏差移至打螺丝点。
 ```csharp
 case (int)步序.等待启动信号:
     if (GetTasksInteraction(启动触发标志, false) == true)
     {
-        if (是否启用相机) // 由 Enable_CCD 且对应 Spare7/Spare15 复选框控制
+        if (是否启用相机) // 由 Enable_CCD 启用相机复选框控制
         {
             SetStep(ref StaInfo, (int)步序.移至拍照位置, true);
         }

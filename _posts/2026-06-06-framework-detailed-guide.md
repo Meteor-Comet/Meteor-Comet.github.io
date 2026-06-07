@@ -28,7 +28,7 @@ tags:
    - [2.2 C# 枚举 (EnumName.cs) 绑定关系与手动同步 SOP](#22-c-枚举-enumnamecs-绑定关系与手动同步-sop)
    - [2.3 Excel 参数配置与 XML 数据库转换映射规则](#23-excel-参数配置与-xml-数据库转换映射规则)
    - [2.4 UI 界面参数标签页 (TabPage) 绑定关系](#24-ui-界面参数标签页-tabpage-绑定关系)
-   - [2.5 HMI UI 诊断监控与 I/O 硬件的交互联系](#25-hmi-ui-诊断监控与-io-硬件的交互联系)
+   - [2.5 HMI UI 诊断监控与 I/O 硬件的交互联系](#25-hmi-ui-诊断监控与-io-硬件 of 交互联系)
    - [2.6 输入限制与合法性校验逻辑](#26-输入限制与合法性校验逻辑)
    - [2.7 功能使能复选框在业务代码中的跳步与屏蔽机制](#27-功能使能复选框在业务代码中的跳步与屏蔽机制)
 3. [自动化流程开发 SOP](#3-自动化流程开发-sop)
@@ -44,10 +44,10 @@ tags:
    - [4.3 文件读写 (File Operations)](#43-文件读写-file-operations)
    - [4.4 网口与串口通讯 (Communications)](#44-网口与串口通讯-communications)
    - [4.5 软交互信号量与干涉区防撞 (Synchronization & Concurrency)](#45-软交互信号量与干涉区防撞-synchronization--concurrency)
+   - [4.6 mFunction 核心工具类与系统状态变量说明](#46-mfunction-核心工具类与系统状态变量说明)
 5. [机械臂基类开发最佳实践](#5-机械臂基类开发最佳实践)
    - [5.1 线程安全的安全移动方法设计 (SafeMoveTo)](#51-线程安全的安全移动方法设计-safemoveto)
 
----
 
 ## 1. 软件框架设计概述
 
@@ -533,7 +533,7 @@ BoTech 框架在多工站流线型设备开发中，采用了流水线段（Conv
 
 在自动运行过程中，工站之间的物料移交以及工站与机械轴之间的工作调度，依靠**流线状态监听**与**任务交互标志（TasksInteraction）**来实现有序控制：
 
-#### 3.6.1 上下游工站之间的通信（顺序流转）
+#### 3.6.1 上下游工站之间的通信与顺序流转（如何判定下游好没好）
 
 上游工位在完成本工位的作业后，不能直接放行，必须首先确认**下游工位处于空闲状态**。以“扫码站（工位1）”与“螺丝站（工位2）”为例，流转和判定顺序如下：
 
@@ -591,7 +591,7 @@ sequenceDiagram
     Note over Station1: 延时350ms，提前升起阻挡气缸防撞
     Station1->>Station1: 开启阻挡气缸1
     Note over Conv2: 载具到达流线2到位传感器
-    Station1->>Station1: 检测到流线2到位=1，关闭电机1，置空流线1 of CustStatus=""
+    Station1->>Station1: 检测到流线2到位=1，关闭电机1，置空流线1的 CustStatus=""
     Note over Station1: 工位1恢复空闲，可接收新料
     Station2->>Station2: 检测到位信号和WAINTING_FOR_ASSEMBLY，关闭电机2，升起定位夹具
     Station2->>Station2: 修改流线2状态 CustStatus="工作中"
@@ -674,7 +674,6 @@ sequenceDiagram
     Note over Master: 重置定位气缸，进入等下游放行步骤
 ```
 
----
 
 ## 4. 框架常用 API 函数参考手册
 
@@ -861,56 +860,152 @@ sequenceDiagram
 
 ### 4.4 网口与串口通讯 (Communications)
 
+BoTech 框架底层集成了基于以太网套接字 (Socket Client) 的网络通讯组件，用于与相机 (CCD)、扫码枪 (Scanner)、RFID 读写器及其他外部智能设备进行双向网络报文交互。
+
 #### 4.4.1 Socket 客户端发送数据
 * **方法**：`TcpIP[Index].SendData(string DataStr)`
-* **参数**：`Index`：网口映射编号；`DataStr`：发送给服务器的字符串。
-* **返回值**：成功送入发送缓冲区则返回 `true`。
+* **参数**：
+  * `Index`：网口的逻辑映射编号（对应 `TCPIP_Port` 枚举）。
+  * `DataStr`：需要发送给服务器的字符串报文。
+* **返回值**：若成功送入发送缓冲区则返回 `true`，否则返回 `false`。
 
-#### 4.4.2 检查是否收到新数据与读取缓冲区
-在后台通讯接收回调线程收到数据后，会将标志置位。工站直接通过以下 API 进行检查：
-* **`TcpInfo[Index].Received`**：当网络连接中有未读取数据时，返回 `true`。
-* **`TcpInfo[Index].Data`**：读取缓冲区内完整的网口数据，读取后框架会自动清空缓冲区并复位 `Received` 为 `false`。
-* **`TcpInfo[Index].Open`**：检查网口连接状态是否正常建立（连接成功为 `true`）。
+#### 4.4.2 检查是否收到新数据与读取机制
+在后台套接字接收线程收到数据后，会将标志置位。工站可以通过以下 API 进行检查与消费：
+* **`TcpInfo[Index].Received`**：只读布尔值。当网络物理链路收到新报文且未被读取时返回 `true`。
+* **`TcpInfo[Index].Data`**：读取并清空缓冲区内完整的网口数据。
+  > [!IMPORTANT]
+  > **毁灭性读取机制**：
+  > 读取 `TcpInfo[Index].Data` 属性会触发其 Getter，该操作在将接收数据字符串返回的同时，会**立即清空底层接收缓冲区并将 `Received` 标志原子复位为 `false`**。
+  > 因此，同一循环中**不可重复读取该属性**（第二次读取将获得空字符串 `""`）。如果需要多次使用接收到的数据，必须在首次读取时用局部变量锁存（如 `string resp = TcpInfo[Index].Data;`）。
+* **`TcpInfo[Index].Open`**：检查网口连接状态（连接建立为 `true`，断开为 `false`）。
 
 #### 4.4.3 TCP 双向应答最佳实践示例
+在 AutoRun 状态机中，典型的双向应答（Request-Response）模式如下：
 ```csharp
-// 重新开始计算扫码等待时间，防止因为流入和到位夹紧动作导致耗时，进而引发扫码超时错误
-mFunction.ConveyorData[MainConvId].StartTime = mFunction.GetTickCount(); 
-
-AddLog("Demo工站：向相机发送 ReadCode 指令", LogsType.Auto, 30, true);
-// SocketDataSend 会封装并执行 SendData
-bool isSent = TcpIp_Communication.SocketDataSend(TCPIP_Port.扫描, "ReadCode");
-if (isSent)
-{
-    SetStep(ref StaInfo, (int)步序.等扫码结果, true);
-}
-else
-{
-    SetStep(ref StaInfo, (int)步序.异常, true);
-}
-
-// 随后在 Step 等扫码结果 中检测接收：
-case (int)步序.等扫码结果:
-    if (TcpInfo[TCPIP_Port.扫描].Received)
+case (int)步序.发送拍照指令:
+    // 重新记录起点时间，避免累加之前动作的时间导致超时错误
+    mFunction.ConveyorData[MainConvId].StartTime = mFunction.GetTickCount(); 
+    AddLog("右机械轴：向相机发送拍照指令", LogsType.CCD, StaInfo.StepIdx, true);
+    
+    // 发送报文
+    if (TcpIp_Communication.SocketDataSend(TCPIP_Port.右CCD, "RScrew"))
     {
-        string resp = TcpInfo[TCPIP_Port.扫描].Data; // 读取数据（自动清空接收区）
+        SetStep(ref StaInfo, (int)步序.等相机数据, true);
+    }
+    else
+    {
+        SetStep(ref StaInfo, (int)步序.异常, true);
+    }
+    break;
+
+case (int)步序.等相机数据:
+    // 1. 判断是否收到回复
+    if (mFunction.TcpInfo[(short)TCPIP_Port.右CCD].Received)
+    {
+        // 2. 局部变量读取并锁存，同时复位 Received 标志并清除接收区
+        string resp = mFunction.TcpInfo[(short)TCPIP_Port.右CCD].Data;
         AddLog($"收到相机回复: {resp}", LogsType.CCD, StaInfo.StepIdx, true);
-        if (resp.StartsWith("ReadCode,OK"))
+        
+        // 3. 解析相机纠偏数据
+        if (resp.StartsWith("OK"))
         {
-            SetStep(ref StaInfo, (int)步序.放行退出, true);
+            // 解析并赋值纠偏 X, Y, R
+            SetStep(ref StaInfo, (int)步序.平移对位, true);
         }
         else
         {
             SetStep(ref StaInfo, (int)步序.异常, true);
         }
     }
+    // 4. 超时监控（3秒）
     else if (mFunction.OverTime(mFunction.ConveyorData[MainConvId].StartTime, 3000))
     {
-        AddLog("等待相机扫码数据超时！", LogsType.CCD, StaInfo.StepIdx, true);
+        AddLog("等待相机数据超时！", LogsType.CCD, StaInfo.StepIdx, true);
         SetStep(ref StaInfo, (int)步序.异常, true);
     }
     break;
 ```
+
+#### 4.4.4 框架内网口通信的两种实现方式（对比）
+
+在 BoTech 软件框架中，接收以太网报文有两种经典开发模式，开发者应根据并发场景进行合理选型。
+
+##### 方式一：直接在 AutoRun 状态机中轮询接收（直接访问模式）
+* **工作原理**：
+  直接在工站的 `AutoRun()` 状态机步序中，使用 `if (mFunction.TcpInfo[Index].Received)` 轮询底层网络接收缓冲区。当判定为 `true` 后，直接读取 `string resp = mFunction.TcpInfo[Index].Data` 获取响应。
+* **典型代码**：
+  ```csharp
+  if (mFunction.TcpInfo[(short)TCPIP_Port.扫描].Received)
+  {
+      string resp = mFunction.TcpInfo[(short)TCPIP_Port.扫描].Data; // 毁灭性读取
+      // 处理扫码数据
+  }
+  ```
+* **适用场景**：
+  **单端口单工站独占**场景。例如，扫码枪网口只与 `Task01_入料扫码站` 发生交互，无其他工站线程介入读取该端口。
+* **优缺点**：
+  * **优点**：简单直接，逻辑高度内聚，无需在其他网络配置文件中注册转发。
+  * **缺点**：由于 `.Data` 的毁灭性读取特性，如果有两个并发线程（如主站和辅轴）同时轮询 `TcpInfo[Index].Received`，一旦数据到达，其中一个线程读取了 `.Data`，另一个线程就会读取到空字符串 `""`，从而导致数据丢失或逻辑失效。
+
+##### 方式二：基于全局事件路由与静态/实例字段（回调分发模式，推荐）
+* **工作原理**：
+  网络底层接收事件与工站时序线程解耦。在系统初始化时，框架通过 `mFunction.TcpIP[i].mDataRec += mTcpData;` 注册全局接收事件回调。
+  当任意网口收到数据时，回调线程立即进入辅助类 `2.TcpIp.cs`（通常称为 `TcpIpcs` 文件）的 `mTcpData(short Index)` 方法：
+  在回调中，读取数据、置位 `Received = false`，然后根据端口索引直接将数据**路由并推送**给目标工站的成员属性中。
+* **回调路由代码 (`2.TcpIp.cs`)**：
+  ```csharp
+  public static void mTcpData(short Index)
+  {
+      if (TcpInfo[Index].Received) 
+      {
+          string data = mFunction.TcpInfo[Index].Data; // 拦截并读取数据，重置缓冲区
+          TcpInfo[Index].Received = false; 
+
+          // 根据网口逻辑端口 Index 进行数据分发
+          switch (Index)
+          {
+              case 1: // 扫码枪端口
+                  Task01_入料扫码站.ReceivedData = data;
+                  Task01_入料扫码站.HasNewData = true;
+                  break;
+              case 2: // 右轴CCD端口
+                  Task04_右机械轴.Instance.相机接收数据 = data;
+                  Task04_右机械轴.Instance.有新数据 = true;
+                  break;
+              case 3: // 左轴CCD端口
+                  Task05_左机械轴.Instance.相机接收数据 = data;
+                  Task05_左机械轴.Instance.有新数据 = true;
+                  break;
+          }
+      }
+  }
+  ```
+* **工位状态机消费代码 (`Task01_入料扫码站.cs`)**：
+  ```csharp
+  case (int)步序.等扫码结果:
+      if (HasNewData)
+      {
+          string resp = ReceivedData; // 消费分发过来的数据
+          HasNewData = false;         // 手动清空消费标志，不影响底层网口缓冲区
+          AddLog($"扫码成功: {resp}", LogsType.Barcode, StaInfo.StepIdx, true);
+          // 处理业务...
+      }
+      break;
+  ```
+* **适用场景**：
+  存在多轴/多线程并发交互、一包数据多处监听，或在后台需要对报文进行统一的断包、心跳过滤、CRC校验的复杂通讯场景。
+* **优缺点**：
+  * **优点**：网口 I/O 线程与状态机时序线程彻底解耦；多线程并发读取工站成员属性安全无冲突；利于底层统一维护。
+  * **缺点**：开发人员需同时修改 `2.TcpIp.cs` 路由分发器和对应的工位类成员，稍微增加了代码维护点。
+
+| 对比维度 | 方式一：直接在 AutoRun 轮询 | 方式二：在 2.TcpIp.cs 回调分发 |
+| :--- | :--- | :--- |
+| **调用位置** | 工站的 `AutoRun()` 状态机内 | `2.TcpIp.cs` 静态方法 `mTcpData` 路由推送 |
+| **线程归属** | 工站自身的时序线程 | Socket 异步监听后台接收线程 |
+| **数据读取方式** | 主动拉取：直接调用 `TcpInfo[Index].Data` | 被动分发：由回调写入工位静态字段 `ReceivedData` |
+| **并发安全性** | **极低**。多线程并发读取会导致缓冲区清空，产生竞争丢失。 | **极高**。数据固化为静态属性，可供多线程安全读取。 |
+| **代码耦合度** | 高。网络交互时序紧密耦合在自动步骤中。 | 低。网络接收与时序解耦，通信异常不阻塞主流程。 |
+| **最佳实践** | 扫码枪单向请求、流程线性的简单工位。 | 左右双轴并发纠偏对位、多相机协作的复杂工位。 |
 
 ---
 
@@ -918,7 +1013,6 @@ case (int)步序.等扫码结果:
 
 #### 4.5.1 干涉区互斥锁 (Interference Zone)
 多台机械轴或机构的活动范围在物理上存在交叠时，为了防止碰撞，必须在进入该交叠空域前申请干涉锁。
-
 * **`EnterInterferenceZone(InterferenceZone id, int ThreadId = 0)`**
   * **机制**：阻塞申请。如果当前干涉区 `id` 已经被其他工站线程占用，此方法将挂起当前工站线程，直到占用者退出。
 * **`ExitInterferenceZone(InterferenceZone id, int threadId = 0)`**
@@ -956,7 +1050,6 @@ case (int)步序.等扫码结果:
 
 #### 4.5.2 工站间软交互信号量 (TasksInteraction)
 用于工站线程之间的软握手和事件同步，避免因线程竞争导致的逻辑混乱。
-
 * **`SetTasksInteractionTrue(Enum id)`**：将指定的交互信号置为 `true`。
 * **`SetTasksInteractionFalse(Enum id)`**：将指定的交互信号置为 `false`。
 * **`GetTasksInteraction(Enum id, bool isAutoClear = false)`**：
@@ -969,8 +1062,173 @@ case (int)步序.等扫码结果:
 * **`WaitAllTaskInteractionTrue(Enum[] ids, int nTimeOut = -1, bool bTimeOutShowDialog = true, bool isAutoClear = false)`**：
   * 阻塞等待数组内**所有的**交互信号均变为 `true` 时才返回。
 
+#### 4.5.3 TasksInteraction 软交互信号量状态详解与使用指南
+
+`TasksInteraction` 是 BoTech 框架中实现跨线程、跨任务（Task）数据同步与多轴协同握手的核心软信号量。
+
+##### 1. 底层存储与工作原理
+* **定义位置**：所有交互信号均声明于 `4.Assist/6.mEnum.cs` 的 `public enum TasksInteraction` 枚举中。
+* **寄存器机制**：系统启动后，内存中开辟了一段 `bool?`（Nullable Boolean）类型的寄存器数组。当执行 `SetTasksInteractionTrue(id)` 或 `GetTasksInteraction(id)` 时，框架使用 `Convert.ToInt32(id)` 对枚举值进行整型强转，直接作为寄存器数组的物理索引，保证了在高频多线程轮询下的无锁高性能访问。
+* **框架级变动日志**：为了便于流程死锁排查，每当调用 `SetTasksInteractionTrue` 或 `SetTasksInteractionFalse` 使得信号值变更时，底层会**自动调用 `AddLog`** 输出带时间戳的变动日志，高亮显示在主界面的“运行日志”窗口中（例如：“*线程交互变量: StaAssembly_Allow_Robot, set value is true*”）。
+
+##### 2. 交互 API 的参数细节与核心防呆规范
+在 `mWorkShare` 业务逻辑开发中，应严格遵守以下 API 调用规则：
+1. **`GetTasksInteraction(Enum id, bool isAutoClear)`**
+   * 用于自动运行主流程中的非阻塞条件判定。
+   * **`isAutoClear = true` 的重要性**：当读取信号状态为 `true` 且该方法返回 `true` 时，系统在同一个原子操作内将该交互寄存器**复位为 `false`**。这能有效阻断信号的持续粘连，防止状态机在进入下一次循环时被残留信号误触发，从而发生“连续空跑”的严重工艺事故。
+2. **`WaitTaskInteractionTrue(Enum id, int nTimeOut, bool bTimeOutShowDialog, bool isAutoClear)`**
+   * 用于辅轴或机械手线程的同步阻塞等待。
+   * **`bTimeOutShowDialog` 选型**：
+     * 若设为 `true`（默认），当等待超时后，前台 UI 会弹出一个带有“重试/取消”的强交互对话框。线程将挂起等待人工干预，非常适合于安全要求高的物理对位阶段。
+     * 若设为 `false`，超时后不弹窗，直接向调用者返回 `false`。状态机可以捕获该返回值并跳转至 `步序.异常` 进行气缸自动缩回及故障停机逻辑。
+
+##### 3. 经典业务场景：多轴主从协同握手设计（打螺丝站时序分析）
+以 `Task02_螺丝站`（主工站）与 `Task04_右机械轴` / `Task05_左机械轴`（辅轴任务）为例，标准的多轴协同握手流程如下：
+
+* **第一阶段：主站复位与就位**
+  系统启动或复位（`Homing`）时，主工站必须主动将所有握手信号初始化为 `false`，清空一切历史状态：
+  ```csharp
+  SetTasksInteractionFalse(TasksInteraction.StaAssembly_Allow_Robot);
+  SetTasksInteractionFalse(TasksInteraction.右轴螺丝工作完成_标志);
+  SetTasksInteractionFalse(TasksInteraction.左轴螺丝工作完成_标志);
+  ```
+* **第二阶段：主站异步广播与防二次触发**
+  当产品定位夹紧后，主工站进入 `做螺丝工作` 步序。它首先以 **`isAutoClear = true`** 消费清除历史残留信号，然后广播 `true` 信号启动左右双轴：
+  ```csharp
+  GetTasksInteraction(TasksInteraction.右轴螺丝工作完成_标志, true); // 清空历史残留
+  GetTasksInteraction(TasksInteraction.左轴螺丝工作完成_标志, true);
+  SetTasksInteractionTrue(TasksInteraction.StaAssembly_Allow_Robot);  // 广播启动信号
+  ```
+  **防二次触发锁**：一旦检测到左、右轴均已读取信号并脱离了等待状态（例如 StepIdx >= 20），主工站必须**立即**执行：
+  ```csharp
+  SetTasksInteractionFalse(TasksInteraction.StaAssembly_Allow_Robot); // 清除启动信号
+  ```
+  如果不及时清除该启动信号，那么当左、右轴执行完毕并返回到等待原点时，检测到该启动信号依然为 `true`，会再次被错误启动，造成二次拧紧的事故。
+* **第三阶段：辅轴独立动作与完成置位**
+  左、右机械轴在各自的 `AutoRun()` 步骤中，轮询检查 `启动触发标志`（即绑定的 `StaAssembly_Allow_Robot`）：
+  ```csharp
+  if (GetTasksInteraction(启动触发标志, false) == true)
+  {
+      SetStep(ref StaInfo, (int)步序.前往拍照对位, true); // 触发启动
+  }
+  ```
+  轴动作完成后，各自退出物理干涉区并回到避让高度，然后将自己的完成标志置为 `true`：
+  ```csharp
+  SetTasksInteractionTrue(完成标志); // 左轴置位左标志，右轴置位右标志
+  ```
+* **第四阶段：主站双轴汇合确认**
+  主工站在 `AutoRun` 中使用非阻塞轮询等待两轴的完成标志，并增加 90 秒最大工作时限保护：
+  ```csharp
+  if (GetTasksInteraction(TasksInteraction.右轴螺丝工作完成_标志, false) == true &&
+      GetTasksInteraction(TasksInteraction.左轴螺丝工作完成_标志, false) == true)
+  {
+      // 双方均已完成，使用 isAutoClear = true 消费并清除两个完成标志
+      GetTasksInteraction(TasksInteraction.右轴螺丝工作完成_标志, true);
+      GetTasksInteraction(TasksInteraction.左轴螺丝工作完成_标志, true);
+      SetStep(ref StaInfo, (int)步序.等工位3空闲, true); // 进入放行判断
+  }
+  else if (mFunction.OverTime(mFunction.ConveyorData[MainConvId].StartTime, 90000))
+  {
+      AddLog("主站等待双轴螺丝工作超时异常！", LogsType.Auto, StaInfo.StepIdx, true);
+      SetStep(ref StaInfo, (int)步序.异常, true);
+  }
+  ```
+
+##### 4. 典型交互信号与业务用途说明
+
+| 交互信号枚举值 | 触发源 (置为 true) | 消费源 (判定并置为 false) | 业务协同物理目的 |
+| :--- | :--- | :--- | :--- |
+| **`料盘已经准备好_标志`** | 上料仓站（满盘到位升起，允许吸取） | 机械臂搬运站 | 允许搬运轴前往上料位置吸取载具或料盘。 |
+| **`StaAssembly_Allow_Robot`** | 组装螺丝主工站（载具到位夹紧） | 左机械轴、右机械轴 | 广播启动信号，通知左右两个打螺丝轴同步脱离等待步序，前往吸取螺丝并拧紧。 |
+| **`右轴螺丝工作完成_标志`** | 右机械轴（拧紧完毕且回退安全原点） | 组装螺丝主工站 | 反馈右轴动作结束。主工站轮询此标志，确信右轴已完全退出工作干涉区。 |
+| **`左轴螺丝工作完成_标志`** | 左机械轴（拧紧完毕且回退安全原点） | 组装螺丝主工站 | 反馈左轴动作结束。主工站轮询此标志，确信左轴已完全退出工作干涉区。 |
+| **`切换料盘标志_To上料仓`** | 托盘空盘传感器触发 | 料仓升降轴 | 通知料仓轴自动升降，将满盘切入上料高度。 |
+
 ---
 
+### 4.6 mFunction 核心工具类与系统状态变量说明
+
+`mFunction` 是整个 BoTech 软件框架的系统枢纽与静态公共工具类，它统一管理着系统运行状态、参数配置、网络套接字以及底层轴数据结构。在开发工站控制类和辅助逻辑时，它是最常调用的底层类。
+
+##### 1. 核心全局状态属性
+
+* **`mFunction.SysState`**：
+  * **数据类型**：`mFunction.State` 枚举。
+  * **作用**：表示整机系统的当前运行状态。包含：
+    * `State.RUNNING`：自动运行中。
+    * `State.STOPED`：系统已停止。
+    * `State.ALARM`：当前存在系统报警，三色灯红灯亮，蜂鸣器叫。
+    * `State.WAITRESET`：等待复位。
+  * **控制逻辑**：
+    在工位自动循环线程中，必须在步序开始处实时判断系统是否停止或进入报警。例如：
+    ```csharp
+    if ((mFunction.IsSysStop || State == mFunction.State.STOPED) && mFunction.ConveyorData[MainConvId].StepIdx == 0)
+    {
+        State = mFunction.State.WAITRUN;
+        SetStep(ref StaInfo, 0, true);
+        break;
+    }
+    ```
+    一旦 `SysState` 变为 `State.ALARM`，三色灯红灯会闪烁，蜂鸣器会鸣叫，软件框架后台监控线程会接管所有运动轴发出急停（Stop）指令。
+
+* **`mFunction.LanguageState`**：
+  * **作用**：系统当前设定的显示语言。如 `LanguageSet.CHN` (中文)、`LanguageSet.ENG` (英文)。在日志输出和提示对话框中，可依此判定加载对应的文字。
+
+* **`mFunction.ConveyorData`**：
+  * **数据类型**：`Conveyor` 数组（容量通常为 25 段）。
+  * **作用**：流水线状态数组。每一段流线都对应一个数据结构，保存着该流水线段的状态信息，包含：
+    * `MotorRun`：滚筒电机工作状态（是否正在运行）。
+    * `ProdPres`：产品存在物理传感器信号。
+    * `StepIdx` / `SubStepIdx`：段内部步骤索引。
+    * `CustStatus`：工站自定义状态属性（如 `"工作中"`、`"处理中"`、`""`）。
+  * **绑定机制**：工站在 `Initialize()` 时，调用 `this.BindConv(short ConvID, short[] StateConvIds)`。框架会将工站的 `MainConvId` 设为绑定的流线段 ID，将 `StateConvIds` 设为依赖的关联流线 ID 数组。工位在运行时会监听 `ConveyorData[MainConvId]` 的数据来唤醒本站流程。
+
+* **`mFunction.TcpInfo` / `mFunction.TcpIP`**：
+  * **作用**：全局网口连接及缓冲数组。`TcpInfo[Index]` 存储接收缓冲区与状态，`TcpIP[Index]` 存储 Socket Client 通信实例。
+
+* **`mFunction.AxisIndex`**：
+  * **作用**：保存着由 `AxisPar.xlsx` 配置表中读入的各个轴的轴号、所属卡号、每圈脉冲数、导程及减速比等基本元数据。
+
+##### 2. 常用全局工具方法 API
+
+* **`mFunction.GetParValue<T>(Enum id)`**：
+  * **功能**：类型安全地读取指定参数的值。
+  * **类型支持**：`double`（浮点数参数）、`int`（整型参数）、`string`（字符类型，如工作模式）、`bool`（复选框参数）。
+  * **代码示例**：
+    ```csharp
+    // 读取扫码失败次数参数
+    int maxRetry = mFunction.GetParValue<int>(UserPar.扫码失败次数);
+    // 判断是否在虚拟仿真运行模式下
+    if (mFunction.GetParValue<string>(UserPar.Machine_runMode) == "OffLine_VirtualRun") { ... }
+    ```
+
+* **`mFunction.GetTickCount()`**：
+  * **功能**：获取高精度自系统启动以来的毫秒时间戳（Tick 数值），主要用于超时计算。
+
+* **`mFunction.OverTime(long StartTime, int SleepTime)`**：
+  * **功能**：判定从指定的 `StartTime` 刻度开始，耗时是否已经超过了 `SleepTime`（毫秒）。
+  * **注意要点**：在自动状态机（AutoRun）的多线程高频循环（Tick）中，**严禁使用 `Thread.Sleep` 进行硬等待**。因为 `Thread.Sleep` 会挂起当前的工位时序线程，导致系统对急停、光幕遮挡等防呆信号的响应产生延迟。必须使用 `GetTickCount` 记录起点，并在后续步序中用 `OverTime` 进行非阻塞时间跨度判断：
+    ```csharp
+    case (int)步序.等待气缸伸出:
+        if (mGlobal.ReadDi_Bool(InNo.气缸伸出限位))
+        {
+            SetStep(ref StaInfo, (int)步序.下一动作, true);
+        }
+        else if (mFunction.OverTime(mFunction.ConveyorData[MainConvId].StartTime, 3000))
+        {
+            AddLog("气缸伸出超时！", LogsType.Alarm, StaInfo.StepIdx, true);
+            SetStep(ref StaInfo, (int)步序.异常, true);
+        }
+        break;
+    ```
+
+* **`mFunction.ReadXml<T>(string XmlFileName, ref T ReadData)`**：
+  * **功能**：从指定磁盘路径读取并反序列化 XML 文件至泛型对象中，用于加载持久化的非易失数据字典。
+
+* **`mFunction.WriteXml<T>(string XmlFileName, ref T WriteData)`**：
+  * **功能**：将泛型对象序列化并写入指定硬盘路径的 XML 文件。
+
+---
 ## 5. 机械臂基类开发最佳实践
 
 在多轴模组（如 X/Y/Z 三轴直角坐标机械臂）开发中，若在运行状态下频繁调用 `pMove.WaitDone()` 或 `mDoDi` 进行手动轮询，容易产生以下问题：

@@ -1,0 +1,43 @@
+---
+title: pyecharts图形在jupyter中不显示的解决办法
+published: 2022-08-09
+description: 
+image: ''
+tags:
+  - python
+  - pyecharts
+  - 问题记录
+category: python
+draft: false
+---
+
+### 问题场景描述：在利用pyecharts库进行数据可视化学习过程中，遇到了在Jupyter Lab环境中执行bar.render_notebook()后图形未能正常显示的问题。
+```python
+from pyecharts.charts import Bar
+bar = Bar()
+bar.add_xaxis(["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"])
+bar.add_yaxis('商家',[5, 20, 36, 10, 75, 90])
+bar.render_notebook()
+```
+
+### 问题解决策略：
+
+经过查阅<a href="https://pyecharts.org/#/zh-cn/notebook?id=jupyter-lab" target="_blank">官方文档</a>发现问题源于Jupyter Lab特有的渲染机制，需按以下步骤进行调整：
+#### 1. 在顶部声明 Notebook 类型，必须在引入 pyecharts.charts 等模块前声明
+```python
+from pyecharts.globals import CurrentConfig, NotebookType
+CurrentConfig.NOTEBOOK_TYPE = NotebookType.JUPYTER_LAB
+```
+#### 2. 在第一次渲染的时候调用 load_javascript() 会预先加载基本 JavaScript 文件到 Notebook 中。如若后面其他图形渲染不出来，则请开发者尝试再次调用，因为 load_javascript 只会预先加载最基本的 js 引用。而主题、地图等 js 文件需要再次按需加载。
+#### 3. load_javascript() 和 render_notebook() 方法需要在不同的 cell 中调用，这是 Notebook 的内联机制，其实本质上我们是返回了带有 _html_, _javascript_ 对象的 class。notebook 会自动去调用这些方法。
+```python
+from pyecharts.charts import Bar
+bar = Bar()
+bar.add_xaxis(["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"])
+bar.add_yaxis('商家',[5, 20, 36, 10, 75, 90])
+bar.load_javascript()
+bar.render_notebook()
+```
+成功运行
+
+Tips：其他Notebook渲染问题，如Jupyter Notebook、Nteract、Zeppelin可查看<a href="https://pyecharts.org/#/zh-cn/notebook" target=":_blank">官方文档</a>

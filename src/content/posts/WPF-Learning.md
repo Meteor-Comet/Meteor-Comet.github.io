@@ -1,0 +1,3666 @@
+---
+title: WPF学习指南
+published: 2024-05-20
+description: Windows Presentation Foundation完整开发教程
+image: ''
+tags:
+  - C#
+  - WPF
+  - Windows
+  - XAML
+  - 桌面开发
+category: C#
+draft: false
+---
+
+# WPF 全面指南
+
+## 目录
+
+- [1. WPF概述](#1-wpf概述)
+- [2. XAML基础](#2-xaml基础)
+- [3. WPF布局系统](#3-wpf布局系统)
+- [4. WPF控件详解](#4-wpf控件详解)
+- [5. WPF 核心骨架：依赖属性与附加属性详解](#5-wpf-核心骨架依赖属性与附加属性详解)
+- [6. WPF 的脉络：路由事件系统 (Routed Events)](#6-wpf-的脉络路由事件系统-routed-events)
+- [7. 数据绑定（Data Binding）](#7-数据绑定data-binding)
+- [8. MVVM设计模式](#8-mvvm设计模式)
+- [9. 样式与模板](#9-样式与模板)
+- [10. 动画与图形](#10-动画与图形)
+- [11. 路由事件与命令系统](#11-路由事件与命令系统)
+- [12. WPF性能优化与最佳实践](#12-wpf性能优化与最佳实践)
+- [13. MVVM模式进阶与常用框架](#13-mvvm模式进阶与常用框架)
+- [14. CommunityToolkit.Mvvm 框架详解](#14-communitytoolkitmvvm-框架详解)
+- [15. 轻量级国产 ORM 神器：SqlSugar 详细使用指南](#15-轻量级国产-orm-神器sqlsugar-详细使用指南)
+- [16. 全球性能第一的微型 ORM：Dapper 全场景 API 使用大全](#16-全球性能第一的微型-ormdapper-全场景-api-使用大全)
+- [17. WPF 现代 UI 控件库详解：HandyControl 全场景实战](#17-wpf-现代-ui-控件库详解handycontrol-全场景实战)
+
+## 1. WPF概述
+
+### 1.1 什么是WPF
+
+Windows Presentation Foundation (WPF) 是微软推出的基于 .NET Framework 的用户界面框架，用于创建 Windows 桌面应用程序。WPF 提供了丰富的图形、动画和交互功能，支持数据绑定、样式、模板等现代 UI 开发特性，是构建现代化 Windows 应用程序的理想选择。
+
+WPF 于 2006 年随 .NET Framework 3.0 一起发布，旨在替代传统的 Windows Forms 技术，提供更现代、更灵活的 UI 开发体验。
+
+### 1.2 WPF的体系结构
+
+WPF 的体系结构由以下几个主要部分组成：
+
+1. **表示子系统**：负责渲染和显示 UI 元素，包括：
+   - DirectX 渲染引擎：使用 DirectX 进行硬件加速渲染
+   - 媒体集成：支持音频、视频和 3D 内容
+   - 文本渲染：基于 ClearType 技术的高质量文本渲染
+
+2. **内容呈现系统**：定义 UI 元素的结构和行为，包括：
+   - 视觉树（Visual Tree）：表示 UI 的实际渲染结构
+   - 逻辑树（Logical Tree）：表示应用程序定义的 UI 结构
+   - 元素树（Element Tree）：逻辑树的扩展，包含更多的布局信息
+
+3. **应用程序模型**：提供应用程序的生命周期管理，包括：
+   - 应用程序启动和关闭
+   - 窗口管理
+   - 导航系统
+
+4. **核心服务**：提供各种支持功能，包括：
+   - 数据绑定
+   - 样式和模板
+   - 资源系统
+   - 命令系统
+   - 事件系统
+
+### 1.3 WPF与WinForms的区别
+
+| 特性 | WPF | WinForms |
+|------|-----|----------|
+| 渲染引擎 | DirectX 硬件加速 | GDI+ 软件渲染 |
+| UI 定义 | XAML（声明式） | 代码（命令式） |
+| 布局系统 | 灵活的布局面板（Grid、StackPanel等） | 固定位置和大小 |
+| 数据绑定 | 强大的双向数据绑定 | 有限的数据绑定能力 |
+| 样式和模板 | 丰富的样式和模板系统 | 有限的样式支持 |
+| 动画支持 | 内置动画系统 | 需要第三方库或自定义实现 |
+| 3D 支持 | 内置 3D 渲染能力 | 不支持 |
+| 分辨率独立性 | 基于设备无关单位 | 基于像素 |
+| 学习曲线 | 较陡峭 | 较平缓 |
+
+## 2. XAML基础
+
+### 2.1 XAML简介
+
+XAML（Extensible Application Markup Language）是一种声明式标记语言，用于定义 WPF 应用程序的用户界面。XAML 基于 XML，提供了一种简洁、直观的方式来创建和布局 UI 元素。
+
+XAML 的主要优点：
+- 声明式语法，使 UI 定义更加清晰
+- 与代码分离，提高代码的可维护性
+- 工具支持良好，Visual Studio 和 Blend 都提供了可视化编辑功能
+- 支持复杂的对象初始化和属性设置
+
+### 2.2 XAML元素与属性
+
+XAML 中的每个元素对应一个 .NET 类，属性对应类的属性。例如：
+
+```xaml
+<!-- 元素 = 类，属性 = 类的属性 -->
+<Button Content="Click Me" Width="100" Height="30" />
+
+<!-- 等同于 C# 代码 -->
+// Button button = new Button();
+// button.Content = "Click Me";
+// button.Width = 100;
+// button.Height = 30;
+```
+
+XAML 元素可以包含子元素，这对应于对象的组合关系：
+
+```xaml
+<Grid>
+    <Button Content="Click Me" />
+</Grid>
+
+<!-- 等同于 C# 代码 -->
+// Grid grid = new Grid();
+// Button button = new Button();
+// button.Content = "Click Me";
+// grid.Children.Add(button);
+```
+
+### 2.3 对象与属性初始化
+
+XAML 提供了多种方式来初始化对象和设置属性：
+
+1. **属性语法**：使用属性名和值的方式设置属性
+   ```xaml
+   <Button Width="100" Height="30" />
+   ```
+
+2. **元素语法**：使用子元素的方式设置属性
+   ```xaml
+   <Button>
+       <Button.Width>100</Button.Width>
+       <Button.Height>30</Button.Height>
+   </Button>
+   ```
+
+3. **内容语法**：对于只有一个内容属性的元素，可以直接设置内容
+   ```xaml
+   <Button>Click Me</Button>
+   ```
+
+4. **集合语法**：对于集合类型的属性，可以使用子元素添加集合项
+   ```xaml
+   <Grid>
+       <Grid.ColumnDefinitions>
+           <ColumnDefinition Width="*" />
+           <ColumnDefinition Width="*" />
+       </Grid.ColumnDefinitions>
+   </Grid>
+   ```
+
+5. **标记扩展**：使用特殊的语法来引用其他对象或执行特殊操作
+   ```xaml
+   <Button Content="{Binding ButtonText}" />
+   ```
+
+### 2.4 XAML命名空间
+
+XAML 文件中的命名空间定义了可用的元素和类型：
+
+```xaml
+<Window x:Class="MyWpfApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:MyWpfApp"
+        Title="MainWindow" Height="450" Width="800">
+    <!-- 内容 -->
+</Window>
+```
+
+- `xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"`：WPF 核心命名空间，包含所有 UI 元素
+- `xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"`：XAML 语言命名空间，包含 XAML 特定的功能
+- `xmlns:local="clr-namespace:MyWpfApp"`：本地命名空间，引用当前项目中的类型
+
+## 3. WPF布局系统
+
+### 3.1 布局面板概览
+
+WPF 提供了多种布局面板，用于组织和排列 UI 元素：
+
+| 布局面板 | 描述 | 适用场景 |
+|---------|------|----------|
+| Grid | 网格布局，支持行列划分 | 复杂布局，需要精确定位 |
+| StackPanel | 堆叠布局，水平或垂直排列 | 简单的线性排列 |
+| WrapPanel | 自动换行的堆叠布局 | 动态数量的元素排列 |
+| DockPanel | 停靠布局，元素可以停靠在边缘 | 工具栏、状态栏等 |
+| Canvas | 画布布局，使用绝对坐标定位 | 自定义绘图、游戏界面 |
+| UniformGrid | 均匀网格布局，所有单元格大小相同 | 图标网格、棋盘等 |
+| Viewbox | 自动缩放内容以适应容器 | 需要自适应大小的内容 |
+
+### 3.2 Grid布局
+
+Grid 是最常用的布局面板，它允许通过定义行和列来创建复杂的布局：
+
+```xaml
+<Grid>
+    <!-- 定义列 -->
+    <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="100" /> <!-- 固定宽度 -->
+        <ColumnDefinition Width="*" /> <!-- 自适应宽度 -->
+        <ColumnDefinition Width="2*" /> <!-- 自适应宽度，是前一列的两倍 -->
+    </Grid.ColumnDefinitions>
+    
+    <!-- 定义行 -->
+    <Grid.RowDefinitions>
+        <RowDefinition Height="50" /> <!-- 固定高度 -->
+        <RowDefinition Height="*" /> <!-- 自适应高度 -->
+        <RowDefinition Height="40" /> <!-- 固定高度 -->
+    </Grid.RowDefinitions>
+    
+    <!-- 放置控件 -->
+    <Label Content="用户名:" Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" />
+    <TextBox Grid.Column="1" Grid.Row="0" Grid.ColumnSpan="2" Margin="5" />
+    
+    <Label Content="密码:" Grid.Column="0" Grid.Row="1" VerticalAlignment="Top" Margin="0,5,0,0" />
+    <PasswordBox Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2" Margin="5" />
+    
+    <Button Content="登录" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Right" Margin="5" />
+    <Button Content="取消" Grid.Column="2" Grid.Row="2" HorizontalAlignment="Left" Margin="5" />
+</Grid>
+```
+
+### 3.3 StackPanel与WrapPanel
+
+StackPanel 用于创建简单的线性布局，元素可以水平或垂直排列：
+
+```xaml
+<!-- 垂直排列 -->
+<StackPanel Orientation="Vertical" Margin="10" Padding="10" Background="LightGray">
+    <TextBlock Text="个人信息" FontSize="16" FontWeight="Bold" Margin="0,0,0,10" />
+    <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
+        <TextBlock Text="姓名:" Width="80" VerticalAlignment="Center" />
+        <TextBox Width="200" />
+    </StackPanel>
+    <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
+        <TextBlock Text="年龄:" Width="80" VerticalAlignment="Center" />
+        <TextBox Width="200" />
+    </StackPanel>
+    <StackPanel Orientation="Horizontal" Margin="0,10,0,0" HorizontalAlignment="Right">
+        <Button Content="保存" Margin="0,0,10,0" />
+        <Button Content="取消" />
+    </StackPanel>
+</StackPanel>
+```
+
+WrapPanel 类似于 StackPanel，但当元素超出容器边界时会自动换行：
+
+```xaml
+<WrapPanel Orientation="Horizontal" Margin="10" Padding="10" Background="LightGray">
+    <Button Content="按钮 1" Margin="5" Width="100" />
+    <Button Content="按钮 2" Margin="5" Width="100" />
+    <Button Content="按钮 3" Margin="5" Width="100" />
+    <Button Content="按钮 4" Margin="5" Width="100" />
+    <Button Content="按钮 5" Margin="5" Width="100" />
+    <Button Content="按钮 6" Margin="5" Width="100" />
+</WrapPanel>
+```
+
+### 3.4 DockPanel与Canvas
+
+DockPanel 允许元素停靠在容器的边缘：
+
+```xaml
+<DockPanel LastChildFill="True">
+    <Menu DockPanel.Dock="Top">
+        <MenuItem Header="文件">
+            <MenuItem Header="新建" />
+            <MenuItem Header="打开" />
+            <MenuItem Header="保存" />
+        </MenuItem>
+        <MenuItem Header="编辑">
+            <MenuItem Header="复制" />
+            <MenuItem Header="粘贴" />
+        </MenuItem>
+    </Menu>
+    
+    <ToolBar DockPanel.Dock="Top">
+        <Button Content="新建" />
+        <Button Content="打开" />
+        <Button Content="保存" />
+    </ToolBar>
+    
+    <StatusBar DockPanel.Dock="Bottom">
+        <TextBlock>状态栏信息</TextBlock>
+    </StatusBar>
+    
+    <StackPanel DockPanel.Dock="Left" Width="200" Background="LightGray">
+        <TextBlock Text="导航菜单" Margin="10" FontWeight="Bold" />
+        <Button Content="首页" Margin="10" />
+        <Button Content="设置" Margin="10" />
+        <Button Content="帮助" Margin="10" />
+    </StackPanel>
+    
+    <Grid Background="White">
+        <TextBlock Text="主内容区域" HorizontalAlignment="Center" VerticalAlignment="Center" />
+    </Grid>
+</DockPanel>
+```
+
+Canvas 使用绝对坐标定位元素，适用于需要精确控制元素位置的场景：
+
+```xaml
+<Canvas Width="400" Height="300" Background="LightGray">
+    <Ellipse Canvas.Left="50" Canvas.Top="50" Width="100" Height="100" Fill="Red" />
+    <Rectangle Canvas.Left="200" Canvas.Top="100" Width="120" Height="80" Fill="Blue" />
+    <TextBlock Canvas.Left="70" Canvas.Top="90" FontSize="16" Foreground="White">红色圆形</TextBlock>
+    <TextBlock Canvas.Left="220" Canvas.Top="130" FontSize="16" Foreground="White">蓝色矩形</TextBlock>
+</Canvas>
+```
+
+### 3.5 布局最佳实践
+
+1. **使用合适的布局面板**：根据具体需求选择合适的布局面板
+2. **优先使用 Grid**：对于复杂布局，Grid 提供了最灵活的控制
+3. **避免过度嵌套**：过多的布局嵌套会影响性能
+4. **使用 Margin 和 Padding**：合理使用边距和内边距来创建空间
+5. **使用 Alignment 属性**：利用 HorizontalAlignment 和 VerticalAlignment 来控制元素的对齐方式
+6. **使用 Star 尺寸**：对于需要自适应的行和列，使用 Star 尺寸
+7. **考虑响应式设计**：设计能够适应不同窗口大小的布局
+8. **使用 Viewbox**：对于需要缩放的内容，使用 Viewbox
+
+### 3.6 布局相关附加属性总览（Attached Properties）
+
+布局面板大量依赖“附加属性（Attached Property）”来描述子元素在布局中的行为。这些属性看似是子控件的属性，实际上由父布局面板定义。
+
+1. **Grid 相关附加属性**
+   - `Grid.Row`：子元素所在的行索引（从 0 开始）
+   - `Grid.Column`：子元素所在的列索引（从 0 开始）
+   - `Grid.RowSpan`：子元素跨越的行数
+   - `Grid.ColumnSpan`：子元素跨越的列数
+   - `Grid.IsSharedSizeScope`：用在父级 Grid 上，使多个 Grid 之间共享列宽
+   - `Grid.ShowGridLines`：调试时常用，显示网格线（一般仅在开发阶段打开）
+
+2. **DockPanel 相关附加属性**
+   - `DockPanel.Dock`：取值 `Left`、`Top`、`Right`、`Bottom`
+   - `LastChildFill`：DockPanel 自身的属性，最后一个子元素是否填充剩余空间
+
+3. **Canvas 相关附加属性**
+   - `Canvas.Left`：相对 Canvas 左边的偏移
+   - `Canvas.Top`：相对 Canvas 顶部的偏移
+   - `Canvas.Right`：相对 Canvas 右边的偏移（较少使用）
+   - `Canvas.Bottom`：相对 Canvas 底部的偏移（较少使用）
+
+4. **其他常见布局附加属性**
+   - `ScrollViewer.HorizontalScrollBarVisibility`：指定水平滚动条显示策略（Disabled、Auto、Hidden、Visible）
+   - `ScrollViewer.VerticalScrollBarVisibility`：指定垂直滚动条显示策略
+   - `DockPanel.Dock`：控制元素在 DockPanel 中停靠的位置
+   - `Viewbox.Stretch`：拉伸方式（None、Fill、Uniform、UniformToFill）
+   - `Viewbox.StretchDirection`：拉伸方向（UpOnly、DownOnly、Both）
+
+综合示例：
+
+```xaml
+<Grid ShowGridLines="True" Grid.IsSharedSizeScope="True">
+    <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn" />
+        <ColumnDefinition Width="*" />
+    </Grid.ColumnDefinitions>
+
+    <TextBlock Text="姓名:" Grid.Row="0" Grid.Column="0" Margin="5" />
+    <TextBox Grid.Row="0" Grid.Column="1" Margin="5" />
+
+    <TextBlock Text="年龄:" Grid.Row="1" Grid.Column="0" Margin="5" />
+    <TextBox Grid.Row="1" Grid.Column="1" Margin="5" />
+</Grid>
+```
+
+### 3.7 常用布局对比清单
+
+下表从“尺寸计算”“子元素对齐”“典型属性”等角度对常用布局进行总结，便于快速选择：
+
+| 面板 | 子元素定位方式 | 尺寸计算特点 | 典型属性 |
+|------|----------------|--------------|----------|
+| Grid | 行列+附加属性 | 先计算行列尺寸，再放置子元素 | `RowDefinitions`、`ColumnDefinitions`、`Grid.Row`、`Grid.Column` |
+| StackPanel | 顺序堆叠 | 先计算布局方向上的总尺寸，再测量另一方向最大值 | `Orientation` |
+| WrapPanel | 堆叠且自动换行 | 行满后换行，每行高度取该行最大元素高度 | `ItemWidth`、`ItemHeight`、`Orientation` |
+| DockPanel | 边缘停靠 | 按顺序将子元素停靠到四边，最后子元素可填充剩余空间 | `DockPanel.Dock`、`LastChildFill` |
+| Canvas | 绝对坐标 | 不参与复杂布局，仅根据坐标放置 | `Canvas.Left`、`Canvas.Top` |
+| UniformGrid | 均匀网格 | 所有单元格大小一致 | `Rows`、`Columns`、`FirstColumn` |
+| Viewbox | 缩放内容 | 按比例缩放内部内容以适配自身大小 | `Stretch`、`StretchDirection` |
+
+实际项目中一般遵循：**整体用 Grid 构架、局部用 StackPanel/WrapPanel 组织、特定区域用 DockPanel 或 Canvas 实现特殊效果**。
+
+## 4. WPF控件详解
+
+### 4.1 常用控件概览
+
+WPF 提供了丰富的内置控件，以下是一些常用的控件：
+
+1. **基础输入控件**：
+   - Button：按钮
+   - TextBox：文本输入框
+   - PasswordBox：密码输入框
+   - CheckBox：复选框
+   - RadioButton：单选按钮
+   - Slider：滑块
+   - ComboBox：下拉选择框
+
+2. **显示控件**：
+   - TextBlock：文本块
+   - Label：标签
+   - Image：图片
+   - ProgressBar：进度条
+   - Calendar：日历
+   - DatePicker：日期选择器
+
+3. **列表和表格控件**：
+   - ListBox：列表框
+   - ComboBox：下拉列表
+   - ListView：列表视图
+   - DataGrid：数据表格
+   - TreeView：树状视图
+
+4. **容器控件**：
+   - Grid：网格布局
+   - StackPanel：堆叠布局
+   - WrapPanel：自动换行布局
+   - DockPanel：停靠布局
+   - Canvas：画布布局
+   - GroupBox：分组框
+   - TabControl：选项卡控件
+
+### 4.2 内容控件（ContentControl）
+
+ContentControl 是 WPF 中一个重要的控件基类，它可以包含单个子元素（Content）。常见的 ContentControl 派生类包括：
+
+- Button
+- Label
+- TextBlock
+- CheckBox
+- RadioButton
+- ScrollViewer
+- Window
+- UserControl
+
+ContentControl 的使用示例：
+
+```xaml
+<Button>
+    <StackPanel Orientation="Horizontal">
+        <Image Source="icon.png" Width="20" Height="20" />
+        <TextBlock Text="带有图标的按钮" Margin="5,0,0,0" />
+    </StackPanel>
+</Button>
+
+<Label>
+    <StackPanel Orientation="Vertical">
+        <TextBlock Text="标题" FontSize="16" FontWeight="Bold" />
+        <TextBlock Text="副标题" FontSize="12" Foreground="Gray" />
+    </StackPanel>
+</Label>
+```
+
+### 4.3 ItemsControl及其派生类
+
+ItemsControl 是用于显示集合数据的控件基类，它可以包含多个子元素（Items）。常见的 ItemsControl 派生类包括：
+
+- ListBox
+- ComboBox
+- ListView
+- DataGrid
+- TreeView
+- Menu
+- ToolBar
+
+ItemsControl 的使用示例：
+
+```xaml
+<!-- 直接添加项目 -->
+<ListBox>
+    <ListBoxItem>项目 1</ListBoxItem>
+    <ListBoxItem>项目 2</ListBoxItem>
+    <ListBoxItem>项目 3</ListBoxItem>
+</ListBox>
+
+<!-- 绑定集合数据 -->
+<ListBox ItemsSource="{Binding Items}" DisplayMemberPath="Name" />
+
+<!-- 使用数据模板 -->
+<ListBox ItemsSource="{Binding Items}">
+    <ListBox.ItemTemplate>
+        <DataTemplate>
+            <StackPanel Orientation="Horizontal">
+                <Image Source="{Binding Icon}" Width="20" Height="20" />
+                <TextBlock Text="{Binding Name}" Margin="5,0,0,0" />
+                <TextBlock Text="{Binding Description}" Margin="10,0,0,0" Foreground="Gray" />
+            </StackPanel>
+        </DataTemplate>
+    </ListBox.ItemTemplate>
+</ListBox>
+```
+
+### 4.4 输入控件与验证
+
+WPF 提供了多种输入控件，同时支持数据验证：
+
+```xaml
+<StackPanel Margin="10">
+    <TextBox Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+        <TextBox.Style>
+            <Style TargetType="TextBox">
+                <Setter Property="BorderBrush" Value="Gray" />
+                <Style.Triggers>
+                    <Trigger Property="Validation.HasError" Value="True">
+                        <Setter Property="BorderBrush" Value="Red" />
+                        <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors)[0].ErrorContent}" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </TextBox.Style>
+    </TextBox>
+    
+    <PasswordBox Password="{Binding Password, Mode=TwoWay}" Margin="0,10,0,0" />
+    
+    <CheckBox IsChecked="{Binding RememberMe, Mode=TwoWay}" Content="记住我" Margin="0,10,0,0" />
+    
+    <Button Content="登录" Command="{Binding LoginCommand}" Margin="0,10,0,0" />
+</StackPanel>
+```
+
+### 4.5 命令绑定
+
+WPF 的命令系统允许将用户操作与业务逻辑分离：
+
+```xaml
+<Button Content="保存" Command="{Binding SaveCommand}" CommandParameter="{Binding SelectedItem}" />
+
+<MenuItem Header="复制" Command="ApplicationCommands.Copy" />
+<MenuItem Header="粘贴" Command="ApplicationCommands.Paste" />
+
+<ListBox ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem}">
+    <ListBox.ItemContainerStyle>
+        <Style TargetType="ListBoxItem">
+            <Setter Property="Command" Value="{Binding DataContext.ItemCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" />
+            <Setter Property="CommandParameter" Value="{Binding}" />
+        </Style>
+    </ListBox.ItemContainerStyle>
+</ListBox>
+```
+
+### 4.6 控件继承层次与通用属性总表
+
+大多数控件都继承自几个核心基类，这些基类上的属性和事件是“所有控件通用的基础知识”。理解这些基类，比死记每个控件所有属性更高效。
+
+1. **DependencyObject / UIElement / FrameworkElement**
+   - 常用依赖属性（大多在 `FrameworkElement`）：
+     - `Width` / `Height` / `MinWidth` / `MinHeight` / `MaxWidth` / `MaxHeight`
+     - `Margin` / `Padding`（注意：Padding 从 `Control` 开始才有）
+     - `HorizontalAlignment` / `VerticalAlignment`
+     - `Visibility`：Visible / Hidden / Collapsed
+     - `DataContext`：数据绑定的入口
+     - `Style` / `Resources`：样式与资源
+     - `ToolTip`：提示信息（可绑定任意对象）
+   - 常用事件：
+     - 鼠标：`MouseDown` / `MouseUp` / `MouseMove` / `MouseEnter` / `MouseLeave` 等
+     - 键盘：`KeyDown` / `KeyUp`
+     - 布局：`Loaded` / `SizeChanged` / `LayoutUpdated`
+
+2. **Control（大多数交互控件的基类）**
+   - 视觉相关属性：
+     - `Foreground` / `Background`
+     - `FontFamily` / `FontSize` / `FontWeight` / `FontStyle` / `TextDecorations`
+     - `BorderBrush` / `BorderThickness`
+     - `Padding`
+     - `Cursor`：鼠标指针样式
+   - 交互状态：
+     - `IsEnabled`：是否可交互
+     - `IsHitTestVisible`：是否参与命中测试
+     - `TabIndex` / `IsTabStop`：键盘导航顺序
+   - 模板相关：
+     - `Template`：`ControlTemplate`
+     - `OverridesDefaultStyle`：是否忽略默认样式
+     - `FocusVisualStyle`：键盘焦点时的虚线框样式
+
+3. **ContentControl（Button、Label、GroupBox、UserControl、Window 等）**
+   - 关键属性：
+     - `Content`：单个内容对象（可以是任意 XAML 元素或字符串）
+     - `ContentTemplate`：`DataTemplate`，定义 Content 的展示方式
+     - `ContentTemplateSelector`：用于根据数据动态选择模板
+     - `ContentStringFormat`：内容转为字符串的格式
+
+4. **ItemsControl（ListBox、ListView、ComboBox、TreeView、Menu 等）**
+   - 关键属性：
+     - `ItemsSource`：集合数据源
+     - `Items`：手动添加的项集合
+     - `ItemTemplate`：每一项的 `DataTemplate`
+     - `ItemTemplateSelector`：动态选择模板
+     - `ItemContainerStyle`：Item 容器（如 `ListBoxItem`）的样式
+     - `ItemsPanel`：`ItemsPanelTemplate`，内部使用的布局面板
+   - 与选择相关（来自 `Selector` 基类，如 ListBox、ComboBox 等）：
+     - `SelectedItem` / `SelectedIndex` / `SelectedValue`
+     - `SelectedValuePath`
+     - `IsSynchronizedWithCurrentItem`：是否与集合的 CurrentItem 同步
+
+5. **文本输入控件（TextBoxBase / TextBox / RichTextBox）**
+   - TextBox 常用属性：
+     - `Text`：文本内容
+     - `AcceptsReturn`：是否接受回车（多行输入）
+     - `AcceptsTab`：是否接受 Tab
+     - `MaxLength`：最大长度
+     - `IsReadOnly`：只读
+     - `CharacterCasing`：大小写（Normal、Upper、Lower）
+     - `TextWrapping`：自动换行（NoWrap、Wrap、WrapWithOverflow）
+     - `SelectionStart` / `SelectionLength` / `SelectedText`
+
+6. **范围类控件（Slider、ProgressBar、ScrollBar 等，基类 RangeBase）**
+   - `Minimum` / `Maximum`：范围边界
+   - `Value`：当前值
+   - `SmallChange` / `LargeChange`：微调和大幅度变化值
+   - 典型用法：通过绑定将 `Value` 与 ViewModel 数值属性联动
+
+### 4.7 常用控件速查表（用途 + 关键属性）
+
+1. **Button / ToggleButton / CheckBox / RadioButton**
+   - 用途：触发命令、状态切换
+   - 关键属性：
+     - Button：`Content`、`Command`、`CommandParameter`
+     - ToggleButton：`IsChecked`、`IsThreeState`
+     - CheckBox：继承自 ToggleButton，多用于布尔标记
+     - RadioButton：`GroupName` 控制互斥分组
+
+2. **TextBlock / Label**
+   - 用途：文本展示
+   - TextBlock：轻量、布局灵活，支持内联格式化（`Run`、`Span`）
+   - Label：带有 `Target` 属性，可与输入控件联动（辅助无障碍）
+
+3. **ComboBox / ListBox / ListView / DataGrid**
+   - 共性：都基于 `ItemsControl` + `Selector`
+   - ComboBox：下拉选择（单选），关键属性 `IsEditable`、`SelectedItem`、`SelectedValuePath`
+   - ListBox：列表选择（可多选），`SelectionMode`（Single/Multiple/Extended）
+   - ListView：基于 ListBox，结合 `View=GridView` 实现列表列头展示
+   - DataGrid：表格控件，关键属性：
+     - `AutoGenerateColumns`、`Columns`
+     - `CanUserAddRows`、`CanUserDeleteRows`、`CanUserSortColumns`
+     - `IsReadOnly`
+
+4. **TreeView / Menu / ToolBar**
+   - TreeView：树状结构，常与 `HierarchicalDataTemplate` 搭配
+   - Menu：菜单栏，配合命令使用
+   - ToolBar：工具栏，适合放置图标按钮和常用操作
+
+5. **TabControl / GroupBox / Expander**
+   - TabControl：选项卡界面，关键属性 `ItemsSource`、`SelectedItem`、`ItemTemplate`、`ContentTemplate`
+   - GroupBox：带标题的内容分组容器
+   - Expander：可折叠/展开的容器，关键属性 `IsExpanded`
+
+通过以上“基类 + 常用控件速查”，在查官方文档时可以快速定位到更完整的属性列表。
+
+## 5. WPF 核心骨架：依赖属性与附加属性详解
+
+在传统的 .NET 开发中（如 WinForms），控件的外观和状态保存在各自私有的 CLR 变量字段中（比如 `int width`）。这带来了极大的内存开销——哪怕一个按钮完全采用系统默认样式，它身上几百个属性也切切实实地在 Heap 堆里分配了内存。
+WPF 为了实现**数据绑定、动画、样式继承和极限的内存压缩**，彻底舍弃了传统的 CLR 属性后备字段机制，发明了**依赖属性 (Dependency Property)** 构架。
+
+### 5.1 依赖属性 (Dependency Property) 的运行机制
+**核心思想**：属性的值并不直接存在对象自己肚子里，而是**依赖于**一个全局的巨型静态字典库 `DependencyProperty.Register`，用到谁才存谁。
+
+*   **内存极度节省**：WPF 的控件树可能有上万个节点。如果大家都没改背景色（依然是默认的白色），传统模式下这上万个控件都要自己存一次白色的内存对象。而在依赖属性下，控件自身什么都不存！当系统问它“你的背景色是什么”时，它发现自己没设置过，系统会自动顺着视觉树往上辈找，最终取到顶层定义的一份“静态的白色”发配下来。
+*   **自带变化通知**：传统 C# 变量改变神不知鬼不觉，WPF 依赖属性一旦被改，它底层的内部字典引擎会自动向四周疯狂发射“我变了！”的广播，从而驱动 UI 自动渲染（这就是数据绑定得以工作的根基核心）。
+
+#### 5.1.1 如何手写注册一个自定义的依赖属性？
+假设我们写了一个自定义的圆角卡片控件 `MyCardControl`，我们要给它开辟一个具有绑定功能的 `CornerRadius` 属性。
+
+```csharp
+public class MyCardControl : Control
+{
+    // 1. 注册核心：这是一个 全局静态只读 字段！它才是正主。
+    // Register 参数解释：("对外名称", 属性类型, 拥有这个属性的主人类型, 默认值及回调配置)
+    public static readonly DependencyProperty CardCornerRadiusProperty =
+        DependencyProperty.Register(
+            "CardCornerRadius", 
+            typeof(double), 
+            typeof(MyCardControl), 
+            new PropertyMetadata(5.0, OnCornerRadiusChanged) // 默认值为 5.0，而且改变时会调用钩子函数
+        );
+
+    // 2. CLR 属性包装器 (Wrapper)：只是为了让我们在 C# 代码里能像调普通属性一样打点调用而已！
+    // 警告：这里面绝对不要写别的逻辑（比如弹 MessageBox 等），因为 WPF 引擎在解析 XAML 时，是直接调用底层 SetValue 的，根本不会走这层 Wrapper 包装壳。
+    public double CardCornerRadius
+    {
+        get { return (double)GetValue(CardCornerRadiusProperty); } // GetValue 来自基类 DependencyObject
+        set { SetValue(CardCornerRadiusProperty, value); }
+    }
+
+    // 3. 值变化时的静态回调钩子
+    private static void OnCornerRadiusChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        var myCard = d as MyCardControl;
+        double oldVal = (double)e.OldValue;
+        double newVal = (double)e.NewValue;
+        // 在这里执行当别人用 Binding 修改了这个卡片的圆角尺寸时，内部要触发的动画或绘图代码！
+    }
+}
+```
+
+### 5.2 附加属性 (Attached Property)
+**附加属性**是依赖属性的特殊变异品种。核心思想是：**“把别人家的属性，强行挂在自己的脖子上”**。
+
+你在布局经常写的：
+```xaml
+<Grid>
+    <Button Grid.Row="1" Grid.Column="2" Content="我是按钮" />
+</Grid>
+```
+**仔细想想：** `Button` 的底层源码里有 `Row` 或者 `Column` 这个属性吗？绝对没有。因为 Button 除了被塞在 `Grid` 里，还有可能在 `Canvas`、在 `StackPanel` 里。
+所以 `Grid.Row` 是一种由 `Grid` 提供的**附加属性**！当 Button 放在了 Grid 里，XAML 解析器就会把这个 `1` 和 `2` 强行塞进 Button 的一个隐藏字典兜衣里。当 Grid 开始计算排版时，Grid 跑到每个孩子那去搜身，从 Button 的兜里搜出它想要的 Row 信息。
+
+#### 5.2.1 极其强大的手写附加属性（MVVM 核心挂载物魔法）
+如果我们想要让一个普通的密码框 `PasswordBox` 支持双向绑定（原生是不支持的），我们就经常用到附加属性，把“绑定源”附加到别人身上：
+
+```csharp
+public static class PasswordBoxHelper
+{
+    // 1. 注册附加属性使用 RegisterAttached 
+    public static readonly DependencyProperty AttachPasswordProperty =
+        DependencyProperty.RegisterAttached(
+            "AttachPassword",
+            typeof(string),
+            typeof(PasswordBoxHelper),
+            new PropertyMetadata(string.Empty, OnPasswordAttachedChanged));
+
+    // 2. 必须提供静态的 Get 和 Set 方法（取代了上文的 CLR Wrapper 包装器）
+    public static string GetAttachPassword(DependencyObject d) 
+        => (string)d.GetValue(AttachPasswordProperty);
+
+    public static void SetAttachPassword(DependencyObject d, string value) 
+        => d.SetValue(AttachPasswordProperty, value);
+
+    private static void OnPasswordAttachedChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        // 我们利用这个钩子，一旦 XAML 把这个幽灵属性挂载到了 PasswordBox 身上，
+        // 我们就在背后偷偷劫持 PasswordBox 原生的 PasswordChanged 事件，强行打通 MVVM 任督二脉！
+        if (d is PasswordBox pbox)
+        {
+            pbox.PasswordChanged -= Pbox_PasswordChanged; // 先卸载防重复
+            pbox.PasswordChanged += Pbox_PasswordChanged;
+        }
+    }
+    
+    // ... 中略劫持同步逻辑 ...
+}
+```
+**XAML 魔法使用它**（强行塞给可怜普通的密码框）：
+`<PasswordBox local:PasswordBoxHelper.AttachPassword="{Binding MyViewModelPwdStr}" />`
+
+---
+
+## 6. WPF 的脉络：路由事件系统 (Routed Events)
+
+传统的 C# `.NET` 事件模型（CLR Event）是**点对点**的点穴攻击。按钮 `Click += 方法`。这在复杂的 UI 树嵌套里是致命的灾难：
+如果你在一张包含了（边界+圆角容器+文字区块+图标）的复杂超级大按钮控件上点击，究竟算谁触发了点击事件？要是刚好点在图片的 1 像素内，只有图片响应该怎么办？你难道要给内部的五个元素排着队全部写一遍 `+=` 吗？
+
+WPF 为了解决这个问题，仿照**蜘蛛网的震动传导机制**，创造了**路由事件（Routed Events）**。
+
+### 6.1 路由事件三大走向阵营
+
+**1. 冒泡事件 (Bubbling)**
+最常见的方向，像水底的气泡一样**从底朝顶浮**上天。
+*   比如 `MouseDown`。如果用户点中了深层的**文字图标** -> 文字图标触发 `MouseDown` -> 紧接着震波传递给包裹它的 **StackPanel** 触发 `MouseDown` -> 再传递给大 **Button** 触发 `MouseDown` -> 最后传递到顶层的 **Window 主窗体**。
+*   **用途**：你只需要在最上层的巨大统率容器里挂一个监听器，就能捕获包裹在里面所有几千个极小部件的集体点击冒泡信号！
+*   **截断器**：任何途经路线抓到这件事的元素，只要它觉得“这事我处理完了上级长官不用管了”，只要将代码里写上 `e.Handled = true;`，这颗冒泡水泡在它这层就会被彻底捏爆消灭，上空不再会收到地震波。
+
+**2. 隧道事件 (Tunneling) [所有以 Preview 开头的事件都是这货]**
+方向刚好相反。像光线从天花板打下深井底。**从顶朝底扎**。
+*   比如 `PreviewKeyDown`（预览键盘按压）。
+*   当焦点在一个文本框上你敲了一个按键，**顶层 Window 先第一个得知**！Window 发出 `Preview` -> 把信号发送给次级大容器 Grid -> ... 最后到底层真正被聚焦的 `TextBox`。
+*   **用途：帝王防线（劫持器）**。如果在输入时我不允许输入数字。我在顶流 Window 层直接把光卡死设置 `e.Handled = true;`。底层连光都见不到，别说是响成了。
+
+**3. 直达事件 (Direct)**
+就是传统的死对点不传递事件。比如 `MouseEnter`。因为如果鼠标进入小按钮的同时也宣布它进入了最外层大窗体的话，这逻辑判断太狂野容易死循环。
+
+### 6.2 在复杂场景处理路由事件的完美范例
+
+**场景**：大列表控件中装了几十个小按钮。你想全局统一监控“删除操作”，而不是给这 50 个按钮在 `.cs` 里写 50 个 `+=` 死绑。
+
+```xaml
+<!-- 在外层的骨架容器里，我们通过路由机制，挂载一个全局大网雷达 Button.Click -->
+<StackPanel Button.Click="OnAnyChildButtonClicked_Handler">
+
+    <!-- 这里面的任何一个可怜的小按钮被普通点击，震波都会像水底丢核弹一样浮上并炸毁监控总网 -->
+    <Button Content="删除文件 A" Tag="A" />
+    <Button Content="删除文件 B" Tag="B" />
+    
+    <Grid>
+       <Button Content="埋得很深的文件 C" Tag="C" />
+    </Grid>
+
+</StackPanel>
+```
+
+```csharp
+// 在后台代码里：
+private void OnAnyChildButtonClicked_Handler(object sender, RoutedEventArgs e)
+{
+    // sender：是谁挂载了这个监听总网？是那个外层至高无上的大 StackPanel 皇帝
+    // e.OriginalSource：是谁真正发射了这颗起爆核弹指令？是我们想要的深处的小按钮！
+    
+    if (e.OriginalSource is Button clickedBtn)
+    {
+        string fileToDel = clickedBtn.Tag.ToString();
+        MessageBox.Show($"长官，我拦截到了总网下的深层动作，它要删文件：{fileToDel}");
+        
+        // 这一句捏爆水泡。如果外头还有更高层的 Window.Click 雷达，别想再收到了！
+        e.Handled = true; 
+    }
+}
+```
+
+---
+## 7. 数据绑定（Data Binding）
+
+### 7.1 绑定基础
+
+数据绑定是 WPF 的核心特性之一，它允许 UI 元素与数据源自动同步：
+
+```xaml
+<!-- 基本数据绑定 -->
+<TextBox Text="{Binding Name}" />
+<TextBlock Text="{Binding Age}" />
+<Button Content="{Binding ButtonText}" Command="{Binding ClickCommand}" />
+```
+
+数据绑定的基本概念：
+- **源（Source）**：提供数据的对象
+- **目标（Target）**：接收数据的 UI 元素
+- **路径（Path）**：源对象中数据的路径
+- **模式（Mode）**：绑定的方向
+- **更新触发器（UpdateSourceTrigger）**：源更新的触发时机
+
+### 7.2 Binding的关键属性
+
+Binding 对象有以下关键属性：
+
+1. **Source**：绑定的数据源
+2. **Path**：数据源中属性的路径
+3. **Mode**：绑定模式（OneWay、TwoWay、OneWayToSource、OneTime、Default）
+4. **UpdateSourceTrigger**：源更新的触发时机（PropertyChanged、LostFocus、Explicit、Default）
+5. **Converter**：值转换器
+6. **ConverterParameter**：传递给转换器的参数
+7. **ConverterCulture**：转换器使用的文化信息
+8. **StringFormat**：字符串格式化
+9. **TargetNullValue**：目标为空时的值
+10. **FallbackValue**：绑定失败时的值
+11. **ValidatesOnDataErrors**：是否启用数据错误验证
+12. **ValidatesOnExceptions**：是否启用异常验证
+13. **NotifyOnValidationError**：是否在验证错误时触发事件
+
+### 7.3 绑定模式（Mode）
+
+| 绑定模式 | 描述 | 适用场景 |
+|---------|------|----------|
+| OneWay | 从源到目标的单向绑定 | 显示数据，不需要用户修改 |
+| TwoWay | 双向绑定，源和目标相互同步 | 编辑表单，需要双向同步 |
+| OneWayToSource | 从目标到源的单向绑定 | 仅需要将 UI 值传递给数据源 |
+| OneTime | 只绑定一次，后续变化不影响 | 静态数据，不需要更新 |
+| Default | 根据目标属性的默认行为 | 大多数情况下的默认选择 |
+
+### 7.4 值转换器（ValueConverter）
+
+值转换器用于在绑定过程中转换数据类型或格式化数据：
+
+```csharp
+// 日期转换器示例
+public class DateConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is DateTime date)
+        {
+            return date.ToString("yyyy-MM-dd");
+        }
+        return string.Empty;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is string str && DateTime.TryParse(str, out DateTime date))
+        {
+            return date;
+        }
+        return DateTime.Now;
+    }
+}
+```
+
+使用值转换器：
+
+```xaml
+<Window.Resources>
+    <local:DateConverter x:Key="DateConverter" />
+</Window.Resources>
+
+<TextBlock Text="{Binding BirthDate, Converter={StaticResource DateConverter}}" />
+<TextBox Text="{Binding BirthDate, Converter={StaticResource DateConverter}, Mode=TwoWay}" />
+```
+
+### 7.5 集合绑定与ObservableCollection
+
+对于集合数据，WPF 提供了特殊的绑定支持：
+
+```csharp
+// 使用 ObservableCollection 实现自动更新
+public class ViewModel
+{
+    public ObservableCollection<Person> People { get; set; }
+    
+    public ViewModel()
+    {
+        People = new ObservableCollection<Person>
+        {
+            new Person { Name = "张三", Age = 25 },
+            new Person { Name = "李四", Age = 30 },
+            new Person { Name = "王五", Age = 35 }
+        };
+        
+        // 添加项
+        People.Add(new Person { Name = "赵六", Age = 40 });
+        
+        // 删除项
+        People.RemoveAt(0);
+    }
+}
+```
+
+绑定到集合：
+
+```xaml
+<ListBox ItemsSource="{Binding People}">
+    <ListBox.ItemTemplate>
+        <DataTemplate>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{Binding Name}" Width="100" />
+                <TextBlock Text="{Binding Age}" />
+            </StackPanel>
+        </DataTemplate>
+    </ListBox.ItemTemplate>
+</ListBox>
+```
+
+### 7.6 绑定源的查找顺序与 DataContext 传递
+
+理解 `DataContext` 及其传递规则，是掌握绑定行为的基础：
+
+1. **DataContext 的继承规则**
+   - 子元素默认继承父元素的 `DataContext`
+   - 一旦在某个元素上显式设置了 `DataContext`，该元素及其子元素都以新的 `DataContext` 为准
+   - 以下元素**不会**继承 DataContext，需要单独设置：
+     - `Binding` 在 `Style`、`ControlTemplate` 中时，默认的源是 `TemplatedParent` 而不是视觉树上的 DataContext
+     - 独立弹出的 `Window`、对话框，需手动设置 `DataContext`
+
+2. **Binding.Source / ElementName / RelativeSource 的优先级**
+   - 当同时指定多个来源时，优先级为：
+     1. `Source`
+     2. `ElementName`
+     3. `RelativeSource`
+     4. 继承的 `DataContext`
+
+3. **典型错误场景**
+   - 在 `ItemContainerStyle` 中绑定 `DataContext` 的属性，需要使用 `RelativeSource` 或 `TemplatedParent`
+   - 在 `ControlTemplate` 内部想绑定到 ViewModel，需要使用 `RelativeSource TemplatedParent` 然后从控件的 `DataContext` 再取属性
+
+### 7.7 ElementName 与 RelativeSource
+
+1. **ElementName 绑定**
+   - 用于绑定到 XAML 中同级或祖先元素的属性：
+
+   ```xaml
+   <Slider x:Name="sld" Minimum="0" Maximum="100" Value="20" />
+   <TextBlock Text="{Binding ElementName=sld, Path=Value}" Margin="10,0,0,0" />
+   ```
+
+   典型用途：多个控件之间联动，如滑块与文本、CheckBox 控制 Panel 的 `IsEnabled` 等。
+
+2. **RelativeSource 绑定**
+   - 常见模式：
+     - `RelativeSource Self`：绑定到自身属性
+     - `RelativeSource FindAncestor`：向上查找指定类型的祖先元素
+     - `RelativeSource TemplatedParent`：在模板内部绑定到使用模板的控件
+
+   示例：绑定到最近的 `ListBoxItem`：
+
+   ```xaml
+   <TextBlock Text="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsSelected}" />
+   ```
+
+   在 `ControlTemplate` 中绑定到控件自身的 `IsMouseOver`：
+
+   ```xaml
+   <Border Background="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Background}">
+       <ContentPresenter />
+   </Border>
+   ```
+
+### 7.8 MultiBinding 与 PriorityBinding
+
+当单一 Binding 无法满足需求时，可以使用 `MultiBinding` 与 `PriorityBinding`：
+
+1. **MultiBinding**
+   - 将多个源值组合成一个目标值，需要实现 `IMultiValueConverter`：
+
+   ```csharp
+   public class FullNameConverter : IMultiValueConverter
+   {
+       public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+       {
+           var firstName = values[0] as string;
+           var lastName = values[1] as string;
+           return $"{lastName}{firstName}";
+       }
+
+       public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+       {
+           var full = value as string ?? string.Empty;
+           if (full.Length >= 2)
+               return new object[] { full.Substring(1), full.Substring(0, 1) };
+           return new object[] { string.Empty, string.Empty };
+       }
+   }
+   ```
+
+   ```xaml
+   <Window.Resources>
+       <local:FullNameConverter x:Key="FullNameConverter" />
+   </Window.Resources>
+
+   <TextBlock>
+       <TextBlock.Text>
+           <MultiBinding Converter="{StaticResource FullNameConverter}">
+               <Binding Path="FirstName" />
+               <Binding Path="LastName" />
+           </MultiBinding>
+       </TextBlock.Text>
+   </TextBlock>
+   ```
+
+2. **PriorityBinding**
+   - 为目标属性提供一组候选绑定，按顺序使用第一个成功的绑定：
+
+   ```xaml
+   <TextBlock>
+       <TextBlock.Text>
+           <PriorityBinding>
+               <!-- 优先使用服务器数据 -->
+               <Binding Path="ServerTitle" FallbackValue="{x:Null}" />
+               <!-- 其次使用本地缓存 -->
+               <Binding Path="LocalTitle" FallbackValue="{x:Null}" />
+               <!-- 最后使用硬编码默认值 -->
+               <Binding Source="默认标题" />
+           </PriorityBinding>
+       </TextBlock.Text>
+   </TextBlock>
+   ```
+
+### 7.9 Binding 常用参数组合清单
+
+1. **文本输入场景**
+
+```xaml
+<TextBox Text="{Binding UserName,
+                        Mode=TwoWay,
+                        UpdateSourceTrigger=PropertyChanged,
+                        ValidatesOnDataErrors=True,
+                        NotifyOnValidationError=True}" />
+```
+
+2. **只读展示场景**
+
+```xaml
+<TextBlock Text="{Binding OrderTotal,
+                          Mode=OneWay,
+                          StringFormat='总金额：{0:C2}'}" />
+```
+
+3. **模板内部绑定到 ViewModel 属性**
+
+```xaml
+<ControlTemplate TargetType="Button">
+    <Border Background="{TemplateBinding Background}">
+        <TextBlock Text="{Binding DataContext.ButtonCaption,
+                                  RelativeSource={RelativeSource TemplatedParent}}" />
+    </Border>
+</ControlTemplate>
+```
+
+4. **带转换器与参数的绑定**
+
+```xaml
+<TextBlock Text="{Binding Progress,
+                          Converter={StaticResource ProgressToPercentConverter},
+                          ConverterParameter='0'}" />
+```
+
+## 8. MVVM设计模式
+
+### 8.1 MVVM的基本概念
+
+MVVM（Model-View-ViewModel）是一种专门为 WPF 设计的设计模式，它将应用程序分为三个主要部分：
+
+1. **Model**：数据模型，包含业务逻辑和数据访问
+2. **View**：视图，用户界面，由 XAML 定义
+3. **ViewModel**：视图模型，连接 Model 和 View，包含 UI 逻辑
+
+MVVM 的主要优点：
+- 关注点分离：UI 和业务逻辑分离
+- 可测试性：ViewModel 可以独立于 View 进行测试
+- 可维护性：代码结构清晰，易于维护
+- 可重用性：ViewModel 可以在不同的 View 中重用
+
+### 8.2 ViewModel的职责
+
+ViewModel 的主要职责包括：
+
+1. **数据转换**：将 Model 中的数据转换为 View 可以显示的形式
+2. **状态管理**：管理 View 的状态
+3. **命令处理**：处理用户的交互命令
+4. **数据验证**：验证用户输入的数据
+5. **导航逻辑**：处理页面或视图之间的导航
+6. **服务协调**：协调各种服务的调用
+
+### 8.3 INotifyPropertyChanged接口
+
+INotifyPropertyChanged 接口用于通知 View 数据源的属性值发生了变化：
+
+```csharp
+public class Person : INotifyPropertyChanged
+{
+    private string _name;
+    private int _age;
+    
+    public string Name
+    {
+        get { return _name; }
+        set
+        {
+            if (_name != value)
+            {
+                _name = value;
+                OnPropertyChanged(nameof(Name));
+            }
+        }
+    }
+    
+    public int Age
+    {
+        get { return _age; }
+        set
+        {
+            if (_age != value)
+            {
+                _age = value;
+                OnPropertyChanged(nameof(Age));
+            }
+        }
+    }
+    
+    public event PropertyChangedEventHandler PropertyChanged;
+    
+    protected virtual void OnPropertyChanged(string propertyName)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+}
+```
+
+### 8.4 命令（ICommand）实现
+
+ICommand 接口用于实现命令模式，将用户操作与业务逻辑分离：
+
+```csharp
+public class RelayCommand : ICommand
+{
+    private readonly Action<object> _execute;
+    private readonly Func<object, bool> _canExecute;
+    
+    public event EventHandler CanExecuteChanged;
+    
+    public RelayCommand(Action<object> execute, Func<object, bool> canExecute = null)
+    {
+        _execute = execute;
+        _canExecute = canExecute;
+    }
+    
+    public bool CanExecute(object parameter)
+    {
+        return _canExecute == null || _canExecute(parameter);
+    }
+    
+    public void Execute(object parameter)
+    {
+        _execute(parameter);
+    }
+    
+    public void RaiseCanExecuteChanged()
+    {
+        CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+    }
+}
+```
+
+使用 RelayCommand：
+
+```csharp
+public class ViewModel
+{
+    public ICommand SaveCommand { get; set; }
+    public ICommand DeleteCommand { get; set; }
+    
+    public ViewModel()
+    {
+        SaveCommand = new RelayCommand(Save, CanSave);
+        DeleteCommand = new RelayCommand(Delete, CanDelete);
+    }
+    
+    private void Save(object parameter)
+    {
+        // 保存逻辑
+    }
+    
+    private bool CanSave(object parameter)
+    {
+        // 检查是否可以保存
+        return true;
+    }
+    
+    private void Delete(object parameter)
+    {
+        // 删除逻辑
+    }
+    
+    private bool CanDelete(object parameter)
+    {
+        // 检查是否可以删除
+        return true;
+    }
+}
+```
+
+### 8.5 MVVM示例
+
+```xaml
+<!-- View -->
+<Window x:Class="MyWpfApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:MyWpfApp"
+        Title="MVVM示例" Height="450" Width="800">
+    <Window.DataContext>
+        <local:MainViewModel />
+    </Window.DataContext>
+    
+    <Grid>
+        <StackPanel Margin="20">
+            <TextBlock Text="用户管理" FontSize="20" FontWeight="Bold" Margin="0,0,0,20" />
+            
+            <ListBox ItemsSource="{Binding Users}" SelectedItem="{Binding SelectedUser}" Margin="0,0,0,20">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding Name}" Width="100" />
+                            <TextBlock Text="{Binding Age}" Width="50" />
+                            <TextBlock Text="{Binding Email}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="40" />
+                </Grid.RowDefinitions>
+                
+                <TextBlock Text="姓名:" Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" />
+                <TextBox Text="{Binding SelectedUser.Name, Mode=TwoWay}" Grid.Column="1" Grid.Row="0" />
+                
+                <TextBlock Text="年龄:" Grid.Column="0" Grid.Row="1" VerticalAlignment="Center" />
+                <TextBox Text="{Binding SelectedUser.Age, Mode=TwoWay}" Grid.Column="1" Grid.Row="1" />
+                
+                <TextBlock Text="邮箱:" Grid.Column="0" Grid.Row="2" VerticalAlignment="Center" />
+                <TextBox Text="{Binding SelectedUser.Email, Mode=TwoWay}" Grid.Column="1" Grid.Row="2" />
+                
+                <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" HorizontalAlignment="Right" Margin="0,10,0,0">
+                    <Button Content="添加" Command="{Binding AddCommand}" Margin="0,0,10,0" />
+                    <Button Content="保存" Command="{Binding SaveCommand}" Margin="0,0,10,0" />
+                    <Button Content="删除" Command="{Binding DeleteCommand}" />
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+    </Grid>
+</Window>
+```
+
+```csharp
+// Model
+public class User : INotifyPropertyChanged
+{
+    private string _name;
+    private int _age;
+    private string _email;
+    
+    public string Name
+    {
+        get { return _name; }
+        set { SetProperty(ref _name, value); }
+    }
+    
+    public int Age
+    {
+        get { return _age; }
+        set { SetProperty(ref _age, value); }
+    }
+    
+    public string Email
+    {
+        get { return _email; }
+        set { SetProperty(ref _email, value); }
+    }
+    
+    public event PropertyChangedEventHandler PropertyChanged;
+    
+    protected void SetProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
+    {
+        if (!EqualityComparer<T>.Default.Equals(field, value))
+        {
+            field = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+}
+
+// ViewModel
+public class MainViewModel
+{
+    public ObservableCollection<User> Users { get; set; }
+    public User SelectedUser { get; set; }
+    
+    public ICommand AddCommand { get; set; }
+    public ICommand SaveCommand { get; set; }
+    public ICommand DeleteCommand { get; set; }
+    
+    public MainViewModel()
+    {
+        Users = new ObservableCollection<User>
+        {
+            new User { Name = "张三", Age = 25, Email = "zhangsan@example.com" },
+            new User { Name = "李四", Age = 30, Email = "lisi@example.com" },
+            new User { Name = "王五", Age = 35, Email = "wangwu@example.com" }
+        };
+        
+        SelectedUser = Users[0];
+        
+        AddCommand = new RelayCommand(AddUser);
+        SaveCommand = new RelayCommand(SaveUser);
+        DeleteCommand = new RelayCommand(DeleteUser);
+    }
+    
+    private void AddUser(object parameter)
+    {
+        var newUser = new User { Name = "新用户", Age = 0, Email = "" };
+        Users.Add(newUser);
+        SelectedUser = newUser;
+    }
+    
+    private void SaveUser(object parameter)
+    {
+        // 保存逻辑
+    }
+    
+    private void DeleteUser(object parameter)
+    {
+        if (SelectedUser != null)
+        {
+            Users.Remove(SelectedUser);
+            if (Users.Count > 0)
+            {
+                SelectedUser = Users[0];
+            }
+            else
+            {
+                SelectedUser = new User();
+            }
+        }
+    }
+}
+```
+
+### 8.6 MVVM 工程结构推荐
+
+常见的 MVVM 工程结构示例：
+
+```text
+MyWpfApp
+├─ Models
+│  ├─ User.cs
+│  └─ Order.cs
+├─ ViewModels
+│  ├─ MainViewModel.cs
+│  └─ OrderDetailViewModel.cs
+├─ Views
+│  ├─ MainWindow.xaml
+│  └─ OrderDetailView.xaml
+├─ Services
+│  ├─ INavigationService.cs
+│  ├─ IDataService.cs
+│  └─ MessageService.cs
+├─ Commands
+│  └─ RelayCommand.cs
+└─ App.xaml / App.xaml.cs
+```
+
+关键思想：
+
+- **View 只关心界面和交互细节**（XAML + 少量 Code-behind 事件转发到命令）
+- **ViewModel 不引用具体的 View 类型**，通过接口（服务）做导航、弹窗等操作
+- **Model 只关注业务与数据，不依赖 UI 框架**
+
+### 8.7 MVVM 中的异步命令与长耗时操作
+
+在 MVVM 中处理异步操作时，通常会引入“异步命令”：
+
+```csharp
+public class AsyncCommand : ICommand
+{
+    private readonly Func<Task> _execute;
+    private readonly Func<bool> _canExecute;
+    private bool _isExecuting;
+
+    public event EventHandler CanExecuteChanged;
+
+    public AsyncCommand(Func<Task> execute, Func<bool> canExecute = null)
+    {
+        _execute = execute;
+        _canExecute = canExecute;
+    }
+
+    public bool CanExecute(object parameter)
+    {
+        return !_isExecuting && (_canExecute?.Invoke() ?? true);
+    }
+
+    public async void Execute(object parameter)
+    {
+        _isExecuting = true;
+        RaiseCanExecuteChanged();
+        try
+        {
+            await _execute();
+        }
+        finally
+        {
+            _isExecuting = false;
+            RaiseCanExecuteChanged();
+        }
+    }
+
+    private void RaiseCanExecuteChanged()
+    {
+        CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+    }
+}
+```
+
+在 ViewModel 中使用：
+
+```csharp
+public class DashboardViewModel
+{
+    public ICommand LoadDataCommand { get; }
+
+    private bool _isBusy;
+    public bool IsBusy
+    {
+        get => _isBusy;
+        set { _isBusy = value; /* OnPropertyChanged 省略 */ }
+    }
+
+    public DashboardViewModel()
+    {
+        LoadDataCommand = new AsyncCommand(LoadDataAsync, () => !IsBusy);
+    }
+
+    private async Task LoadDataAsync()
+    {
+        IsBusy = true;
+        try
+        {
+            await Task.Delay(1000);
+            // 加载数据逻辑
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+}
+```
+
+### 8.8 MVVM 中的验证与错误提示
+
+MVVM 中常用两种验证接口：`IDataErrorInfo` 与 `INotifyDataErrorInfo`。
+
+1. **IDataErrorInfo（简单同步验证）**
+
+```csharp
+public class UserEditModel : INotifyPropertyChanged, IDataErrorInfo
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+
+    public string Error => null;
+
+    public string this[string columnName]
+    {
+        get
+        {
+            return columnName switch
+            {
+                nameof(Name) when string.IsNullOrWhiteSpace(Name) => "姓名不能为空",
+                nameof(Age) when Age <= 0 || Age > 120 => "年龄范围不合法",
+                _ => null
+            };
+        }
+    }
+}
+```
+
+配合绑定使用：
+
+```xaml
+<TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
+<TextBox Text="{Binding Age, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
+```
+
+2. **INotifyDataErrorInfo（适合异步/复杂验证）**
+
+用于需要异步验证（例如服务端校验）时，错误集合可按属性名维护。
+
+### 8.9 MVVM 单元测试要点
+
+MVVM 最大的优势之一是 ViewModel 易于测试：
+
+- ViewModel 不依赖具体 UI 控件，只依赖接口和模型
+- 命令逻辑可通过直接调用 `Execute` / `CanExecute` 测试
+- 通过 Mock（模拟）服务测试导航、消息弹出等行为
+
+示例（伪代码）：
+
+```csharp
+[Fact]
+public void SaveCommand_Should_Disable_When_Model_Invalid()
+{
+    var dataService = new FakeDataService();
+    var vm = new EditUserViewModel(dataService);
+
+    vm.User.Name = string.Empty;
+
+    Assert.False(vm.SaveCommand.CanExecute(null));
+}
+```
+
+## 9. 样式与模板
+
+### 9.1 样式（Style）基础
+
+样式用于定义控件的外观，避免重复设置相同的属性：
+
+```xaml
+<Window.Resources>
+    <!-- 基本样式 -->
+    <Style x:Key="ButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="Blue" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Padding" Value="10,5" />
+        <Setter Property="Margin" Value="5" />
+    </Style>
+    
+    <!-- 继承样式 -->
+    <Style x:Key="PrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource ButtonStyle}">
+        <Setter Property="Background" Value="Green" />
+    </Style>
+    
+    <!-- 隐式样式 -->
+    <Style TargetType="TextBlock">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Margin" Value="5" />
+    </Style>
+</Window.Resources>
+
+<!-- 使用样式 -->
+<Button Content="普通按钮" Style="{StaticResource ButtonStyle}" />
+<Button Content="主要按钮" Style="{StaticResource PrimaryButtonStyle}" />
+<TextBlock Text="这是一个文本块" />
+```
+
+### 9.2 触发器（Trigger）
+
+触发器用于响应属性变化，动态改变控件的外观：
+
+```xaml
+<Style TargetType="Button">
+    <Setter Property="Background" Value="Blue" />
+    <Setter Property="Foreground" Value="White" />
+    <Setter Property="Padding" Value="10,5" />
+    <Setter Property="Margin" Value="5" />
+    
+    <Style.Triggers>
+        <!-- 属性触发器 -->
+        <Trigger Property="IsMouseOver" Value="True">
+            <Setter Property="Background" Value="LightBlue" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Trigger>
+        
+        <!-- 事件触发器 -->
+        <EventTrigger RoutedEvent="MouseDown">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation Storyboard.TargetProperty="Width" From="100" To="120" Duration="0:0:0.2" />
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+        
+        <!-- 数据触发器 -->
+        <DataTrigger Binding="{Binding IsEnabled}" Value="False">
+            <Setter Property="Background" Value="Gray" />
+            <Setter Property="Foreground" Value="LightGray" />
+        </DataTrigger>
+    </Style.Triggers>
+</Style>
+```
+
+### 9.3 控件模板（ControlTemplate）
+
+控件模板用于完全自定义控件的外观：
+
+```xaml
+<ControlTemplate x:Key="CustomButtonTemplate" TargetType="Button">
+    <Border x:Name="Border" 
+            Background="{TemplateBinding Background}"
+            BorderBrush="{TemplateBinding BorderBrush}"
+            BorderThickness="{TemplateBinding BorderThickness}"
+            CornerRadius="5">
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <ContentPresenter x:Name="Content" Margin="{TemplateBinding Padding}" />
+        </StackPanel>
+    </Border>
+    <ControlTemplate.Triggers>
+        <Trigger Property="IsMouseOver" Value="True">
+            <Setter TargetName="Border" Property="Background" Value="LightBlue" />
+        </Trigger>
+        <Trigger Property="IsPressed" Value="True">
+            <Setter TargetName="Border" Property="Background" Value="DarkBlue" />
+            <Setter TargetName="Content" Property="Margin" Value="12,7,8,3" />
+        </Trigger>
+        <Trigger Property="IsEnabled" Value="False">
+            <Setter TargetName="Border" Property="Background" Value="Gray" />
+            <Setter TargetName="Border" Property="BorderBrush" Value="LightGray" />
+        </Trigger>
+    </ControlTemplate.Triggers>
+</ControlTemplate>
+
+<Button Content="自定义按钮" Template="{StaticResource CustomButtonTemplate}" Background="Blue" Foreground="White" Padding="10,5" />
+```
+
+### 9.4 数据模板（DataTemplate）
+
+数据模板用于定义数据对象的可视化表示：
+
+```xaml
+<DataTemplate x:Key="PersonTemplate" DataType="{x:Type local:Person}">
+    <Border BorderBrush="Gray" BorderThickness="1" Padding="10" Margin="5" CornerRadius="5">
+        <StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="姓名: " FontWeight="Bold" />
+                <TextBlock Text="{Binding Name}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="年龄: " FontWeight="Bold" />
+                <TextBlock Text="{Binding Age}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="邮箱: " FontWeight="Bold" />
+                <TextBlock Text="{Binding Email}" />
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</DataTemplate>
+
+<ContentControl Content="{Binding SelectedPerson}" ContentTemplate="{StaticResource PersonTemplate}" />
+
+<ListBox ItemsSource="{Binding People}" ItemTemplate="{StaticResource PersonTemplate}" />
+```
+
+### 9.5 资源（Resource）与资源字典
+
+资源字典用于集中管理和共享资源：
+
+```xaml
+<!-- Styles.xaml -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <SolidColorBrush x:Key="PrimaryColor" Color="Blue" />
+    <SolidColorBrush x:Key="SecondaryColor" Color="Green" />
+    
+    <Style x:Key="ButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="{StaticResource PrimaryColor}" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Padding" Value="10,5" />
+    </Style>
+</ResourceDictionary>
+
+<!-- 在 App.xaml 中引用 -->
+<Application.Resources>
+    <ResourceDictionary>
+        <ResourceDictionary.MergedDictionaries>
+            <ResourceDictionary Source="Styles.xaml" />
+        </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+</Application.Resources>
+
+<!-- 在窗口中引用 -->
+<Window.Resources>
+    <ResourceDictionary>
+        <ResourceDictionary.MergedDictionaries>
+            <ResourceDictionary Source="Styles.xaml" />
+        </ResourceDictionary.MergedDictionaries>
+        
+        <!-- 窗口特定资源 -->
+        <Style x:Key="WindowButtonStyle" TargetType="Button" BasedOn="{StaticResource ButtonStyle}">
+            <Setter Property="Margin" Value="5" />
+        </Style>
+    </ResourceDictionary>
+</Window.Resources>
+```
+
+### 9.6 TemplateBinding 与 RelativeSource TemplatedParent
+
+在 `ControlTemplate` 内部访问控件本身的属性时，常见两种写法：`TemplateBinding` 与 `RelativeSource TemplatedParent`。
+
+1. **TemplateBinding**
+   - 语法简洁，性能较好
+   - 只能用于简单的“一对一属性映射”，不支持转换器、字符串格式等
+
+```xaml
+<ControlTemplate TargetType="Button">
+    <Border Background="{TemplateBinding Background}"
+            BorderBrush="{TemplateBinding BorderBrush}"
+            BorderThickness="{TemplateBinding BorderThickness}">
+        <ContentPresenter Margin="{TemplateBinding Padding}"
+                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+    </Border>
+</ControlTemplate>
+```
+
+2. **RelativeSource TemplatedParent**
+   - 完整的 Binding 语法，支持 Converter、StringFormat 等
+
+```xaml
+<ControlTemplate TargetType="Button">
+    <Border>
+        <Border.Background>
+            <SolidColorBrush Color="{Binding RelativeSource={RelativeSource TemplatedParent},
+                                             Path=Tag,
+                                             Converter={StaticResource TagToColorConverter}}" />
+        </Border.Background>
+        <ContentPresenter />
+    </Border>
+</ControlTemplate>
+```
+
+一般原则：
+
+- 简单属性映射用 `TemplateBinding`
+- 需要转换器、复杂路径、绑定到 DataContext 时用 `RelativeSource TemplatedParent`
+
+### 9.7 ItemsControl 模板体系：ItemTemplate、ItemsPanel、ItemContainerStyle
+
+`ItemsControl` 及其子类有一套完整的模板体系：
+
+1. **ItemTemplate（每一行长什么样）**
+
+```xaml
+<ListBox ItemsSource="{Binding People}">
+    <ListBox.ItemTemplate>
+        <DataTemplate>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{Binding Name}" Width="100" />
+                <TextBlock Text="{Binding Age}" />
+            </StackPanel>
+        </DataTemplate>
+    </ListBox.ItemTemplate>
+</ListBox>
+```
+
+2. **ItemsPanel（所有行如何排列）**
+
+```xaml
+<ListBox ItemsSource="{Binding People}">
+    <ListBox.ItemsPanel>
+        <ItemsPanelTemplate>
+            <WrapPanel />
+        </ItemsPanelTemplate>
+    </ListBox.ItemsPanel>
+</ListBox>
+```
+
+3. **ItemContainerStyle（容器行为与样式）**
+
+```xaml
+<ListBox ItemsSource="{Binding People}" SelectionMode="Multiple">
+    <ListBox.ItemContainerStyle>
+        <Style TargetType="ListBoxItem">
+            <Setter Property="Margin" Value="2" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#333333" />
+                    <Setter Property="Foreground" Value="White" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </ListBox.ItemContainerStyle>
+</ListBox>
+```
+
+4. **HierarchicalDataTemplate（层级数据模板，常用于 TreeView）**
+
+```xaml
+<TreeView ItemsSource="{Binding Departments}">
+    <TreeView.ItemTemplate>
+        <HierarchicalDataTemplate ItemsSource="{Binding Employees}">
+            <TextBlock Text="{Binding Name}" />
+        </HierarchicalDataTemplate>
+    </TreeView.ItemTemplate>
+</TreeView>
+```
+
+### 9.8 VisualStateManager 与控件状态
+
+对于复杂控件状态（普通、鼠标悬停、按下、禁用等），可以使用 `VisualStateManager` 管理视觉状态：
+
+```xaml
+<ControlTemplate x:Key="StatefulButtonTemplate" TargetType="Button">
+    <Grid x:Name="Root">
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="CommonStates">
+                <VisualState x:Name="Normal" />
+                <VisualState x:Name="MouseOver">
+                    <Storyboard>
+                        <ColorAnimation Storyboard.TargetName="BorderBrush"
+                                        Storyboard.TargetProperty="Color"
+                                        To="Orange" Duration="0:0:0.2" />
+                    </Storyboard>
+                </VisualState>
+                <VisualState x:Name="Pressed">
+                    <Storyboard>
+                        <DoubleAnimation Storyboard.TargetName="Root"
+                                         Storyboard.TargetProperty="Opacity"
+                                         To="0.7" Duration="0:0:0.1" />
+                    </Storyboard>
+                </VisualState>
+                <VisualState x:Name="Disabled">
+                    <Storyboard>
+                        <DoubleAnimation Storyboard.TargetName="Root"
+                                         Storyboard.TargetProperty="Opacity"
+                                         To="0.4" Duration="0:0:0.2" />
+                    </Storyboard>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
+        <Border CornerRadius="4" Padding="{TemplateBinding Padding}">
+            <Border.BorderBrush>
+                <SolidColorBrush x:Name="BorderBrush" Color="Gray" />
+            </Border.BorderBrush>
+            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Border>
+    </Grid>
+</ControlTemplate>
+
+<Button Content="状态按钮"
+        Template="{StaticResource StatefulButtonTemplate}" />
+```
+
+`VisualStateManager` 适合状态较多、需要平滑动画过渡的控件，对复杂 UI 的可维护性帮助较大。
+
+## 10. 动画与图形
+
+### 10.1 动画基础
+
+WPF 提供了强大的动画系统，支持各种类型的动画：
+
+1. **属性动画**：改变控件的属性值
+2. **路径动画**：沿着路径移动元素
+3. **关键帧动画**：定义多个关键帧，实现更复杂的动画
+4. **故事板**：组合多个动画，实现复杂的动画序列
+
+### 10.2 DoubleAnimation与ColorAnimation
+
+DoubleAnimation 用于动画数值类型的属性：
+
+```xaml
+<Button Content="动画按钮" Width="100" Height="40">
+    <Button.Triggers>
+        <EventTrigger RoutedEvent="MouseEnter">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation Storyboard.TargetProperty="Width" From="100" To="150" Duration="0:0:0.5" />
+                    <DoubleAnimation Storyboard.TargetProperty="Height" From="40" To="60" Duration="0:0:0.5" />
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+        <EventTrigger RoutedEvent="MouseLeave">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation Storyboard.TargetProperty="Width" From="150" To="100" Duration="0:0:0.5" />
+                    <DoubleAnimation Storyboard.TargetProperty="Height" From="60" To="40" Duration="0:0:0.5" />
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </Button.Triggers>
+</Button>
+```
+
+ColorAnimation 用于动画颜色类型的属性：
+
+```xaml
+<Rectangle Width="200" Height="100">
+    <Rectangle.Fill>
+        <SolidColorBrush x:Name="RectBrush" Color="Blue" />
+    </Rectangle.Fill>
+    <Rectangle.Triggers>
+        <EventTrigger RoutedEvent="Loaded">
+            <BeginStoryboard>
+                <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                    <ColorAnimation Storyboard.TargetName="RectBrush" 
+                                   Storyboard.TargetProperty="Color" 
+                                   From="Blue" To="Red" 
+                                   Duration="0:0:2" />
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </Rectangle.Triggers>
+</Rectangle>
+```
+
+### 10.3 Storyboard详解
+
+Storyboard 用于组合和控制多个动画：
+
+```xaml
+<Storyboard x:Key="FadeInOutAnimation">
+    <DoubleAnimation Storyboard.TargetProperty="Opacity" 
+                     From="0" To="1" 
+                     Duration="0:0:1" 
+                     BeginTime="0:0:0" />
+    <DoubleAnimation Storyboard.TargetProperty="Opacity" 
+                     From="1" To="0" 
+                     Duration="0:0:1" 
+                     BeginTime="0:0:2" />
+</Storyboard>
+
+<TextBlock Text="淡入淡出动画" Opacity="0">
+    <TextBlock.Triggers>
+        <EventTrigger RoutedEvent="Loaded">
+            <BeginStoryboard Storyboard="{StaticResource FadeInOutAnimation}" RepeatBehavior="Forever" />
+        </EventTrigger>
+    </TextBlock.Triggers>
+</TextBlock>
+```
+
+### 10.4 绘图与形状
+
+WPF 提供了丰富的绘图和形状功能：
+
+```xaml
+<Canvas Width="400" Height="300" Background="LightGray">
+    <!-- 基本形状 -->
+    <Rectangle Width="100" Height="100" Fill="Red" Canvas.Left="50" Canvas.Top="50" />
+    <Ellipse Width="100" Height="100" Fill="Blue" Canvas.Left="200" Canvas.Top="50" />
+    <Line X1="50" Y1="200" X2="150" Y2="250" Stroke="Green" StrokeThickness="2" />
+    <Path Data="M 50,200 L 150,200 L 100,150 Z" Fill="Yellow" />
+    
+    <!-- 复杂路径 -->
+    <Path Data="M 200,200 C 250,150 350,150 350,200 S 250,250 200,200" 
+          Stroke="Purple" StrokeThickness="2" Fill="Transparent" />
+    
+    <!-- 文本 -->
+    <TextBlock Text="WPF 绘图示例" FontSize="16" FontWeight="Bold" Canvas.Left="100" Canvas.Top="250" />
+</Canvas>
+```
+
+## 11. 路由事件与命令系统
+
+### 11.1 路由事件的机制
+
+WPF 的路由事件系统允许事件从子元素冒泡到父元素，或从父元素隧道到子元素：
+
+1. **冒泡事件（Bubbling）**：从事件源向上传播到视觉树的根
+2. **隧道事件（Tunneling）**：从视觉树的根向下传播到事件源
+3. **直接事件（Direct）**：只在事件源上触发，不传播
+
+路由事件的处理：
+
+```csharp
+// 处理冒泡事件
+private void Button_Click(object sender, RoutedEventArgs e)
+{
+    // 处理点击事件
+    e.Handled = true; // 阻止事件继续传播
+}
+
+// 处理隧道事件
+private void Grid_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+{
+    // 处理鼠标按下事件
+}
+```
+
+### 11.2 冒泡与隧道事件
+
+```xaml
+<Grid PreviewMouseDown="Grid_PreviewMouseDown" MouseDown="Grid_MouseDown" Background="LightGray" Padding="20">
+    <StackPanel PreviewMouseDown="StackPanel_PreviewMouseDown" MouseDown="StackPanel_MouseDown" Background="LightBlue" Padding="10">
+        <Button Content="点击我" PreviewMouseDown="Button_PreviewMouseDown" Click="Button_Click" />
+    </StackPanel>
+</Grid>
+```
+
+事件触发顺序：
+1. Grid.PreviewMouseDown（隧道）
+2. StackPanel.PreviewMouseDown（隧道）
+3. Button.PreviewMouseDown（隧道）
+4. Button.Click（直接）
+5. Button.MouseDown（冒泡）
+6. StackPanel.MouseDown（冒泡）
+7. Grid.MouseDown（冒泡）
+
+### 11.3 命令（Command）机制
+
+WPF 的命令系统提供了一种将用户操作与业务逻辑分离的方式：
+
+1. **命令源（Command Source）**：触发命令的元素，如 Button、MenuItem
+2. **命令目标（Command Target）**：命令的执行目标，如 TextBox
+3. **命令绑定（Command Binding）**：将命令与处理方法关联
+4. **命令（Command）**：表示要执行的操作，如 ApplicationCommands.Copy
+
+```xaml
+<Window.CommandBindings>
+    <CommandBinding Command="ApplicationCommands.Open" 
+                    Executed="OpenCommand_Executed" 
+                    CanExecute="OpenCommand_CanExecute" />
+    <CommandBinding Command="ApplicationCommands.Save" 
+                    Executed="SaveCommand_Executed" 
+                    CanExecute="SaveCommand_CanExecute" />
+</Window.CommandBindings>
+
+<StackPanel>
+    <MenuItem Header="文件">
+        <MenuItem Header="打开" Command="ApplicationCommands.Open" />
+        <MenuItem Header="保存" Command="ApplicationCommands.Save" />
+    </MenuItem>
+    <Button Content="打开" Command="ApplicationCommands.Open" />
+    <Button Content="保存" Command="ApplicationCommands.Save" />
+</StackPanel>
+```
+
+```csharp
+private void OpenCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+{
+    // 执行打开操作
+}
+
+private void OpenCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+{
+    e.CanExecute = true; // 检查是否可以执行
+}
+
+private void SaveCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+{
+    // 执行保存操作
+}
+
+private void SaveCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+{
+    e.CanExecute = true; // 检查是否可以执行
+}
+```
+
+### 11.4 自定义命令
+
+除了使用内置命令，还可以创建自定义命令：
+
+```csharp
+public static class CustomCommands
+{
+    public static readonly RoutedUICommand Exit = new RoutedUICommand(
+        "退出", "Exit", typeof(CustomCommands),
+        new InputGestureCollection { new KeyGesture(Key.F4, ModifierKeys.Alt) });
+    
+    public static readonly RoutedUICommand About = new RoutedUICommand(
+        "关于", "About", typeof(CustomCommands));
+}
+```
+
+```xaml
+<Window.CommandBindings>
+    <CommandBinding Command="local:CustomCommands.Exit" 
+                    Executed="ExitCommand_Executed" 
+                    CanExecute="ExitCommand_CanExecute" />
+    <CommandBinding Command="local:CustomCommands.About" 
+                    Executed="AboutCommand_Executed" 
+                    CanExecute="AboutCommand_CanExecute" />
+</Window.CommandBindings>
+
+<MenuItem Header="帮助">
+    <MenuItem Header="关于" Command="local:CustomCommands.About" />
+    <Separator />
+    <MenuItem Header="退出" Command="local:CustomCommands.Exit" />
+</MenuItem>
+```
+
+## 12. WPF性能优化与最佳实践
+
+### 12.1 资源管理优化
+
+1. **合理使用资源字典**：将资源集中管理，避免重复定义
+2. **使用静态资源**：对于不会变化的资源，使用 StaticResource
+3. **延迟加载资源**：对于大型资源，使用延迟加载
+4. **释放未使用的资源**：及时释放不再使用的资源
+5. **避免内存泄漏**：正确处理事件订阅和资源引用
+
+### 12.2 虚拟化与延迟加载
+
+1. **列表虚拟化**：对于大量数据的列表，使用虚拟化
+   ```xaml
+   <ListBox ItemsSource="{Binding Items}"
+            VirtualizingStackPanel.IsVirtualizing="True"
+            VirtualizingStackPanel.VirtualizationMode="Recycling" />
+   ```
+
+2. **数据虚拟化**：对于非常大的数据集，使用数据虚拟化
+3. **延迟加载**：对于复杂的 UI 元素，使用延迟加载
+   ```xaml
+   <ContentControl Content="{Binding ComplexContent}" IsAsync="True" />
+   ```
+
+### 12.3 绑定性能优化
+
+1. **使用合适的绑定模式**：根据需要选择合适的绑定模式
+2. **优化绑定路径**：避免深层嵌套的绑定路径
+3. **使用 OneWay 绑定**：对于不需要双向绑定的场景，使用 OneWay 绑定
+4. **使用 ObservableCollection**：对于动态集合，使用 ObservableCollection
+5. **避免不必要的绑定更新**：合理设置 UpdateSourceTrigger
+
+### 12.4 UI线程与异步操作
+
+1. **使用异步操作**：对于耗时操作，使用异步处理
+   ```csharp
+   private async void LoadDataButton_Click(object sender, RoutedEventArgs e)
+   {
+       IsBusy = true;
+       try
+       {
+           await Task.Run(() => LoadData());
+       }
+       finally
+       {
+           IsBusy = false;
+       }
+   }
+   ```
+
+2. **使用 Dispatcher**：在非 UI 线程中更新 UI 时，使用 Dispatcher
+   ```csharp
+   private void BackgroundOperation()
+   {
+       // 执行后台操作
+       
+       // 更新 UI
+       Application.Current.Dispatcher.Invoke(() =>
+       {
+           StatusText = "操作完成";
+       });
+   }
+   ```
+
+3. **避免阻塞 UI 线程**：不要在 UI 线程中执行耗时操作
+4. **使用进度报告**：对于长时间运行的操作，使用进度报告
+
+### 12.5 性能监控与调试
+
+1. **使用性能分析工具**：
+   - Visual Studio 性能分析器
+   - WPF 性能工具（PerfView）
+   - Snoop（WPF UI 调试工具）
+
+2. **监控视觉树复杂度**：避免过度复杂的视觉树
+3. **监控绑定更新**：避免不必要的绑定更新
+4. **使用日志**：记录性能关键路径的执行时间
+5. **定期测试**：定期进行性能测试，发现问题及时优化
+
+## 13. MVVM模式进阶与常用框架
+
+### 13.1 课外阅读推荐与架构演进
+
+在深入 MVVM 之前，了解经典架构设计的演进过程是非常有必要的，这有助于我们理解 MVVM 为什么会在 WPF 中成为主流。
+
+*   **MVC (Model-View-Controller)**：模型、视图和控制器。最初的 UI 架构，控制器处理用户输入逻辑，然后更新模型，模型改变后通知视图更新。缺点在于控制器往往会变得非常臃肿，且与视图耦合较深。
+*   **MVP (Model-View-Presenter)**：为了解决 MVC 耦合问题引入了 Presenter。视图将所有交互委托给 Presenter，Presenter 处理业务逻辑后通过接口被动更新视图。实现了完全解耦，代价是接口方法数量激增，且依然需要手动编写大量更新界面的代码。
+*   **MVVM (Model-View-ViewModel)**：WPF 开发的核心架构模式。ViewModel 代替了 Presenter，不持有视图的任何引用。核心在于利用 WPF 强大的**数据绑定（Data Binding）**引擎和数据模板。ViewModel 专注于把控状态，只要 ViewModel 中的数据发生了变化，视图就会自动更新，极大地解放了生产力。
+
+> **课外阅读推荐：**
+> *   [MVP，MVC，MVVM 深度参考 1](https://blog.csdn.net/fageaaa/article/details/145936426)
+> *   [MVP，MVC，MVVM 深度参考 2](https://baijiahao.baidu.com/s?id=1855075764046835653)
+
+### 13.2 INotifyPropertyChanged 与 ICommand 核心原理解析
+
+这两个接口是撑起 WPF 响应式 MVVM 架构的绝对基石。不论使用什么第三方框架，底层一定是对这两者的封装。
+
+#### 1. INotifyPropertyChanged：数据的“广播站”
+*   **主要作用**：当属性发生变化时发起通知。WPF 中为了给控件绑定动态属性，使用了绑定语法 `{Binding PropertyName}`。`INotifyPropertyChanged` 负责在后台变量发生变化时，准确地通知视图重绘。
+*   **如果不实现它会怎样？**：如果绑定的后台属性变了，但没有触发 `PropertyChanged` 事件，UI 界面就不会发生任何变化。
+*   **原始代码实现示例**：
+
+```csharp
+// 经典的 INotifyPropertyChanged 手写实现非常繁琐
+public class PersonModel : INotifyPropertyChanged
+{
+    private string _name;
+    public string Name
+    {
+        get { return _name; }
+        set
+        {
+            if (_name != value)
+            {
+                _name = value;
+                // 数据发生变化，必须手动调用通知方法
+                OnPropertyChanged(nameof(Name)); 
+            }
+        }
+    }
+
+    public event PropertyChangedEventHandler PropertyChanged;
+    protected virtual void OnPropertyChanged(string propertyName)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+}
+```
+
+> **课外阅读推荐：**
+> *   [如何实现 INotifyPropertyChanged 属性更改通知](https://learn.microsoft.com/zh-cn/dotnet/desktop/wpf/data/how-to-implement-property-change-notification)
+
+#### 2. ICommand：行为交互的“遥控器”
+*   **主要作用**：为了给页面元素（XAML 标签，比如 Button 的 Click）绑定事件参数，`ICommand` 取代了传统的 Code-Behind 中双击生成的事件处理器。实现了前台交互设计与后台业务逻辑完全分离。
+*   **原始接口核心要素**：
+    *   `Execute(object parameter)`：点击时执行的核心业务代码。
+    *   `CanExecute(object parameter)`：返回布尔值，决定当前命令状态。如果返回 `false`，界面绑定的按钮组件会自动变为灰色**禁用状态**。
+
+**原始的手写 ICommand 实现示例：**
+
+```csharp
+// 通常我们需要自定义一个实现了 ICommand 的 RelayCommand 类
+public class RelayCommand : ICommand
+{
+    private readonly Action<object> _execute;
+    private readonly Predicate<object> _canExecute;
+
+    public RelayCommand(Action<object> execute, Predicate<object> canExecute = null)
+    {
+        _execute = execute ?? throw new ArgumentNullException(nameof(execute));
+        _canExecute = canExecute;
+    }
+
+    // CommandManager 会在界面发生交互时评估命令是否可用
+    public event EventHandler CanExecuteChanged
+    {
+        add { CommandManager.RequerySuggested += value; }
+        remove { CommandManager.RequerySuggested -= value; }
+    }
+
+    public bool CanExecute(object parameter)
+    {
+        return _canExecute == null || _canExecute(parameter);
+    }
+
+    public void Execute(object parameter)
+    {
+        _execute(parameter);
+    }
+}
+
+// 在 ViewModel 中使用
+public class MainViewModel
+{
+    public ICommand SaveCommand { get; }
+
+    public MainViewModel()
+    {
+        // 只有当名字不为空时才能点击保存
+        SaveCommand = new RelayCommand(ExecuteSave, CanSave);
+    }
+
+    private void ExecuteSave(object obj) { /* 模拟保存逻辑 */ }
+    private bool CanSave(object obj) { return true; } 
+}
+```
+
+> **课外阅读推荐：**
+> *   [深入理解 ICommand 参考 1](https://www.cnblogs.com/wzzkaifa/p/19126253)
+> *   [深入理解 ICommand 参考 2](https://www.cnblogs.com/yanwuming/p/18929337)
+
+### 13.3 WPF 中三大重要的 MVVM 框架评测
+
+社区和官方封装了现成的 MVVM 框架，免去了我们每次手写上述恶心累赘的实现的折磨。
+
+1.  **MVVMLight**
+    *   **概况**：诞生最早且最为知名的轻量级框架，微软出品。
+    *   **状态**：**目前已官方标记为过时（Deprecated），不再推荐使用。** 它的历史使命已经完成。
+2.  **CommunityToolkit.Mvvm**
+    *   **概况**：由微软官方主推的现代 MVVM 工具包，可以视为 MVVMLight精神续作（API 高度兼容）。
+    *   **特点**：依托于源生器（Source Generators）机制和现代特性，能成倍减少代码编写量，性能极佳。**目前 WPF / MAUI / WinUI3 开发绝对的首选。**
+3.  **Prism**
+    *   **概况**：微软推出的重量级老牌框架，被称为“三棱镜”万花筒。
+    *   **特点**：专为大型企业级复合应用设计。内置了极其复杂的模块化、高级区域导航（Region Navigation）、对话框服务等。对于中小型管理系统显得笨重庞大。
+
+---
+
+## 14. CommunityToolkit.Mvvm 框架详解
+
+**进阶学习参考资料：**
+*   [官方文档 - 微软 Learn](https://learn.microsoft.com/zh-cn/dotnet/communitytoolkit/mvvm/)
+*   [GitHub 开源仓库首页](https://github.com/CommunityToolkit)
+*   [博客参考 1：核心原理解析](https://www.cnblogs.com/7bao3shu/articles/19420516)
+*   [博客参考 2：入门综合指南](https://www.cnblogs.com/cdaniu/p/16848821.html)
+*   [博客参考 3：信使高级模块](https://blog.csdn.net/JetRaven12/article/details/156069254)
+*   [博客参考 4：视图模型定位器的封装艺术](https://blog.csdn.net/u010975589/article/details/155889321)
+
+### 14.1 什么是 CommunityToolkit.Mvvm？
+
+`CommunityToolkit.Mvvm` 包（曾经名叫 `Microsoft.Toolkit.Mvvm`）是一个现代、快速、独立且模块化的 MVVM 库。
+*   **Community（社区）**：由社区和微软官方联合开源维护。
+*   **Toolkit（工具包）**：它不强制采用某种特定的工程项目架构，开发者可以当做一个百宝箱随取随用。
+
+### 14.2 工具包中的核心骨架对象
+
+熟悉以下几组对象，你就能快速驾驭此框架：
+
+1.  **视图模型基类与命令**：
+    *   `ObservableObject`：实现 `INotifyPropertyChanged` 的基类，内置最高效的通知逻辑。
+    *   `RelayCommand` / `AsyncRelayCommand`：实现了 `ICommand`，专门用来绑定界面上的同步点击或是耗时的异步等待事件（如 API 数据请求）。
+2.  **依赖注入（IoC）服务集成**：
+    *   `IServiceProvider`：获取服务的核心接口。
+    *   `ServiceCollection`：用来注册、配置生命周期服务的容器组件。
+3.  **信使（消息通知交互机制）**：
+    *   `IMessenger`：消息总线接口基类。
+    *   `WeakReferenceMessenger`：弱引用信使（官方最推荐的默认实现）。
+    *   `StrongReferenceMessenger`：强引用信使（性能最好，但容易造成内存泄漏）。
+
+### 14.3 项目实战：标准使用三步曲
+
+1.  **安装依赖**：通过 NuGet 包管理器安装 `CommunityToolkit.Mvvm` 包。如果您还需要依赖注入，可以一并安装 `Microsoft.Extensions.DependencyInjection`。
+2.  **规整架构**：在项目中按规范规划文件夹。推荐的最基础的三层/四层结构：`Models`, `Views`, `ViewModels`, `Services`。
+3.  **编码开发**：继承基础对象编写业务逻辑，时刻注意使用框架提供的特性来简化代码。
+
+### 14.4 优雅架构：视图模型定位器（ViewModelLocator）的封装与扩展
+
+为了实现视图与模型依赖关系的进一步解耦并彻底拥抱依赖注入（DI），构建一个全局的 `ViewModelLocator` 充当创建 VM 和注入服务的引擎是非常有必要的。
+
+这本质就是把 ASP.NET Core 的那一整套启动配置注入机制搬到了 WPF：
+
+```csharp
+// App.xaml.cs 启动配置
+public partial class App : Application
+{
+    // 全局服务提供者
+    public static IServiceProvider Services { get; private set; }
+
+    public App()
+    {
+        Services = ConfigureServices();
+    }
+
+    private static IServiceProvider ConfigureServices()
+    {
+        var services = new ServiceCollection();
+
+        // 1. 注册所有的服务层
+        services.AddSingleton<IDataService, SqlDataService>();
+        services.AddSingleton<IDialogService, DefaultDialogService>();
+
+        // 2. 注册所有的 ViewModel (一般为瞬时对象 Transient)
+        services.AddTransient<MainViewModel>();
+        services.AddTransient<LoginViewModel>();
+
+        return services.BuildServiceProvider();
+    }
+}
+```
+
+```csharp
+// ViewModelLocator.cs 的标准设计
+public class ViewModelLocator
+{
+    public MainViewModel Main => App.Services.GetService<MainViewModel>();
+    public LoginViewModel Login => App.Services.GetService<LoginViewModel>();
+}
+```
+
+**在项目中扩展页面的开发流（以新建注册页为例）：**
+1.  **第一步**：在 `Views` 文件夹中新建视图 `RegisterView.xaml`。
+2.  **第二步**：在 `ViewModels` 文件夹中新建视图模型 `RegisterViewModel.cs`。
+3.  **第三步**：在 `App.xaml.cs` 中添加 `services.AddTransient<RegisterViewModel>();`。然后在 `ViewModelLocator.cs` 中添加一个只读属性 `Register`。
+4.  **第四步**：通过 Locator 为视图绑定它的 ViewModel (DataContext 挂载)：
+    ```xaml
+    <!-- App.xaml 中已提前将 Locator 声明为全家静态资源 <local:ViewModelLocator x:Key="Locator" /> -->
+    <Window x:Class="MyApp.Views.RegisterView"
+            DataContext="{Binding Source={StaticResource Locator}, Path=Register}">
+            ...
+    ```
+
+### 14.5 核心工具：源生成器（Source Generators）深度剖析
+
+`CommunityToolkit.Mvvm` 包之所以让人上瘾，核心就在于这套从版本 8.0 引入的基于 Roslyn 的**源生成器**（Source Generators）。
+
+**源生成器的本质：它是 C# 编译期的高效代码生成机制。**
+你只需要写极简的一两句代码定好标记（特性的使用），编译时，编译器检测到这些类，会在内存中动态为你生成上百行标准的样板代码。它是在编译阶段重写源代码，而不是反射，所以具有**绝对零性能损耗**。
+
+#### 源生器使用的前提与特点：
+1.  **必须声明为部分类 (`partial class`)**：
+    *   **原因与原理**：系统生成的那一大堆通知代码、绑定逻辑也叫这个类名，只有加上 `partial` 才能让它们在编译结果中合二为一，缺少了将会直接编译报错。
+2.  **平台严重限制支持**：
+    *   由于依赖 Roslyn 最新底层特性，**它仅支持 .NET Core / .NET 5+ 以上。绝对不支持传统的 .NET Framework （如 .net framework 4.7.2）**。如果不幸使用了老旧框架环境，只能乖乖手写完整的实现。
+
+#### 对比：不使用源生器 VS 使用源生器
+
+**【纯手写实现（老式的MVVMLight风格）】 (需要大约 30 行恶心的重复代码)：**
+
+```csharp
+public class UserViewModel : ObservableObject
+{
+    private string _userName;
+    public string UserName
+    {
+        get => _userName;
+        set => SetProperty(ref _userName, value); // 必须逐个属性写重写调用通知
+    }
+
+    public ICommand LoginCommand { get; }
+
+    public UserViewModel()
+    {
+        LoginCommand = new RelayCommand(OnLogin, CanLogin);
+    }
+
+    private void OnLogin()
+    {
+        // 登陆业务逻辑
+    }
+
+    private bool CanLogin()
+    {
+        return !string.IsNullOrEmpty(UserName);
+    }
+}
+```
+
+**【使用 CommunityToolkit.Mvvm 源生器后】 (精简至极，仅仅只需几行！)：**
+
+```csharp
+// 必须是 partial class
+public partial class UserViewModel : ObservableObject
+{
+    // C# 特性：自动生成拥有通知能力的公共属性 public string UserName { get; set; }
+    // 并且当你按下了保存键保存这个底层字段时，系统甚至替你通知了 CanExecuteChanged ！
+    // 注意：字段建议用小写下划线开头
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(LoginCommand))] 
+    private string _userName;
+
+    // C# 特性：自动将当前普通方法包装为 public IAsyncRelayCommand LoginCommand { get; }
+    // 如果带了 CanExecute 参数，自动识别执行限制
+    [RelayCommand(CanExecute = nameof(CanLogin))]
+    private async Task LoginAsync()
+    {
+        // 业务逻辑变得清爽无比
+        await Task.Delay(1000); 
+    }
+
+    private bool CanLogin() => !string.IsNullOrWhiteSpace(UserName);
+}
+```
+**源生器通过以上数个 C# 属性特征魔法标签，帮助我们把繁琐的日常操作彻底埋藏，开发者几乎只需要专注核心业务。**
+
+### 14.6 信使机制（Messenger）：打通组件任督二脉
+
+在一个绝对解耦、采用顶级 MVVM 划分标准的项目系统中，页面 A 是绝不可能持有 页面 B 的代码上下文引用的。它们必须要沟通（刷新列表、传递用户资料、发送弹窗触发等），通常采用中转站发送消息的模式。
+
+#### 弱引用 vs 强引用（避免内存泄漏的抉择）
+*   **WeakReferenceMessenger（官方默认推荐实现）**：内部使用**弱引用**来跟踪维护收件人的订阅注册。
+    *   **优点为安全省心**：如果你使用它，即使一个弹出子级 Window 已经关闭，但因为忘记注销对一条消息的订阅事件也没关系。因为是弱引用，.NET 的垃圾回收机制依旧可以完美销毁掉那个 Window。
+*   **StrongReferenceMessenger**：内部使用传统的**强引用**。
+    *   **它的优点为极限性能**：因为无需追踪和维护弱引用的回收耗时，它的派发吞吐性能远超前者。
+    *   **它的代价是严苛的开发意识**：使用它，在那个窗口关闭时**必须绝对手动去取消订阅收件人（Unregister）**。少写一句注销代码而强引用绑架着目标对象，那么那个窗口就永远不会被内存回收掉，最终导致客户端崩溃。只有对游戏渲染、大量毫秒级消息通讯的应用才需考虑性能取舍而去使用它。
+
+#### 实战三段式必考题：如何操作信使？（代码示例）
+
+**1. 如何创建一个消息类型？（用来承载传递内容的数据包）**
+通常派生自 `ValueChangedMessage<T>`，用来代表这是一个明确携带值改变的消息类型。
+
+```csharp
+using CommunityToolkit.Mvvm.Messaging.Messages;
+
+// 创建一个专门用来跨ViewModel传递“系统通知推送文本”的快递包
+public class SystemAlertMessage : ValueChangedMessage<string>
+{
+    // 构造函数传入消息内容，供基类承载
+    public SystemAlertMessage(string messageText) : base(messageText)
+    {
+    }
+}
+```
+
+**2. 如何注册消息（订阅监听消息）？**
+在需要接收通知处理事件的（或者是弹出框）ViewModel 的构造函数中进行事件注册：
+
+```csharp
+public partial class MainDashboardViewModel : ObservableObject
+{
+    [ObservableProperty]
+    private string _alertFooterText;
+
+    public MainDashboardViewModel()
+    {
+        // WeakReferenceMessenger.Default 是一个全局的中转站单例实体
+        // Register 参数讲解：1. 接收者就是我自己 (this) 
+        // 2. 只有发送了类型为 SystemAlertMessage 包裹的人发的消息，我这才能监听到，然后进入 Lambda 回调。
+        WeakReferenceMessenger.Default.Register<SystemAlertMessage>(this, (recipient, message) =>
+        {
+            // 当消息到达时，提取其内置的消息承载文本，刷新我这个页面的属性。
+            recipient.AlertFooterText = $"收到警告广播：{message.Value}";
+            
+            // 如果你想用强引用信使机制： StrongReferenceMessenger.Default.Register... 
+        });
+    }
+
+    // 严谨写法如果是强引用信使，还需要手动写重构注销，避免内存炸弹：
+    // public void Cleanup() {  StrongReferenceMessenger.Default.UnregisterAll(this);  }
+}
+```
+
+**3. 如何发送消息广播？**
+例如在系统中某一个设置界面，保存成功后想通知整个框架全局弹出或者更新数据，只需要一句话：
+
+```csharp
+public partial class SettingsViewModel : ObservableObject
+{
+    [RelayCommand]
+    private void SaveSettings()
+    {
+        // ... 执行写入到本地数据库配置的漫长逻辑保存 ..
+
+        // 将自己新做好的快递包寄件扔到中转站。只要注册过对相同类型的数据包感冒的接收者，统统立刻执行回调！
+        WeakReferenceMessenger.Default.Send(new SystemAlertMessage("恭喜：当前系统配置数据已极速保存成功！"));
+    }
+}
+```
+
+### 14.7 架构进阶：依赖注入（DI）与多窗口自动注册的最佳实践
+
+在实际的企业级 WPF 应用开发中，仅仅通过 `ViewModelLocator` 绑定单个的主窗体是不够的。我们通常会面临大量子窗口（如登录、设置、编辑弹窗）的跳转需求。如何在完全隔离 View 和 ViewModel 的前提下，还能**优雅地传递参数、打开新窗口，并且自动享受依赖注入的红利（比如 EF Core上下文）呢？**
+
+通常的做法是封装一个 `WindowRegister` 窗口注册/导航器，结合 Microsoft 的通用主机构建器（`Microsoft.Extensions.Hosting`），实现全自动的容器装配与窗口管理。
+
+#### 1. 核心导航引擎：`WindowRegister` 解析
+
+这是一份非常典型的工业级封装代码。它接管了原本散落在各处的 `new Window().Show()` 逻辑：
+
+```csharp
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Windows;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace WpfApp1.Utils;
+
+/// <summary>
+/// 窗口注册器，用于在 MVVM 架构中管理 ViewModel 和 View(Window) 的映射关系，并提供打开窗口的方法。
+/// 配合 Microsoft.Extensions.DependencyInjection (DI) 容器结合使用。
+/// </summary>
+public class WindowRegister
+{
+    private static IServiceProvider _serviceProvider;
+    // 存储 ViewModel 类型到 Window 类型的映射表
+    private static readonly Dictionary<Type, Type> _mappings = new Dictionary<Type, Type>();
+
+    /// <summary>
+    /// ① 自动扫描装配：通过反射扫描所有标有 [RegisterViewModel] 的 View，并将对应的 VM和视图批量丢入 DI 容器。
+    /// </summary>
+    public static void AddWindowsFromAssembly(IServiceCollection services, Assembly assembly)
+    {
+        var types = assembly.GetTypes();
+        foreach (var viewType in types)
+        {
+            var attr = viewType.GetCustomAttribute<RegisterViewModelAttribute>();
+            if (attr != null)
+            {
+                Type viewModelType = attr.ViewModelType;
+
+                // 统一注册到生命周期容器中 (推荐使用 Transient 瞬态，每次打开新窗口都是独立的)
+                if (services != null)
+                {
+                    services.AddTransient(viewModelType);
+                    services.AddTransient(viewType);
+                }
+
+                // 登记字典映射表，方便后续只传泛型 ViewModel 就能反推找到应该弹出哪个 View。
+                if (!_mappings.ContainsKey(viewModelType))
+                {
+                    _mappings.Add(viewModelType, viewType);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// 初始化：在 App 启动时将全局 DI 供应商注入进来。
+    /// </summary>
+    public static void Initialize(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+    }
+
+    /// <summary>
+    /// ② 核心跳转逻辑：只认 ViewModel，绝对不碰 View 实现代码，强制解耦。
+    /// </summary>
+    public static void ShowWindow<TViewModel>()
+    {
+        if (_serviceProvider == null)
+            throw new InvalidOperationException("请先调用 Initialize 注入 IServiceProvider！");
+
+        Type viewModelType = typeof(TViewModel);
+        if (_mappings.TryGetValue(viewModelType, out Type viewType))
+        {
+            // 通过 DI 容器解析得到 Window (这能保证 Window 构造函数如果有参数需求，会被容器自动搞定)
+            Window window = (Window)_serviceProvider.GetRequiredService(viewType);  
+
+            // 【防重复挂接】检查窗口是否已经通过 DI 自动注入了 DataContext
+            if (window.DataContext == null || window.DataContext.GetType() != viewModelType)
+            {
+                object viewModel = _serviceProvider.GetRequiredService(viewModelType);
+                window.DataContext = viewModel; // 手动挂载上下文
+            }
+
+            // 【防止内存泄漏】必须拦截它的关闭事件
+            AttachDisposeToWindow(window);
+
+            window.Show(); // 打开非模态窗口
+        }
+        else
+        {
+            throw new InvalidOperationException($"未找到对应的视图窗口类型，是否漏加了标签？");
+        }
+    }
+    
+    // ... 可以进一步扩展诸如 ShowWindow<TViewModel>(TViewModel viewModel) 传参打开
+    // ... 和 ShowDialog<TViewModel> 模态打开的方法。
+
+    /// <summary>
+    /// ③ 保驾护航的灵魂：自动内存清理 (Dispose) 防止瞬态对象堆积爆内存
+    /// </summary>
+    private static void AttachDisposeToWindow(Window window)
+    {
+        window.Closed += (sender, e) =>
+        {
+            // 只要你编写的 ViewModel 里面继承接管了 IDisposable 接口
+            // 窗口被×掉的时候，注册器会强制帮你调用析构清理（比如断开特定的 Socket 或网络连接实例）
+            if (window.DataContext is IDisposable disposableVm)
+            {
+                disposableVm.Dispose();
+            }
+
+            // 暴力切断 View 和 ViewModel 之间的树形绑定联系，帮助 GC (垃圾回收器) 加速回收内存空间
+            window.DataContext = null;
+        };
+    }
+}
+```
+
+**上述设计带来的三大核心优势：**
+1.  **完全消灭了类似 `new LoginWindow().Show()` 的强耦合恶习**。现在，如果要在主控制台打开登录界面，只有纯粹清爽的 `WindowRegister.ShowWindow<LoginViewModel>();` 一行代码，符合 MVVM 规范且极度方便单元测试。
+2.  **避免忘记写 GC 释放**。因为瞬态窗体每次打开都会吃掉一份常驻内存，`AttachDisposeToWindow` 是守护内存暴涨的最后防线。
+3.  只需要在 XAML 的后台代码顶部加一句 `[RegisterViewModel(typeof(LoginViewModel))]`，它就能通过反射自动接管全世界的页面映射。
+
+#### 2. 全局承载容器：标准的 `App.xaml.cs` 配置模板
+
+最后，我们需要将前面学习的“数据库服务”、“弹窗服务”、以及刚刚讲解的“窗体自动注册”全部汇总进 `App.xaml.cs`。现在的 WPF 项目基本上都会借用经典的 .NET 通用主机（`IHost`） 启动管道：
+
+```csharp
+using System.Windows;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using DAL;
+using WpfApp1.Utils;
+using WpfApp1.ViewModel;
+
+namespace WpfApp1;
+
+public partial class App : Application
+{
+    // 全局通用的 Application Host
+    public static IHost? AppHost { get; private set; }
+
+    public App()
+    {
+        AppHost = Host.CreateDefaultBuilder()
+            .ConfigureServices((context, services) =>
+            {
+                // 1. 注册全局/单例的核心服务 (比如弹窗提示服务、用户的权限Token会话)
+                services.AddSingleton<IDialogService, DefaultDialogService>();
+                services.AddSingleton<IUserSession, UserSession>();
+
+                // 2. 注入前面封装的注册器：自动扫描自身程序集，批量把几百个窗口丢进 DI 容器
+                WindowRegister.AddWindowsFromAssembly(services, System.Reflection.Assembly.GetExecutingAssembly());
+
+                // 3. (高阶) 注册 EF Core ORM数据库上下文，并且读取工程根目录下的 json 数据库连接符
+                var connectionString = context.Configuration.GetConnectionString("DefaultConnection");
+                services.AddDbContext<DAL.Models.StudentManagementContext>(options =>
+                    options.UseSqlServer(connectionString), ServiceLifetime.Transient);
+
+                // 4. 注册标准的仓储(Repository)与业务逻辑(BLL)层接口
+                services.AddTransient(typeof(IRepository<>), typeof(BaseRepository<>));
+                services.AddTransient<BLL.IStudentService, BLL.StudentService>();
+                services.AddTransient<BLL.ILoginService, BLL.LoginService>();
+            })
+            .Build();
+    }
+
+    protected override async void OnStartup(StartupEventArgs e)
+    {
+        // 启动后台通用主机的系统监听
+        await AppHost!.StartAsync();
+        base.OnStartup(e);
+        
+        // 【关键装配点】把 DI 大管家(IServiceProvider)递交给静态的窗体导航注器
+        WindowRegister.Initialize(AppHost.Services);
+
+        // 利用纯粹的泛型 ViewModel 类型，向用户弹出软件的第一个起点界面 (登陆页面)
+        WindowRegister.ShowWindow<LoginViewModel>();
+    }
+
+    protected override async void OnExit(ExitEventArgs e)
+    {
+        // 软件关闭时平滑地结束并归还底层依赖主机的一切句柄
+        await AppHost!.StopAsync();
+        base.OnExit(e);
+    }
+}
+```
+
+**这段配置使得 WPF 的生命周期彻底跟现代 .NET 挂轨！** 
+今后，例如当你的 `LoginViewModel` 构造函数配置为：`public LoginViewModel(ILoginService loginService)`，开发者无需手动 `new` 实例化业务服务，底层的依赖注入容器 `AppHost` 会自动完成组件树的解析并注入 `LoginService` 实例。这是现代大型客户端应用中实现控制反转的标准系统规范。
+
+### 14.8 现代 WPF 配置管理：`appsettings.json` 的深度使用
+
+在传统的 .NET Framework 时代，WPF 依靠繁琐的 `App.config` 和 `ConfigurationManager` 来读取 XML 配置。
+而在全新的 .NET Core / .NET 5+ 架构下（尤其是当我们引入了 `Microsoft.Extensions.Hosting` 后），WPF 可以像 ASP.NET Core Web API 一样，完美拥抱现代化的 JSON 配置文件管理。
+
+#### 1. 典型的 `appsettings.json` 配置示例
+
+首先，在 WPF 项目的根目录新建一个 `appsettings.json` 文件。**（注意：必须在文件属性中将其设置为“如果较新则复制”或“始终复制”到输出目录，否则程序将找不到该文件）**：
+
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=StudentManagement;User ID=sa;Password=123456;Trusted_Connection=False;MultipleActiveResultSets=true;TrustServerCertificate=True;"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.Hosting.Lifetime": "Information",
+      "Microsoft.EntityFrameworkCore.Database.Command": "Warning"
+    }
+  },
+  "AppPreferences": {
+    "MaxRecentFiles": 10,
+    "Theme": "Dark",
+    "ApiBaseUrl": "https://api.example.com/v1/"
+  }
+}
+```
+
+#### 2. 在不同场景下读取配置的方法
+
+当你在 `App.xaml.cs` 中使用了 `Host.CreateDefaultBuilder()` 后，系统会在底层自动搜寻并加载运行目录下的 `appsettings.json` 文件并将它们构建为 `IConfiguration` 树。
+
+**场景 A：在 `App.xaml.cs` (DI 容器注册阶段) 直接获取**
+
+在这个阶段，容器还没有建立完毕，但我们可以通过 `HostBuilderContext` 提前取出配置：
+
+```csharp
+AppHost = Host.CreateDefaultBuilder()
+    .ConfigureServices((context, services) =>
+    {
+        // 核心方法：context.Configuration
+        
+        // 【1】获取专属的数据库连接字符串 (内部本质是读取 "ConnectionStrings:DefaultConnection")
+        var connectionString = context.Configuration.GetConnectionString("DefaultConnection");
+        services.AddDbContext<StudentManagementContext>(options =>
+            options.UseSqlServer(connectionString));
+
+        // 【2】获取某个普通字符串片段
+        string theme = context.Configuration["AppPreferences:Theme"];
+
+        // 【3】将整块配置强类型绑定到 C# 类，并注入给需要的地方 (IOptions 模式)
+        // 例如：services.Configure<AppPreferencesOptions>(context.Configuration.GetSection("AppPreferences"));
+    })
+    .Build();
+```
+
+**场景 B：在普通的服务（Service）或 ViewModel 中获取**
+
+既然全局主机引擎已经建立，一切对象都处于依赖注入之中。我们只需要在构造函数里**索要 `IConfiguration`**，底层就会完美地把它递给你：
+
+```csharp
+using Microsoft.Extensions.Configuration;
+
+public class LoginService : ILoginService
+{
+    private readonly IConfiguration _config;
+    private readonly string _apiBaseUrl;
+
+    // 构造函数注入 IConfiguration 依赖
+    public LoginService(IConfiguration config)
+    {
+        _config = config;
+        
+        // 通过冒号 ':' 来逐级读取 JSON 树中的键值
+        _apiBaseUrl = _config["AppPreferences:ApiBaseUrl"]; 
+    }
+
+    public async Task<bool> Authenticate(string user, string pass)
+    {
+        // ... 使用 _apiBaseUrl 拼接请求进行网络验证 ...
+        return true;
+    }
+}
+```
+
+**场景 C：非主流场景——在没有 DI 构造函数的静态类/扩展方法中获取**
+
+如果因为历史包袱，某些静态工具类无法使用构造函数依赖注入，可以从我们之前建立好的全局静态 `AppHost` 中硬取（这也就是所谓的**服务定位器模式**，非必要不推荐，但有时很救急）：
+
+```csharp
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
+
+public static class GlobalConfigHelper
+{
+    public static int GetMaxRecentFiles()
+    {
+        // 直接找 App.AppHost 提供商索要配置服务实体
+        var config = App.AppHost.Services.GetRequiredService<IConfiguration>();
+        
+        // 读取并转换类型 (也可以用 config.GetValue<int>("AppPreferences:MaxRecentFiles"))
+        int limit = int.Parse(config["AppPreferences:MaxRecentFiles"]);
+        return limit;
+    }
+}
+```
+
+**总结：**
+采用这一套 `appsettings.json` + `IConfiguration` 大一统模型，可以让 WPF 前端轻松与公司后端的 C# Web 服务保持统一的开发体验，配置文件不仅结构更清晰，反序列化绑定也更安全。
+
+---
+
+## 15. 轻量级国产 ORM 神器：SqlSugar 详细使用指南
+
+**官方文档**：[https://www.donet5.com/Home/Doc](https://www.donet5.com/Home/Doc)
+
+在 WPF 开发中，虽然微软官方主推 Entity Framework Core (EF Core)，但在遇到一些老旧系统、国产数据库或者需要轻量、极速开发的桌面场景时，**SqlSugar** 凭借其极其平缓的学习曲线、原生支持几十种主流及国产数据库、优异的性能，成为了很多团队的首选。
+
+### 17.1 引入 SqlSugar 与基础对象映射 (DbFirst/CodeFirst)
+
+通过 NuGet 安装包：`SqlSugarCore`（注意，不是旧版的 `sqlSugar`）。
+
+#### 步骤一：创建实体类模型
+SqlSugar 通过简单的 C# 特性（Attributes）即可完成实体与数据库表的映射。
+
+```csharp
+using SqlSugar;
+using System;
+
+// SugarTable 映射数据库表名
+[SugarTable("SysUser")]
+public class UserEntity
+{
+    // ISPrimaryKey 标记主键，IsIdentity 标记自增列
+    [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
+    public int Id { get; set; }
+
+    [SugarColumn(ColumnName = "UserName", Length = 50)]
+    public string Name { get; set; }
+
+    // 可空类型会被映射成数据库中的 NULL 允许列
+    public DateTime? CreateTime { get; set; }
+
+    // IsIgnore 标记在数据库中不存在该列，纯粹用于程序的临时业务逻辑
+    [SugarColumn(IsIgnore = true)]
+    public string TempToken { get; set; }
+}
+```
+
+#### 步骤二：实例化 SqlSugarClient 连接
+
+创建一个简单的 SqlSugar 客户端是非常轻量的，它是线程安全的，官方推荐在每次使用时实例化或者按需采用单例。
+
+```csharp
+using SqlSugar;
+
+public class SqlSugarHelper
+{
+    public static SqlSugarClient GetInstance()
+    {
+        return new SqlSugarClient(new ConnectionConfig()
+        {
+            ConnectionString = "Server=(local);Database=TestDb;UID=sa;PWD=123",
+            DbType = DbType.SqlServer,       // 必须指定数据库类型 (MySQL, Oracle, Sqlite 等支持多达几十种)
+            IsAutoCloseConnection = true,    // 自动释放关闭数据库连接，不用手工 using
+            InitKeyType = InitKeyType.Attribute // 告诉框架通过特性去读取主键
+        });
+    }
+}
+```
+
+### 17.2 进阶操作：结合依赖注入 (DI) 在 WPF 中的应用
+
+如果你的 WPF 程序像前面的章节一样，集成了现代化的 `Host.CreateDefaultBuilder()` 和依赖注入，这里有官方推荐的单例注入方案 `ISqlSugarClient`。
+
+**在 `App.xaml.cs` 中注册：**
+
+```csharp
+services.AddSingleton<ISqlSugarClient>(s =>
+{
+    var config = s.GetRequiredService<IConfiguration>();
+    // 需要通过 NuGet 额外安装 SqlSugar.IOC
+    var client = new SqlSugarScope(new ConnectionConfig()
+    {
+        ConnectionString = config.GetConnectionString("DefaultConnection"),
+        DbType = DbType.SqlServer,
+        IsAutoCloseConnection = true
+    });
+    
+    // 配置 AOP 机制，用来在控制台打印生成的真实 SQL 语句，方便调试追踪。
+    client.Aop.OnLogExecuting = (sql, pars) =>
+    {
+        Console.WriteLine(sql); // 打印出来的SQL可以复制并在 SSMS 运行
+    };
+    
+    return client;
+});
+
+// 你也可以注册泛型仓储 SimpleClient<T> 来提供更面向对象的玩法
+services.AddTransient(typeof(SimpleClient<>));
+```
+
+然后，在你的 ViewModel 中直接构造函数注入即可：
+
+```csharp
+public partial class UserViewModel : ObservableObject
+{
+    private readonly ISqlSugarClient _db;
+
+    public UserViewModel(ISqlSugarClient db)
+    {
+        _db = db;
+    }
+
+    [RelayCommand]
+    private async Task QueryUsersAsync()
+    {
+        // ... 使用 _db 查询操作 ...
+    }
+}
+```
+
+### 17.3 经典 CRUD（增删改查）语法实战
+
+**1. 高级查询 (Queryable)：**
+SqlSugar 的 Lambda 查询表达式支持极其丰富。
+
+```csharp
+// 【基础查询】获取列表
+var list = _db.Queryable<UserEntity>().ToList();
+
+// 【条件查询】Where
+var list2 = _db.Queryable<UserEntity>()
+               .Where(it => it.Name == "admin" && it.Id > 10)
+               .ToList();
+
+// 【模糊查询】类似于 LIKE '%keyword%'
+var keyword = "jack";
+var list3 = _db.Queryable<UserEntity>()
+               .Where(it => it.Name.Contains(keyword))
+               .ToList();
+
+// 【分页查询】
+int totalCount = 0;
+// 查第 1 页，每页 20 条，带出总行数
+var pageList = _db.Queryable<UserEntity>()
+                  .OrderBy(it => it.CreateTime, OrderByType.Desc)
+                  .ToPageList(1, 20, ref totalCount);
+
+// 【连表查询】
+var joinList = _db.Queryable<UserEntity, DeptEntity>((user, dept) => new JoinQueryInfos(
+    JoinType.Left, user.DeptId == dept.Id))
+    .Select((user, dept) => new 
+    {
+        user.Name,
+        DeptName = dept.Name
+    })
+    .ToList();
+```
+
+**2. 插入 (Insertable)：**
+```csharp
+var newUser = new UserEntity { Name = "NewUser", CreateTime = DateTime.Now };
+
+// 插入单条：返回影响行数
+int count = _db.Insertable(newUser).ExecuteCommand(); 
+
+// 插入并返回库里自动生成的主键 Id
+int insertId = _db.Insertable(newUser).ExecuteReturnIdentity(); 
+
+// 极速批量插入百万级别数据 (内部自动采用 SqlBulkCopy 高性能模式)
+var listToInsert = new List<UserEntity> { ... };
+_db.Fastest<UserEntity>().BulkCopy(listToInsert);
+```
+
+**3. 更新 (Updateable)：**
+```csharp
+var user = _db.Queryable<UserEntity>().InSingle(1);
+user.Name = "UpdatedName";
+
+// 【按实体更新】会自动根据主键更新那些变化了的列
+_db.Updateable(user).ExecuteCommand();
+
+// 【批量条件更新】这比 EF Core 要写原生的 ExecuteSqlRaw 方便太多了
+_db.Updateable<UserEntity>()
+   .SetColumns(it => it.Name == "禁止登陆")
+   .Where(it => it.CreateTime < DateTime.Now.AddYears(-1))
+   .ExecuteCommand();
+```
+
+**4. 删除 (Deleteable)：**
+```csharp
+// 【根据主键实体删除】
+_db.Deleteable(user).ExecuteCommand();
+
+// 【根据主键Id集合进行 IN 操作批量删除】
+int[] idsToDelete = new int[] { 1, 2, 3 };
+_db.Deleteable<UserEntity>().In(idsToDelete).ExecuteCommand();
+
+// 【根据表达式多条件复杂删除】
+_db.Deleteable<UserEntity>().Where(it => it.Name == "Test").ExecuteCommand();
+```
+
+
+---
+
+## 16. 全球性能第一的微型 ORM：Dapper 全场景 API 使用大全
+
+**官方/GitHub地址**：[https://github.com/DapperLib/Dapper](https://github.com/DapperLib/Dapper)
+
+Dapper 由 StackOverflow 团队开发并开源。它是市面上名副其实**性能最高的 ORM（仅比纯原生的 Ado.Net `DataReader` 慢极短暂的微秒量级，完全秒杀 EF Core 等重型框架）**。
+
+Dapper 的本质是一个**对象映射器（Object Mapper）**，它以 `IDbConnection` 扩展方法的形式存在。
+**核心理念**：Dapper **完全不负责帮你生成 SQL 语句**，你需要自己手写 原汁原味的 SQL 或调用存储过程。Dapper 只负责一件事：**将你手写的 SQL 扔给数据库，并极其狂暴地把返回的死表格结果集反射实例化成你想要的 C# 面向对象集合**。
+
+如果你或你的公司有严苛复杂的 SQL（几百行连表报表查询），在 EF Core 编写 Lambda 觉得费劲，并且极度在乎查询的绝对响应毫秒数，那么 Dapper 是你的不二之选。
+
+### 16.1 核心 API 全家桶解析 (Query / Execute 家族)
+
+通过 NuGet 安装包：`Dapper`。如果操作 SQL Server，请一并安装官方驱动包 `Microsoft.Data.SqlClient`。
+*(注意：所有的同步方法，Dapper 都提供了对应的异步 `*Async` 版本，在 WPF 开发中，**强烈建议全部使用 Async 版本以防止界面卡死**。)*
+
+#### 1. Query<T> 系列：一切查询语句的基石
+用于执行 `SELECT` 语句，并将结果映射到指定的类型的集合。
+
+```csharp
+using Dapper;
+using Microsoft.Data.SqlClient;
+using System.Data;
+
+public class DapperQueryDemo
+{
+    private string connStr = "Server=(local);Database=TestDb;UID=sa;PWD=123";
+
+    public async Task GetAllUsers()
+    {
+        using (IDbConnection db = new SqlConnection(connStr))
+        {
+            // 1. 查询全部列表
+            // Dapper 会自动忽略字段大小写，甚至把下划线 user_name 自动映射到 UserName 属性上
+            IEnumerable<UserEntity> list = await db.QueryAsync<UserEntity>("SELECT * FROM SysUser");
+
+            // 2. 防注入参数化查询 (绝不准用字符串 + 号拼接 SQL！)
+            // 只要传入一个匿名对象 new { 变量名 = 值 }，Dapper 会自动转化为等价的 SqlParameter
+            string sql = "SELECT * FROM SysUser WHERE Age > @MinAge AND Status = @State";
+            var filteredList = await db.QueryAsync<UserEntity>(sql, new { MinAge = 25, State = 1 });
+
+            // 3. 【极高频需求】获取单条记录的 4 兄弟：
+            
+            // QueryFirst：查不到直接抛红字报错崩溃！查到多行拿第一行。
+            var u1 = await db.QueryFirstAsync<UserEntity>("SELECT * FROM SysUser WHERE Id = @id", new { id = 1 });
+            
+            // QueryFirstOrDefault：查不到优雅返回 null。查到多行拿第一行。(最常用)
+            var u2 = await db.QueryFirstOrDefaultAsync<UserEntity>("...", new { id = 9999 });
+
+            // QuerySingle：查不到报错！查到了但居然有两条以上也报错！（逼迫底层保证数据的绝对唯一性）
+            var u3 = await db.QuerySingleAsync<UserEntity>("...");
+            
+            // QuerySingleOrDefault：查不到返回 null。查到了两条以上报错违规！
+            var u4 = await db.QuerySingleOrDefaultAsync<UserEntity>("...");
+        }
+    }
+}
+```
+
+#### 2. Execute：无情的数据绞肉机 (增删改)
+`Execute` 用于运行根本不返回结果集列表的 `INSERT`, `UPDATE`, `DELETE`。它的返回值永远是：**受影响的行数 (int)**。
+
+```csharp
+public async Task DapperExecuteDemo(UserEntity user)
+{
+    using (IDbConnection db = new SqlConnection(connStr))
+    {
+        // 1. 单条猛烈插入
+        string sql = "INSERT INTO SysUser (UserName, Age) VALUES (@UserName, @Age)";
+        // 直接把整个实体对象 user 扔给 Dapper，它会自动剥离出里面的 UserName 和 Age 属性凑成参数包！
+        int rows = await db.ExecuteAsync(sql, user);
+
+        // 2. 批量高速操作 (Bulk Execution)
+        // Dapper 有个黑魔法：如果传给它的 参数 不是单体模型，而是一个 List<T> 集合
+        // 它会在底层自动展开，帮你循环对这批数据进行极其快速的多次插入/更新动作！
+        var hugeList = new List<UserEntity> { new UserEntity{...}, new UserEntity{...} };
+        int massiveRows = await db.ExecuteAsync(
+            "UPDATE SysUser SET Status = 1 WHERE Id = @Id", 
+            hugeList  // 传进去的是个集合！
+        );
+    }
+}
+```
+
+#### 3. ExecuteScalar<T>：获取标量第一行第一列的王者
+专门用来搞定像 `SELECT COUNT(*)`、`SELECT SUM(Salary)` 或者刚 `INSERT` 完直接查询全局生成 ID 的那【唯一一个单独数字/字符串】。
+
+```csharp
+public async Task<int> GetUserCountAndInsert()
+{
+    using (IDbConnection db = new SqlConnection(connStr))
+    {
+        // 获取总数
+        int total = await db.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM SysUser WHERE Status = 1");
+
+        // 极其常见的连环魔法：插入一条数据后，由于 SQL 末尾带了 SELECT SCOPE_IDENTITY()
+        // ExecuteScalar 会瞬间捕获这个新生成的自增 ID 返回回来给你！
+        string insertSql = @"
+             INSERT INTO SysUser (UserName) VALUES (@Name);
+             SELECT CAST(SCOPE_IDENTITY() AS INT);";
+        
+        int newlyBornId = await db.ExecuteScalarAsync<int>(insertSql, new { Name = "Jack" });
+        return newlyBornId;
+    }
+}
+```
+
+### 16.2 进阶用法：让 Dapper 与传统 ORM 并驾齐驱
+
+很多新手觉得既然手写 SQL 爽，那怎么解决 `IN` 数组查找？又怎么解决多张表格 `JOIN` 回来拆分给不同的实体类的情况？Dapper 全都有对策！
+
+#### 1. IN 语法的动态数组大挪移
+在传统的原生 ADO.Net 中，要对 `WHERE Id IN (1, 2, 3)` 传参是人间炼狱（你要手动拼接几百个参数符）。
+但在 Dapper 里，它聪明到了极点：
+
+```csharp
+public async Task<IEnumerable<UserEntity>> GetUsersByIds(int[] searchIds)
+{
+    using (IDbConnection db = new SqlConnection(connStr))
+    {
+        // SQL 里只有一个普通的 @Ids
+        string sql = "SELECT * FROM SysUser WHERE Id IN @Ids";
+        
+        // 但你传进来的 new { Ids = searchIds } 其实是一个完整的 int 数组 或 List<int>
+        // Dapper 会在底层把它大卸八块，自动翻译扩写成： IN (@Ids1, @Ids2, @Ids3)
+        return await db.QueryAsync<UserEntity>(sql, new { Ids = searchIds });
+    }
+}
+```
+
+#### 2. QueryMultiple：一网打尽（多结果集）
+想要展示一个大型看板，既要用户列表，又要部门列表，还要今日订单总数。
+以前的做法是发起 3 次对数据库的网络 TCP 握手请求。
+现在，用 `QueryMultiple` 发一次包含 3 条句子的超级长报文，一次性全拿回来，网络 I/O 耗电直降到底：
+
+```csharp
+public async Task GetDashboardData()
+{
+    using (IDbConnection db = new SqlConnection(connStr))
+    {
+        string sql = @"
+            SELECT * FROM SysUser;
+            SELECT * FROM Department;
+            SELECT COUNT(1) FROM Orders WHERE CreateDate = CAST(GETDATE() AS DATE);
+        ";
+        
+        // 通过网格阅读器拿到了从数据库端一次性打回的这个包含 3 个大包裹的包裹箱
+        using (var gridReader = await db.QueryMultipleAsync(sql))
+        {
+            // 注意：Read 的顺序必须与你写的 SQL 查询顺序严丝合缝的对应上！
+            var users = (await gridReader.ReadAsync<UserEntity>()).ToList();
+            var depts = (await gridReader.ReadAsync<DepartmentEntity>()).ToList();
+            var todaysOrders = await gridReader.ReadFirstAsync<int>();
+            
+            // 数据在极度极速的网络吞吐下全部拼装完毕发往前台。
+        }
+    }
+}
+```
+
+#### 3. 动态超阶参数神器：DynamicParameters
+如果你是在跟 DBA 写的**存储过程 (Stored Procedure)** 对接，经常会遇到恶心的 `OUTPUT` 参数（输出包裹）、或者要求抛回返回值状态（Return Value）。这个时候普通的 `new { aaa = 1 }` 这种傻瓜匿名类抗不住了，必须上纯粹的重武器：
+
+```csharp
+public async Task CallStoredProcedure()
+{
+    using (IDbConnection db = new SqlConnection(connStr))
+    {
+        // 1. 手动声明一个高度自定义的参数组大杂烩容器
+        var parameters = new DynamicParameters();
+        parameters.Add("@InName", "DapperFan");
+        parameters.Add("@InAge", 28);
+        
+        // 2. 指定它这个是个暗器(OUTPUT)：跑完存储过程你要往外往这个格子里倒东西的！
+        parameters.Add("@OutNewId", dbType: DbType.Int32, direction: ParameterDirection.Output);
+        
+        // 3. 执行存储过程 (切记 CommandType 参数务必标明这是存储过程不是普通常规代码)
+        await db.ExecuteAsync(
+            "sp_CreateUserAndReturnId", 
+            parameters, 
+            commandType: CommandType.StoredProcedure
+        );
+
+        // 4. 从大杂烩容器里把暗盒里的结果取走掏出来
+        int resultingId = parameters.Get<int>("@OutNewId");
+    }
+}
+```
+
+#### 4. 神魔一念：多重映射连表查拆分 (Multi-Mapping)
+这是所有轻量化 ORM 的门槛噩梦。一句话 `SELECT * FROM User u INNER JOIN Dept d ON u.DeptId = d.Id`。这返回的一行横向结果里既有人的字段又有部门的字段，这可怎么往内存实体类里塞？
+
+**场景 A：1 对 1 (一对一的挂靠)**
+我们希望拿出的 `UserEntity` 模型身体里，那个 `public DeptEntity Department {get;set;}` 关联属性能被 Dapper 自动填充。
+
+```csharp
+public async Task<List<UserEntity>> GetUsersWithDept()
+{
+    using (IDbConnection db = new SqlConnection(connStr))
+    {
+        // 注意列的顺序：前面全是人的属性，直到 d.Id 开始，全变成部门属性
+        string sql = @"
+            SELECT u.Id, u.UserName, u.DeptId, d.Id, d.DeptName 
+            FROM SysUser u 
+            INNER JOIN Department d ON u.DeptId = d.Id";
+
+        // QueryAsync<目标1, 目标2, 最终怎么揉在一块的返回值类型>
+        var result = await db.QueryAsync<UserEntity, DepartmentEntity, UserEntity>(
+            sql,
+            (user, dept) => 
+            {
+                // Dapper 已经聪明的把刚才那么极其长的一行字符串，以 splitOn 切分出的人和部门单独给你了。
+                // 你只需要在这一个 Lambda 里面，手动帮他们系上鞋带关联起来。
+                user.Department = dept;
+                // 最终还是返回包装好的人
+                return user; 
+            },
+            // 【极其关键的劈砍点】：告诉 Dapper 框架，“兄弟，当你扫到名叫 Id 的这列时（指的是 d.Id），前面的全是用户部分，从这里开始后面都是部门部分的数据。”
+            splitOn: "Id" 
+        );
+        
+        return result.ToList();
+    }
+}
+```
+
+**场景 B：1 对 多 (如获取某部门及其旗下的所有几百个员工)**
+（由于 Dapper 遇到十行相同部门、不同人的记录时，会触发十次回调，我们需要自己用字典做消除重复缓存）。
+
+```csharp
+public async Task<List<DepartmentEntity>> GetDeptsWithHugeUsers()
+{
+    using (IDbConnection db = new SqlConnection(connStr))
+    {
+        string sql = @"
+            SELECT d.Id, d.DeptName, u.Id, u.UserName 
+            FROM Department d 
+            LEFT JOIN SysUser u ON d.Id = u.DeptId";
+
+        // 建立一个只存在于这短暂一瞬查询中的缓存池
+        var deptCache = new Dictionary<int, DepartmentEntity>();
+
+        var result = await db.QueryAsync<DepartmentEntity, UserEntity, DepartmentEntity>(
+            sql,
+            (dept, user) => 
+            {
+                // 1. 如果字典里没这个头目部门，就加进去先
+                if (!deptCache.TryGetValue(dept.Id, out var currentDept))
+                {
+                    currentDept = dept;
+                    currentDept.Users = new List<UserEntity>(); // 初始化他的手下数组
+                    deptCache.Add(currentDept.Id, currentDept);
+                }
+
+                // 2. 如果这行连表的人真的扫出来活人了(由于是 LEFT JOIN，可能是 Null)，就把人拉进数组
+                if (user != null)
+                {
+                    currentDept.Users.Add(user);
+                }
+
+                // 随便返回，其实我们最终想要的是外面的纯天然被折叠过的字典值
+                return currentDept; 
+            },
+            splitOn: "Id" // 切分点
+        );
+        
+        // 放弃他直接 Select 回来的充满重复项的 List 结局。单独抽离出我们缓存池的纯净被压合数据。
+        return deptCache.Values.ToList();
+    }
+}
+```
+
+
+### 16.3 与 WPF 及现代依赖注入 (DI) 的彻底融合
+
+在上一章的 `WPF App.xaml.cs` 构建中，我们不需要去像 EFCore 那样注册一个巨大的 `DbContext`。对于 Dapper，我们只需要把最底层的原生发动机 **`IDbConnection`** 交给容器。
+
+**1. 在 App.xaml.cs 中注册你的纯血统连接**
+
+```csharp
+AppHost = Host.CreateDefaultBuilder()
+    .ConfigureServices((context, services) =>
+    {
+        // 拿到我们在 appsettings.json 里写好的数据库账号密码
+        var connStr = context.Configuration.GetConnectionString("DefaultConnection");
+
+        // 注册底层的 IDbConnection。（如果你的软件高发频跳转，使用 Transient 提供瞬态新建链接最好！因为底层 SqlClient 天生就有巨型连接池担保，绝不会拖拉）
+        services.AddTransient<IDbConnection>(provider => 
+        {
+            return new SqlConnection(connStr);
+        });
+
+        // 也可以顺带把你手写了各种 CRUD 封装出来的通用服务层装载进去
+        services.AddTransient<IUserService, UserService>();
+    })
+    .Build();
+```
+
+**2. 在 Service 层中优雅地取出享受**
+
+当你能在构造函数里直接提取 `_db` 并无缝开启带有事务 (`Transaction`) 控制的业务代码操作，这才是真正的大师级客户端应用体验。
+
+```csharp
+public class UserService : IUserService
+{
+    private readonly IDbConnection _db;
+
+    public UserService(IDbConnection db)
+    {
+        _db = db;
+    }
+
+    // 一个真实的转账事务例子：演示 Dapper 也可以极速带 Transaction
+    public async Task<bool> ProcessSalaryTransferAsync(int companyId, int employeeId, decimal amount)
+    {
+        // 【关键】：Dapper 有个神器的检测，你无需显式调用 _db.Open()，只要你发起 Query，它自动开门。
+        // 但如果要使用 Transaction，必须强行手动先扯开大门！
+        if (_db.State != ConnectionState.Open)
+            _db.Open();
+
+        using (var trans = _db.BeginTransaction())
+        {
+            try
+            {
+                // 注意第二个参数和 第三个 transaction 锁定护身符参数的传递
+                await _db.ExecuteAsync("UPDATE Accounts SET Bal = Bal - @amount WHERE Id = @cId", 
+                    new { amount, cId = companyId }, transaction: trans);
+                    
+                await _db.ExecuteAsync("UPDATE Accounts SET Bal = Bal + @amount WHERE Id = @eId", 
+                    new { amount, eId = employeeId }, transaction: trans);
+
+                trans.Commit();
+                return true;
+            }
+            catch (Exception)
+            {
+                trans.Rollback();
+                return false;
+            }
+        } // 离开 using 块，如果忘关底端链接池会自动进行处置终结。
+    }
+}
+```
+
+### 16.4 SqlSugar vs Dapper 的使用抉择总结
+
+在 WPF 的开发框架选型时，这里给出一个标准客观的抉择建议：
+
+| 特性评估项 | SqlSugar (最强全自动化国产) | Dapper (纯手动硬核最强王者) |
+| :--- | :--- | :--- |
+| **性能测试** | 中上 (优于 EFCore) | **快到令人窒息** (贴身肉搏纯低级 Ado.Net Reader) |
+| **学习门槛** | 极低（配置好特性直接无脑 `.Where()` `.ToPageList()`)） | 高（需要极度扎实且严谨的手写大部头复合超长 SQL 能力） |
+| **多库兼容切换** | **极强** (底层自带翻译引擎，一键转 MySQL/Oracle) | 极弱（如果里面写了死锁和 SqlServer 方言函数，一旦切库就会立刻集体报废） |
+| **复杂树结构查询** | 原生拥抱主外键导航属性，几层级联查询全部 Lambda 包裹全自动 | 难受至极，多对多需要手写复杂的 `Dictionary` 和 `Multi-Mapping` 分裂点来擦屁股 |
+
+**究极推荐开发姿势 (CQRS 混流分治)：**
+不要让这俩打架，在超大型商业级 WPF 应用中，绝大部分团队会采用**读写分离**：
+*   所有涉及到修改、插入、带验证逻辑的写业务 (`Command`)：使用 **SqlSugar** 的全自动增删改查。
+*   所有涉及到百万级别长时耗大数据展现渲染统计表格、超复杂三十张表关联汇总的大数据报表 (`Query`)：纯手写最高效精妙的大范围 SQL，用 **Dapper** 去 `QueryMultiple` 直接闪电抽拉带走结果。
+
+把这套组合拳打在 WPF 和依赖注入系统中，这个桌面应用的框架底层就算是彻底无懈可击了。
+
+
+---
+
+## 17. WPF 现代 UI 控件库详解：HandyControl 全场景实战
+
+WPF 原生的控件虽然强大，但在 2026 年现代 UI 审美标准下，原生的基础控件视觉效果显得非常老旧（类似于 Windows 7/8 风格）。为了实现扁平化、流线型以及具有高阶交互动画的现代化界面，在商业项目中我们极少原生地从零手搓圆角和阴影，而是全栈引入成熟的开源 UI 框架。
+
+**HandyControl** 是 WPF 领域知名度极高、极其轻量且组件极为丰富的开源 UI 框架。如果你不需要像 MaterialDesignInXAML 那样强制束缚在谷歌的 Material 规范下，HandyControl 将为你打开一扇绝对自由且极为奢华漂亮的 UI 大门。
+
+*官方仓库：[https://github.com/HandyOrg/HandyControl](https://github.com/HandyOrg/HandyControl)*
+
+### 17.1 引入与全局配置初始化
+
+1. **安装 NuGet 包**：在项目中搜索并安装 `HandyControl`。
+2. **全局字典注水 (App.xaml)**：
+   要想让全工程的按钮、文本框一夜之间变成现代化的精美风格，我们需要在应用的启动根节点将 HandyControl 的基础样式大血脉全部导入。
+
+```xaml
+<!-- App.xaml -->
+<Application x:Class="WpfAppApp.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <!-- 将 HandyControl 主题皮肤强行注入到程序的血液中 -->
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- 基础主题颜色和控件统一样式 -->
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
+```
+
+3. **在窗体中声明命名空间 (MainWindow.xaml)**：
+   必须在 XML 头部引入 `hc` 前缀，才能使用其数百个独创的现代控件。
+
+```xaml
+<Window x:Class="WpfAppApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
+        Title="HandyControl 演练场" Height="600" Width="800">
+    <!-- 主体代码 -->
+</Window>
+```
+
+---
+
+### 17.2 基础输入控件的彻底进化 (按钮与输入框)
+
+HandyControl 接管了 WPF 原生 `Button` 和 `TextBox` 等基础控件，并提供了海量的开箱即用的优美样式。
+
+#### 1. 语义化按钮 (Semantic Buttons)
+在现代 Web 框架 (如 Vue Element, React AntDesign) 中非常流行的“主配色、成功、警告、危险”语义颜色按钮，现在在 WPF 也能通过一行 `Style` 调用：
+
+```xaml
+<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="20">
+    <!-- 原生默认按钮，已经被 HC 自动渲染成了带动画圆角的扁平按钮 -->
+    <Button Content="普通按钮" Margin="5"/>
+    
+    <!-- 蓝色首要强调按钮 -->
+    <Button Content="主要操作 Primary" Style="{StaticResource ButtonPrimary}" Margin="5"/>
+    
+    <!-- 绿色成功按钮 -->
+    <Button Content="成功 Success" Style="{StaticResource ButtonSuccess}" Margin="5"/>
+    
+    <!-- 黄色警告按钮 -->
+    <Button Content="警告 Warning" Style="{StaticResource ButtonWarning}" Margin="5"/>
+    
+    <!-- 红色危险按钮 (带悬浮涟漪动画) -->
+    <Button Content="绝密删除 Danger" Style="{StaticResource ButtonDanger}" Margin="5"/>
+    
+    <!-- 虚线边框外轮廓按钮 -->
+    <Button Content="幽灵虚线 Dashed" Style="{StaticResource ButtonDashed}" Margin="5"/>
+</StackPanel>
+```
+
+#### 2. “霸道”的现代文本框 (支持占位符和一键清除)
+WPF 原生最让人诟病的是 `TextBox` 竟然没有 `Placeholder`（暗淡提示修饰词）属性！想要一键清空的 `X` 按钮更是需要手写大量附加属性。现在有了 HC 的强力扩展属性（通过 `hc:InfoElement` 追加的各类特性）：
+
+```xaml
+<StackPanel Width="300" Margin="20" Spacing="15">
+    <!-- 1. 带有 Placeholder 和自带清空叉号的文本框 -->
+    <TextBox hc:InfoElement.Placeholder="请输入您的登录账号..."
+             hc:InfoElement.Necessary="True" 
+             Style="{StaticResource TextBoxExtend}"
+             hc:InfoElement.ShowClearButton="True" />
+             
+    <!-- 2. 完全现代化的密码框 (自带右侧小眼睛点击显示明文的防偷窥功能) -->
+    <PasswordBox hc:InfoElement.Placeholder="请输入严格的大小写密码..." 
+                 Style="{StaticResource PasswordBoxExtend}"
+                 hc:InfoElement.ShowClearButton="True" />
+                 
+    <!-- 3. 数字微调器 (替代 TextBox 的纯数字输入限制，原生 WPF 没有这个！) -->
+    <hc:NumericUpDown Minimum="0" Maximum="100" Value="25" 
+                      hc:InfoElement.Placeholder="年龄上限" />
+                      
+    <!-- 4. 极致漂亮的纯正搜索框 -->
+    <hc:SearchBar hc:InfoElement.Placeholder="全网搜素您的报表..." Style="{StaticResource SearchBarPlus}" />
+</StackPanel>
+```
+
+---
+
+### 17.3 进阶视觉/布局组件
+
+#### 1. 加载等待动画 (Loading & Progress)
+当界面后台发起异步数据库查询时，锁定 UI 并转圈必不可少。
+
+```xaml
+<WrapPanel Margin="20">
+    <!-- 环形动态大平滑光晕进度条 -->
+    <hc:CircleProgressBar Value="65" ArcThickness="5" Margin="20" Width="80" Height="80" Text="65%"/>
+    
+    <!-- 无尽旋转的双轨道波浪动画等待圈 -->
+    <hc:LoadingCircle Foreground="{DynamicResource PrimaryBrush}" Margin="20" Width="60" Height="60"/>
+    
+    <!-- 骨架屏占位符 (网速慢时常用的块状渐变闪烁等待替代物) -->
+    <hc:Skeleton Margin="20" Width="200" Height="80" Active="True" Skin="Line"/>
+</WrapPanel>
+```
+
+#### 2. 分段器与徽标 (Pagination & Badge)
+针对列表和提醒的小部件，让页面专业性陡增。
+
+```xaml
+<!-- 1. 红点/数字角标 (常用于右上角提醒新消息 99+) -->
+<hc:Badge Value="99+" BadgeType="Badge" Margin="20">
+    <Button Content="你有未读审批" Style="{StaticResource ButtonPrimary}"/>
+</hc:Badge>
+
+<!-- 2. 全功能底部分页控制器 -->
+<!-- 极其容易跟后端 MVVM 进行绑定控制总页数与当前页跳跃触发 -->
+<hc:Pagination MaxPageCount="100" PageIndex="3" DataCountPerPage="20" IsJumpEnabled="True" Margin="20"/>
+```
+
+---
+
+### 17.4 灵魂功能：Growl (全局极简屏显通知)
+
+这绝对是 HandyControl 最核心必杀的控件：**绝不要再去用又丑又打断用户的原生弹窗 `MessageBox.Show()` 了**！
+就像在现代 Web 里一样，操作成功后在屏幕顶部或右下角轻柔地浮现一个渐渐滑出色带气泡，三秒后自动溶解消失。这就叫做 **Growl**。
+
+**它的使用纯粹依靠 C# 后端代码触发（无论在普通的 ViewModel 还是窗口后台 cs），不需要在 XAML 埋点任何东西。**
+
+```csharp
+using HandyControl.Controls;
+
+public class TestViewModel : ObservableObject
+{
+    [RelayCommand]
+    private void SaveData()
+    {
+        // ... (假装在这里调用了刚才 Dapper 章节的数据库 Execute 增加) ...
+        bool dbSuccess = true;
+
+        if (dbSuccess)
+        {
+            // 在屏幕右上角或中上方浮现一层绿色的悦耳成功提示框，2秒后自动透明消失（不抢夺鼠标焦点，用户体验极佳）
+            Growl.Success("薪水调优及数据报表保存成功！");
+        }
+        else
+        {
+            // 在屏幕右上角强力震动弹出的红色危险错误通知
+            Growl.Fatal("致命错误：底层数据库引擎断开链接，请检查网络！");
+        }
+        
+        // 还有蓝色打底的 Growl.Info("我只是个单纯通知") 以及橙色打底的 Growl.Warning("服务器负载预警")
+    }
+}
+```
+
+*进阶特性*：如果不喜欢右上角堆叠（类似 Mac 的系统通知机制），甚至可以通过 `Growl.SetGrowlParent()` 把这些气泡死死锁进屏幕的主布局容器，限制他们在特定容器中央漂浮！
+
+### 17.5 现代弹窗系统 (Dialog)
+
+有时候必须要打断用户进行输入，但自带的 Windows MessageBox 不仅难看还会导致进程强行切挂，甚至在带遮罩的异步编程下极其难受。HC 提供了纯净原生渲染在你的 UI 里（而非新建独立进程悬浮框）层的对话框。
+
+```csharp
+using HandyControl.Controls;
+
+// 极其方便强硬的原生对话框平替
+MessageBox.Show("您确认要清空本年度的财会账本并且删除 50 亿条归档吗？", 
+                "危险最高级红线警告", 
+                MessageBoxButton.YesNo, 
+                MessageBoxImage.Warning);
+                
+// 注意：HandyControl 已经使用样式覆盖了这个静态 MessageBox 调用，
+// 所以只需触发这句普通代码，跳出来的就是带着极为酷炫高雅的纯扁平磨砂玻璃样式的警告弹框。
+```
+
+而在更复杂的“里面不是一行字，我要弹出一个带着极其复杂的验证码输入、多层下拉框选人的巨大子窗口”时：
+
+```csharp
+// 【极客高发】展示极其复杂的自定义子视图弹层：
+// 假设你有一个提前画好的独立 UserControl 叫 MyCustomAddUserDetailView (里面全是填表栏)
+
+var dialog = Dialog.Show(new MyCustomAddUserDetailView())
+                   .Initialize<TestViewModel>(vm => 
+                   {
+                         // 可以在这里瞬间把数据从母窗口强硬插进被弹出的子窗口 ViewModel 里面去！
+                         vm.IsAdminPass = true;
+                   })
+                   .GetHalfWindow(); // 拿到一个受控制的内部独立框实例句柄
+                   
+// 上述代码不会引起跨线程崩溃，而且能得到极其完美的黑色半透明遮罩背景。
+```
+
+### 17.6 将 HandyControl 收为己有的总结
+
+在 WPF 的征途上，拥有了 **CommunityToolkit.Mvvm 管理逻辑大动脉**，拥有了 **Dapper / SqlSugar 做底层钢铁引擎**，加上现在由 **HandyControl 为你的软件披上了如同现代宇宙战舰一般的极简科幻皮肤**。
+
+您目前所掌握的技术版图，已经彻底抹除了“WPF 软件长得像上个世纪老财务报表工具”的陈旧偏见。只需要合理的组合搭配，便能在几天时间内靠一人之力，爆发出媲美一整个五十人专业 Web 前端加设计团队制作出的大型多端适配应用级别的震撼桌面视觉体验方案。

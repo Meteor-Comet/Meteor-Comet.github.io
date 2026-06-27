@@ -1,0 +1,78 @@
+---
+title: 使用Charles对移动端环境进行抓包实录
+published: 2022-02-21
+description: Charles代理配置与移动端网络调试完整指南
+image: ''
+tags:
+  - 抓包
+  - Charles
+  - 问题记录
+  - 移动开发
+  - 网络调试
+category: 抓包
+draft: false
+---
+
+## 问题概述：
+在尝试利用Charles工具对应用程序（以雷电模拟器中的APP为例）的网络通信进行抓包时，遭遇了开启代理后移动设备无法访问互联网的问题。
+> Charles作为一款强大的HTTP代理服务器工具，能够拦截和分析客户端与服务器间的通信数据。
+
+## 解决策略概览：
+> 本文参照<a href="https://blog.csdn.net/qq_53631388/article/details/134706062">IOS/安卓+charles实现抓包（主要解决证书网站无法打开问题）</a>
+提供了一套详细的操作步骤，以确保在安装Charles SSL证书后，移动端不仅能够成功代理，还能保持正常的网络连接。
+
+### 实施步骤详解
+#### 1. Charles基础代理配置
+- **识别代理服务器IP**：首先进入Charles的Help > SSL Proxying > Install Charles Root Certificate on a Mobile Device or Remote Browser，记录显示的IP地址。<br>
+![Charles_1](/images/in-post/post_charles/Charles_1.png)
+这时会弹出弹窗，记下IP地址，然后打开模拟器的WLAN设置
+![Charles_2](/images/in-post/post_charles/Charles_2.png)
+- 模拟器网络设置：在雷电模拟器的WLAN设置中，手动配置代理，输入刚才记录的IP及Charles的默认端口（通常为8888）。
+![Charles_3](/images/in-post/post_charles/Charles_3.png)
+#### 2. SSL证书下载与安装
+默认情况下，charles不能解析https协议的接口，里面的请求和响应数据都是乱码格式，所以我们需要下载ssl证书，来获取里面的数据，我们先从Charles下载证书
+- **下载Charles根证书**：在Charles菜单选择Help > SSL Proxying > Save Charles Root Certificate...，保存为PEM格式。
+![Charles_5](/images/in-post/post_charles/Charles_5.png)
+
+这里下载证书需要下载到系统目录，一般来说我们是没有权限的，所以需要打开模拟器的abd和root权限，方便后续连接
+![Charles_4](/images/in-post/post_charles/Charles_4.png)
+#### 3. ADB与OpenSSL工具准备
+> ADB:ADB 全称为 Android Debug Bridge，起到调试桥的作用，是一个客户端-服务器端程序。其中客户端是用来操作的电脑，服务端是 Android 设备。</br>
+压缩包下载：
+[Windows版本](https://dl.google.com/android/repository/platform-tools-latest-windows.zip?_blank);
+[Mac版本](https://dl.google.com/android/repository/platform-tools-latest-darwin.zip);
+[Linux版本](https://dl.google.com/android/repository/platform-tools-latest-linux.zip)
+
+> OpenSSL:一个安全套接字层密码库，囊括主要的密码算法、常用密钥、证书封装管理功能及实现ssl协议。[保姆级OpenSSL下载及安装教程](https://blog.csdn.net/loveryunz/article/details/136739887)
+
+#### 4. 查看证书哈希值并重命名上传证书到移动端环境
+在安装OpenSSL工具后，打开CMD，运行命令获取计算后的证书哈希值
+```
+openssl x509 -subject_hash_old -in {charles.pem(下载的证书)的绝对路径}
+```
+得到证书哈希值
+接下来我们需要将证书重命名为{哈希值}.0
+并使用adb工具进行上传
+- **命令行操作**：使用ADB进入root模式，使能文件系统重新挂载，以获得写权限，随后执行证书的推送与重命名操作。
+```
+adb root
+adb remount
+adb push {证书绝对路径} /system/etc/security/cacerts
+```
+这里其实在上传后会发现证书名字缺少后半部分以及后缀.0，所以我们需要使用adb shell进入到证书目录手动重命名
+输入
+- **验证与调整**：通过ADB Shell进入目标目录检查并手动完成证书名称的最终调整，确保格式为.0结尾的完整哈希值命名。
+```
+adb shell
+cd /system/etc/security/cacerts
+```
+进入证书目录
+![Charles_6](/images/in-post/post_charles/Charles_6.png)
+> 这里由于我已经进行过上传以及重命名，仅做演示
+
+找到我们上传的证书，使用
+```
+mv {命名不完整证书名} {完整哈希值.0}
+```
+### 成功标志
+完成上述步骤后，重新启动移动设备或模拟器上的网络服务，此时应当能够正常连接互联网，同时Charles能够成功捕获到HTTPS通信的数据包，实现对移动端网络流量的有效监控与分析。

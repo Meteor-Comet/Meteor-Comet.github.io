@@ -17,12 +17,12 @@ export const siteConfig: SiteConfig = {
   },
   banner: {
     enable: true,
-    src: 'assets/images/demo-banner.png',
+    src: '/images/banner-nagame.jpg',
     position: 'center',
     credit: {
-      enable: false,
-      text: '',
-      url: '',
+      enable: true,
+      text: '眺め / 伊豆狐',
+      url: 'https://www.pixiv.net/artworks/83928679',
     },
   },
   toc: {

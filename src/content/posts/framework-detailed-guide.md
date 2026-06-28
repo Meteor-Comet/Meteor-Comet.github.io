@@ -3205,11 +3205,11 @@ mGlobal.mDoReset(OutNo.右电批Start);  // 停止
 
 ### 9.6 完整映射关系图
 
-````carousel
+:::carousel
 ![Conveyor 传送带自动控制面板](/images/in-post/framework-guide/conveyor_auto_control.png)
 <!-- slide -->
 ![Conveyor 状态控制面板](/images/in-post/framework-guide/conv_status_control.png)
-````
+:::
 
 ```
 ┌─────────────────────────────────────────────────────────────┐

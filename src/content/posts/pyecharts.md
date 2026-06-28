@@ -1,13 +1,17 @@
 ---
-title: pyecharts示例�?published: 2022-08-11
-description: pyecharts各类图表代码示例与效果展�?image: ''
+title: pyecharts示例图
+published: 2022-08-11
+description: pyecharts各类图表代码示例与效果展示
+image: ''
 category: Python
 tags:
   - pyecharts
-  - 数据可视�?draft: false
+  - 数据可视化
+draft: false
 ---
 
-# pyecharts示例�?
+# pyecharts示例图
+
 ## 渲染图片文件方法
 ```python
 from pyecharts.render import make_snapshot
@@ -15,13 +19,14 @@ from snapshot_selenium import snapshot
 
 bar = (
     Bar()
-    .add_xaxis(["衬衫", "羊毛�?, "雪纺�?, "裤子", "高跟�?, "袜子"])
+    .add_xaxis(["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"])
     .add_yaxis('商家',[5, 20, 36, 10, 75, 90])
 )
 make_snapshot(snapshot,bar.render(),'bar.png')
 ```
 
-## 柱状�?```python
+## 柱状图
+```python
 from pyecharts.globals import CurrentConfig, NotebookType
 CurrentConfig.NOTEBOOK_TYPE = NotebookType.JUPYTER_LAB
 ```
@@ -30,7 +35,7 @@ CurrentConfig.NOTEBOOK_TYPE = NotebookType.JUPYTER_LAB
 ```python
 from pyecharts.charts import Bar
 bar = Bar()
-bar.add_xaxis(["衬衫", "羊毛�?, "雪纺�?, "裤子", "高跟�?, "袜子"])
+bar.add_xaxis(["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"])
 bar.add_yaxis('商家',[5, 20, 36, 10, 75, 90])
 bar.load_javascript()
 ```
@@ -94,7 +99,8 @@ c.render_notebook()
 ```
 ![img3](/images/in-post/post_pyecharts/pie_2.png)
 
-## 玫瑰�?
+## 玫瑰图
+
 
 ```python
 v = Faker.choose()
@@ -128,13 +134,14 @@ c = (
         rosetype='radius',
         label_opts=opts.LabelOpts(is_show=True)
     )
-    .set_global_opts(title_opts=opts.TitleOpts(title='南丁格尔玫瑰�?))
+    .set_global_opts(title_opts=opts.TitleOpts(title='南丁格尔玫瑰图'))
 )
 c.render_notebook()
 ```
 ![img4](/images/in-post/post_pyecharts/rose.png)
 
-## 柱形�?
+## 柱形图
+
 
 ```python
 from pyecharts.charts import Bar
@@ -148,7 +155,7 @@ c=(
     .add_yaxis('商家A',Faker.values())
     .add_yaxis('商家B',Faker.values())
     .set_global_opts(
-        title_opts=opts.TitleOpts(title='销�?,subtitle='副标�?)
+        title_opts=opts.TitleOpts(title='销量',subtitle='副标题')
     )
 )
 c.render_notebook()
@@ -161,14 +168,15 @@ c=(
         init_opts=opts.InitOpts(
             animation_opts=opts.AnimationOpts(
                 animation_delay=100, #延时动画1000ms
-                animation_easing='elasticOut' #弹性动�?            )
+                animation_easing='elasticOut' #弹性动画
+            )
         )
     )
     .add_xaxis(Faker.choose())
     .add_yaxis('商家A',Faker.values())
     .add_yaxis('商家B',Faker.values())
     .set_global_opts(
-        title_opts=opts.TitleOpts(title='销�?,subtitle='副标�?),
+        title_opts=opts.TitleOpts(title='销量',subtitle='副标题'),
     )
 )
 c.render_notebook()
@@ -198,7 +206,7 @@ c=(
     .add_yaxis('商家A',Faker.values())
     .add_yaxis('商家B',Faker.values())
     .set_global_opts(
-        title_opts=opts.TitleOpts(title='销�?,subtitle='副标�?),
+        title_opts=opts.TitleOpts(title='销量',subtitle='副标题'),
     )
 )
 
@@ -215,7 +223,8 @@ c.render_notebook()
 ![img7](/images/in-post/post_pyecharts/js.png)
 
 
-## 堆叠柱状�?
+## 堆叠柱状图
+
 
 ```python
 c=(
@@ -227,13 +236,14 @@ c=(
         label_opts=opts.LabelOpts(is_show=False)
     )
     .set_global_opts(
-        title_opts=opts.TitleOpts(title='堆叠柱状�?,subtitle='副标�?),
+        title_opts=opts.TitleOpts(title='堆叠柱状图',subtitle='副标题'),
         xaxis_opts=opts.AxisOpts(
             axislabel_opts=opts.LabelOpts(rotate=45)
         ),
         #缩放
         datazoom_opts=[
-            opts.DataZoomOpts(),  #x轴拖拉缩�?            opts.DataZoomOpts(type_='inside') #滚轮缩放
+            opts.DataZoomOpts(),  #x轴拖拉缩放
+            opts.DataZoomOpts(type_='inside') #滚轮缩放
         ]
         
     )
@@ -244,7 +254,8 @@ c.render_notebook()
 ![img8](/images/in-post/post_pyecharts/stack_bar.png)
 
 
-## 条形�?
+## 条形图
+
 
 ```python
 c=(
@@ -252,12 +263,12 @@ c=(
     .add_xaxis(Faker.choose())
     .add_yaxis('商家A',Faker.values())
     .add_yaxis('商家B',Faker.values())
-    .reversal_axis()  #反转�?
+    .reversal_axis()  #反转轴 
     .set_series_opts(
         label_opts=opts.LabelOpts(is_show=True,position='right')
     )
     .set_global_opts(
-        title_opts=opts.TitleOpts(title='条形�?,subtitle='副标�?),
+        title_opts=opts.TitleOpts(title='条形图',subtitle='副标题'),
     )
 )
 
@@ -265,8 +276,10 @@ c.render_notebook()
 ```
 ![img9](/images/in-post/post_pyecharts/bar_4.png)
 
-## 直方�?
-不同系列柱子之间的距�?
+## 直方图
+
+不同系列柱子之间的距离
+
 
 ```python
 c=(
@@ -294,7 +307,7 @@ c=(
     .add_xaxis(Faker.choose())
     .add_yaxis('商家A',Faker.values(),category_gap='5%')
     .set_global_opts(
-        title_opts=opts.TitleOpts(title='直方�?),
+        title_opts=opts.TitleOpts(title='直方图'),
     )
 )
 
@@ -339,7 +352,7 @@ c=(
         
     )
     .set_global_opts(
-        title_opts=opts.TitleOpts(title='直方�?),
+        title_opts=opts.TitleOpts(title='直方图'),
     )
 )
 
@@ -347,7 +360,8 @@ c.render_notebook()
 ```
 ![img12](/images/in-post/post_pyecharts/js_2.png)
 
-## 象形柱状�?
+## 象形柱状图
+
 
 ```python
 from pyecharts.charts import PictorialBar
@@ -356,7 +370,7 @@ from pyecharts.globals import SymbolType
 
 
 ```python
-location = ['山西','四川','西藏','北京','上海','内蒙�?,'云南','黑龙�?,'广东','福建']
+location = ['山西','四川','西藏','北京','上海','内蒙古','云南','黑龙江','广东','福建']
 values = [13,42,67,81,86,94,166,220,249,262]
 c = (
     PictorialBar()
@@ -372,9 +386,11 @@ c = (
     )
     .reversal_axis()
     .set_global_opts(
-        title_opts=opts.TitleOpts(title='象形柱状�?),
-        xaxis_opts=opts.AxisOpts(is_show=False), #不显示x�?        yaxis_opts=opts.AxisOpts(
-            axistick_opts=opts.AxisTickOpts(is_show=False), #不显示y轴刻�?            axisline_opts=opts.AxisLineOpts(is_show=False)
+        title_opts=opts.TitleOpts(title='象形柱状图'),
+        xaxis_opts=opts.AxisOpts(is_show=False), #不显示x轴
+        yaxis_opts=opts.AxisOpts(
+            axistick_opts=opts.AxisTickOpts(is_show=False), #不显示y轴刻度
+            axisline_opts=opts.AxisLineOpts(is_show=False)
         ),
     )
     .set_series_opts(
@@ -386,7 +402,8 @@ c.render_notebook()
 
 ![img13](/images/in-post/post_pyecharts/PictorialBar.png)
 
-## 雷达�?
+## 雷达图
+
 
 ```python
 from pyecharts.charts import Radar
@@ -425,7 +442,8 @@ c.render_notebook()
 ![img14](/images/in-post/post_pyecharts/radar.png)
 
 
-## 折线�?
+## 折线图
+
 
 ```python
 from pyecharts.charts import Line
@@ -440,7 +458,7 @@ c=(
     .add_yaxis('商家B',Faker.values(),is_smooth=True)  #平滑曲线
     .set_global_opts(
         title_opts=opts.TitleOpts(
-            title='折线�?
+            title='折线图'
         ),
         tooltip_opts=opts.TooltipOpts(
             trigger='axis'
@@ -470,7 +488,8 @@ c=(
     .add_yaxis(
         series_name='',
         y_axis=[120,200,150,80,70,110,130],
-        symbol='triangle', #点类�?        symbol_size=20,
+        symbol='triangle', #点类型
+        symbol_size=20,
         #线条样式
         linestyle_opts=opts.LineStyleOpts(
             color='green',
@@ -510,7 +529,8 @@ c.render_notebook()
 ![img16](/images/in-post/post_pyecharts/line_2.png)
 
 
-## 面积�?
+## 面积图
+
 
 ```python
 c=(
@@ -522,7 +542,7 @@ c=(
         areastyle_opts=opts.AreaStyleOpts(opacity=0.5)
     )
     .set_global_opts(
-        title_opts=opts.TitleOpts(title='面积�?),
+        title_opts=opts.TitleOpts(title='面积图'),
         tooltip_opts=opts.TooltipOpts(trigger='axis'),
         xaxis_opts=opts.AxisOpts(type_='category',boundary_gap=False)
     )
@@ -533,7 +553,8 @@ c.render_notebook()
 ![img17](/images/in-post/post_pyecharts/line_3.png)
 
 
-## 堆叠面积�?
+## 堆叠面积图
+
 
 ```python
 c=(
@@ -547,7 +568,7 @@ c=(
         label_opts=opts.LabelOpts(is_show=False) 
     )
     .add_yaxis(
-        '销�?,
+        '销售',
         stack='堆叠',
         y_axis=[120,40,100,30,50,60,150],
         areastyle_opts=opts.AreaStyleOpts(opacity=0.5),
@@ -568,7 +589,7 @@ c=(
         label_opts=opts.LabelOpts(is_show=False) 
     )
     .set_global_opts(
-        title_opts=opts.TitleOpts(title='堆叠面积�?),
+        title_opts=opts.TitleOpts(title='堆叠面积图'),
         xaxis_opts=opts.AxisOpts(type_='category',boundary_gap=False)
     )
 )
@@ -578,7 +599,8 @@ c.render_notebook()
 ![img18](/images/in-post/post_pyecharts/line_4.png)
 
 
-## 散点�?
+## 散点图
+
 
 ```python
 from pyecharts.charts import Scatter
@@ -649,7 +671,8 @@ c.render_notebook()
 
 
 
-## 涟漪散点�?
+## 涟漪散点图
+
 
 ```python
 from pyecharts.charts import EffectScatter
@@ -670,14 +693,15 @@ c=(
         label_opts=opts.LabelOpts(position='top')
     )
     .set_global_opts(
-        title_opts=opts.TitleOpts(title='涟漪散点�?),
+        title_opts=opts.TitleOpts(title='涟漪散点图'),
     )
 )
 c.render_notebook()
 ```
 
 ![img20](/images/in-post/post_pyecharts/scatter_2.png)
-## 热力�?
+## 热力图
+
 ```python
 from pyecharts.charts import HeatMap
 import random
@@ -706,7 +730,8 @@ c.render_notebook()
 ![img21](/images/in-post/post_pyecharts/heat.png)
 
 
-## 日历�?
+## 日历图
+
 
 ```python
 from pyecharts.charts import Calendar
@@ -796,7 +821,8 @@ v2 = [
 ] 
 ```
 
-## 箱型�?
+## 箱型图
+
 
 ```python
 c=Boxplot()
@@ -808,7 +834,8 @@ c.render_notebook()
 ![img23](/images/in-post/post_pyecharts/box.png)
 
 
-## 词云�?
+## 词云图
+
 
 ```python
 from pyecharts.charts import WordCloud
@@ -819,12 +846,13 @@ from pyecharts.charts import WordCloud
 # wordcloud = (
 #     WordCloud()
 #     .add("", data_pair = words, word_size_range=[6,60],textstyle_opts=opts.TextStyleOpts(font_family='Microsoft YaHei',font_weight='bold'))
-#     .set_global_opts(title_opts=opts.TitleOpts(title="《政府工作报告（2021）》新�?,title_textstyle_opts = opts.TextStyleOpts(font_size = 25,color="midnightblue")))
+#     .set_global_opts(title_opts=opts.TitleOpts(title="《政府工作报告（2021）》新词",title_textstyle_opts = opts.TextStyleOpts(font_size = 25,color="midnightblue")))
 # )
 # wordcloud.render_notebook()
 ```
 
-## 漏斗�?
+## 漏斗图
+
 
 ```python
 from pyecharts.charts import Funnel
@@ -854,7 +882,7 @@ c=(
     Funnel()
     .add('商品',[list(i) for i in zip(Faker.choose(),Faker.values())])
     .set_global_opts(
-        title_opts=opts.TitleOpts(title='漏斗�?)
+        title_opts=opts.TitleOpts(title='漏斗图')
     )
 )
 c.render_notebook()
@@ -878,7 +906,7 @@ c=(
         init_opts=opts.InitOpts(width='600px',height='400px')
     )
     .add(
-        '漏斗�?,
+        '漏斗图',
         data_pair=data,
         gap=5,
         tooltip_opts=opts.TooltipOpts(
@@ -892,7 +920,7 @@ c=(
         )
     )
     .set_global_opts(
-        title_opts=opts.TitleOpts(title='漏斗�?)
+        title_opts=opts.TitleOpts(title='漏斗图')
     )
 )
 c.render_notebook()
@@ -917,7 +945,7 @@ data=[(i,random.randint(1,100)) for i in range(100)]
 c=(
     Polar()
     .add(
-        '极坐�?,
+        '极坐标',
         data,
         type_='scatter',
         label_opts=opts.LabelOpts(
@@ -979,7 +1007,7 @@ c=(
     .add('商品C',[1,2,3,4,3,5,1],type_='bar',stack='abc')
     .set_global_opts(
         title_opts=opts.TitleOpts(
-            title='极坐标图+堆叠柱形�?
+            title='极坐标图+堆叠柱形图'
         )
     )
 )
@@ -987,7 +1015,8 @@ c.render_notebook()
 ```
 ![img28](/images/in-post/post_pyecharts/polar_3.png)
 
-## 水球�?
+## 水球图
+
 
 ```python
 from pyecharts.charts import Liquid
@@ -997,12 +1026,14 @@ from pyecharts.charts import Liquid
 ```python
 # c =(
 #     Liquid()
-#     .add('',[0.2,0.7]) #0.7水百分之七十�?.2显示数�?#     .set_global_opts(title_opts=opts.TitleOpts(title='水球�?))
+#     .add('',[0.2,0.7]) #0.7水百分之七十，0.2显示数值
+#     .set_global_opts(title_opts=opts.TitleOpts(title='水球图'))
 # )
 # c.render_notebook()
 ```
 
-## 桑基�?
+## 桑基图
+
 
 ```python
 from pyecharts.charts import Sankey
@@ -1035,13 +1066,16 @@ c=(
     Sankey()
     .add(
         '',
-        nodes,  #所有节�?        links,  #节点之间的链接关�?        linestyle_opt=opts.LineStyleOpts(
-            opacity=0.2, #透明�?            curve=0.6,   #曲线幅度
+        nodes,  #所有节点
+        links,  #节点之间的链接关系
+        linestyle_opt=opts.LineStyleOpts(
+            opacity=0.2, #透明度
+            curve=0.6,   #曲线幅度
             color='red'
         ),
         # label_opts=opts.LabelOpts(position='right')
     )
-    .set_global_opts(title_opts=opts.TitleOpts(title='桑基�?))
+    .set_global_opts(title_opts=opts.TitleOpts(title='桑基图'))
 )
 c.render_notebook()
 ```

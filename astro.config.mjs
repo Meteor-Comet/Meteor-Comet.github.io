@@ -24,6 +24,8 @@ import { remarkExcerpt } from "./src/plugins/remark-excerpt.js";
 import { remarkReadingTime } from "./src/plugins/remark-reading-time.mjs";
 import { pluginCustomCopyButton } from "./src/plugins/expressive-code/custom-copy-button.js";
 import { CarouselComponent } from "./src/plugins/rehype-component-carousel.mjs";
+import { defineConfig } from 'astro/config';
+import expressiveCode from 'astro-expressive-code';
 
 // https://astro.build/config
 export default defineConfig({
@@ -58,6 +60,11 @@ export default defineConfig({
 		}),
 		expressiveCode({
 			themes: [expressiveCodeConfig.theme, expressiveCodeConfig.theme],
+			shiki: {
+				langAlias: {
+				xaml: 'xml',
+				},
+			},
 			plugins: [
 				pluginCollapsibleSections(),
 				pluginLineNumbers(),

@@ -17,12 +17,12 @@ export const siteConfig: SiteConfig = {
   },
   banner: {
     enable: true,
-    src: '/images/banner-oblivious.jpg',
+    src: 'assets/images/demo-banner.png',
     position: 'center',
     credit: {
-      enable: true,
-      text: 'Oblivious 🌿 / Aeuna',
-      url: 'https://www.pixiv.net/artworks/107236405',
+      enable: false,
+      text: '',
+      url: '',
     },
   },
   toc: {

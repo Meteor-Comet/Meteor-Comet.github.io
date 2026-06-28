@@ -3,10 +3,10 @@ title: "C#基础语法详解"
 published: 2024-02-10
 description: 类/对象/方法/枚举/结构体
 image: ''
+category: C#
 tags:
   - C#
   - 基础语法
-category: C#
 draft: false
 ---
 

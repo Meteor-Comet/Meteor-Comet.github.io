@@ -3,10 +3,10 @@ title: 向往波特尔 1 级的夜空
 published: 2021-09-13
 description: 记录一下21年夏天拍摄的星空
 image: ''
+category: 学习记录
 tags:
   - 星空
   - 生活
-category: 学习记录
 draft: false
 ---
 

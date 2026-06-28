@@ -3,10 +3,10 @@ title: 日语学习日志
 published: 2022-07-01
 description: ""
 image: ''
+category: 学习记录
 tags:
   - 日语
   - 学习
-category: 学习记录
 draft: false
 ---
 

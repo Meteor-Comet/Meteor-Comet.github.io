@@ -3,11 +3,10 @@ title: 如何解决误删除root用户
 published: 2023-05-30
 description: MySQL数据库管理员紧急恢复指南
 image: ''
+category: 数据库
 tags:
   - MySQL
   - 故障恢复
-  - root用户
-category: 数据库
 draft: false
 ---
 

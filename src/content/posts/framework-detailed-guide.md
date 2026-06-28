@@ -3,12 +3,10 @@ title: 框架详解
 published: 2026-06-06
 description: BoTech 工业自动化软件框架开发手册与核心架构指南
 image: ''
-tags:
-  - C#
-  - 工业控制
-  - 软件框架
-  - 架构设计
 category: C#
+tags:
+  - 工业控制
+  - 架构设计
 draft: false
 ---
 

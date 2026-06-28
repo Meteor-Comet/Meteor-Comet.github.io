@@ -3,11 +3,10 @@ title: pyecharts图形在jupyter中不显示的解决办法
 published: 2022-08-09
 description: ""
 image: ''
+category: Python
 tags:
-  - Python
   - pyecharts
   - 问题记录
-category: Python
 draft: false
 ---
 

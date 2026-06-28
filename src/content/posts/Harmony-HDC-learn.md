@@ -3,11 +3,10 @@ title: 鸿蒙开发设备调试工具HDC学习日志
 published: 2022-10-30
 description: "原文：https://blog.csdn.net/ToBeTheEnder/article/details/139325200"
 image: ''
+category: 学习记录
 tags:
   - 鸿蒙
-  - 华为
   - HarmonyOS
-category: 学习记录
 draft: false
 ---
 

@@ -3,12 +3,10 @@ title: MySQL视图、存储过程、触发器详解
 published: 2023-02-01
 description: 数据库对象 / 视图 / 存储过程 / 触发器 / 数据库编程
 image: ''
+category: 数据库
 tags:
   - MySQL
   - 存储过程
-  - 视图
-  - 触发器
-category: 数据库
 draft: false
 ---
 

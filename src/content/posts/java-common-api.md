@@ -3,11 +3,10 @@ title: Java常用API
 published: 2023-06-15
 description: Java核心类库与API使用指南
 image: ''
+category: Java
 tags:
   - Java
   - 常用API
-  - 类库
-category: Java
 draft: false
 ---
 

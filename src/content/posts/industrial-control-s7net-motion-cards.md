@@ -3,12 +3,10 @@ title: 工业控制核心：S7.Net 深度指南与固高、雷赛运动控制卡
 published: 2024-10-20
 description: Siemens PLC 通信协议解析与多轴运动控制底层 API、参数配置及应用场景全解
 image: ''
-tags:
-  - C#
-  - 工业控制
-  - S7NetPlus
-  - 运动控制
 category: C#
+tags:
+  - 工业控制
+  - 运动控制
 draft: false
 ---
 

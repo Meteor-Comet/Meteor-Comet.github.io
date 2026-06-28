@@ -3,12 +3,10 @@ title: Google Antigravity 代理使用
 published: 2025-11-28
 description: Gemini 3 IDE登录与使用问题完整解决方案
 image: ''
+category: AI & 工具
 tags:
   - Antigravity
-  - Gemini
   - AI
-  - 代理
-category: AI & 工具
 draft: false
 ---
 

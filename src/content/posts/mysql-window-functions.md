@@ -3,11 +3,10 @@ title: MySQL窗口函数
 published: 2023-06-19
 description: OVER / PARTITION BY / ORDER BY / FRAME / LAG / LEAD
 image: ''
+category: 数据库
 tags:
   - MySQL
   - 窗口函数
-  - SQL
-category: 数据库
 draft: false
 ---
 

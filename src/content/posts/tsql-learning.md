@@ -3,11 +3,10 @@ title: SQL Server 与 T-SQL 深度学习笔记与实战记录
 published: 2023-10-15
 description: 从基础CRUD到存储过程、事务、索引、游标与并发控制的万字高阶实战解析
 image: ''
+category: 数据库
 tags:
   - SQL Server
   - T-SQL
-  - 性能调优
-category: 数据库
 draft: false
 ---
 

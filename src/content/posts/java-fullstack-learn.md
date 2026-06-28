@@ -3,11 +3,10 @@ title: JavaSE
 published: 2023-04-10
 description: Java标准版核心语法与API完整教程
 image: ''
+category: Java
 tags:
   - Java
   - 全栈
-  - JavaSE
-category: Java
 draft: false
 ---
 

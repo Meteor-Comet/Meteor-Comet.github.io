@@ -3,10 +3,10 @@ title: "C#进阶特性详解"
 published: 2024-03-15
 description: 泛型/委托与事件/反射与特性
 image: ''
+category: C#
 tags:
   - C#
   - 进阶特性
-category: C#
 draft: false
 ---
 

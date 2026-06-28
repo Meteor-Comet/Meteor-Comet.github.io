@@ -3,12 +3,10 @@ title: WPF学习指南
 published: 2024-05-20
 description: Windows Presentation Foundation完整开发教程
 image: ''
-tags:
-  - C#
-  - WPF
-  - XAML
-  - 桌面开发
 category: C#
+tags:
+  - WPF
+  - 桌面开发
 draft: false
 ---
 

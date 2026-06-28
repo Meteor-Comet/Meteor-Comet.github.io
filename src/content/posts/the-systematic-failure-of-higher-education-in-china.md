@@ -3,10 +3,10 @@ title: 中国高等教育的系统性失败
 published: 2021-01-19
 description: The Systematic Failure of Higher Education in China
 image: ''
+category: 学习记录
 tags:
   - 教育
   - 思考
-category: 学习记录
 draft: false
 ---
 

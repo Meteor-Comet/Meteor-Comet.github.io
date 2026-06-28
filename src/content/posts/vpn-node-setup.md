@@ -3,11 +3,10 @@ title: VPN节点搭建完整教程
 published: 2022-08-01
 description: 从VPS购买到Netflix解锁
 image: ''
+category: DevOps
 tags:
   - VPN
   - VPS
-  - X-UI
-category: DevOps
 draft: false
 ---
 

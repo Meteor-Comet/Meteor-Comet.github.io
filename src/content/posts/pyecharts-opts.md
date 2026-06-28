@@ -3,11 +3,10 @@ title: pyecharts配置项
 published: 2022-08-10
 description: pyecharts图表配置参数完整指南
 image: ''
+category: Python
 tags:
-  - Python
   - pyecharts
   - 图表配置
-category: Python
 draft: false
 ---
 

@@ -3,11 +3,10 @@ title: pyecharts示例图
 published: 2022-08-11
 description: pyecharts各类图表代码示例与效果展示
 image: ''
+category: Python
 tags:
-  - Python
   - pyecharts
   - 数据可视化
-category: Python
 draft: false
 ---
 

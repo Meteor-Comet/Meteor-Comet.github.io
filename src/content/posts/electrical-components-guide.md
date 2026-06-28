@@ -3,12 +3,10 @@ title: 电气元件认识
 published: 2026-06-13
 description: 非标自动化工业上位机全套电气元件手册
 image: ''
+category: 工业控制
 tags:
   - 电气元件
-  - 传感器
-  - 伺服电机
-  - 机器视觉
-category: 工业控制
+  - 工业控制
 draft: false
 ---
 

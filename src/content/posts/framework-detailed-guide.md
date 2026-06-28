@@ -34,6 +34,7 @@ draft: false
    - [3.4 超时计时器重置与防虚警防呆逻辑](#34-超时计时器重置与防虚警防呆逻辑)
    - [3.5 流水线（Conveyor）与工站绑定逻辑](#35-流水线conveyor与工站绑定逻辑)
    - [3.6 工站间与工站同轴（任务）间的通信与顺序控制逻辑](#36-工站间与工站同轴任务间的通信与顺序控制逻辑)
+   - [3.7 典型工序异常处理与故障模拟设计（以扫码与打螺丝为例）](#37-典型工序异常处理与故障模拟设计以扫码与打螺丝为例)
 4. [框架常用 API 函数参考手册](#4-框架常用-api-函数参考手册)
    - [4.1 运动控制类 (Motion Control)](#41-运动控制类-motion-control)
    - [4.2 系统、超时与日志 (System/Utility/Logs)](#42-系统超时与日志-systemutilitylogs)
@@ -45,6 +46,49 @@ draft: false
    - [5.1 线程安全的安全移动方法设计 (SafeMoveTo)](#51-线程安全的安全移动方法设计-safemoveto)
    - [5.2 框架底层原生运动控制 API 详解](#52-框架底层原生运动控制-api-详解)
    - [5.3 为什么封装 SafeMoveTo 自定义安全移动函数](#53-为什么封装-safemoveto-自定义安全移动函数)
+6. [WorkShare 子对象 API 完整参考](#6-workshare-子对象-api-完整参考)
+   - [6.1 mHome — 单轴回零](#61-mhome--单轴回零)
+   - [6.2 dHome — 多轴同时回零](#62-dhome--多轴同时回零)
+   - [6.3 pMove — 位置运动](#63-pmove--位置运动)
+   - [6.4 sMove — 单轴运动](#64-smove--单轴运动)
+   - [6.5 mMove — 多轴运动](#65-mmove--多轴运动)
+   - [6.6 mDoDi — 数字IO等待](#66-mdodi--数字io等待)
+   - [6.7 mDoDiS — 简化版数字IO](#67-mDodis--简化版数字io)
+   - [6.8 mSend — TCP发送等待](#68-msend--tcp发送等待)
+   - [6.9 mPulseOut — 脉冲输出](#69-mpulseout--脉冲输出)
+   - [6.10 mDialog — 对话框](#610-mdialog--对话框)
+   - [6.11 mDicValue — 等待字典](#611-mdicvalue--等待字典)
+   - [6.12 MotionDll 底层 API](#612-motiondll-底层-api)
+   - [6.13 mFunction.State 系统状态枚举](#613-mfunctionstate-系统状态枚举)
+   - [6.14 WorkShare 辅助方法](#614-workshare-辅助方法)
+   - [6.15 API 速查表](#615-api-速查表workshare-子对象)
+7. [传送带（Conveyor）配置系统详解](#7-传送带conveyor配置系统详解)
+   - [7.1 核心设计理念](#71-核心设计理念)
+   - [7.2 Conveyor.xml 配置文件](#72-conveyorxml-配置文件)
+   - [7.3 nConveyor 状态机](#73-nconveyor-状态机框架内部)
+   - [7.4 ConvEvent 用户可编程事件](#74-convevent-用户可编程事件a0conveyorscs)
+   - [7.5 完整数据流示例](#75-完整数据流示例)
+   - [7.6 Conveyor.xml 与 InNo/OutNo 的映射关系](#76-conveyorxml-与-innooutno-的映射关系)
+   - [7.7 标准开发模式 vs 当前项目](#77-标准开发模式-vs-当前项目)
+   - [7.8 CurStnStatus 完整状态列表](#78-curstnstatus-完整状态列表)
+   - [7.9 ConveyorData 运行时属性](#79-conveyordata-运行时属性)
+   - [7.10 常见问题](#710-常见问题)
+8. [核心 API 详解与常见问题](#8-核心-api-详解与常见问题)
+   - [8.1 TasksInteraction 跨线程通信详解](#81-tasksinteraction-跨线程通信详解)
+   - [8.2 mSend.WaitDone 通信详解](#82-msendwaitdone-通信详解)
+   - [8.3 MainConvId 详解](#83-mainconvid-详解)
+   - [8.4 TipsDiglogForm 弹框详解](#84-tipsdiglogform-弹框详解)
+   - [8.5 mDoDiWaitDone 详解](#85-mdodiwaitdone-详解)
+   - [8.6 mFunction.OverTime 超时判断](#86-mfunctionovertime-超时判断)
+   - [8.7 机械轴屏蔽模式详解](#87-机械轴屏蔽模式详解)
+   - [8.8 扫码使能检查重复的原因](#88-扫码使能检查重复的原因)
+9. [UI 控件使用详解](#9-ui-控件使用详解)
+   - [9.1 控件总览](#91-控件总览)
+   - [9.2 StationRun — 工站启停控件](#92-stationrun--工站启停控件)
+   - [9.3 Teach — 轴示教控件](#93-teach--轴示教控件)
+   - [9.4 Cylinder — 气缸控件](#94-cylinder--气缸控件)
+   - [9.5 mBtn_Out — 输出按钮控件](#95-mbtn_out--输出按钮控件)
+   - [9.6 控件与代码的关系](#96-控件与代码的关系)
 
 
 ## 1. 软件框架设计概述
@@ -110,7 +154,7 @@ BoTech 框架是一款基于多线程并发、状态机流控制和点位/参数
 
 #### 2.1.5 全局参数表 (`ParList.xlsx`)
 包含用于微调和控制的所有非硬件参数（如微调补偿量、速度、使能复选框开关等）。
-* 索引 0~99、150~179 映射为浮点数/字符串形式的用户参数，对应 `UserPar` 枚举。
+* 索引 0 ~ 99、150~179 映射为浮点数/字符串形式的用户参数，对应 `UserPar` 枚举。
 * 索引 100~131 映射为功能使能复选框（布尔开关），对应 `FuncChk` 枚举。
 
 ---
@@ -150,47 +194,90 @@ Excel 与 `EnumName.cs` 内枚举项的精确映射如下：
 [步骤3: 编译类库] 在 VS 中编译 ParName 项目，生成最新的 ParName.dll，并重新编译主程序以更新项目引用
        │
        ▼
-[步骤4: 软件自动建库] 启动 BoTech 主程序，在 HMI “参数设置”中点击 “AutoSetup” 按钮
+[步骤4: 生成/更新 XML] 系统读取 Excel 元数据并写入 ParInput/ParOutput/ParMachine/ParData/SysPar.xml
        │
        ▼
-[步骤5: 生成/更新 XML] 系统读取 Excel 元数据并写入 ParInput/ParOutput/ParMachine/ParData/SysPar.xml
-       │
-       ▼
-[步骤6: 重启软件生效] 关闭并重新启动软件，底层 DLL 读取新的 XML 数据，此时软硬件完全对应生效！
+[步骤5: 重启软件生效] 关闭并重新启动软件，底层 DLL 读取新的 XML 数据，此时软硬件完全对应生效！
 ```
-### 2.2.3 多种参数获取方式
+#### 2.2.3 多种参数获取方式
 
-在 BoTech 框架中，参数读取有三种常用方式，适用于不同的性能需求和代码可读性要求：
+框架提供了 **三类** 常用的全局参数读取方式，适用于不同的开发场景。
 
-1. **类型安全获取 (`mFunction.GetParValue<T>`)**
-   ```csharp
-   // 示例：读取 double 类型的参数
-   double speed = mFunction.GetParValue<double>(UserPar.轴速度);
-   ```
-   * 适用于不频繁访问的参数。
-   * 编译期间检查返回类型，防止类型错误。
+##### 1. 泛型获取 `GetParValue<T>`
+```csharp
+// 读取整数参数
+int maxRetry = mFunction.GetParValue<int>(UserPar.扫码失败次数);
+// 读取字符串参数
+string mode = mFunction.GetParValue<string>(UserPar.Machine_runMode);
+// 读取浮点参数
+double speed = mFunction.GetParValue<double>(UserPar.RobotSpeed);
+// 读取 Bool 参数（功能开关）
+bool safety = mFunction.GetParValue<bool>(FuncChk.Enable_Security_);
+```
+* **适用场景**：一次性读取，类型安全，由框架自动完成类型转换。
+* **特性**：编译期间检查返回类型，防止类型错误。
 
-2. **快捷包装属性 (`mGlobal.ParInt/ParDbl/ParStr`)**
-   ```csharp
-   // 示例：读取整数型参数
-   int timeout = mGlobal.ParInt[(int)UserPar.超时设定];
-   ```
-   * 直接访问全局数组 `mParList`，效率最高，常用于高频读取的实时控制参数。
+##### 2. 快捷读取 `mGlobal` 包装属性
+```csharp
+double robotSpeed = mGlobal.ParDbl(UserPar.RobotSpeed);
+int delayMs = mGlobal.ParInt(UserPar.电批吸料稳定延时);
+string modeStr = mGlobal.ParStr(UserPar.Machine_runMode);
+bool enableScan = mGlobal.FuncCheck(FuncChk.启用扫码);  // Bool 快捷读取
+```
+* **适用场景**：直接访问全局数组 `mParList`，效率最高。
+* **最佳实践**：适合在自动运行循环（AutoRun）或高频轮询的实时控制参数中调用。
 
-3. **数组直接索引 (`mParList[]`)**
-   ```csharp
-   // 示例：读取限位上下限
-   double limitUp = mParList[(int)UserPar.位置上限].LimitUp;
-   double limitDown = mParList[(int)UserPar.位置下限].LimitDown;
-   ```
-   * 只能用于需要额外元数据（如 LimitUp/LimitDown、CheckSts 等）的场景。
+##### 3. 直接访问全局数组 `mParList[]`
+```csharp
+// 读取数值
+double speed = mParList[(short)UserPar.RobotSpeed].DataDbl;
+// 读取 Bool 状态
+bool enabled = mParList[(short)FuncChk.Enable_Security_].CheckSts;
+// 读取上下限信息（用于 UI 限制）
+double up = mParList[(short)UserPar.RobotSpeed].LimitUp;
+double down = mParList[(short)UserPar.RobotSpeed].LimitDown;
+```
+* **适用场景**：仅在需要访问元数据（如上下限 `LimitUp`/`LimitDown`、物理单位 `Unit`、中文备注 `Remark` 等）的场景下使用。
 
-> 选择使用哪种方式应基于 **访问频率** 与 **代码可读性** 的平衡。对常规业务逻辑推荐使用第 1 种，对实时运动控制或高频采样推荐第 2 种，需要元数据时使用第 3 种。
+---
+
+##### 4. Bool 类型参数（FuncChk）读取详解
+
+`FuncChk` 枚举定义了所有功能开关（复选框），对应 Excel 配置表中的"功能使能"列。读取 Bool 参数有三种方式：
+
+* **方式1：`mGlobal.FuncCheck`（推荐，最简洁）**
+  ```csharp
+  // 源码：return mParList[(short)func].CheckSts;
+  bool enableScan = mGlobal.FuncCheck(FuncChk.启用扫码);
+  bool enableCCD = mGlobal.FuncCheck(FuncChk.启用CCD);
+  bool enablePDCA = mGlobal.FuncCheck(FuncChk.启用_PDCA);
+  bool blockLeft = mGlobal.FuncCheck(FuncChk.屏蔽左轴);
+  ```
+
+* **方式2：`mFunction.GetParValue<bool>`（泛型，类型安全）**
+  ```csharp
+  bool enableScan = mFunction.GetParValue<bool>(FuncChk.启用扫码);
+  bool blockLeft = mFunction.GetParValue<bool>(FuncChk.屏蔽左轴);
+  ```
+
+* **方式3：`mParList[].CheckSts`（直接数组访问，最快）**
+  ```csharp
+  // 带安全检查的写法（推荐用于属性初始化器或字段声明中）
+  protected override bool 是否屏蔽 =>
+      mParList != null
+      && mParList.Length > (int)FuncChk.屏蔽右轴
+      && mParList[(int)FuncChk.屏蔽右轴].CheckSts;
+
+  // 不带安全检查的写法（用于方法内部，确保 mParList 已初始化）
+  bool enableScan = mParList[(int)FuncChk.启用扫码].CheckSts;
+  ```
+
+---
 
 > [!WARNING]
 > **参数类型不匹配导致的读取残留值漏洞 (Data vs DataInt)**
 >
-> 在 Excel (如 `UserPar.xlsx`) 中定义参数时，列 `Category` 如果被指定为 `D` (即 Double 浮点型)，则用户配置的参数值会存储在 XML 数据库的 `<Data>` 节点中。此时，`<DataInt>` 节点在 XML 中不会更新，而是保留其默认的初始/残留值 (例如 `333` 或 `200` 等)。
+> 在 Excel (如 `UserPar.xlsx`) 中定义参数时，列 `Category` 如果被指定为 `D` (即 Double 浮点型)，则用户配置的参数值会存储在 XML 数据库 of `<Data>` 节点中。此时，`<DataInt>` 节点在 XML 中不会更新，而是保留其默认的初始/残留值 (例如 `333` 或 `200` 等)。
 >
 > 如果在 C# 代码中错误地使用 `mFunction.GetParValue<int>(UserPar.某参数)` 去读取该参数，系统会因为泛型类型是 `int` 而直接返回 `<DataInt>` 中的残留默认值，而不是经过正确四舍五入或截断的 `<Data>` 值。这会导致读取出来的参数与界面设置完全不符（例如设置了 10 却获取到 7，或者设置了 5 却获取到 333）。
 >
@@ -199,7 +286,21 @@ Excel 与 `EnumName.cs` 内枚举项的精确映射如下：
 > * **如果 Excel 中参数类型是 `I` (Int)**：可以直接使用 `mFunction.GetParValue<int>(UserPar.某参数)`。
 > * 在编写代码前，必须仔细核对 Excel 配置文件中参数的类型定义（`Category` 或 `<ChkCategory>` 的值）。
 
----
+##### 5. `mParList` 内存数据结构
+
+`mParList[index]` 的每个元素包含以下核心字段：
+
+| 字段 | 类型 | 说明 |
+| :--- | :--- | :--- |
+| `DataDbl` | double | 数值参数值 |
+| `DataInt` | int | 整数参数值 |
+| `DataStr` | string | 字符串参数值 |
+| `CheckSts` | bool | 功能开关状态（对应 FuncChk） |
+| `LimitUp` | double | 参数上限 |
+| `LimitDown` | double | 参数下限 |
+| `Unit` | string | 单位 |
+| `Remark` | string | 备注 |
+
 ---
 
 ### 2.3 Excel 参数配置与 XML 数据库转换映射规则
@@ -618,7 +719,7 @@ BoTech 框架在多工站流线型设备开发中，采用了流水线段（Conv
 
 ### 3.6 工站间与工站同轴（任务）间的通信与顺序控制逻辑
 
-在自动运行过程中，工站之间的物料移交以及工站与机械轴之间的工作调度，依靠**流线状态监听**与**任务交互标志（TasksInteraction）**来实现有序控制：
+在自动运行过程中，工站之间的物料移交以及工站与机械轴之间的工作调度，依靠 **流线状态监听** 与 **任务交互标志（TasksInteraction）** 来实现有序控制：
 
 #### 3.6.1 上下游工站之间的通信与顺序流转（如何判定下游好没好）
 
@@ -760,6 +861,97 @@ sequenceDiagram
     Master->>Master: 消费并自动清除两个完成标志
     Note over Master: 重置定位气缸，进入等下游放行步骤
 ```
+
+
+### 3.7 典型工序异常处理与故障模拟设计（以扫码与打螺丝为例）
+
+在大型工控系统中，**异步网络通信与高风险执行单元（如相机纠偏、电批拧紧）是异常和报警最高发的区域**。为了保证整机连调的流畅性，并对生产制造中的各项 NG（不良）流程进行验证，BoTech 框架推荐采用**通讯与逻辑解耦、全局仿真注入与全面异常隔离**的设计模式。
+
+#### 3.7.1 扫码枪异步通讯与全局仿真
+在物理扫码枪未连接或调试阶段，传统逻辑往往会因连接超时而陷入阻塞或直接触发停机，极大地定拖慢了现场调试效率。
+
+##### 1. 旧数据残留漏洞与解决规范
+早期的 C# 扫码流程常常采用 `有新数据` 等全局静态标志进行读写同步。在高速运行或逻辑跳转复杂的场景中，若未在发送指令前对标志及接收缓冲区进行强制清理，极易发生**“在下一工序开始时，误读取了上一轮遗留的旧条码（Stale Data）”**的严重 bug。
+
+**推荐的数据同步与清理时序模式**：
+- **触发前重置**：在向扫码枪发送 `ReadCode` 指令前，强制清空接收字符串缓冲区：
+  ```csharp
+  接收的数据 = ""; // 显式清除历史接收缓存
+  ```
+- **读取即消费**：在轮询检测到 `接收的数据` 变为非空后，**立即锁存并抹除**：
+  ```csharp
+  if (!string.IsNullOrEmpty(接收的数据))
+  {
+      string resp = 接收的数据;
+      接收的数据 = ""; // 毁灭性重置，防止下一轮循环二次读取旧数据
+      // 开始解析并校验 resp ...
+  }
+  ```
+
+##### 2. 全局仿真注入（脱机连调支持）
+如果在自动流程处于在线运行状态，而物理扫码枪断开，BoTech 框架会根据计时器与仿真标志自动切入**全局仿真逻辑**：
+- 如果当前处于虚拟运行（`OffLine_VirtualRunMode`）或者**距离发送扫码指令过了 1000ms 物理网口仍无任何返回**时，软件会自动启动随机条码生成器。
+- 生成器以 **50% 的权重模拟成功与失败（Scan NG）**，用以测试整机的缺陷品剔除与气缸分流剔废流程。
+
+---
+
+#### 3.7.2 电批拧紧失败概率模拟与连续故障防护
+电批拧紧作为核心组装工序，如果气压不稳、螺丝规格不符或螺牙磨损，容易发生滑牙或拧紧 NG。
+
+##### 1. 模拟拧紧 NG 与破真空释放
+在 `步序.启动拧紧` 阶段，电批启动信号输出并延时 1.5 秒（模拟螺丝拧紧过程）。完成后，软件会执行 **15% 概率的电批拧紧失败模拟**。
+拧紧失败后，需按照以下防呆时序释放异常螺丝，防止在后续位置发生二次卡料或机械撞击：
+```csharp
+mGlobal.mDoReset(电批吸真空信号); // 关闭吸真空
+mGlobal.mDoSet(电批破真空信号);   // 开启破真空脉冲吹气以放开螺丝
+Thread.Sleep(150);
+mGlobal.mDoReset(电批破真空信号); // 关闭吹气
+已持料 = false;                    // 强制复位内部持料状态
+```
+
+##### 2. 连续失败次数超限与原生 TipsDialog 交互
+- **故障限额参数**：软件通过类型安全强转读取 `(int)mFunction.GetParValue<double>(UserPar.电批执行失败次数)` 参数来确定允许的最高连续 NG 次数上限。
+- **超限提示交互**：当 `当前电批失败次数` 达到该上限时，自动弹出原生对话框 `TipsDiglogForm` 提示：
+  - **选择“Yes” (重试)**：重置 `当前电批失败次数 = 0`，并命令机械轴退回 `移至取料位置` 步骤，重新去供料器吸取新螺丝进行锁付。
+  - **选择“No” (停止)**：自动调用整机急停逻辑 `Machine.Machine.Instance.Stop(true)`，并将当前轴状态机切换到 `State.ALARM` 中断运行，由人工介入排查。
+
+---
+
+#### 3.7.3 网络通信与坐标转换的 try-catch 异常安全防护规范
+任何与外部硬件（相机、扫码枪、电批控制器）发生套接字（Socket）通信的接口，均存在网线松动、防火墙拦截等引发进程级 Exception 的隐患。此外，转换外部传来的 ASCII 报文（如 `double.Parse(parts[2])`）也是高风险操作。
+
+**BoTech 异常安全编码规范三剑客**：
+1. **网络交互层 Try-Catch**：
+   对于所有 `SocketDataSend` 和 `mSend.WaitDone` 等网口 I/O 动作，必须使用 `try-catch` 隔离：
+   ```csharp
+   try
+   {
+       isOk = mSend.WaitDone((int)相机端口, 1, 相机发送指令, 0, "", 5000, true, false);
+   }
+   catch (Exception ex)
+   {
+       AddLog($"网络通信发生崩溃异常: {ex.Message}", LogsType.ErrorCode, StaInfo.StepIdx, true, Color.Red);
+       isOk = false; // 降级为网络失败，等待模拟器或重试机制介入
+   }
+   ```
+2. **数据解析与转换 Try-Catch**：
+   在解析 `Split` 数据并转换浮点坐标时，极易因相机传输了乱码或空报文导致崩溃：
+   ```csharp
+   try
+   {
+       string[] parts = resp.Split(',');
+       double offsetX = double.Parse(parts[2]);
+       double offsetY = double.Parse(parts[3]);
+       // 判定坐标偏移上限并存入纠偏偏差值...
+   }
+   catch (Exception ex)
+   {
+       AddLog($"解析相机纠偏报文或校验偏移上限异常: {ex.Message}", LogsType.ErrorCode, StaInfo.StepIdx, true, Color.Red);
+       SetStep(ref StaInfo, (int)步序.拍照重试判定, true); // 优雅重试而绝不发生系统级闪退
+   }
+   ```
+3. **动作执行与移动 Try-Catch**：
+   伺服轴移动（包含 XY 轴纠偏坐标转换相加）动作，均应封装在带有 `try-catch` 保护的 `安全移动至`（`SafeMoveTo`）方法内。如果 Z 轴未在安全高度、硬件限位触发或计算溢出，软件会捕获异常并返回 `false` 以终止后续动作，确保设备人身安全。
 
 
 ## 4. 框架常用 API 函数参考手册
@@ -1052,8 +1244,7 @@ case (int)步序.等相机数据:
           switch (Index)
           {
               case 1: // 扫码枪端口
-                  Task01_入料扫码站.ReceivedData = data;
-                  Task01_入料扫码站.HasNewData = true;
+                  Task01_入料扫码站.接收的数据 = data;
                   break;
               case 2: // 右轴CCD端口
                   Task04_右机械轴.Instance.相机接收数据 = data;
@@ -1070,10 +1261,10 @@ case (int)步序.等相机数据:
 * **工位状态机消费代码 (`Task01_入料扫码站.cs`)**：
   ```csharp
   case (int)步序.等扫码结果:
-      if (HasNewData)
+      if (!string.IsNullOrEmpty(接收的数据))
       {
-          string resp = ReceivedData; // 消费分发过来的数据
-          HasNewData = false;         // 手动清空消费标志，不影响底层网口缓冲区
+          string resp = 接收的数据; // 消费分发过来的数据
+          接收的数据 = "";           // 立即清空，防止下个循环重复读取
           AddLog($"扫码成功: {resp}", LogsType.Barcode, StaInfo.StepIdx, true);
           // 处理业务...
       }
@@ -1089,7 +1280,7 @@ case (int)步序.等相机数据:
 | :--- | :--- | :--- |
 | **调用位置** | 工站的 `AutoRun()` 状态机内 | `2.TcpIp.cs` 静态方法 `mTcpData` 路由推送 |
 | **线程归属** | 工站自身的时序线程 | Socket 异步监听后台接收线程 |
-| **数据读取方式** | 主动拉取：直接调用 `TcpInfo[Index].Data` | 被动分发：由回调写入工位静态字段 `ReceivedData` |
+| **数据读取方式** | 主动拉取：直接调用 `TcpInfo[Index].Data` | 被动分发：由回调写入工位静态字段 `接收的数据` |
 | **并发安全性** | **极低**。多线程并发读取会导致缓冲区清空，产生竞争丢失。 | **极高**。数据固化为静态属性，可供多线程安全读取。 |
 | **代码耦合度** | 高。网络交互时序紧密耦合在自动步骤中。 | 低。网络接收与时序解耦，通信异常不阻塞主流程。 |
 | **最佳实践** | 扫码枪单向请求、流程线性的简单工位。 | 左右双轴并发纠偏对位、多相机协作的复杂工位。 |
@@ -1294,43 +1485,7 @@ case (int)步序.等相机数据:
   > * **`CCD光源稳定延时`** (`UserPar.CCD光源稳定延时` / 默认 `1000ms`，上限 `3000ms`, 下限 `0ms`)
   > * **`电批吸料稳定延时`** (`UserPar.电批吸料稳定延时` / 默认 `200ms`，上限 `1000ms`, 下限 `50ms`)
   > 通过上述延时参数的上下限管控（例如：电批吸料稳定延时限制最低 `50ms` 以保证吸附稳定），既保证了机构响应拍率，又实现了防呆保护。
-### 2.2.5 多种参数获取方式
 
-> [!NOTE]
-> 框架提供了 **三类** 常用的全局参数读取方式，适用于不同的开发场景。
-
-1. **泛型获取 `GetParValue<T>`**
-   ```csharp
-   // 读取整数参数
-   int maxRetry = mFunction.GetParValue<int>(UserPar.扫码失败次数);
-   // 读取字符串参数
-   string mode = mFunction.GetParValue<string>(UserPar.Machine_runMode);
-   // 读取 Bool 参数
-   bool safety = mFunction.GetParValue<bool>(FuncChk.Enable_Security_);
-   ```
-   - 适用于 **一次性读取**，类型安全，由框架自动完成类型转换。
-
-2. **快捷读取 `mGlobal` 包装函数**
-   ```csharp
-   double robotSpeed = mGlobal.ParDbl(UserPar.RobotSpeed);
-   int delayMs = mGlobal.ParInt(UserPar.电批吸料稳定延时);
-   string modeStr = mGlobal.ParStr(UserPar.Machine_runMode);
-   ```
-   - 代码更简洁，适合 **高频读取**（如循环或实时监控）
-
-3. **直接访问全局数组 `mParList`**
-   ```csharp
-   // 读取数值
-   double speed = mParList[(short)UserPar.RobotSpeed].DataDbl;
-   // 读取 Bool 状态
-   bool enabled = mParList[(short)FuncChk.Enable_Security_].CheckSts;
-   // 读取上下限信息（用于 UI 限制）
-   double up = mParList[(short)UserPar.RobotSpeed].LimitUp;
-   double down = mParList[(short)UserPar.RobotSpeed].LimitDown;
-   ```
-   - 在**需要访问元数据**（如上下限、单位、备注）时使用。
-
-> **最佳实践**：绝大多数业务代码推荐使用前两种方式，保持代码可读性与类型安全；仅在特殊需求（如动态生成 UI 或做参数校验）时使用裸数组访问。
 
 * **`mFunction.GetTickCount()`**：
   * **功能**：获取高精度自系统启动以来的毫秒时间戳（Tick 数值），主要用于超时计算。
@@ -1474,4 +1629,1600 @@ protected bool SafeMoveTo(ValueType stationId, int pointIdx, double safeZ = 0.0,
 2. **非阻塞的 `StaXYRMove`** 支持纠偏偏移量，但**不支持安全 Z 轴防撞和到位检测**；
 3. **单轴 `WaitDone`** 支持纠偏坐标，但需要连续编写 4 步同步时序，流程非常繁琐。
 
-为了合并这一缺陷，我们在 `Task_机械轴基类` 中封装了 `SafeMoveTo` 方法。它将“Z轴安全上升 -> XY轴纠偏联移（支持 Offset） -> Z轴下降到位”的 4 步过程，通过单行代码进行了底层安全封装，既避免了 XY 轴在大行程移动时撞击治具，又简化了自动流程的实现。
+为了合并这一缺陷，我们在 `Task_机械轴基类` 中封装了 `SafeMoveTo` 方法。它将”Z轴安全上升 -> XY轴纠偏联移（支持 Offset） -> Z轴下降到位”的 4 步过程，通过单行代码进行了底层安全封装，既避免了 XY 轴在大行程移动时撞击治具，又简化了自动流程的实现。
+
+---
+
+## 6. WorkShare 子对象 API 完整参考
+
+WorkShare 基类包含多个子对象，每个子对象提供一组专用 API。这些是工位开发中最常用的方法，全部来源于 DLL 说明书。
+
+### 6.1 mHome — 单轴回零
+
+**类型：** `ZHome`
+**用途：** 控制单个轴的回零操作
+
+#### WaitDone
+
+```csharp
+mHome.WaitDone(short axisId)
+```
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `axisId` | short | 轴编号（对应 `mAxis` 枚举） |
+
+**阻塞方法**，执行后线程会等待轴回零完成。
+
+**使用示例：**
+
+```csharp
+mHome.WaitDone(mAxis.右Z);
+if (mHome.RunSts)
+{
+    AddLog(“右Z轴回零OK”, LogsType.Home);
+}
+else
+{
+    AddLog(“右Z轴回零失败”, LogsType.Home);
+}
+```
+
+#### RunSts
+
+```csharp
+bool mHome.RunSts
+```
+
+回零结果。`true` = 回零成功，`false` = 回零失败。在 `WaitDone` 返回后读取。
+
+---
+
+### 6.2 dHome — 多轴同时回零
+
+**类型：** `DHome`
+**用途：** 控制多个轴同时回零
+
+#### WaitDone
+
+```csharp
+dHome.WaitDone(short[] axisIds, double[] speeds)
+```
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `axisIds` | short[] | 轴编号数组 |
+| `speeds` | double[] | 各轴回零速度，-1 表示使用默认速度 |
+
+**阻塞方法**，所有轴回零完成后返回。
+
+**使用示例：**
+
+```csharp
+dHome.WaitDone(
+    new short[] { (short)mAxis.右X, (short)mAxis.右Y },
+    new double[] { -1, -1 }
+);
+if (dHome.RunSts)
+{
+    AddLog(“右XY轴回零OK”, LogsType.Home);
+}
+```
+
+#### RunSts
+
+```csharp
+bool dHome.RunSts
+```
+
+回零结果。`true` = 全部成功，`false` = 有失败。
+
+---
+
+### 6.3 pMove — 位置运动
+
+**类型：** `Moving`
+**用途：** 控制轴移动到指定位置（支持点位移动和直接坐标移动）
+
+#### WaitDone（10参数完整版 — 多轴示教点联动）
+
+```csharp
+pMove.WaitDone(
+    int StationNum,                 // 工位编号
+    int PointNum,                   // 点位编号
+    bool MultiAxisSync,             // 是否多轴联动
+    double ZLiftHeight,             // Z轴安全高度(mm)
+    int PosDelayTime,               // 到位延时(ms)
+    int MaxWaitTime,                // 超时(ms)
+    double LowSpeedApproachDist,    // 低速趋近距离(mm)
+    double LowSpeedApproachSpeed,   // 低速趋近速度(mm/s)
+    double LowSpeedLiftDist,        // 低速抬升距离(mm)
+    double LowSpeedLiftSpeed        // 低速抬升速度(mm/s)
+)
+```
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `StationNum` | int | 工站编号（对应 `mTeachN` 枚举） |
+| `PointNum` | int | 点位编号（对应 `ePx` 枚举） |
+| `MultiAxisSync` | bool | `true`=多轴联动（Z先升→XY移动→Z降），`false`=单轴独立移动 |
+| `ZLiftHeight` | double | Z轴安全抬升高度（mm），仅 `MultiAxisSync=true` 时生效 |
+| `PosDelayTime` | int | 到位后延时（ms） |
+| `MaxWaitTime` | int | 最大等待时间（ms） |
+| `LowSpeedApproachDist` | double | 低速趋近距离（mm），到达目标前最后一段距离降速 |
+| `LowSpeedApproachSpeed` | double | 低速趋近速度（mm/s） |
+| `LowSpeedLiftDist` | double | 低速抬升距离（mm） |
+| `LowSpeedLiftSpeed` | double | 低速抬升速度（mm/s） |
+
+**运行逻辑（MultiAxisSync=true 时）：**
+1. Z 轴先上升至 `ZLiftHeight`（安全高度）
+2. X、Y 轴联动移至目标点位
+3. XY 到位后，Z 轴下降至目标 Z 坐标
+
+**使用示例：**
+
+```csharp
+// 多轴联动，Z轴先升到0mm，到位延时10ms，超时15秒
+pMove.WaitDone(
+    (int)mTeachN.Sta_右待机位置,
+    (int)ePx.P0_待机位置,
+    true,            // 多轴联动
+    0.0,             // Z轴安全高度
+    10,              // 到位延时10ms
+    15000,           // 超时15秒
+    0.0, 0.0, 0.0, 0.0  // 低速趋近参数（0=不使用）
+);
+
+// 单轴独立移动（MultiAxisSync=false）
+pMove.WaitDone(
+    (int)mTeachN.Sta_右待机位置,
+    (int)ePx.P0_待机位置,
+    false,           // 不联动
+    0.0, 10, 15000,
+    0.0, 0.0, 0.0, 0.0
+);
+```
+
+#### WaitDone（5参数版 — 单轴绝对运动）
+
+```csharp
+pMove.WaitDone(
+    ValueType AxisNum,      // 轴编号
+    double TargetPos,       // 目标位置(mm)
+    double Speed,           // 速度(mm/s)，-1=使用参数配置速度
+    int PosDelayTime,       // 到位延时(ms)
+    int MaxWaitTime         // 超时(ms)
+)
+```
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `AxisNum` | ValueType | 轴编号 |
+| `TargetPos` | double | 目标位置（mm） |
+| `Speed` | double | 速度（mm/s），**-1=使用参数配置速度** |
+| `PosDelayTime` | int | 到位延时（ms） |
+| `MaxWaitTime` | int | 最大等待时间（ms） |
+
+**使用示例：**
+
+```csharp
+// Z轴移动到等待位，使用默认速度，超时60秒
+pMove.WaitDone(上料Z轴, 上料Z_P0等待位.Z, -1, 10, 60000);
+
+// X轴移动到工作位
+pMove.WaitDone(搬运X轴, 搬运X_P2工作位.X, -1, 10, 60000);
+```
+
+#### Pause
+
+```csharp
+bool pMove.Pause
+```
+
+暂停标志。设为 `true` 暂停运动，`false` 恢复。在 `Homing()` 中通常设为 `false`：
+
+```csharp
+this.pMove.Pause = false;
+```
+
+#### Pause
+
+```csharp
+bool pMove.Pause
+```
+
+暂停标志。设为 `true` 暂停运动，`false` 恢复。在 `Homing()` 中通常设为 `false`：
+
+```csharp
+this.pMove.Pause = false;
+```
+
+---
+
+### 6.4 sMove — 单轴运动（非阻塞）
+
+**类型：** `OneAxis`
+**用途：** 单轴运动控制（发送指令，不等待到位）
+
+#### 常用方法
+
+```csharp
+// 绝对位置移动（发送指令，不阻塞）
+sMove.AbsMove(short axisIndex, double position, double speed)
+
+// 停止
+sMove.Stop(short axisIndex)
+```
+
+---
+
+### 6.5 mMove — 多轴运动（非阻塞）
+
+**类型：** `MutiAxis`
+**用途：** 多轴联动控制（发送指令，不等待到位）
+
+#### 常用方法
+
+```csharp
+// 多轴同时移动（发送指令，不阻塞）
+mMove.AbsMove(short[] axisIndexes, double[] positions, double[] speeds)
+```
+
+---
+
+### 6.6 mDoDi — 数字IO等待
+
+**类型：** `DoAndDi`
+**用途：** 设置输出并等待输入条件（阻塞方法）
+
+#### WaitDone（设置输出 + 等待输入）— 7参数版
+
+```csharp
+mDoDi.WaitDone(
+    ValueType OutNum,       // 输出点序号
+    short nState,           // 输出点目标状态：1=ON, 0=OFF
+    ValueType InNum,        // 输入点序号
+    short nState1,          // 输入点目标状态：1=ON, 0=OFF
+    short DelayTime,        // 到位后延时(ms)
+    short TimeOut,          // 超时(ms)，-1=无限等待
+    bool Pop_up_message     // 超时是否弹框
+)
+```
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `OutNum` | ValueType | 输出端口号（`OutNo` 枚举） |
+| `nState` | short | 输出目标状态：**1=ON, 0=OFF** |
+| `InNum` | ValueType | 输入端口号（`InNo` 枚举） |
+| `nState1` | short | 输入目标状态：**1=ON, 0=OFF** |
+| `DelayTime` | short | 到位后延时（ms） |
+| `TimeOut` | short | 超时（ms），**-1=无限等待** |
+| `Pop_up_message` | bool | 超时是否弹框提示 |
+
+**阻塞方法**，先设置输出，然后等待输入达到期望状态。
+
+**使用示例：**
+
+```csharp
+// 设置气缸伸出（输出ON），等待伸出信号（输入ON）
+mDoDi.WaitDone(
+    OutNo.流线2阻挡气缸, 1,        // 输出：气缸伸出
+    InNo.流线2阻挡伸出信号, 1,      // 等待：伸出信号亮
+    10, 3000, true                  // 延时10ms，超时3秒，超时弹框
+);
+
+// 设置气缸缩回（输出OFF），等待缩回信号（输入ON）
+mDoDi.WaitDone(
+    OutNo.流线2阻挡气缸, 0,        // 输出：气缸缩回
+    InNo.流线2阻挡缩回信号, 1,      // 等待：缩回信号亮
+    10, 3000, true
+);
+```
+
+#### WaitDone（仅等待输入）— 4参数版
+
+```csharp
+mDoDi.WaitDone(
+    ValueType InNum,        // 输入点序号
+    short nState1,          // 输入点目标状态：1=ON, 0=OFF
+    short DelayTime,        // 到位后延时(ms)
+    short TimeOut,          // 超时(ms)
+    bool Pop_up_message     // 超时是否弹框
+)
+```
+
+**使用示例：**
+
+```csharp
+// 等待信号消失
+mDoDi.WaitDone(
+    InNo.搬运层料盘有无感应, 0,    // 等待信号消失
+    10, 5000, true                  // 延时10ms，超时5秒
+);
+```
+
+#### mAction
+
+```csharp
+event Action<string, string> mDoDi.mAction
+```
+
+错误回调事件。当 `WaitDone` 超时时触发。在 `Initialize()` 中注册：
+
+```csharp
+mDoDi.mAction += Err;
+```
+
+---
+
+### 6.7 mDoDiS — 简化版数字IO
+
+**类型：** `DoAndDiS`
+**用途：** 简化的 IO 控制，支持输出脉冲和批量操作
+
+#### WaitDone — 7参数版（设置输出 + 等待输入）
+
+```csharp
+mDoDiS.WaitDone(
+    ValueType OutNum,       // 输出点序号
+    short nState,           // 输出点目标状态：1=ON, 0=OFF
+    ValueType InNum,        // 输入点序号
+    short nState1,          // 输入点目标状态：1=ON, 0=OFF
+    short DelayTime,        // 到位后延时(ms)
+    short TimeOut,          // 超时(ms)
+    bool Pop_up_message     // 超时是否弹框
+)
+```
+
+功能与 `mDoDi.WaitDone` 7参数版相同。
+
+#### WaitDone — 4参数版（仅等待输入）
+
+```csharp
+mDoDiS.WaitDone(
+    ValueType InNum,        // 输入点序号
+    short nState1,          // 输入点目标状态：1=ON, 0=OFF
+    short DelayTime,        // 到位后延时(ms)
+    short TimeOut,          // 超时(ms)
+    bool Pop_up_message     // 超时是否弹框
+)
+```
+
+#### mAction
+
+```csharp
+event Action<string, string> mDoDiS.mAction
+```
+
+错误回调事件，用法同 `mDoDi.mAction`。
+
+---
+
+### 6.8 mSend — TCP 发送等待
+
+**类型：** `DataSend`
+**用途：** 发送 TCP/串口数据并等待响应（阻塞方法）
+
+#### WaitDone
+
+```csharp
+mSend.WaitDone(
+    int mPortIndex,         // 端口号
+    int sendType,           // 发送类型
+    string SendData,        // 发送数据
+    int recvType,           // 接收类型
+    string recvStr,         // 匹配字符串
+    int nTimeOut,           // 超时(ms)
+    bool bTimeOutShowDialog,// 超时是否弹框
+    bool nShowLog           // 是否显示日志
+)
+```
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `mPortIndex` | int | 端口号（对应 `TCPIP_Port` 枚举或串口编号） |
+| `sendType` | int | **发送类型：0=字节发送, 1=字符串发送** |
+| `SendData` | string | 发送的数据内容 |
+| `recvType` | int | **接收类型：0=字节接收, 1=字符串接收** |
+| `recvStr` | string | 匹配字符串（空字符串=接收任何响应） |
+| `nTimeOut` | int | 超时（ms），**-1=无限等待** |
+| `bTimeOutShowDialog` | bool | 超时是否弹框提示 |
+| `nShowLog` | bool | 是否在界面显示日志 |
+
+**使用示例：**
+
+```csharp
+// 发送字符串指令，等待字符串响应
+mSend.WaitDone(
+    (int)TCPIP_Port.扫描,  // 端口
+    1,                       // sendType: 1=字符串发送
+    “ReadCode”,              // 发送数据
+    1,                       // recvType: 1=字符串接收
+    “”,                      // 匹配字符串（空=任意）
+    5000,                    // 超时5秒
+    true,                    // 超时弹框
+    false                    // 不显示日志
+);
+
+// 发送字符串，等待以特定前缀开头的响应
+mSend.WaitDone(
+    (int)TCPIP_Port.扫描, 1, “ReadCode”, 1, “ReadCode,OK,”, 5000, true, false
+);
+```
+
+#### mAction
+
+```csharp
+event Action<string, string> mSend.mAction
+```
+
+错误回调事件。在 `Initialize()` 中注册：
+
+```csharp
+mSend.mAction += Err;
+```
+
+#### mAction
+
+```csharp
+event Action<string, string> mSend.mAction
+```
+
+错误回调事件。在 `Initialize()` 中注册：
+
+```csharp
+mSend.mAction += Err;
+```
+
+---
+
+### 6.9 mPulseOut — 脉冲输出
+
+**类型：** `PulseOut`
+**用途：** 输出指定时长的脉冲信号（阻塞方法）
+
+#### Send
+
+```csharp
+mPulseOut.Send(
+    ValueType index,    // 输出端口号
+    int nValue,         // 输出状态：1=ON, 0=OFF
+    int nDelayTime      // 脉冲持续时间(ms)
+)
+```
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `index` | ValueType | 输出端口号（`OutNo` 枚举） |
+| `nValue` | int | 输出状态：**1=ON, 0=OFF** |
+| `nDelayTime` | int | 脉冲持续时间（ms） |
+
+**使用示例：**
+
+```csharp
+// 输出100ms的ON脉冲
+mPulseOut.Send(OutNo.蜂鸣器, 1, 100);
+```
+
+---
+
+### 6.11 mDialog — 对话框
+
+**类型：** `Dialog`
+**用途：** 在工位线程中弹出对话框
+
+---
+
+### 6.12 mDicValue — 等待字典
+
+**类型：** `WaitDic`
+**用途：** 基于字典的条件等待
+
+---
+
+### 6.13 MotionDll 底层 API
+
+**命名空间：** `MotionFunction`
+**类：** `static class MotionDll`
+
+#### IO 操作
+
+| 方法 | 签名 | 说明 |
+|------|------|------|
+| `ReadDi` | `int ReadDi(short Index)` | 读取数字输入（返回 0 或 1） |
+| `ReadDiT` | `bool ReadDiT(short Index)` | 读取 DI，信号存在时返回 true |
+| `ReadDiF` | `bool ReadDiF(short Index)` | 读取 DI，信号不存在时返回 true |
+| `ReadDo` | `int ReadDo(short Index)` | 读取数字输出状态 |
+| `WriteDo` | `bool WriteDo(short Index, short Value)` | 写入数字输出 |
+| `DoSet` | `bool DoSet(ValueType Index)` | 设置输出 ON |
+| `DoReset` | `bool DoReset(ValueType Index)` | 设置输出 OFF |
+| `WriteDoPls` | `void WriteDoPls(ValueType Index, short Value, int WaitTime)` | 输出脉冲信号 |
+
+#### 单轴运动
+
+| 方法 | 签名 | 说明 |
+|------|------|------|
+| `AbsMotion` | `void AbsMotion(ValueType mCardNum, ValueType mAxis, double Position, double Vel)` | 绝对位置移动（mm, mm/s） |
+| `AbsMove` | `void AbsMove(axisIndex, position, speed)` | 绝对移动 |
+| `AxisMove` | `void AxisMove(short mAxisIndex, double Position, double Vel)` | 发送运动指令（不等待） |
+| `AxisMoveAndStop` | `void AxisMoveAndStop(short mAxisIndex, double Position, double Speed, int WaitTime)` | 移动并等待到位 |
+| `StopMove` | `void StopMove(ValueType AxisID, double Speed)` | 停止轴 |
+
+#### 工站级运动（阻塞）
+
+```csharp
+// 绝对移动并等待到位（工站级）
+MotionDll.MotionAbsMoveAndDone(short axisIndex, double position, double speed, int timeout)
+```
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `axisIndex` | short | 轴编号 |
+| `position` | double | 目标位置（mm） |
+| `speed` | double | 速度（mm/s），-1=使用配置速度 |
+| `timeout` | int | 超时（ms） |
+
+**使用示例：**
+
+```csharp
+// Z轴移动到安全高度
+bool ok = MotionDll.MotionAbsMoveAndDone(轴Z, 0.0, -1, 5000);
+if (!ok) { /* 超时处理 */ }
+```
+
+#### 工站级运动（非阻塞）
+
+```csharp
+// 绝对移动（不等待到位）
+MotionDll.MotionAbsMove(short axisIndex, double position, double speed)
+```
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `axisIndex` | short | 轴编号 |
+| `position` | double | 目标位置（mm） |
+| `speed` | double | 速度（mm/s），-1=使用配置速度 |
+
+#### 多轴到位等待
+
+```csharp
+// 等待多个轴同时到位
+bool MotionWaitMoveDone(int[] axisIndexes, double[] targetPositions, int timeout)
+```
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `axisIndexes` | int[] | 轴编号数组 |
+| `targetPositions` | double[] | 目标位置数组（mm） |
+| `timeout` | int | 超时（ms） |
+
+**使用示例：**
+
+```csharp
+// 先异步发送XY移动指令
+MotionDll.MotionAbsMove(轴X, targetX, -1);
+MotionDll.MotionAbsMove(轴Y, targetY, -1);
+// 再同步等待XY都到位
+bool ok = MotionDll.MotionWaitMoveDone(new int[]{轴X, 轴Y}, new double[]{targetX, targetY}, 15000);
+```
+
+#### 到位检测
+
+| 方法 | 签名 | 说明 |
+|------|------|------|
+| `ZSPD` | `bool ZSPD(ValueType AxisID)` | 轴到位检查 |
+| `ZSPD` | `bool ZSPD(short CardNum, short Axis, double InPosDist)` | 带误差范围的到位检查 |
+| `SatZSPD` | `bool SatZSPD(short StationID)` | 工站所有轴到位检查 |
+
+#### 编码器
+
+| 方法 | 签名 | 说明 |
+|------|------|------|
+| `GetEncMm` | `double GetEncMm(int axisIndex)` | 获取编码器位置（mm） |
+
+#### 配置
+
+| 方法 | 签名 | 说明 |
+|------|------|------|
+| `SetSpeedRatio` | `void SetSpeedRatio(double Ratio, bool AllSpeedDn = false)` | 设置全局速度比例（0-1） |
+| `SetAcc` | `void SetAcc(short AxisID, double Acc, double Dec)` | 设置加减速（m/s），-1=系统默认 |
+| `CardLoad` | `int CardLoad(int, short)` | 卡初始化 |
+| `GetCardPar` | `void GetCardPar(...)` | 传递卡参数 |
+| `GetAxisPar` | `void GetAxisPar(...)` | 传递轴参数 |
+
+#### 属性
+
+| 属性 | 类型 | 说明 |
+|------|------|------|
+| `VirtualMode` | bool | 离线调试模式（true 时到位检查直接返回 true） |
+| `mGEN` | mGEN | Googol EtherCAT 卡接口 |
+| `mGTN` | nGTN | Googol GTN 卡接口 |
+
+---
+
+### 6.14 mFunction.State 系统状态枚举
+
+```csharp
+public enum State
+{
+    NONE,           // 无状态
+    WAITRESET,      // 等待复位
+    RESETTING,      // 复位中
+    WAITRUN,        // 等待运行
+    RUNNING,        // 运行中
+    PAUSE,          // 暂停
+    STOPED,         // 停止
+    ALARM,          // 报警
+    MANUAL,         // 手动模式
+}
+```
+
+---
+
+### 6.15 WorkShare 辅助方法
+
+#### SetDoBit / ResetDoBit
+
+```csharp
+void SetDoBit(ValueType Index)    // 设置输出ON（暂停时阻塞）
+void ResetDoBit(ValueType Index)  // 设置输出OFF（暂停时阻塞）
+```
+
+与 `mGlobal.mDoSet`/`mDoReset` 的区别：**这两个方法在系统暂停时会阻塞**，直到暂停恢复后才执行。适用于需要暂停安全保护的场景。
+
+#### GetPosInfo
+
+```csharp
+mFunction.PosInfo GetPosInfo(ValueType StaId, ValueType PosIndex)
+```
+
+获取系统点位数据。`StaId` = 工站编号，`PosIndex` = 点位编号。
+
+#### GetPosData
+
+```csharp
+double[] GetPosData(ValueType StaId, ValueType PosIndex)
+```
+
+获取系统点位数据（返回 double 数组）。
+
+---
+
+### 6.16 API 速查表（WorkShare 子对象）
+
+| API | 说明 | 阻塞？ |
+|-----|------|--------|
+| `mHome.WaitDone(axisId)` | 单轴回零 | ✅ |
+| `mHome.RunSts` | 回零结果 | — |
+| `dHome.WaitDone(axisIds[], speeds[])` | 多轴同时回零 | ✅ |
+| `dHome.RunSts` | 回零结果 | — |
+| `pMove.WaitDone(stationId, posIndex, ...)` | 点位移动（带Z轴安全高度） | ✅ |
+| `pMove.WaitDone(axisId, position, speed, ...)` | 直接坐标移动 | ✅ |
+| `pMove.Pause` | 暂停/恢复运动 | — |
+| `mDoDi.WaitDone(outNum, outState, inNum, inState, ...)` | 设置输出+等待输入 | ✅ |
+| `mDoDi.WaitDone(inNum, inState, ...)` | 仅等待输入 | ✅ |
+| `mDoDi.mAction += Err` | 注册错误回调 | — |
+| `mSend.WaitDone(port, sendType, data, ...)` | TCP发送+等待响应 | ✅ |
+| `mSend.mAction += Err` | 注册错误回调 | — |
+| `SetTasksInteractionTrue(id)` | 设置交互标志为 true | ❌ |
+| `SetTasksInteractionFalse(id)` | 设置交互标志为 false | ❌ |
+| `GetTasksInteraction(id, autoClear)` | 读取交互标志 | ❌ |
+| `WaitTaskInteractionTrue(id, timeout, ...)` | 等待标志变为 true | ✅ |
+| `WaitAllTaskInteractionTrue(ids, timeout, ...)` | 等待所有标志为 true | ✅ |
+| `WaitAnyTaskInteractionTrue(ids, timeout, ...)` | 等待任一标志为 true | ✅ |
+| `MotionDll.ReadDi(index)` | 读取数字输入 | ❌ |
+| `MotionDll.DoSet(index)` | 设置输出 ON | ❌ |
+| `MotionDll.DoReset(index)` | 设置输出 OFF | ❌ |
+| `MotionDll.AbsMove(axis, pos, speed)` | 绝对移动 | ❌ |
+| `MotionDll.StopMove(axis, speed)` | 停止轴 | ❌ |
+| `MotionDll.ZSPD(axisId)` | 到位检查 | ❌ |
+| `MotionDll.GetEncMm(axisIndex)` | 读取编码器位置 | ❌ |
+
+---
+
+## 7. 传送带（Conveyor）配置系统详解
+
+### 7.1 核心设计理念
+
+在 BoTech 框架中，**传送带的 IO 控制（电机、气缸、传感器）应该配置在传送带框架中，而不是写在 Task 代码里**。
+
+标准开发模式：
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Conveyor.xml                           │
+│  配置：电机IO、气缸IO、传感器IO、速度、延时、上下游关系       │
+└─────────────────────────────────────────────────────────┘
+         │
+         ↓
+┌─────────────────────────────────────────────────────────┐
+│               nConveyor 状态机（框架内部）                  │
+│  自动执行：启动电机 → 等传感器 → 控制气缸 → 停止电机        │
+│  自动处理：流入、到位、减速、流出、阻挡气缸伸缩               │
+│  自动处理：异常检测（超时弹框）                              │
+└─────────────────────────────────────────────────────────┘
+         │
+         ↓ CurStnStatus 状态变化
+┌─────────────────────────────────────────────────────────┐
+│               ConvEvent（A0.Conveyors.cs）                 │
+│  ConvRun() 根据 CurStnStatus 分发到：                      │
+│    → Data_Change()        数据交换                         │
+│    → HandleCurrentStation() 当站处理（等工位完成）           │
+│    → Start_Send()         电机启动                         │
+│    → Stop_Send()          电机停止                         │
+│    → Reduce_Speed()       减速                             │
+│    → ReLoadCarrier()      载具重载                         │
+│    → 异常处理              弹框重试/取消                     │
+└─────────────────────────────────────────────────────────┘
+         │
+         ↓ CustStatus 握手
+┌─────────────────────────────────────────────────────────┐
+│               Task（5.Tasks/Task0X_xxx.cs）                │
+│  只负责：                                                 │
+│    1. 等待 CustStatus == "WAITING_FOR_ASSEMBLY"           │
+│    2. 做工位业务（扫码/锁螺丝/出料）                        │
+│    3. 设置 CustStatus = "ASSEMBLY_COMPLETED"              │
+│  不负责：电机、气缸、传感器（由传送带框架自动控制）           │
+└─────────────────────────────────────────────────────────┘
+```
+
+### 7.2 Conveyor.xml 配置文件
+
+**路径：** `BZ-Parameter/RBF/Conveyor.xml`
+
+每个 `<Conveyor>` 节点代表一条传送带段，包含完整的 IO 和运动配置。
+
+#### 完整字段说明
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| **IO编号** | string | 电机IO端口编号（逗号分隔） |
+| **IO控制** | bool | `true`=IO控制电机，`false`=轴控制电机 |
+| **工作速度** | double | 工作时电机速度 |
+| **流出速度** | double | 流出时电机速度 |
+| **减速速度** | double | 减速时电机速度 |
+| **允许同步流入** | bool | 是否允许与前站同步流入 |
+| **同步流入延时** | int | 同步流入延时(ms) |
+| **上一段流线编号** | int | 前站传送带编号（-1=无） |
+| **下一段流线编号** | int | 后站传送带编号（-1=无） |
+| **阻挡气缸输出编号** | int | 阻挡气缸输出IO（-1=无气缸） |
+| **阻挡气缸原点信号** | int | 气缸缩回到位信号（-1=无） |
+| **阻挡气缸动点信号** | int | 气缸伸到位信号（-1=无） |
+| **起始感应信号** | int | 流入传感器信号（-1=无） |
+| **末端减速信号** | int | 减速传感器信号（-1=无） |
+| **到位感应信号** | int | 到位传感器信号（-1=无） |
+| **流出感应信号** | int | 流出传感器信号（-1=无） |
+| **马达轴编号** | int | 电机轴编号（IO控制时为0） |
+| **马达启动信号** | int | 电机启动IO（IO控制时为0） |
+| **顶升延时** | int | 顶升延时(ms) |
+| **到位延时** | int | 到位后延时(ms) |
+| **方向调转** | bool | 电机方向调转 |
+
+#### 传送带1 实际配置示例
+
+```xml
+<Conveyor>
+    <IO编号>40,41,42</IO编号>
+    <IO控制>true</IO控制>
+    <工作速度>500</工作速度>
+    <流出速度>500</流出速度>
+    <减速速度>50</减速速度>
+    <上一段流线编号>-1</上一段流线编号>     <!-- 没有前站 -->
+    <下一段流线编号>2</下一段流线编号>      <!-- 后站是传送带2 -->
+    <阻挡气缸输出编号>62</阻挡气缸输出编号>
+    <阻挡气缸原点信号>-1</阻挡气缸原点信号>
+    <阻挡气缸动点信号>73</阻挡气缸动点信号>
+    <到位感应信号>74</到位感应信号>
+    <起始感应信号>-1</起始感应信号>
+    <流出感应信号>-1</流出感应信号>
+    <到位延时>1000</到位延时>
+</Conveyor>
+```
+
+---
+
+### 7.3 nConveyor 状态机（框架内部）
+
+`nConveyor` 是框架提供的传送带状态机，运行在独立线程上。根据 `Conveyor.xml` 的配置自动控制电机、气缸和传感器。
+
+#### 状态机步进
+
+```
+StepIdx=10   FlowInStart          启动电机，等待产品流入
+StepIdx=20   AtPositionCheck      等待到位传感器 + 阻挡气缸
+StepIdx=30   DataExchange         从前一站复制产品数据
+StepIdx=40   AtPositionClassify   到位分类，停止电机
+StepIdx=70   WaitProcessing       通知工位开始工作
+StepIdx=80   ProcessingComplete   工位说"做完了"
+StepIdx=100  FlowOutStart         启动流出电机
+StepIdx=110  ObstacleRetract      阻挡气缸缩回
+StepIdx=150  FlowOutEnd           等待产品流走
+StepIdx=160  LoopCheck            计算CT，回到10
+```
+
+#### nConveyor 自动控制的 IO
+
+| 步进 | 自动控制 | 依据配置 |
+|------|---------|---------|
+| StepIdx=10 | 启动电机 | `工作速度`、`IO编号` |
+| StepIdx=20 | 等传感器 | `到位感应信号`、`阻挡气缸动点信号` |
+| StepIdx=40 | 停止电机 | `Stop_Send()` 回调 |
+| StepIdx=100 | 启动流出电机 | `流出速度` |
+| StepIdx=110 | 缩回阻挡气缸 | `阻挡气缸输出编号`、`阻挡气缸原点信号` |
+| StepIdx=150 | 停止电机 | `Stop_Send()` 回调 |
+
+---
+
+### 7.4 ConvEvent 用户可编程事件（A0.Conveyors.cs）
+
+`ConvEvent` 是用户可编程的事件处理器。当 `nConveyor` 状态机的状态发生变化时，通过 `mEvent` 委托调用 `ConvRun()`。
+
+#### ConvRun 主调度器
+
+```csharp
+public void ConvRun(short ConvID)
+{
+    if (CurStnStatus == "PRODUCT_ARRIVED")              → Data_Change()
+    if (CurStnStatus == "CURRENT_STATION_PROCESSING")   → HandleCurrentStation()
+    if (CurStnStatus == "CARRIER_RELOAD")               → ReLoadCarrier()
+    if (CurStnStatus == "START_TRANSFER")               → Start_Send()
+    if (CurStnStatus == "STOP_TRANSFER")                → Stop_Send()
+    if (CurStnStatus == "START_DECELERATING")           → Reduce_Speed()
+    if (CurStnStatus == "ObstacleRetract_ERROR")        → 异常弹框
+    if (CurStnStatus == "ObstacleLifting_ERROR")        → 异常弹框
+    if (CurStnStatus == "FLOWOUT_ERROR")                → 异常弹框
+    if (CurStnStatus == "RECEIVING_ERROR")              → 异常弹框
+    if (CurStnStatus == "FlowIn_ERROR")                 → 异常弹框
+}
+```
+
+#### HandleCurrentStation — 当站处理（核心）
+
+连接传送带框架和 Task 代码的桥梁：
+
+```csharp
+public static bool HandleCurrentStation(int StaNum)
+{
+    switch (StaNum)
+    {
+        case 1:  // 传送带1
+            if (SubStepIdx == 10)
+            {
+                ConvData.Clear();                              // 清空旧数据
+                CustStatus = "WAITING_FOR_ASSEMBLY";           // ← 通知工位
+                SubStepIdx = 20;
+            }
+            if (CustStatus == "ASSEMBLY_COMPLETED")            // ← 工位完成
+            {
+                return true;                                   // 告诉框架：可以流走
+            }
+            break;
+    }
+    return false;
+}
+```
+
+#### Start_Send / Stop_Send — 电机控制
+
+```csharp
+// 电机启动（框架在 StepIdx=100 时调用）
+private static bool Start_Send(int ConvID) { return true; }
+
+// 电机停止（框架在 StepIdx=40/150 时调用）
+// 关键：传送带成对共用电机（1-2、3-4、5-6、7-8）
+private static bool Stop_Send(int ConvID)
+{
+    switch (ConvID)
+    {
+        case 1: case 2:
+            if (ConveyorData[1].MotorRun | ConveyorData[2].MotorRun)
+                return true;  // 配对还在跑，不停
+            return true;
+        case 3: case 4:
+            if (ConveyorData[3].MotorRun | ConveyorData[4].MotorRun)
+                return true;
+            return true;
+    }
+    return true;
+}
+```
+
+---
+
+### 7.5 完整数据流示例
+
+以传送带1为例，产品从流入到流出的完整流程：
+
+```
+传送带框架（nConveyor）           ConvEvent                    Task01
+    │                              │                           │
+    │ StepIdx=10: 启动电机          │                           │
+    │ 等待产品流入                   │                           │
+    │                              │                           │
+    │ 产品到达 → 到位传感器亮        │                           │
+    │ StepIdx=20: 等到位+气缸       │                           │
+    │                              │                           │
+    │ StepIdx=30: 数据交换          │                           │
+    │ CurStnStatus="PRODUCT_ARRIVED"│                           │
+    │                              │→ ConvRun → Data_Change()  │
+    │                              │  清空前站数据               │
+    │                              │                           │
+    │ StepIdx=40: 停止电机          │                           │
+    │ CurStnStatus="CURRENT_STATION"│                           │
+    │       _PROCESSING             │                           │
+    │                              │→ ConvRun →                │
+    │                              │  HandleCurrentStation()   │
+    │                              │  CustStatus=              │
+    │                              │  "WAITING_FOR_ASSEMBLY"  ─│─→ 检测到信号
+    │                              │                           │  开始扫码
+    │                              │                           │  做工作...
+    │                              │                           │  完成
+    │                              │                           │  CustStatus=
+    │                              │  检测到 CustStatus  ←─────│─  "ASSEMBLY_COMPLETED"
+    │                              │  == "ASSEMBLY_COMPLETED"  │
+    │                              │  return true              │
+    │                              │                           │
+    │ StepIdx=100: 启动流出电机     │                           │
+    │ CurStnStatus="START_TRANSFER"│                           │
+    │                              │→ ConvRun → Start_Send()   │
+    │                              │                           │
+    │ StepIdx=110: 气缸缩回         │                           │
+    │ 产品流出                      │                           │
+    │                              │                           │
+    │ StepIdx=150: 停止电机         │                           │
+    │ CurStnStatus="STOP_TRANSFER" │                           │
+    │                              │→ ConvRun → Stop_Send()    │
+    │                              │                           │
+    │ StepIdx=160: 回到 StepIdx=10  │                           │
+    │                              │                           │
+    │ 等待下一个产品...              │                           │
+```
+
+---
+
+### 7.6 Conveyor.xml 与 InNo/OutNo 的映射关系
+
+Conveyor.xml 中的信号编号**直接对应** `EnumName.cs` 中的 `InNo` 和 `OutNo` 枚举值。
+
+#### 各传送带映射
+
+| 传送带 | `阻挡气缸输出编号` | `阻挡气缸动点信号` | `到位感应信号` | `上一站` | `下一站` |
+|--------|-------------------|-------------------|---------------|---------|---------|
+| 1 | 62 | 73 | 74 | -1 | 2 |
+| 2 | 64 | 77 | 78 | 1 | 3 |
+| 3 | -1 | -1 | 83 | 2 | -1 |
+
+---
+
+### 7.7 标准开发模式 vs 当前项目
+
+#### 标准模式（推荐）
+
+| 层级 | 职责 |
+|------|------|
+| **Conveyor.xml** | 配置电机IO、气缸IO、传感器IO、速度、延时、上下游关系 |
+| **A0.Conveyors.cs** | HandleCurrentStation: 设置 CustStatus 等工位完成；Start_Send/Stop_Send: 共用电机处理 |
+| **Task 代码** | 只检查 CustStatus，只做业务逻辑，不直接控制电机/气缸 |
+
+**优点：** 框架自动处理电机启停、气缸伸缩、传感器等待、异常检测。Task 代码简洁。
+
+#### 当前项目模式
+
+| 层级 | 职责 |
+|------|------|
+| **Task 代码** | 直接控制电机、气缸、检查传感器、处理超时 |
+
+**缺点：** Task 代码复杂，IO 操作在等待循环中导致日志刷屏、UI 卡死。
+
+---
+
+### 7.8 CurStnStatus 完整状态列表
+
+| 状态字符串 | 中文 | 设置者 | 说明 |
+|-----------|------|--------|------|
+| `"PRODUCT_ARRIVED"` | 产品到位 | nConveyor | 产品到达工位 |
+| `"SWAP_COMPLETED"` | 交换完成 | ConvEvent | 数据交换完成 |
+| `"CURRENT_STATION_PROCESSING"` | 当站处理 | nConveyor | 通知 ConvEvent 开始处理 |
+| `"PROCESSING_COMPLETED"` | 处理完成 | ConvEvent | 工位完成 |
+| `"CARRIER_RELOAD"` | 载具重载 | nConveyor | 需要载具重载 |
+| `"RELOAD_COMPLETED"` | 重载完成 | ConvEvent | 重载完成 |
+| `"START_TRANSFER"` | 开始传送 | nConveyor | 通知启动电机 |
+| `"STOP_TRANSFER"` | 停止传送 | nConveyor | 通知停止电机 |
+| `"START_DECELERATING"` | 开始减速 | nConveyor | 通知减速 |
+| `"DONE"` | 完成 | nConveyor | 流程完成 |
+| `"RESTART"` | 重新开始 | HandleCurrentStation | 流线复位 |
+| `"ObstacleRetract_ERROR"` | 阻挡缩回异常 | nConveyor | 气缸缩回超时 |
+| `"ObstacleLifting_ERROR"` | 阻挡伸出异常 | nConveyor | 气缸伸出超时 |
+| `"FLOWOUT_ERROR"` | 流出异常 | nConveyor | 流出超时 |
+| `"RECEIVING_ERROR"` | 接收异常 | nConveyor | 接收超时 |
+| `"FlowIn_ERROR"` | 流入异常 | nConveyor | 流入超时 |
+
+---
+
+### 7.9 ConveyorData 运行时属性
+
+`mFunction.ConveyorData[i]` 的运行时属性：
+
+| 属性 | 类型 | 说明 |
+|------|------|------|
+| `StepIdx` | int | 状态机当前步进（0=停, 10=流入, 70=等待工位, 160=循环） |
+| `SubStepIdx` | int | 子步进（给 HandleCurrentStation 用） |
+| `CurStnStatus` | string | 当前工位状态（框架设置） |
+| `CustStatus` | string | 自定义状态（工位间通信） |
+| `ProdPres` | string | 产品存在："HAS" / "无" |
+| `ProdStatus` | string | 产品状态："OK" / "NG" |
+| `MotorRun` | bool | 电机是否在转 |
+| `PrevFLNum` | short | 前站编号（-1=无） |
+| `NextFLNum` | short | 后站编号（-1=无） |
+| `IOControl` | bool | IO控制模式 |
+| `BlockCylOutputNum` | int | 阻挡气缸输出编号 |
+| `PosSensorSig` | int | 到位传感器信号编号 |
+
+---
+
+### 7.10 常见问题
+
+**Q: 为什么 Task 里的电机控制不生效？**
+A: 如果 Conveyor.xml 中配置了 `IO控制=true`，框架会自动控制电机。Task 里的 `mDoSet`/`mDoReset` 会被覆盖。
+
+**Q: 传送带1和2为什么会同时停？**
+A: 因为 `Stop_Send` 中 1-2、3-4 成对共用电机。停止一条时会检查配对是否还在运行。
+
+**Q: Conveyor.xml 中的数字和 InNo/OutNo 枚举值不一样？**
+A: Conveyor.xml 用的是 IO 卡的**物理端口号**，InNo/OutNo 是**逻辑索引**。通过 `ParInput.xml`/`ParOutput.xml` 映射。
+
+**Q: 如何让传送带不停电机？**
+A: 在 `Stop_Send` 中设置 `mConvSts[ConvID].StepStop = true`，框架不会执行停止代码。
+
+---
+
+## 8. 核心 API 详解与常见问题
+
+### 8.1 TasksInteraction 跨线程通信详解
+
+#### 底层原理
+
+`TasksInteraction` 的本质是一个**全局线程安全寄存器表**，由 `SystemMgr` 单例管理：
+
+```
+SystemMgr（全局单例，内存中）
+    │
+    ├─ 寄存器[0] → bool?  组装允许机械手_标志
+    ├─ 寄存器[1] → bool?  右轴螺丝工作完成_标志
+    ├─ 寄存器[2] → bool?  左轴螺丝工作完成_标志
+    └─ ...
+```
+
+每个寄存器可以存三个值：
+- `null` — 从未设置过
+- `true` — 被设为 true
+- `false` — 被设为 false
+
+枚举值通过 `Convert.ToInt32(id)` 转为 int，直接作为寄存器数组的物理索引。
+
+#### 为什么不用普通 bool 变量？
+
+```csharp
+// ❌ 普通 bool — 跨线程不安全
+public static bool 右轴完成 = false;
+
+// Task02（线程A）写入
+右轴完成 = true;
+
+// Task04（线程B）读取
+if (右轴完成) { ... }  // 可能读到旧值！CPU缓存、编译器优化可能导致不可见
+```
+
+```csharp
+// ✅ TasksInteraction — 线程安全
+SetTasksInteractionTrue(TasksInteraction.右轴螺丝工作完成_标志);   // 线程安全写入
+GetTasksInteraction(TasksInteraction.右轴螺丝工作完成_标志);        // 线程安全读取
+```
+
+| 对比项 | 普通 bool | TasksInteraction |
+|--------|----------|-----------------|
+| 线程安全 | ❌ 不安全 | ✅ 有锁保护 |
+| 跨线程可见 | ❌ 可能读到旧值 | ✅ 保证最新值 |
+| 超时等待 | ❌ 需自己写循环 | ✅ 内置 Wait + 超时 + 弹框 |
+| 自动日志 | ❌ 无 | ✅ 值变化自动记录 |
+| 适用场景 | 同一线程内 | 跨线程工位间通信 |
+
+#### SetTasksInteractionTrue
+
+```csharp
+void SetTasksInteractionTrue(Enum id)
+```
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `id` | Enum | 标志枚举值 |
+
+把指定寄存器设为 `true`。值变化时自动写日志。
+
+```csharp
+SetTasksInteractionTrue(TasksInteraction.左轴螺丝工作完成_标志);
+// 日志：线程交互变量: 左轴螺丝工作完成_标志, set value is true
+```
+
+#### SetTasksInteractionFalse
+
+```csharp
+void SetTasksInteractionFalse(Enum id)
+```
+
+把指定寄存器设为 `false`。
+
+#### GetTasksInteraction
+
+```csharp
+bool? GetTasksInteraction(Enum id, bool isAutoClear = false)
+```
+
+| 参数 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `id` | Enum | — | 标志枚举值 |
+| `isAutoClear` | bool | `false` | 读取后是否自动清空 |
+
+返回 `null`（未设置）、`true` 或 `false`。
+
+```csharp
+// 读取但不清空
+bool? result = GetTasksInteraction(TasksInteraction.右轴完成_标志, false);
+
+// 读取后自动清空（一次性信号）
+bool? result = GetTasksInteraction(TasksInteraction.右轴完成_标志, true);
+```
+
+#### WaitTaskInteractionTrue
+
+```csharp
+bool WaitTaskInteractionTrue(Enum id, int nTimeOut = -1, bool bTimeOutShowDialog = true, bool isAutoClear = false)
+```
+
+| 参数 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `id` | Enum | — | 标志枚举值 |
+| `nTimeOut` | int | `-1` | 超时(ms)，**-1=永远等待** |
+| `bTimeOutShowDialog` | bool | `true` | 超时是否弹框 |
+| `isAutoClear` | bool | `false` | 成功后是否自动清空 |
+
+**阻塞方法**，每 10ms 检查一次。暂停时计时器停止。
+
+```csharp
+bool ok = WaitTaskInteractionTrue(
+    TasksInteraction.左轴螺丝工作完成_标志,
+    5000,    // 5秒超时
+    true,    // 超时弹框
+    true     // 成功后自动清空
+);
+```
+
+#### WaitAllTaskInteractionTrue
+
+```csharp
+bool WaitAllTaskInteractionTrue(Enum[] ids, int nTimeOut = -1, bool bTimeOutShowDialog = true, bool isAutoClear = false)
+```
+
+等待所有标志**同时**为 true。
+
+```csharp
+bool ok = WaitAllTaskInteractionTrue(
+    new Enum[] {
+        TasksInteraction.右轴螺丝工作完成_标志,
+        TasksInteraction.左轴螺丝工作完成_标志
+    },
+    5000, true, false
+);
+```
+
+#### WaitAnyTaskInteractionTrue
+
+```csharp
+bool WaitAnyTaskInteractionTrue(Enum[] ids, out Enum[] completes, int nTimeOut = -1, bool bTimeOutShowDialog = true, bool isAutoClear = false)
+```
+
+等待**任一**标志为 true。`completes` 输出满足条件的标志。
+
+---
+
+### 8.2 mSend.WaitDone 通信详解
+
+```csharp
+bool mSend.WaitDone(int mPortIndex, int sendType, string SendData, int recvType, string recvStr, int nTimeOut, bool bTimeOutShowDialog, bool nShowLog)
+```
+
+| # | 参数 | 类型 | 说明 |
+|---|------|------|------|
+| 1 | `mPortIndex` | int | 端口号（`TCPIP_Port` 枚举或串口编号） |
+| 2 | `sendType` | int | **0=字节发送, 1=字符串发送** |
+| 3 | `SendData` | string | 发送的数据 |
+| 4 | `recvType` | int | **0=字节接收, 1=字符串接收** |
+| 5 | `recvStr` | string | 匹配字符串（空=接收任何响应） |
+| 6 | `nTimeOut` | int | 超时(ms)，**-1=无限等待** |
+| 7 | `bTimeOutShowDialog` | bool | 超时是否弹框 |
+| 8 | `nShowLog` | bool | 是否显示日志 |
+
+#### recvStr 匹配规则
+
+框架对接收到的数据做 **前缀匹配（StartsWith）**：
+
+```csharp
+// 接收到的数据
+string receivedData = "ReadCode,OK,SN12345678";
+
+// 匹配检查
+receivedData.StartsWith("ReadCode,OK,")  // ✅ 匹配成功
+```
+
+| recvStr 值 | 行为 |
+|------------|------|
+| `""` (空) | 接收任何响应都算成功 |
+| `"ReadCode,OK,"` | 响应必须以这个字符串开头才算成功 |
+
+不匹配的数据会被忽略，继续等下一条响应，直到超时。
+
+#### 使用示例
+
+```csharp
+// 扫码枪通信
+bool ok = mSend.WaitDone(
+    (int)TCPIP_Port.扫描,  // 端口
+    1,                       // 字符串发送
+    "ReadCode",              // 发送数据
+    0,                       // 字节接收
+    "",                      // 接收任何响应
+    5000,                    // 超时5秒
+    true,                    // 超时弹框
+    false                    // 不显示日志
+);
+```
+
+---
+
+### 8.3 MainConvId 详解
+
+`MainConvId` 是基类 `WorkShare` 的属性，在 `Initialize()` 中通过 `BindConv()` 设置：
+
+```csharp
+public override void Initialize()
+{
+    this.BindConv(1, null);  // MainConvId = 1
+    // ...
+}
+```
+
+| 工位 | BindConv | MainConvId |
+|------|----------|------------|
+| Task01 | `BindConv(1, null)` | 1 |
+| Task02 | `BindConv(2, null)` | 2 |
+| Task03 | `BindConv(3, null)` | 3 |
+
+使用 `MainConvId` 而不是写死数字，保证代码通用：
+
+```csharp
+// ✅ 通用写法
+mFunction.ConveyorData[MainConvId].StartTime
+
+// ❌ 写死数字
+mFunction.ConveyorData[1].StartTime
+```
+
+---
+
+### 8.4 TipsDiglogForm 弹框详解
+
+```csharp
+AlarmCenter.XAlarmRecord.Instance.TipsDiglogForm(
+    int taskId, string taskName, string message,
+    string changeWithoutTran, bool isWaitOne,
+    string btnOKText, string btnCancelText
+)
+```
+
+| # | 参数 | 类型 | 说明 |
+|---|------|------|------|
+| 1 | `taskId` | int | 工位ID（用于日志） |
+| 2 | `taskName` | string | 工位名称（用于日志） |
+| 3 | `message` | string | 弹框消息 |
+| 4 | `changeWithoutTran` | string | 不翻译的变量（多语言用，通常 `""`） |
+| 5 | `isWaitOne` | bool | 是否阻塞等待用户点击 |
+| 6 | `btnOKText` | string | 确定按钮文字 |
+| 7 | `btnCancelText` | string | 取消按钮文字（可选） |
+
+返回 `AlarmCenter.mDialogResult.OK` 或 `AlarmCenter.mDialogResult.Cancel`。
+
+```csharp
+if (AlarmCenter.XAlarmRecord.Instance.TipsDiglogForm(
+    (int)this.TaskID, this.TaskName,
+    "是否重试？", "", true, "Yes", "No") == AlarmCenter.mDialogResult.OK)
+{
+    // 用户点了 Yes
+}
+```
+
+---
+
+### 8.5 mDoDiWaitDone 详解
+
+```csharp
+mDoDi.WaitDone(outNum, outState, inNum, inState, delayTime, timeout, popUpMessage)
+```
+
+| # | 参数 | 类型 | 说明 |
+|---|------|------|------|
+| 1 | `outNum` | ValueType | 输出端口号（`OutNo` 枚举） |
+| 2 | `outState` | short | 输出状态：**1=ON, 0=OFF** |
+| 3 | `inNum` | ValueType | 输入端口号（`InNo` 枚举） |
+| 4 | `inState` | short | 期望输入状态：**1=ON, 0=OFF** |
+| 5 | `delayTime` | short | 到位后延时(ms) |
+| 6 | `timeout` | short | 超时(ms)，**-1=无限等待** |
+| 7 | `popUpMessage` | bool | 超时是否弹框 |
+
+**阻塞方法**，先设置输出，然后等待输入达到期望状态。
+
+```csharp
+// 气缸伸出，等伸出信号
+mDoDiWaitDone(OutNo.流线1阻挡气缸, 1, InNo.流线1阻挡伸出信号, 1, 10, 3000, true);
+
+// 气缸缩回，等缩回信号
+mDoDiWaitDone(OutNo.流线1阻挡气缸, 0, InNo.流线1阻挡缩回信号, 1, 10, 3000, true);
+```
+
+**注意：** `mDoDiWaitDone` 是阻塞方法，在 AutoRun 中使用会导致线程阻塞。仅在 Homing 或非循环步骤中使用。AutoRun 中用 `mDoSet` + 下一步 `ReadDi_Bool` 替代。
+
+---
+
+### 8.6 mFunction.OverTime 超时判断
+
+```csharp
+bool mFunction.OverTime(long StartTime, int SleepTime)
+```
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `StartTime` | long | 起始时间戳（`GetTickCount()` 获取） |
+| `SleepTime` | int | 超时时间(ms) |
+
+**非阻塞方法**，判断从 `StartTime` 开始是否已超过 `SleepTime` 毫秒。
+
+```csharp
+// 记录起点
+mFunction.ConveyorData[MainConvId].StartTime = mFunction.GetTickCount();
+
+// 后续步骤中检查（每10ms检查一次）
+if (mFunction.OverTime(mFunction.ConveyorData[MainConvId].StartTime, 5000))
+{
+    // 5秒超时
+}
+```
+
+**替代 Thread.Sleep 的非阻塞写法：**
+
+```csharp
+// ❌ 阻塞
+Thread.Sleep(3000);
+
+// ✅ 非阻塞
+StartTime = GetTickCount();
+// ... 下一步 ...
+if (OverTime(StartTime, 3000)) { /* 3秒到了 */ }
+```
+
+---
+
+### 8.7 机械轴屏蔽模式详解
+
+```csharp
+if (是否屏蔽)
+{
+    已持料 = false;
+    mGlobal.mDoReset(CCD光源触发信号);
+    mGlobal.mDoReset(电批吸真空信号);
+    mGlobal.mDoReset(电批破真空信号);
+    mGlobal.mDoReset(电批启动信号);
+
+    if (GetTasksInteraction(启动触发标志, false) == true)
+    {
+        SetTasksInteractionTrue(完成标志);  // 直接回复"完成"
+    }
+    SetStep(ref StaInfo, (int)步序.等待启动信号, false);
+    return;  // 不执行后面的 switch
+}
+```
+
+**执行流程：**
+
+```
+屏蔽状态（每10ms）：
+    清除所有输出 → 收到启动信号？→ 直接回复"完成"
+    → SetStep(等待启动信号) → return（不执行switch）
+
+取消屏蔽后：
+    是否屏蔽=false → 不进if块 → 执行switch
+    → StepIdx 已经是"等待启动信号" → 等产品到位 → 正常工作
+```
+
+**为什么 SetStep(等待启动信号)？** 确保取消屏蔽后，轴从"等产品到位"这个安全状态开始，而不是从"拧紧到一半"或"移动中"继续。
+
+---
+
+### 8.8 扫码使能检查重复的原因
+
+```csharp
+// Step10: 检查到位信号
+if (mGlobal.ReadDi_Bool(InNo.流线1到位信号))
+{
+    // 产品已经在位（机器重启场景）
+    if (启用扫码) { SetStep(电机停扫码); }
+    else { SetStep(关光源); }
+}
+
+// Step20: 等到位信号
+if (WaitDi(InNo.流线1到位信号, 1))
+{
+    // 产品刚到达（正常流程）
+    if (启用扫码) { SetStep(电机停扫码); }
+    else { SetStep(关光源); }
+}
+```
+
+**Step10 处理"产品已在位"（机器重启），Step20 处理"产品刚到达"（正常流程）。两个场景都需要检查扫码使能，所以写了两遍。**
+
+---
+
+## 9. UI 控件与代码的映射关系
+
+### 9.1 核心概念
+
+UI 控件和 Task 代码之间的桥梁是**枚举映射**。控件通过枚举值（`OutNo`、`InNo`、`mAxis`、`Task_ID`）与代码关联。
+
+```
+UI 控件（设计时配置）          Task 代码（运行时调用）
+    │                              │
+    ├─ StationRun.StationID ──────→ Task_ID 枚举
+    ├─ Teach.StationID ──────────→ 工站编号属性
+    ├─ Cylinder.OutputIndex ─────→ OutNo 枚举
+    ├─ Cylinder.MovingPointNumber → InNo 枚举
+    └─ mBtn_Out.OutputIndex ─────→ OutNo 枚举
+```
+
+---
+
+### 9.2 StationRun → Task 绑定
+
+**映射关系：** `StationRun.StationID` = `Task_ID` 枚举值
+
+| UI 控件 | StationID | Task 代码 |
+|---------|-----------|-----------|
+| `stationRun00` | 1 | `Task01_入料扫码站` |
+| `stationRun01` | 2 | `Task02_螺丝站` |
+| `stationRun02` | 3 | `Task03_出料站` |
+
+**代码绑定（Initialize 中）：**
+
+```csharp
+public override void Initialize()
+{
+    TaskID = (short)Task_ID.Task01_入料扫码站;
+    WkManager.BindStation((short)Task_ID.Task01_入料扫码站, "名称", this);
+    this.BindStationRun(Frm_Task.Instance.stationRun00);  // ← 绑定UI控件
+    // ...
+}
+```
+
+**调用链：** 用户点击 StationRun.Start() → 框架找到对应 Task → 调用 Ready() → 调用 ManualMode("模式名")
+
+---
+
+### 9.3 Teach → 轴运动映射
+
+**映射关系：** `Teach.StationID` = 代码中的 `工站编号` 属性
+
+| UI 控件 | StationID | 代码属性 |
+|---------|-----------|---------|
+| `teach_右轴` | 1 | `工站编号 => 示教工站ID.右取料模组` |
+| `teach_左轴` | 2 | `工站编号 => 示教工站ID.左取料模组` |
+
+**代码中的使用：**
+
+```csharp
+// 基类定义
+protected abstract ValueType 工站编号 { get; }
+
+// 子类实现（映射到 Teach 控件的 StationID）
+protected override ValueType 工站编号 => 示教工站ID.右取料模组;
+
+// 使用时：工站编号 + 点位索引 → 获取坐标 → 移动轴
+PosInfo pos = GetPosInfo(工站编号, 取料点位索引);
+pMove.WaitDone(轴X, pos.X, -1, 10, 15000);
+```
+
+**映射链：** `teach_右轴.StationID` → `示教工站ID.右取料模组` → `工站编号` 属性 → `GetPosInfo()` 读取坐标
+
+---
+
+### 9.4 Cylinder → IO 映射
+
+**映射关系：** `Cylinder.OutputIndex` = `OutNo` 枚举值，`MovingPointNumber`/`HomePointNumber` = `InNo` 枚举值
+
+| UI 控件 | OutputIndex | MovingPointNumber | HomePointNumber |
+|---------|-------------|-------------------|-----------------|
+| `流线1阻挡气缸` | 80 | 68 | 69 |
+
+**代码中的对应：**
+
+```csharp
+// UI 控件配置
+流线1阻挡气缸.OutputIndex = "80";        // = OutNo.流线1阻挡气缸
+流线1阻挡气缸.MovingPointNumber = 68;    // = InNo.流线1阻挡伸出信号
+流线1阻挡气缸.HomePointNumber = 69;      // = InNo.流线1阻挡缩回信号
+
+// Task 代码中使用
+mGlobal.mDoSet(OutNo.流线1阻挡气缸);                          // 伸出
+mGlobal.mDoReset(OutNo.流线1阻挡气缸);                        // 缩回
+mGlobal.ReadDi_Bool(InNo.流线1阻挡伸出信号);                   // 读伸出状态
+mGlobal.ReadDi_Bool(InNo.流线1阻挡缩回信号);                   // 读缩回状态
+mDoDiWaitDone(OutNo.流线1阻挡气缸, 1, InNo.流线1阻挡伸出信号, 1, 10, 3000, true);  // 伸出并等待
+```
+
+**映射链：** `Cylinder.OutputIndex` → `OutNo` 枚举 → `mDoSet`/`mDoReset`
+
+---
+
+### 9.5 mBtn_Out → IO 映射
+
+**映射关系：** `mBtn_Out.OutputIndex` = `OutNo` 枚举值
+
+| UI 控件 | OutputIndex | 代码对应 |
+|---------|-------------|---------|
+| `mBtn_右电批启动` | 56 | `OutNo.右电批Start` |
+| `mBtn_右电批reset` | 57 | `OutNo.右电批Reset` |
+| `mBtn_右吸真空` | 60 | `OutNo.右电批吸真空` |
+| `mBtn_右破真空` | 61 | `OutNo.右电批破真空` |
+
+**代码中的对应：**
+
+```csharp
+// UI 控件配置
+mBtn_右电批启动.OutputIndex = 56;     // = OutNo.右电批Start
+
+// Task 代码中使用
+mGlobal.mDoSet(OutNo.右电批Start);    // 启动
+mGlobal.mDoReset(OutNo.右电批Start);  // 停止
+```
+
+---
+
+### 9.6 完整映射关系图
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        UI 控件层                             │
+│                                                              │
+│  StationRun        Teach           Cylinder      mBtn_Out   │
+│  (stationRun00)    (teach_右轴)    (流线1阻挡气缸) (mBtn_右电批)│
+│  StationID=1       StationID=1     OutputIndex=80  Index=56  │
+│       │                │           MovingPt=68                │
+│       │                │           HomePt=69                  │
+└───────┼────────────────┼───────────────┼──────────────┼──────┘
+        │                │               │              │
+        │    ┌───────────┘               │              │
+        │    │                           │              │
+┌───────┼────┼───────────────────────────┼──────────────┼──────┐
+│       │    │          Task 代码层       │              │      │
+│       │    │                           │              │      │
+│  Initialize()      工站编号属性         OutNo枚举      OutNo  │
+│  BindStationRun()  GetPosInfo()        mDoSet()       枚举   │
+│  ManualMode()      pMove.WaitDone()    mDoReset()           │
+│       │    │               │               │              │  │
+└───────┼────┼───────────────┼───────────────┼──────────────┘
+        │    │               │               │
+        │    │               │               │
+┌───────┼────┼───────────────┼───────────────┼──────────────────┐
+│       │    │          底层 API 层          │                  │
+│       │    │                               │                  │
+│  WkManager    MotionDll              MotionDll.DoSet/DoReset │
+│  .BindStation .AbsMove()             MotionDll.ReadDi()      │
+│  .TaskStart() .WaitDone()                                  │
+└──────────────────────────────────────────────────────────────┘
+```

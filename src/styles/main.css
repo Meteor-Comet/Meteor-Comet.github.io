@@ -175,13 +175,16 @@
   margin: 0 auto;
 }
 
+/* 🔽 从这里开始替换 🔽 */
+
 /* 切换按钮 */
 .carousel-prev,
 .carousel-next {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 10;
+  z-index: 10;            /* 提升层级，防止被图片遮挡 */
+  pointer-events: auto;   /* 确保可点击（防御性添加） */
   background: rgba(0, 0, 0, 0.5);
   color: #fff;
   border: none;
@@ -200,7 +203,16 @@
 .carousel-prev { left: 10px; }
 .carousel-next { right: 10px; }
 
-/* 指示器圆点 */
+/* 🆕 新增：防止 Markdown <p> 标签遮挡按钮或产生多余间距 */
+.carousel-slide p {
+  margin: 0;
+  padding: 0;
+  position: static; 
+}
+
+/* 🔼 替换到这里结束 🔼 */
+
+/* 指示器圆点 (这部分保持不变) */
 .carousel-indicators {
   display: flex;
   justify-content: center;

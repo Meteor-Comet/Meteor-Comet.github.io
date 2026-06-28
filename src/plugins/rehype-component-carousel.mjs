@@ -1,114 +1,70 @@
-/// <reference types="mdast" />
-import { h } from "hastscript";
+import { h } from 'hastscript';
 
-/**
- * 将 <!-- slide --> 注释分割为独立幻灯片
- * @param {import('hast').Content[]} children
- */
-function splitSlides(children) {
-	const slides = [];
-	let current = [];
+export function CarouselComponent(children) {
+  // 1. 过滤出真正的图片段落
+  const imageNodes = children.filter(
+    (node) => node.tagName === 'p' && 
+              node.children?.some((c) => c.tagName === 'img')
+  );
 
-	for (const child of children) {
-		if (
-			child.type === "comment" &&
-			typeof child.value === "string" &&
-			child.value.trim() === "slide"
-		) {
-			if (current.length > 0) slides.push(current);
-			current = [];
-		} else {
-			current.push(child);
-		}
-	}
+  if (imageNodes.length === 0) return children;
 
-	if (current.length > 0) slides.push(current);
-	return slides;
-}
+  // 2. 生成 N 个独立的 slide
+  const slideNodes = imageNodes.map((para, index) => {
+    const img = para.children.find((c) => c.tagName === 'img');
+    return h('div', {
+      class: `carousel-slide${index === 0 ? ' active' : ''}`,
+      'data-index': index,
+    }, [h('p', {}, [img])]);
+  });
 
-/**
- * Creates a Carousel component.
- * 与 GithubCardComponent / AdmonitionComponent 完全同构
- *
- * @param {Object} properties - The properties of the component.
- * @param {import('mdast').RootContent[]} children - Slide content separated by <!-- slide -->
- * @returns {import('mdast').Parent} The created Carousel component.
- */
-export function CarouselComponent(properties, children) {
-	const slides = splitSlides(children || []);
+  // 3. 🔑 生成与 slide 数量完全一致的 N 个 dot
+  const dotNodes = imageNodes.map((_, index) =>
+    h('span', {
+      class: `carousel-dot${index === 0 ? ' active' : ''}`,
+      'data-index': index,
+    })
+  );
 
-	if (slides.length === 0) {
-		return h("div", { class: "carousel-error" }, [
-			'Invalid directive. ("carousel" directive must contain at least one slide)',
-		]);
-	}
+  const id = `carousel-${Math.random().toString(36).slice(2, 8)}`;
 
-	const uuid = `carousel-${Math.random().toString(36).slice(-6)}`;
-
-	const slideNodes = slides.map((slideChildren, i) =>
-		h(
-			"div",
-			{ class: `carousel-slide${i === 0 ? " active" : ""}`, "data-index": i },
-			slideChildren,
-		),
-	);
-
-	const prevBtn = h(
-		"button",
-		{ class: "carousel-prev", "aria-label": "Previous slide" },
-		"‹",
-	);
-	const nextBtn = h(
-		"button",
-		{ class: "carousel-next", "aria-label": "Next slide" },
-		"›",
-	);
-
-	const indicators = h(
-		"div",
-		{ class: "carousel-indicators" },
-		slides.map((_, i) =>
-			h("span", {
-				class: `carousel-dot${i === 0 ? " active" : ""}`,
-				"data-index": i,
-			}),
-		),
-	);
-
-	const nScript = h(
-		`script#${uuid}-script`,
-		{ type: "text/javascript", defer: true },
-		`
-      (function() {
-        var c = document.getElementById('${uuid}');
-        if (!c) return;
-        var slides = c.querySelectorAll('.carousel-slide');
-        var dots = c.querySelectorAll('.carousel-dot');
-        var cur = 0;
-        function show(i) {
-          slides.forEach(function(s, n) { s.classList.toggle('active', n === i); });
-          dots.forEach(function(d, n) { d.classList.toggle('active', n === i); });
-          cur = i;
-        }
-        c.querySelector('.carousel-prev').addEventListener('click', function() {
-          show((cur - 1 + slides.length) % slides.length);
-        });
-        c.querySelector('.carousel-next').addEventListener('click', function() {
-          show((cur + 1) % slides.length);
-        });
-        dots.forEach(function(dot) {
-          dot.addEventListener('click', function() { show(parseInt(dot.dataset.index)); });
-        });
-        console.log("[CAROUSEL] Initialized ${uuid} with " + slides.length + " slides.");
-      })();
-    `,
-	);
-
-	return h(`div#${uuid}`, { class: "carousel-container" }, [
-		h("div", { class: "carousel-track" }, slideNodes),
-		prevBtn,
-		nextBtn,
-		indicators,
-		nScript,
-	]);
+  // 4. 组装完整结构（包含修复后的内联脚本）
+  return [
+    h('div', { id, class: 'carousel-container' }, [
+      h('div', { class: 'carousel-track' }, slideNodes),
+      h('button', { class: 'carousel-prev', 'aria-label': 'Previous slide' }, '‹'),
+      h('button', { class: 'carousel-next', 'aria-label': 'Next slide' }, '›'),
+      h('div', { class: 'carousel-indicators' }, dotNodes),
+      // 移除 defer，因为脚本在 DOM 底部，执行时元素已就绪
+      h('script', { id: `${id}-script`, type: 'text/javascript' }, `
+        (function() {
+          var c = document.getElementById('${id}');
+          if (!c) return;
+          var slides = c.querySelectorAll('.carousel-slide');
+          var dots = c.querySelectorAll('.carousel-dot');
+          var cur = 0;
+          function show(i) {
+            slides.forEach(function(s, n) { s.classList.toggle('active', n === i); });
+            dots.forEach(function(d, n) { d.classList.toggle('active', n === i); });
+            cur = i;
+          }
+          // 箭头事件绑定
+          var prevBtn = c.querySelector('.carousel-prev');
+          var nextBtn = c.querySelector('.carousel-next');
+          if (prevBtn) prevBtn.addEventListener('click', function() {
+            show((cur - 1 + slides.length) % slides.length);
+          });
+          if (nextBtn) nextBtn.addEventListener('click', function() {
+            show((cur + 1) % slides.length);
+          });
+          // 圆点事件绑定
+          dots.forEach(function(dot) {
+            dot.addEventListener('click', function() { 
+              show(parseInt(dot.dataset.index)); 
+            });
+          });
+        })();
+      `),
+    ]),
+  ];
 }

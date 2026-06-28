@@ -82,13 +82,13 @@ draft: false
    - [8.6 mFunction.OverTime 超时判断](#86-mfunctionovertime-超时判断)
    - [8.7 机械轴屏蔽模式详解](#87-机械轴屏蔽模式详解)
    - [8.8 扫码使能检查重复的原因](#88-扫码使能检查重复的原因)
-9. [UI 控件使用详解](#9-ui-控件使用详解)
-   - [9.1 控件总览](#91-控件总览)
-   - [9.2 StationRun — 工站启停控件](#92-stationrun--工站启停控件)
-   - [9.3 Teach — 轴示教控件](#93-teach--轴示教控件)
-   - [9.4 Cylinder — 气缸控件](#94-cylinder--气缸控件)
-   - [9.5 mBtn_Out — 输出按钮控件](#95-mbtn_out--输出按钮控件)
-   - [9.6 控件与代码的关系](#96-控件与代码的关系)
+9. [UI 控件与代码的映射关系](#9-ui-控件与代码的映射关系)
+   - [9.1 核心概念](#91-核心概念)
+   - [9.2 StationRun → Task 绑定](#92-stationrun--task-绑定)
+   - [9.3 Teach → 轴运动映射](#93-teach--轴运动映射)
+   - [9.4 Cylinder → IO 映射](#94-cylinder--io-映射)
+   - [9.5 mBtn_Out → IO 映射](#95-mbtn_out--io-映射)
+   - [9.6 完整映射关系图](#96-完整映射关系图)
 
 
 ## 1. 软件框架设计概述
@@ -3074,6 +3074,8 @@ if (WaitDi(InNo.流线1到位信号, 1))
 
 ### 9.1 核心概念
 
+![手动测试控件面板](/images/in-post/framework-guide/manual_test_control.png)
+
 UI 控件和 Task 代码之间的桥梁是**枚举映射**。控件通过枚举值（`OutNo`、`InNo`、`mAxis`、`Task_ID`）与代码关联。
 
 ```
@@ -3089,6 +3091,8 @@ UI 控件（设计时配置）          Task 代码（运行时调用）
 ---
 
 ### 9.2 StationRun → Task 绑定
+
+![StationRun 工站启停控件](/images/in-post/framework-guide/stationRun_control.png)
 
 **映射关系：** `StationRun.StationID` = `Task_ID` 枚举值
 
@@ -3116,6 +3120,8 @@ public override void Initialize()
 
 ### 9.3 Teach → 轴运动映射
 
+![Teach 轴示教控件](/images/in-post/framework-guide/teach_control.png)
+
 **映射关系：** `Teach.StationID` = 代码中的 `工站编号` 属性
 
 | UI 控件 | StationID | 代码属性 |
@@ -3142,6 +3148,8 @@ pMove.WaitDone(轴X, pos.X, -1, 10, 15000);
 ---
 
 ### 9.4 Cylinder → IO 映射
+
+![Cylinder 气缸控件](/images/in-post/framework-guide/cylinder_control.png)
 
 **映射关系：** `Cylinder.OutputIndex` = `OutNo` 枚举值，`MovingPointNumber`/`HomePointNumber` = `InNo` 枚举值
 
@@ -3171,6 +3179,8 @@ mDoDiWaitDone(OutNo.流线1阻挡气缸, 1, InNo.流线1阻挡伸出信号, 1, 1
 
 ### 9.5 mBtn_Out → IO 映射
 
+![mBtn_Out 输出按钮控件](/images/in-post/framework-guide/mbtn_out_control.png)
+
 **映射关系：** `mBtn_Out.OutputIndex` = `OutNo` 枚举值
 
 | UI 控件 | OutputIndex | 代码对应 |
@@ -3194,6 +3204,12 @@ mGlobal.mDoReset(OutNo.右电批Start);  // 停止
 ---
 
 ### 9.6 完整映射关系图
+
+````carousel
+![Conveyor 传送带自动控制面板](/images/in-post/framework-guide/conveyor_auto_control.png)
+<!-- slide -->
+![Conveyor 状态控制面板](/images/in-post/framework-guide/conv_status_control.png)
+````
 
 ```
 ┌─────────────────────────────────────────────────────────────┐

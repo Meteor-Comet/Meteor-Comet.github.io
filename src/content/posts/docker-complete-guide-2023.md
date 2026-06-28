@@ -6,11 +6,8 @@ image: ''
 tags:
   - Docker
   - 容器化
-  - 虚拟化
-  - DevOps
-  - 云原生
   - 部署
-category: Docker
+category: DevOps
 draft: false
 ---
 

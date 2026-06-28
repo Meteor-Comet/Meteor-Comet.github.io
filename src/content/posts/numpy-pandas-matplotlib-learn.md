@@ -5,13 +5,9 @@ description: 数据科学 / 数据分析 / 机器学习 / Python编程
 image: ''
 tags:
   - Python
+  - 数据分析
   - NumPy
   - Pandas
-  - Matplotlib
-  - 数据分析
-  - 数据科学
-  - 机器学习
-  - 学习日志
 category: Python
 draft: false
 ---

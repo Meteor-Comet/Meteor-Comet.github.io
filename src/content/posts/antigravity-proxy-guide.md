@@ -7,10 +7,8 @@ tags:
   - Antigravity
   - Gemini
   - AI
-  - 工具
   - 代理
-  - 问题记录
-category: AI
+category: AI & 工具
 draft: false
 ---
 

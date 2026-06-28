@@ -7,7 +7,6 @@ tags:
   - C#
   - 工业控制
   - 软件框架
-  - BoTech
   - 架构设计
 category: C#
 draft: false

@@ -6,9 +6,7 @@ image: ''
 tags:
   - Java
   - 全栈
-  - 学习日志
   - JavaSE
-  - 编程语言
 category: Java
 draft: false
 ---

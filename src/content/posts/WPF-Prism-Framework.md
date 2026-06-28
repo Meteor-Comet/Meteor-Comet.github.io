@@ -8,8 +8,6 @@ tags:
   - WPF
   - Prism
   - MVVM
-  - 桌面开发
-  - 学习日志
 category: C#
 draft: false
 ---

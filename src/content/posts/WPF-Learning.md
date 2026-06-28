@@ -6,7 +6,6 @@ image: ''
 tags:
   - C#
   - WPF
-  - Windows
   - XAML
   - 桌面开发
 category: C#

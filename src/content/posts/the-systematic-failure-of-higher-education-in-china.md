@@ -5,7 +5,8 @@ description: The Systematic Failure of Higher Education in China
 image: ''
 tags:
   - 教育
-category: 教育
+  - 思考
+category: 学习记录
 draft: false
 ---
 

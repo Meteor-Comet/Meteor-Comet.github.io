@@ -4,10 +4,9 @@ published: 2023-12-23
 description: 电脑系统设置与效率提升全攻略
 image: ''
 tags:
-  - 新电脑
   - 系统设置
-  - 提效
-category: 新电脑
+  - 效率工具
+category: 学习记录
 draft: false
 ---
 

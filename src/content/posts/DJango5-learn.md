@@ -4,12 +4,10 @@ published: 2022-02-15
 description: Django5 Web框架完整教程
 image: ''
 tags:
-  - 学习记录
-  - 后端
-  - DJango
-  - python
+  - Python
+  - Django
   - Web开发
-category: 学习记录
+category: Python
 draft: false
 ---
 

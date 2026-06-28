@@ -4,12 +4,10 @@ published: 2022-08-11
 description: pyecharts各类图表代码示例与效果展示
 image: ''
 tags:
-  - python
+  - Python
   - pyecharts
-  - 记录
   - 数据可视化
-  - 图表示例
-category: python
+category: Python
 draft: false
 ---
 

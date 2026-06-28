@@ -4,14 +4,10 @@ published: 2026-06-13
 description: 非标自动化工业上位机全套电气元件手册
 image: ''
 tags:
-  - 工业控制
   - 电气元件
-  - 硬件
   - 传感器
-  - 直线电机
-  - 远程IO
-  - 机器视觉
   - 伺服电机
+  - 机器视觉
 category: 工业控制
 draft: false
 ---

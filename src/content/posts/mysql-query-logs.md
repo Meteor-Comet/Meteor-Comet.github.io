@@ -6,10 +6,8 @@ image: ''
 tags:
   - MySQL
   - 性能优化
-  - 慢查询日志
-  - EXPLAIN
-  - 查询监控
-category: MySQL
+  - 慢查询
+category: 数据库
 draft: false
 ---
 

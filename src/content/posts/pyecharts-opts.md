@@ -4,12 +4,10 @@ published: 2022-08-10
 description: pyecharts图表配置参数完整指南
 image: ''
 tags:
-  - python
+  - Python
   - pyecharts
-  - 记录
-  - 数据可视化
   - 图表配置
-category: python
+category: Python
 draft: false
 ---
 

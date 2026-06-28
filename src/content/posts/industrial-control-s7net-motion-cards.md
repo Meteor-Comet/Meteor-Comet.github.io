@@ -7,11 +7,7 @@ tags:
   - C#
   - 工业控制
   - S7NetPlus
-  - 固高科技
-  - 雷赛智能
   - 运动控制
-  - WinForm
-  - WPF
 category: C#
 draft: false
 ---

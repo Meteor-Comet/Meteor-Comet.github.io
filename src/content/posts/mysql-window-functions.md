@@ -5,11 +5,9 @@ description: OVER / PARTITION BY / ORDER BY / FRAME / LAG / LEAD
 image: ''
 tags:
   - MySQL
-  - SQL
   - 窗口函数
-  - 数据分析
-  - 学习日志
-category: MySQL
+  - SQL
+category: 数据库
 draft: false
 ---
 

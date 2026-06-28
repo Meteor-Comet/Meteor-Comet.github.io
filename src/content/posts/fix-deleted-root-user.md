@@ -5,11 +5,9 @@ description: MySQL数据库管理员紧急恢复指南
 image: ''
 tags:
   - MySQL
-  - 数据库管理
   - 故障恢复
   - root用户
-  - 紧急修复
-category: MySQL
+category: 数据库
 draft: false
 ---
 

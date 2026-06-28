@@ -5,8 +5,8 @@ description: 记录一下21年夏天拍摄的星空
 image: ''
 tags:
   - 星空
-  - 生活记录
-category: 星空
+  - 生活
+category: 学习记录
 draft: false
 ---
 

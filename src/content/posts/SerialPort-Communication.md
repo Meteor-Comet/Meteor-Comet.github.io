@@ -4,13 +4,10 @@ published: 2024-09-05
 description: "全景解析高低位/CRC校验与 NModbus 集成；探讨 ISO 模型、C# async 异步 Socket 与核心防范通信并发内存问题"
 image: ''
 tags:
+  - C#
   - 串口通信
   - 硬件编程
-  - 协议解析
-  - C#
-  - WinForm
-  - 学习笔记
-category: 通信
+category: C#
 draft: false
 ---
 

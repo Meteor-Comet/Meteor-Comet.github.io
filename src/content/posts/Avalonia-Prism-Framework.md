@@ -6,11 +6,9 @@ image: ''
 tags:
   - C#
   - Avalonia
-  - ReactiveUI
   - Prism
   - MVVM
-  - 跨平台开发
-  - 架构设计
+  - 跨平台
 category: C#
 draft: false
 ---

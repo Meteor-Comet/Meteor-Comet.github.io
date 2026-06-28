@@ -4,10 +4,10 @@ published: 2022-08-09
 description: ""
 image: ''
 tags:
-  - python
+  - Python
   - pyecharts
   - 问题记录
-category: python
+category: Python
 draft: false
 ---
 

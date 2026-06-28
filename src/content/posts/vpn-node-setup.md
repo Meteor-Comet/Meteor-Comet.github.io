@@ -7,8 +7,7 @@ tags:
   - VPN
   - VPS
   - X-UI
-  - Netflix解锁
-category: VPN
+category: DevOps
 draft: false
 ---
 

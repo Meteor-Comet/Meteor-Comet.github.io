@@ -7,9 +7,7 @@ tags:
   - Git
   - GitHub
   - SSH
-  - 开发工具
-  - 版本控制
-category: Git
+category: DevOps
 draft: false
 ---
 

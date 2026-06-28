@@ -6,10 +6,8 @@ image: ''
 tags:
   - SQL Server
   - T-SQL
-  - 数据库开发
   - 性能调优
-  - 深入架构
-category: Database
+category: 数据库
 draft: false
 ---
 

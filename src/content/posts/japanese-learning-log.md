@@ -6,8 +6,7 @@ image: ''
 tags:
   - 日语
   - 学习
-  - 记录
-category: 日语
+category: 学习记录
 draft: false
 ---
 

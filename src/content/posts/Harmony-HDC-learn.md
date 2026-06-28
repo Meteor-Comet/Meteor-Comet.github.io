@@ -6,7 +6,8 @@ image: ''
 tags:
   - 鸿蒙
   - 华为
-category: 鸿蒙
+  - HarmonyOS
+category: 学习记录
 draft: false
 ---
 

@@ -5,10 +5,8 @@ description: Java核心类库与API使用指南
 image: ''
 tags:
   - Java
-  - API
-  - 学习日志
+  - 常用API
   - 类库
-  - 编程基础
 category: Java
 draft: false
 ---

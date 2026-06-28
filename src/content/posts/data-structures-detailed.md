@@ -7,9 +7,7 @@ tags:
   - 数据结构
   - 算法
   - 编程基础
-  - 计算机科学
-  - 学习日志
-category: 数据结构
+category: 计算机基础
 draft: false
 ---
 

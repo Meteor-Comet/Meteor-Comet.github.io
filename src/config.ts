@@ -50,7 +50,7 @@ export const navBarConfig: NavBarConfig = {
 export const profileConfig: ProfileConfig = {
   avatar: '/images/一日の終わり.jpg',
   name: 'Comet',
-  bio: '月 | 这里是 @HComet彗星 的个人博客',
+  bio: '风|鸟|花|月',
   links: [
     {
       name: 'GitHub',
@@ -58,9 +58,9 @@ export const profileConfig: ProfileConfig = {
       url: 'https://github.com/Meteor-Comet',
     },
     {
-      name: '知乎',
-      icon: 'fa6-brands:zhihu',
-      url: 'https://www.zhihu.com/people/assassin-64-87',
+      name: 'Steam',
+      icon: 'fa6-brands:steam',
+      url: 'https://steamcommunity.com/id/513578967/',
     },
     {
       name: 'Twitter',

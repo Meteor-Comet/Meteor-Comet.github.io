@@ -16,13 +16,13 @@ export const siteConfig: SiteConfig = {
     fixed: false,
   },
   banner: {
-    enable: false,
-    src: 'assets/images/demo-banner.png',
+    enable: true,
+    src: '/images/banner-evening-breeze.png',
     position: 'center',
     credit: {
-      enable: false,
-      text: '',
-      url: '',
+      enable: true,
+      text: 'evening breeze / Taizo',
+      url: 'https://www.pixiv.net/artworks/115315413',
     },
   },
   toc: {

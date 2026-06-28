@@ -1,4 +1,5 @@
 import type {
+  ExpressiveCodeConfig,
   LicenseConfig,
   NavBarConfig,
   ProfileConfig,
@@ -47,7 +48,7 @@ export const navBarConfig: NavBarConfig = {
 }
 
 export const profileConfig: ProfileConfig = {
-  avatar: 'assets/images/avatar.png',
+  avatar: '/images/一日の終わり.jpg',
   name: 'Comet',
   bio: '月 | 这里是 @HComet彗星 的个人博客',
   links: [
@@ -74,3 +75,8 @@ export const licenseConfig: LicenseConfig = {
   name: 'CC BY-NC-SA 4.0',
   url: 'https://creativecommons.org/licenses/by-nc-sa/4.0/',
 }
+
+export const expressiveCodeConfig: ExpressiveCodeConfig = {
+  theme: 'github-dark',
+}
+

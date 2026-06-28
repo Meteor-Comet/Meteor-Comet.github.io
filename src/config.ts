@@ -17,12 +17,12 @@ export const siteConfig: SiteConfig = {
   },
   banner: {
     enable: true,
-    src: '/images/banner-evening-breeze.png',
+    src: '/images/banner-oblivious.jpg',
     position: 'center',
     credit: {
       enable: true,
-      text: 'evening breeze / Taizo',
-      url: 'https://www.pixiv.net/artworks/115315413',
+      text: 'Oblivious 🌿 / Aeuna',
+      url: 'https://www.pixiv.net/artworks/107236405',
     },
   },
   toc: {

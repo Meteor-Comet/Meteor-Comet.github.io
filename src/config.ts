@@ -17,12 +17,12 @@ export const siteConfig: SiteConfig = {
   },
   banner: {
     enable: true,
-    src: '/images/banner-nagame.jpg',
+    src: '/images/banner-evening-breeze.png',
     position: 'center',
     credit: {
       enable: true,
-      text: '眺め / 伊豆狐',
-      url: 'https://www.pixiv.net/artworks/83928679',
+      text: 'evening breeze / Taizo',
+      url: 'https://www.pixiv.net/artworks/115315413',
     },
   },
   toc: {

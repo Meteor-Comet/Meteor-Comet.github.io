@@ -2,7 +2,7 @@
 title: 硬件架构与接线指南
 published: 2026-07-01
 description: 工业自动化设备硬件拓扑、电机类型、驱动器配置、IO接线规则及电气BOM详解
-image: ''
+image: /images/hardware-wiring-cover.jpg
 category: 工业控制
 tags:
   - 工业控制

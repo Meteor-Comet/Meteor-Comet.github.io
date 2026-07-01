@@ -7,7 +7,7 @@ category: 学习记录
 tags:
   - 教育
   - 思考
-draft: false
+draft: true
 ---
 
 高票 [@Youngster38324 的回答](https://www.zhihu.com/question/439622084/answer/1681505518)透露出来的本质上是「**中国高等教育的系统性失败**」，逐层来看:

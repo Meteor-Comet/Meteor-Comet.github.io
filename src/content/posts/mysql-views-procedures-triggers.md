@@ -2,7 +2,7 @@
 title: MySQL视图、存储过程、触发器详解
 published: 2023-02-01
 description: 数据库对象 / 视图 / 存储过程 / 触发器 / 数据库编程
-image: ''
+image: /images/mysql-views-procedures-triggers.jpg
 category: 数据库
 tags:
   - MySQL

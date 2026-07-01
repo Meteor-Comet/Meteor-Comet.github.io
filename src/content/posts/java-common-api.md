@@ -2,7 +2,7 @@
 title: Java常用API
 published: 2023-06-15
 description: Java核心类库与API使用指南
-image: ''
+image: /images/java-common-api.jpg
 category: Java
 tags:
   - Java

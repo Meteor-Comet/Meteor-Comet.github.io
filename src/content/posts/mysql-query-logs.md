@@ -2,7 +2,7 @@
 title: MySQL 查询日志与性能诊断
 published: 2023-06-20
 description: 慢查询日志 / EXPLAIN 执行计划 / SHOW PROFILES / Performance Schema
-image: ''
+image: /images/mysql-query-logs.jpg
 category: 数据库
 tags:
   - MySQL

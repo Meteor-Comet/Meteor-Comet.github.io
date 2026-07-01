@@ -2,7 +2,7 @@
 title: 电气元件认识
 published: 2026-06-13
 description: 非标自动化工业上位机全套电气元件手册
-image: ''
+image: /images/electrical-components-guide.jpg
 category: 工业控制
 tags:
   - 电气元件

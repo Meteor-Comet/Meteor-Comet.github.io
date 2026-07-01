@@ -2,7 +2,7 @@
 title: JavaSE
 published: 2023-04-10
 description: Java标准版核心语法与API完整教程
-image: ''
+image: /images/java-fullstack-learn.jpg
 category: Java
 tags:
   - Java

@@ -2,7 +2,7 @@
 title: pyecharts图形在jupyter中不显示的解决办法
 published: 2022-08-09
 description: ""
-image: ''
+image: /images/echarts-solve.jpg
 category: Python
 tags:
   - pyecharts

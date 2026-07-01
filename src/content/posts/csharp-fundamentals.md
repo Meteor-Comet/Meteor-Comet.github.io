@@ -2,7 +2,7 @@
 title: "C#基础语法详解"
 published: 2024-02-10
 description: 类/对象/方法/枚举/结构体
-image: ''
+image: /images/csharp-fundamentals.jpg
 category: C#
 tags:
   - C#

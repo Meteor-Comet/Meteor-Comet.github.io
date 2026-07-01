@@ -2,7 +2,7 @@
 title: "C#进阶特性详解"
 published: 2024-03-15
 description: 泛型/委托与事件/反射与特性
-image: ''
+image: /images/csharp-advanced.jpg
 category: C#
 tags:
   - C#

@@ -2,7 +2,7 @@
 title: pyecharts示例图
 published: 2022-08-11
 description: pyecharts各类图表代码示例与效果展示
-image: ''
+image: /images/pyecharts.jpg
 category: Python
 tags:
   - pyecharts

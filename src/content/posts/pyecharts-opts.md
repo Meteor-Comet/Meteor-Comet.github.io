@@ -2,7 +2,7 @@
 title: pyecharts配置项
 published: 2022-08-10
 description: pyecharts图表配置参数完整指南
-image: ''
+image: /images/pyecharts-opts.jpg
 category: Python
 tags:
   - pyecharts

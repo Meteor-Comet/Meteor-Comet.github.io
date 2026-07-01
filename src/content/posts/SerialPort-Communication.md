@@ -2,7 +2,7 @@
 title: 工业级通信与 Modbus 协议全栈指南：从底层串口理论到高并发 Socket 架构实战
 published: 2024-09-05
 description: "全景解析高低位/CRC校验与 NModbus 集成；探讨 ISO 模型、C# async 异步 Socket 与核心防范通信并发内存问题"
-image: ''
+image: /images/SerialPort-Communication.jpg
 category: C#
 tags:
   - 串口通信

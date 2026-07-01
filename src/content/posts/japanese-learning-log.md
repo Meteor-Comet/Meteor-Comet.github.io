@@ -2,7 +2,7 @@
 title: 日语学习日志
 published: 2022-07-01
 description: ""
-image: ''
+image: /images/japanese-learning-log.jpg
 category: 学习记录
 tags:
   - 日语

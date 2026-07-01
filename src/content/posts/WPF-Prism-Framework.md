@@ -2,7 +2,7 @@
 title: WPF Prism框架学习笔记
 published: 2024-07-25
 description: 深入理解与实战Prism这一强大的WPF MVVM框架
-image: ''
+image: /images/WPF-Prism-Framework.jpg
 category: C#
 tags:
   - WPF

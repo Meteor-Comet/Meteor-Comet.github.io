@@ -2,7 +2,7 @@
 title: Docker 实践指南
 published: 2023-06-30
 description: 容器化 / 虚拟化 / 部署 / DevOps / 云原生
-image: ''
+image: /images/docker-complete-guide-2023.jpg
 category: DevOps
 tags:
   - Docker

@@ -2,7 +2,7 @@
 title: 数据结构详解
 published: 2023-01-10
 description: 数据结构 / 算法 / 编程基础 / 计算机科学
-image: ''
+image: /images/data-structures-detailed.jpg
 category: 计算机基础
 tags:
   - 数据结构

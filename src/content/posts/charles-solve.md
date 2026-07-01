@@ -2,7 +2,7 @@
 title: 使用Charles对移动端环境进行抓包实录
 published: 2022-02-21
 description: Charles代理配置与移动端网络调试完整指南
-image: ''
+image: /images/charles-solve.jpg
 category: 工具
 tags:
   - 抓包

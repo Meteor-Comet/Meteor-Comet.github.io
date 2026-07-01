@@ -2,7 +2,7 @@
 title: DJango5学习日志
 published: 2022-02-15
 description: Django5 Web框架完整教程
-image: ''
+image: /images/DJango5-learn.jpg
 category: Python
 tags:
   - Django

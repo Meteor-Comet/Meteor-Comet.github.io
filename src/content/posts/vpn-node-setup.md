@@ -2,7 +2,7 @@
 title: VPN节点搭建完整教程
 published: 2022-08-01
 description: 从VPS购买到Netflix解锁
-image: ''
+image: /images/vpn-node-setup.jpg
 category: DevOps
 tags:
   - VPN

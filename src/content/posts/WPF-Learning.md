@@ -2,7 +2,7 @@
 title: WPF学习指南
 published: 2024-05-20
 description: Windows Presentation Foundation完整开发教程
-image: ''
+image: /images/WPF-Learning.jpg
 category: C#
 tags:
   - WPF

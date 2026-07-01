@@ -2,7 +2,7 @@
 title: Python数据分析三剑客：NumPy、Pandas、Matplotlib详解
 published: 2022-09-01
 description: 数据科学 / 数据分析 / 机器学习 / Python编程
-image: ''
+image: /images/numpy-pandas-matplotlib-learn.jpg
 category: Python
 tags:
   - 数据分析

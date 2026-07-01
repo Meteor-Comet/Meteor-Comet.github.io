@@ -2,7 +2,7 @@
 title: 鸿蒙开发设备调试工具HDC学习日志
 published: 2022-10-30
 description: "原文：https://blog.csdn.net/ToBeTheEnder/article/details/139325200"
-image: ''
+image: /images/Harmony-HDC-learn.jpg
 category: 学习记录
 tags:
   - 鸿蒙

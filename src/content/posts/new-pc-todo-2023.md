@@ -2,7 +2,7 @@
 title: 电脑设置事项清单(搁置，有待完善)
 published: 2023-12-23
 description: 电脑系统设置与效率提升全攻略
-image: ''
+image: /images/new-pc-todo-2023.jpg
 category: 学习记录
 tags:
   - 系统设置

@@ -2,7 +2,7 @@
 title: 如何使用SSH连接GitHub和本地以方便git操作
 published: 2022-06-10
 description: GitHub SSH密钥配置完整指南
-image: ''
+image: /images/ssh-github-git-2022.jpg
 category: DevOps
 tags:
   - Git

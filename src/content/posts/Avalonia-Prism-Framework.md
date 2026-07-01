@@ -2,7 +2,7 @@
 title: Avalonia全景指南：ReactiveUI精讲与Prism企业级架构深度扩展
 published: 2025-03-10
 description: 从属性绑定到模块化注入：一万字超长干货解析Avalonia生态核心API与所有应用场景
-image: ''
+image: /images/Avalonia-Prism-Framework.jpg
 category: C#
 tags:
   - Avalonia

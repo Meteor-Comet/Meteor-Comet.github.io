@@ -2,7 +2,7 @@
 title: ASP.NET Core 企业级开发全栈手册：从核心架构到万能 HttpClient 实战
 published: 2024-11-15
 description: 深度拆解 IActionResult 全景字典、Minimal API 高级策略、以及 HttpClient 通用请求引擎 SendAsync 深度解析
-image: ''
+image: /images/ASP-NET-Notes.jpg
 category: C#
 tags:
   - ASP.NET

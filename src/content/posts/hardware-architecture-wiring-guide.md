@@ -1,5 +1,5 @@
 ---
-title: 硬件架构与接线指南
+title: 硬件架构
 published: 2026-07-01
 description: 工业自动化设备硬件拓扑、电机类型、驱动器配置、IO接线规则及电气BOM详解
 image: /images/hardware-wiring-cover.jpg
@@ -12,7 +12,7 @@ tags:
 draft: false
 ---
 
-# 硬件架构与接线指南
+# 硬件架构
 
 > 本文档描述设备硬件拓扑、电机类型、驱动器配置、IO接线规则等硬件相关内容。
 > 与 `BoTech_Framework_Manual.md` 互补，后者侧重软件API和框架。

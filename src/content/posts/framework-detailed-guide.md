@@ -2588,9 +2588,9 @@ mGlobal.mDoReset(电批破真空信号); // 关闭吹气
 
 | 文档名称 | 说明 | 操作 |
 |----------|------|------|
-| **ZCM968SOP (英文版)** | ZCM968 控件全套使用说明（英文，最新版） | [📖 在线阅读](/docs/framework/ZCM968SOP_En.pdf) |
-| **Zcm2018 SOP** | Zcm2018 系列控件说明书（含中文界面截图） | [📖 在线阅读](/docs/framework/Zcm2018_SOP.pdf) |
-| **XSation SOP** | XSation 工站框架控件说明书 | [📖 在线阅读](/docs/framework/XSation_SOP.pdf) |
+| **ZCM968SOP (英文版)** | ZCM968 控件全套使用说明（英文，最新版） | <a href="/docs/framework/ZCM968SOP_En.pdf" target="_blank" rel="noopener noreferrer">📖 在线阅读</a> |
+| **Zcm2018 SOP** | Zcm2018 系列控件说明书（含中文界面截图） | <a href="/docs/framework/Zcm2018_SOP.pdf" target="_blank" rel="noopener noreferrer">📖 在线阅读</a> |
+| **XSation SOP** | XSation 工站框架控件说明书 | <a href="/docs/framework/XSation_SOP.pdf" target="_blank" rel="noopener noreferrer">📖 在线阅读</a> |
 
 > **提示**：点击「在线阅读」可直接在浏览器中打开 PDF，支持全文搜索。如需下载，在 PDF 查看器中右键另存即可。
 

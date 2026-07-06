@@ -9,7 +9,7 @@ tags:
   - 硬件架构
   - 电机控制
   - 电气接线
-draft: false
+draft: true
 ---
 
 # 硬件架构

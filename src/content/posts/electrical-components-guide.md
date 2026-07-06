@@ -7,7 +7,7 @@ category: 工业控制
 tags:
   - 电气元件
   - 工业控制
-draft: false
+draft: true
 ---
 
 # 电气元件认识

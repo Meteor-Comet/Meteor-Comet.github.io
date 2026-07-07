@@ -17,87 +17,208 @@ draft: false
 
 ## 目录
 
+
 1. [软件框架设计概述](#1-软件框架设计概述)
 
 2. [硬件参数与系统配置](#2-硬件参数与系统配置)
-   - [硬件参数与系统参数的 Excel 配置 (开发第一步)](#硬件参数与系统参数的-Excel-配置-(开发第一步))
-   - [C# 枚举 (`EnumName.cs`) 绑定关系与手动同步 SOP](#C#-枚举-(`EnumName.cs`)-绑定关系与手动同步-SOP)
-   - [Excel 参数配置与 XML 数据库转换映射规则](#Excel-参数配置与-XML-数据库转换映射规则)
-   - [UI 界面参数标签页 (TabPage) 绑定关系](#UI-界面参数标签页-(TabPage)-绑定关系)
-   - [HMI UI 诊断监控与 I/O 硬件的交互联系](#HMI-UI-诊断监控与-I/O-硬件的交互联系)
-   - [输入限制与合法性校验逻辑](#输入限制与合法性校验逻辑)
-   - [功能使能复选框在业务代码中的跳步与屏蔽机制](#功能使能复选框在业务代码中的跳步与屏蔽机制)
 
-3. [核心与运动控制 API](#3-核心与运动控制-API)
-   - [运动控制类 (Motion Control)](#运动控制类-(Motion-Control))
-   - [系统、超时与日志 (System/Utility/Logs)](#系统、超时与日志-(System/Utility/Logs))
-   - [文件读写 (File Operations)](#文件读写-(File-Operations))
-   - [网口与串口通讯 (Communications)](#网口与串口通讯-(Communications))
-   - [软交互信号量与干涉区防撞 (Synchronization & Concurrency)](#软交互信号量与干涉区防撞-(Synchronization-&-Concurrency))
-   - [mFunction 核心工具类与系统状态变量说明](#mFunction-核心工具类与系统状态变量说明)
+   - [硬件参数与系统参数的 Excel 配置 (开发第一步)](#2-1-硬件参数与系统参数的-excel-配置-开发第一步)
+      - [控制卡配置 (`CardPar.xlsx`)](#2-1-1-控制卡配置-cardpar-xlsx)
+      - [伺服轴配置 (`AxisPar.xlsx`)](#2-1-2-伺服轴配置-axispar-xlsx)
+      - [数字 I/O 映射配置 (`Input.xlsx` 与 `Output.xlsx`)](#2-1-3-数字-i-o-映射配置-input-xlsx-与-output-xlsx)
+      - [系统参数配置 (`SysPar.xlsx`)](#2-1-4-系统参数配置-syspar-xlsx)
+      - [全局参数表 (`ParList.xlsx`)](#2-1-5-全局参数表-parlist-xlsx)
+   - [C# 枚举 (`EnumName.cs`) 绑定关系与手动同步 SOP](#2-2-c-枚举-enumname-cs-绑定关系与手动同步-sop)
+      - [详细映射对应关系](#2-2-1-详细映射对应关系)
+      - [硬件配置与枚举修改的手动同步 SOP 流程](#2-2-2-硬件配置与枚举修改的手动同步-sop-流程)
+      - [多种参数获取方式](#2-2-3-多种参数获取方式)
+   - [Excel 参数配置与 XML 数据库转换映射规则](#2-3-excel-参数配置与-xml-数据库转换映射规则)
+      - [Excel 参数模板列定义 (`ParList.xlsx`)](#2-3-1-excel-参数模板列定义-parlist-xlsx)
+      - [自动同步生成逻辑 (`AutoSetup`)](#2-3-2-自动同步生成逻辑-autosetup)
+   - [UI 界面参数标签页 (TabPage) 绑定关系](#2-4-ui-界面参数标签页-tabpage-绑定关系)
+      - [TabPage 1: 属性网格配置 (PropertyGrid)](#2-4-1-tabpage-1-属性网格配置-propertygrid)
+      - [TabPage 2: 文本框组参数配置](#2-4-2-tabpage-2-文本框组参数配置)
+      - [TabPage 4: Check Tab (功能使能复选框页)](#2-4-3-tabpage-4-check-tab-功能使能复选框页)
+   - [HMI UI 诊断监控与 I/O 硬件的交互联系](#2-5-hmi-ui-诊断监控与-i-o-硬件的交互联系)
+   - [输入限制与合法性校验逻辑](#2-6-输入限制与合法性校验逻辑)
+   - [功能使能复选框在业务代码中的跳步与屏蔽机制](#2-7-功能使能复选框在业务代码中的跳步与屏蔽机制)
+      - [扫码功能屏蔽 (`Enable_scanning_code` 索引 102)](#2-7-1-扫码功能屏蔽-enablescanningcode-索引-102)
+      - [机械手关闭屏蔽 (`Block_leftRobot` 索引 116 / `Block_rightRobot` 索引 117)](#2-7-2-机械手关闭屏蔽-blockleftrobot-索引-116-blockrightrobot-索引-117)
+      - [相机跳步逻辑 (`Enable_CCD` 索引 104 - 启用相机功能)](#2-7-3-相机跳步逻辑-enableccd-索引-104-启用相机功能)
+3. [核心与运动控制 API](#3-核心与运动控制-api)
 
-4. [WorkShare 子对象 API](#4-WorkShare-子对象-API)
-   - [mHome — 单轴回零](#mHome-—-单轴回零)
-   - [dHome — 多轴同时回零](#dHome-—-多轴同时回零)
-   - [pMove — 位置运动](#pMove-—-位置运动)
-   - [sMove — 单轴运动（非阻塞）](#sMove-—-单轴运动（非阻塞）)
-   - [mMove — 多轴运动（非阻塞）](#mMove-—-多轴运动（非阻塞）)
-   - [mDoDi — 数字IO等待](#mDoDi-—-数字IO等待)
-   - [mDoDiS — 简化版数字IO](#mDoDiS-—-简化版数字IO)
-   - [mSend — TCP 发送等待](#mSend-—-TCP-发送等待)
+   - [运动控制类 (Motion Control)](#3-1-运动控制类-motion-control)
+      - [`MotionGetDi`](#3-1-1-motiongetdi)
+      - [`MotionGetDo`](#3-1-2-motiongetdo)
+      - [`MotionSetDo`](#3-1-3-motionsetdo)
+      - [`MotionAbsMove` / `MotionRelMove`](#3-1-4-motionabsmove-motionrelmove)
+      - [`MotionWaitMoveDone`](#3-1-5-motionwaitmovedone)
+      - [`MotionAbsMoveAndDone` / `MotionRelMoveAndDone`](#3-1-6-motionabsmoveanddone-motionrelmoveanddone)
+      - [`MotionWaitDi` / `MotionWaitDo`](#3-1-7-motionwaitdi-motionwaitdo)
+      - [`MotionGoHomeAndDone`](#3-1-8-motiongohomeanddone)
+      - [`mDoDiWaitDone`](#3-1-9-mdodiwaitdone)
+   - [系统、超时与日志 (System/Utility/Logs)](#3-2-系统-超时与日志-system-utility-logs)
+      - [`mFunction.GetTickCount()`](#3-2-1-mfunction-gettickcount)
+      - [`mFunction.OverTime`](#3-2-2-mfunction-overtime)
+      - [`mFunction.Sleep`](#3-2-3-mfunction-sleep)
+      - [`AddLog`](#3-2-4-addlog)
+      - [`AddAlarmCenter` / `AddTipCentert`](#3-2-5-addalarmcenter-addtipcentert)
+   - [文件读写 (File Operations)](#3-3-文件读写-file-operations)
+      - [INI 配置文件读写](#3-3-1-ini-配置文件读写)
+      - [XML 数据读写](#3-3-2-xml-数据读写)
+      - [CSV 与 TXT 文件写入](#3-3-3-csv-与-txt-文件写入)
+   - [网口与串口通讯 (Communications)](#3-4-网口与串口通讯-communications)
+      - [Socket 客户端发送数据](#3-4-1-socket-客户端发送数据)
+      - [检查是否收到新数据与读取机制](#3-4-2-检查是否收到新数据与读取机制)
+      - [TCP 双向应答最佳实践示例](#3-4-3-tcp-双向应答最佳实践示例)
+      - [框架内网口通信的两种实现方式（对比）](#3-4-4-框架内网口通信的两种实现方式-对比)
+   - [软交互信号量与干涉区防撞 (Synchronization & Concurrency)](#3-5-软交互信号量与干涉区防撞-synchronization-concurrency)
+      - [干涉区互斥锁 (Interference Zone)](#3-5-1-干涉区互斥锁-interference-zone)
+      - [工站间软交互信号量 (TasksInteraction)](#3-5-2-工站间软交互信号量-tasksinteraction)
+      - [TasksInteraction 软交互信号量状态详解与使用指南](#3-5-3-tasksinteraction-软交互信号量状态详解与使用指南)
+   - [mFunction 核心工具类与系统状态变量说明](#3-6-mfunction-核心工具类与系统状态变量说明)
+4. [WorkShare 子对象 API](#4-workshare-子对象-api)
 
-5. [传送带 Conveyor 系统](#5-传送带-Conveyor-系统)
-   - [核心设计理念](#核心设计理念)
-   - [Conveyor.xml 配置文件](#Conveyor.xml-配置文件)
-   - [nConveyor 状态机（框架内部）](#nConveyor-状态机（框架内部）)
-   - [ConvEvent 用户可编程事件（A0.Conveyors.cs）](#ConvEvent-用户可编程事件（A0.Conveyors.cs）)
-   - [完整数据流示例](#完整数据流示例)
-   - [Conveyor.xml 与 InNo/OutNo 的映射关系](#Conveyor.xml-与-InNo/OutNo-的映射关系)
-   - [标准开发模式 vs 当前项目](#标准开发模式-vs-当前项目)
-   - [CurStnStatus 完整状态列表](#CurStnStatus-完整状态列表)
+   - [mHome — 单轴回零](#4-1-mhome-单轴回零)
+      - [WaitDone](#waitdone)
+      - [RunSts](#runsts)
+   - [dHome — 多轴同时回零](#4-2-dhome-多轴同时回零)
+      - [WaitDone](#waitdone)
+      - [RunSts](#runsts)
+   - [pMove — 位置运动](#4-3-pmove-位置运动)
+      - [WaitDone（10参数完整版 — 多轴示教点联动）](#waitdone-10参数完整版-多轴示教点联动)
+      - [WaitDone（5参数版 — 单轴绝对运动）](#waitdone-5参数版-单轴绝对运动)
+      - [Pause](#pause)
+      - [Pause](#pause)
+   - [sMove — 单轴运动（非阻塞）](#4-4-smove-单轴运动-非阻塞)
+      - [常用方法](#常用方法)
+   - [mMove — 多轴运动（非阻塞）](#4-5-mmove-多轴运动-非阻塞)
+      - [常用方法](#常用方法)
+   - [mDoDi — 数字IO等待](#4-6-mdodi-数字io等待)
+      - [WaitDone（设置输出 + 等待输入）— 7参数版](#waitdone-设置输出-等待输入-7参数版)
+      - [WaitDone（仅等待输入）— 4参数版](#waitdone-仅等待输入-4参数版)
+      - [mAction](#maction)
+   - [mDoDiS — 简化版数字IO](#4-7-mdodis-简化版数字io)
+      - [WaitDone — 7参数版（设置输出 + 等待输入）](#waitdone-7参数版-设置输出-等待输入)
+      - [WaitDone — 4参数版（仅等待输入）](#waitdone-4参数版-仅等待输入)
+      - [mAction](#maction)
+   - [mSend — TCP 发送等待](#4-8-msend-tcp-发送等待)
+      - [WaitDone](#waitdone)
+      - [mAction](#maction)
+      - [mAction](#maction)
+   - [mPulseOut — 脉冲输出](#4-9-mpulseout-脉冲输出)
+      - [Send](#send)
+   - [mDialog — 对话框](#4-11-mdialog-对话框)
+   - [mDicValue — 等待字典](#4-12-mdicvalue-等待字典)
+   - [MotionDll 底层 API](#4-13-motiondll-底层-api)
+      - [IO 操作](#io-操作)
+      - [单轴运动](#单轴运动)
+      - [工站级运动（阻塞）](#工站级运动-阻塞)
+      - [工站级运动（非阻塞）](#工站级运动-非阻塞)
+      - [多轴到位等待](#多轴到位等待)
+      - [到位检测](#到位检测)
+      - [编码器](#编码器)
+      - [配置](#配置)
+      - [属性](#属性)
+   - [mFunction.State 系统状态枚举](#4-14-mfunction-state-系统状态枚举)
+   - [WorkShare 辅助方法](#4-15-workshare-辅助方法)
+      - [SetDoBit / ResetDoBit](#setdobit-resetdobit)
+      - [GetPosInfo](#getposinfo)
+      - [GetPosData](#getposdata)
+   - [API 速查表（WorkShare 子对象）](#4-16-api-速查表-workshare-子对象)
+5. [传送带 Conveyor 系统](#5-传送带-conveyor-系统)
 
-6. [自动化流程开发 SOP](#6-自动化流程开发-SOP)
-   - [继承关系与生命周期函数](#继承关系与生命周期函数)
-   - [自动运行状态机开发模板](#自动运行状态机开发模板)
-   - [步序控制与更新机制 (`SetStep`)](#步序控制与更新机制-(`SetStep`))
-   - [超时计时器重置与防虚警防呆逻辑](#超时计时器重置与防虚警防呆逻辑)
-   - [流水线（Conveyor）与工站绑定逻辑](#流水线（Conveyor）与工站绑定逻辑)
-   - [工站间与工站同轴（任务）间的通信与顺序控制逻辑](#工站间与工站同轴（任务）间的通信与顺序控制逻辑)
-   - [典型工序异常处理与故障模拟设计（以扫码与打螺丝为例）](#典型工序异常处理与故障模拟设计（以扫码与打螺丝为例）)
+   - [核心设计理念](#5-1-核心设计理念)
+   - [Conveyor.xml 配置文件](#5-2-conveyor-xml-配置文件)
+      - [完整字段说明](#完整字段说明)
+      - [传送带1 实际配置示例](#传送带1-实际配置示例)
+   - [nConveyor 状态机（框架内部）](#5-3-nconveyor-状态机-框架内部)
+      - [状态机步进](#状态机步进)
+      - [nConveyor 自动控制的 IO](#nconveyor-自动控制的-io)
+   - [ConvEvent 用户可编程事件（A0.Conveyors.cs）](#5-4-convevent-用户可编程事件-a0-conveyors-cs)
+      - [ConvRun 主调度器](#convrun-主调度器)
+      - [HandleCurrentStation — 当站处理（核心）](#handlecurrentstation-当站处理-核心)
+      - [Start_Send / Stop_Send — 电机控制](#startsend-stopsend-电机控制)
+   - [完整数据流示例](#5-5-完整数据流示例)
+   - [Conveyor.xml 与 InNo/OutNo 的映射关系](#5-6-conveyor-xml-与-inno-outno-的映射关系)
+      - [各传送带映射](#各传送带映射)
+   - [标准开发模式 vs 当前项目](#5-7-标准开发模式-vs-当前项目)
+      - [标准模式（推荐）](#标准模式-推荐)
+      - [当前项目模式](#当前项目模式)
+   - [CurStnStatus 完整状态列表](#5-8-curstnstatus-完整状态列表)
+   - [ConveyorData 运行时属性](#5-9-conveyordata-运行时属性)
+   - [常见问题](#5-10-常见问题)
+6. [自动化流程开发 SOP](#6-自动化流程开发-sop)
 
-7. [ZCM968SOP 控件与方法说明](#7-ZCM968SOP-控件与方法说明)
-   - [📄 控件说明书下载](#-控件说明书下载)
+   - [继承关系与生命周期函数](#6-1-继承关系与生命周期函数)
+   - [自动运行状态机开发模板](#6-2-自动运行状态机开发模板)
+   - [步序控制与更新机制 (`SetStep`)](#6-3-步序控制与更新机制-setstep)
+   - [超时计时器重置与防虚警防呆逻辑](#6-4-超时计时器重置与防虚警防呆逻辑)
+   - [流水线（Conveyor）与工站绑定逻辑](#6-5-流水线-conveyor-与工站绑定逻辑)
+      - [流线气缸的去代码化与参数化配置实现](#6-5-1-流线气缸的去代码化与参数化配置实现)
+   - [工站间与工站同轴（任务）间的通信与顺序控制逻辑](#6-6-工站间与工站同轴-任务-间的通信与顺序控制逻辑)
+      - [上下游工站之间的通信与顺序流转（如何判定下游好没好）](#6-6-1-上下游工站之间的通信与顺序流转-如何判定下游好没好)
+      - [工站与机械轴之间的通信（任务协程）](#6-6-2-工站与机械轴之间的通信-任务协程)
+   - [典型工序异常处理与故障模拟设计（以扫码与打螺丝为例）](#6-7-典型工序异常处理与故障模拟设计-以扫码与打螺丝为例)
+      - [扫码枪异步通讯与全局仿真](#6-7-1-扫码枪异步通讯与全局仿真)
+      - [电批拧紧失败概率模拟与连续故障防护](#6-7-2-电批拧紧失败概率模拟与连续故障防护)
+      - [网络通信与坐标转换的 try-catch 异常安全防护规范](#6-7-3-网络通信与坐标转换的-try-catch-异常安全防护规范)
+   - [脱机空跑（虚拟仿真）实现 SOP](#6-8-脱机空跑-虚拟仿真-实现-sop)
+      - [简介](#6-8-1-简介)
+      - [系统参数配置（Excel → 系统界面 → 枚举同步 三步走）](#6-8-2-系统参数配置-excel-系统界面-枚举同步-三步走)
+      - [程序配置实现](#6-8-3-程序配置实现)
+      - [脱机空跑切换与运行处理](#6-8-4-脱机空跑切换与运行处理)
+7. [ZCM968SOP 控件与方法说明](#7-zcm968sop-控件与方法说明)
 
-8. [Setup_Load.cs 程序启动初始化](#8-Setup_Load.cs-程序启动初始化)
+   - [📄 控件说明书下载](#控件说明书下载)
+8. [Setup_Load.cs 程序启动初始化](#8-setupload-cs-程序启动初始化)
+
    - [执行流程](#执行流程)
    - [初始化顺序重要性](#初始化顺序重要性)
-
 9. [机械臂基类开发最佳实践](#9-机械臂基类开发最佳实践)
-   - [线程安全的安全移动方法设计 (`SafeMoveTo`)](#线程安全的安全移动方法设计-(`SafeMoveTo`))
-   - [框架底层原生运动控制 API 详解](#框架底层原生运动控制-API-详解)
-   - [为什么封装 `SafeMoveTo` 自定义安全移动函数](#为什么封装-`SafeMoveTo`-自定义安全移动函数)
 
-10. [辅助类 API](#10-辅助类-API)
-   - [Zcm.Dialog — 对话框类](#Zcm.Dialog-—-对话框类)
-   - [Zcm.DoAndDi — IO 操作类](#Zcm.DoAndDi-—-IO-操作类)
-   - [Zcm.LanguageHelper — 语言切换](#Zcm.LanguageHelper-—-语言切换)
+   - [线程安全的安全移动方法设计 (`SafeMoveTo`)](#9-1-线程安全的安全移动方法设计-safemoveto)
+   - [框架底层原生运动控制 API 详解](#9-2-框架底层原生运动控制-api-详解)
+      - [原生阻塞型运动 API (`WaitDone`)](#9-2-1-原生阻塞型运动-api-waitdone)
+      - [原生非阻塞型运动 API (`StaXYMove` 系列)](#9-2-2-原生非阻塞型运动-api-staxymove-系列)
+   - [为什么封装 `SafeMoveTo` 自定义安全移动函数](#9-3-为什么封装-safemoveto-自定义安全移动函数)
+10. [辅助类 API](#10-辅助类-api)
 
-11. [核心 API 常见问题与技巧](#11-核心-API-常见问题与技巧)
-   - [TasksInteraction 跨线程通信详解](#TasksInteraction-跨线程通信详解)
-   - [mSend.WaitDone 通信详解](#mSend.WaitDone-通信详解)
-   - [MainConvId 详解](#MainConvId-详解)
-   - [TipsDiglogForm 弹框详解](#TipsDiglogForm-弹框详解)
-   - [mDoDiWaitDone 详解](#mDoDiWaitDone-详解)
-   - [mFunction.OverTime 超时判断](#mFunction.OverTime-超时判断)
-   - [机械轴屏蔽模式详解](#机械轴屏蔽模式详解)
-   - [扫码使能检查重复的原因](#扫码使能检查重复的原因)
+   - [Zcm.Dialog — 对话框类](#10-1-zcm-dialog-对话框类)
+      - [ReturnData](#returndata)
+      - [DialogShow()](#dialogshow)
+   - [Zcm.DoAndDi — IO 操作类](#10-2-zcm-doanddi-io-操作类)
+      - [WaitDi()](#waitdi)
+      - [WaitDone()](#waitdone)
+   - [Zcm.LanguageHelper — 语言切换](#10-3-zcm-languagehelper-语言切换)
+      - [SetLanguage()](#setlanguage)
+11. [核心 API 常见问题与技巧](#11-核心-api-常见问题与技巧)
 
-12. [API 速查表](#12-API-速查表)
-   - [Motion & mFunction](#Motion-&-mFunction)
-   - [MotionDll](#MotionDll)
-   - [TaskBase IMotion](#TaskBase-IMotion)
-   - [WkManager](#WkManager)
-   - [WorkShare 子对象](#WorkShare-子对象)
+   - [TasksInteraction 跨线程通信详解](#11-1-tasksinteraction-跨线程通信详解)
+      - [底层原理](#底层原理)
+      - [为什么不用普通 bool 变量？](#为什么不用普通-bool-变量)
+      - [SetTasksInteractionTrue](#settasksinteractiontrue)
+      - [SetTasksInteractionFalse](#settasksinteractionfalse)
+      - [GetTasksInteraction](#gettasksinteraction)
+      - [WaitTaskInteractionTrue](#waittaskinteractiontrue)
+      - [WaitAllTaskInteractionTrue](#waitalltaskinteractiontrue)
+      - [WaitAnyTaskInteractionTrue](#waitanytaskinteractiontrue)
+   - [mSend.WaitDone 通信详解](#11-2-msend-waitdone-通信详解)
+      - [recvStr 匹配规则](#recvstr-匹配规则)
+      - [使用示例](#使用示例)
+   - [MainConvId 详解](#11-3-mainconvid-详解)
+   - [TipsDiglogForm 弹框详解](#11-4-tipsdiglogform-弹框详解)
+   - [mDoDiWaitDone 详解](#11-5-mdodiwaitdone-详解)
+   - [mFunction.OverTime 超时判断](#11-6-mfunction-overtime-超时判断)
+   - [机械轴屏蔽模式详解](#11-7-机械轴屏蔽模式详解)
+   - [扫码使能检查重复的原因](#11-8-扫码使能检查重复的原因)
+12. [API 速查表](#12-api-速查表)
+
+   - [Motion & mFunction](#motion-mfunction)
+   - [MotionDll](#motiondll)
+   - [TaskBase IMotion](#taskbase-imotion)
+   - [WkManager](#wkmanager)
+   - [WorkShare 子对象](#workshare-子对象)
 
 ---
 
@@ -2578,6 +2699,244 @@ mGlobal.mDoReset(电批破真空信号); // 关闭吹气
 
 
 ---
+
+
+### 6.8 脱机空跑（虚拟仿真）实现 SOP
+
+> 脱机空跑（Offline Dry-Run / Virtual Simulation）是指硬件尚未到场、无法实际接线与触发传感器时，通过程序内置的虚拟模式标志位将整条产线 / 工站流程完整跑通的调试手段，用于提前验证 Task 生命周期、流线数据交换、步序逻辑与异常处理，缩短硬件到场后的联调周期。
+
+---
+
+#### 6.8.1 简介
+
+设备实现空跑需要配置好程序运行的各项必要参数，并正确编写设备的 Task 和流线相关处理。本 SOP 按**系统参数配置 → 程序代码实现 → 脱机切换与验证**三大阶段逐步讲解。
+
+---
+
+#### 6.8.2 系统参数配置（Excel → 系统界面 → 枚举同步 三步走）
+
+参数文件统一存放于 **`<ParameterRoot>\ParXlsx`**（`<ParameterRoot>` 为部署时指定的参数配置根目录，具体路径由 `Setup_Load.cs` / 框架配置项决定）。
+
+##### 2.1 控制卡配置（CardPar.xlsx）
+
+1. 打开 `<ParameterRoot>\ParXlsx`，找到 `CardPar.xlsx`。
+2. 按控制卡厂家 / 型号（固高 / 雷赛 / 汇川 EtherCAT 主站等）填写卡索引、控制轴数、卡类型、总线编号等字段。
+3. 启动程序后进入 **系统参数 → 卡 / IO 配置** 页面，点击"卡配置"进入子界面。
+4. 点击 **读取 Excel** 重新加载配置，核对无误后点击 **保存**；有误可在界面手动修改后点击"保存 Excel"回写文件。
+
+##### 2.2 伺服轴配置（AxisPar.xlsx）
+
+1. 打开 `<ParameterRoot>\ParXlsx`，编辑 `AxisPar.xlsx`。
+2. 按设备实际轴规划填写：轴编号、轴名称、每圈脉冲、减速比、导程、正负限位、回零模式、工作速度、加 / 减速时间、惯量参数等。
+3. 启动程序 → 系统参数 → 卡 / IO 配置 → **轴配置**。
+4. 点击 **读取 Excel** → 核对 → **保存**（或界面手动改完后"保存 Excel"回写）。
+5. 保存完成后，需在 `EnumName.cs`（或 VB 版 `名称枚举.vb`）中同步定义**轴枚举**。要求：**枚举序号 ↔ Excel 轴编号必须严格一一对应**，后续代码通过枚举名引用轴。
+
+##### 2.3 数字 I / O 映射配置（Input.xlsx / Output.xlsx）
+
+1. 打开 `<ParameterRoot>\ParXlsx`，编辑 `Input.xlsx`（输入）与 `Output.xlsx`（输出）。
+2. 根据《设备 IO 分配表》逐行填写 IO 编号、信号名称、所属工站、类型（NPN / PNP）、是否常闭、默认电平、注释说明等字段。
+3. 启动程序 → 系统参数 → 卡 / IO 配置 → **IO 配置**。
+4. 点击 **读取 Excel** → 核对 → **保存**（界面可手动改后"保存 Excel"回写）。
+5. 保存完成后，在 `EnumName.cs` 同步定义**输入枚举**与**输出枚举**，要求同 2.2：枚举序号 ↔ Excel 编号严格一一对应。
+
+##### 2.4 系统参数配置（ParList.xlsx / SysPar.xlsx）
+
+1. 打开 `<ParameterRoot>\ParXlsx`，编辑 `ParList.xlsx`。
+2. 按参数分类填写。类型约定：`D`=Double 浮点、`I`=Int 整型、`B`=Bool 布尔、`A`=下拉选择项、`S`=String 字符串；并指定默认值、上下限、单位、所属参数页。
+3. 启动程序 → 系统参数 → **参数配置 / 变量配置**。
+4. 点击 **读取 Excel** → 核对 → **保存**。
+5. 保存完成后在 `EnumName.cs` 同步**参数枚举**（序号 ↔ Excel 序号一致）。
+
+##### 2.5 流线参数（ParList.xlsx 流线分组）
+
+1. 在 `ParList.xlsx` 中新增流线分类参数块：段数、每段站号、节拍 CT 设定、顶升 / 阻挡 / 定位使能、缓存站容量等。
+2. 读取 Excel → 保存，并在 `EnumName.cs` 中同步对应的流线枚举。
+
+---
+
+#### 6.8.3 程序配置实现
+
+##### 3.1 Task 工站配置（7 大生命周期方法）
+
+每一个工站对应一个继承 `mWorkShare`（或框架内部 TaskBase / IWorkShare 基类）的子类，**必须按顺序重写以下 7 个生命周期方法**：
+
+```text
+                    ┌──────────────┐
+  程序启动 ───────► │ Initialize() │  绑定工站 / 日志 / 事件 & 实例化私有字段
+                    └──────┬───────┘
+                           ▼
+  点击"运行" ─────► ┌──────────────┐
+   (整机复位)       │   Homing()   │  机械手复位 + 轴回零 + IO/参变量清零
+                    └──────┬───────┘
+                           ▼  AllHomeOK → 背景变黄 WAITRUN
+  再次点击"运行"     ┌──────────────┐
+  (开始自动运行) ──► │   Ready()    │  判断运行前置条件；返回 true/false
+                    └──────┬───────┘
+                     false │  true
+                           ▼
+                    ┌──────────────┐
+                    │  AutoRun()   │  多线程并发，各站独立主业务
+                    └──────┬───────┘
+            异常触发 mAction │
+                           ▼
+                    ┌──────────────┐      ┌──────────────┐
+                    │    Err()     │ ───► │ ManualMode() │  手动调试 / 标定
+                    └──────────────┘      └──────────────┘
+```
+
+**(1) Task 建立**：在项目工站目录下新建对应的 Task 类文件，继承框架指定的 `mWorkShare` 基类。
+
+**(2) `Initialize()` — 工站初始化**
+- 调用 `WkManager.BindStation(TaskID, TaskName, this)` 将 Task 绑定到工站：
+  - `TaskID` = 工站索引（从 0 开始或按 `StationDefine` 枚举）
+  - `TaskName` = 工站 UI 显示名
+  - `this` = 当前工站类实例；绑定成功后可在状态栏 / `StaStats` 控件看到各工站运行状态
+- 实例化工站日志：`_Logs = new cLogs(TaskName, TaskID)`，后续调用 `AddLog(...)` 即可按工站自动落盘日志。
+- 按需实例化视觉对象（`ComCCD`）、气缸逻辑、工站私有字段；并为 `mDoDi.mAction`、`mSend.mAction` 等 WorkShare 事件绑定处理方法。
+- 在 `A0.工位加载.cs` 的 `TaskLoad()` 入口中**按依赖顺序依次调用所有工站的 `Initialize()`**。
+
+**(3) `Homing()` — 整机复位 / 回零**
+- 设备停止时点击"运行"会弹出"是否整机复位"确认 → OK 后框架依次调用各绑定站的 `Homing()`。
+- `Homing()` 内建议按如下顺序：机械手回安全点 → 伺服轴执行回零 → 关键输出（真空 / 电磁阀）复位 → 工站参变量 / 步序状态置零 → 软交互信号量 `TasksInteraction` 复位。
+- 本站复位 / 回零完成后将 `StaHomeOk = true`。
+- 当 `XStation.WkManager.AllHomeOK()` 为真时，主界面背景变为**黄色**，系统状态切为 **WAITRUN（待运行）**。
+
+**(4) `Err()` — 异常处理**
+- 挂到 `mDoDi.mAction` / `mSend.mAction` 等失败回调上；方法签名内通过 `CtrName`（触发对象名）+ `ErrInfo` 做分支：报警信息上报告警中心、触发声光三色灯、调用重试逻辑或直接 `SetStep` 跳到异常分支步序。
+
+**(5) `Ready()` — 自动运行前置条件判断**
+- WAITRUN 状态下点击"运行" → 弹"开始自动运行？" → OK 后 `WkManager.Ready()` 逐工站调用各站的 `Ready()`。
+- `Ready()` 内判断本站是否满足运行条件（关键轴已回零、气源压力 OK、视觉连通 / 参数载入、关键参数阈值合理、急停未触发、安全门关等），可顺带做本步运行前的变量初始化；满足返回 `true`，否则返回 `false` 并在 UI 给出明确提示。
+- 全部通过时 `WkManager.Ready()` 返回 0；有任一工站未通过则返回非 0，整体流程停止等待用户处理。
+
+**(6) `AutoRun()` — 自动运行主循环（步序机）**
+- `Ready()` 通过后调用 `WkManager.Start()`，框架内部开启**多线程并发**运行各工站 `AutoRun()`。
+- `AutoRun()` 内写工站业务（扫码、取料、装配、检测、下料等）。推荐配合流线控制采用**"步序机 + 流线自定状态"双驱动**模式：
+
+```text
+ AutoConv.cs (流线内部)        流线控制.cs (用户代码)           Task工站.AutoRun()
+ ─────────────────────        ────────────────────────        ───────────────────
+ 载具到位 & 数据交换 OK
+          │
+          ▼
+ 进入"等待处理" ─────────► 子步序10：初始化
+                                │
+                                ▼
+                       自定状态 = "等待装配"   ◄──────── 轮询到此状态
+                                │                  │        开始执行业务步序
+                                │                  │        (扫码/取料/装配..)
+                                │                  │
+                                └──────────────────┘        处理完毕
+                                     业务完成                 │
+                                     自定状态 = "装配完成"    │
+                                          │                   │
+                                          ▼                   ▼
+                                   返回 true → 流线放行 → 载具流出到下一工站
+```
+
+**(7) `ManualMode()` — 手动 / 标定调试**
+- 两种 UI 控件可触发：
+  - **XTaskBtn**：配置 `TaskId`（路由到对应工站）+ `Text`（方法内 switch 分支键），框架按 `TaskId` 找工站后进入 `ManualMode()`，再按 `Text` 分支执行对应代码段；用于回原点、单个气缸动作、取放标定等。
+  - **ManualTestModule**：配置 `TaskId` + `SelectItems` 下拉项（如 "1-九针标定" / "2-相机拍照点标定"），多用于复杂标定流程（多步序 / 参数回写 `ParList.xlsx`）。
+
+##### 3.2 流线 Conveyor 配置
+
+**(1) 控件搭建**
+- 主界面按作业需求拖拽对应数量的 `ConvStatus` 控件。
+- 对每个控件配置**流水线编号 ConvId**、刷新频率、是否显示节拍 CT、是否显示载具图标。
+- 框架会自动把 `ConvStatus` 控件与 `mFunction.流水线[ConvId]` 运行时对象进行双向绑定。
+
+**(2) 流线初始化**
+- 在"整机复位判断"逻辑内重写流线复位代码（每段：清空缓存数据、步序回初始 10、自定状态置空、载具在位标志清除、顶升机构回落）。
+- 冷启动与热复位时各调用一次。
+
+**(3) 流线数据交换（上站 → 本站）**
+
+载具到位后先触发 `数据交换()`。交换原则：
+1. 确认当站状态后，将**上一站**的 `AutoConv.mConvData[UpStreamId]` 深拷贝到本站数据结构（避免浅拷贝引发的引用共享问题）；
+2. 随后清空上一站的数据，并返回 `true`；
+3. 内部 `mEvent()` 指向 `流线控制.cs` 的 `ConvRun()`，再按当站状态继续调度。
+- 返回 true 后 `ConvRun()` 将当站状态置为"交换完成"，`RunFun()` 进入"到位分类"。
+
+**(4) 流线等待处理（交接给 Task 工站）**
+- 到位分类结束后进入"等待处理" → `AutoConv.WhenStationProcess()` → 经 `mEvent()` → `ConvRun()` → `ConvEvent()` 的当站处理分支，正式交由工站 `AutoRun()` 接手（见 3.1 (6) 的步序图）。
+
+**(5) 流线载具重载（顶升站专用）**
+- 顶升站载具需要"二次下落"（例：顶升后底部还需额外过板）时，`RunFun()` 当检测到当站状态为"等待载具重载"即进入重载流程：
+  1. `载具重载()` → `mEvent()` → `ConvRun()` → 用户代码的 `载具重载()` 方法；
+  2. 用户代码内执行：顶升站 ↔ 底部站 数据交换 → 清空顶升站缓存 + 复位顶升站状态 → 返回 `true`；
+  3. `ConvRun()` 收到 true → 自定状态 = "重载完成" → 流线步序跳到"处理完成"，载具流出。
+
+---
+
+#### 6.8.4 脱机空跑切换与运行处理
+
+##### 4.1 模式切换
+
+1. 参数 / Task / 流线全部配置完善后，在 HMI 顶部 **运行模式** 下拉选择 **"脱机空跑"** → 点击 **保存**（写回配置文件，下次启动仍沿用）。
+2. 点击"运行"后框架入口 `RunClick()` 中检测到模式为"脱机空跑"即执行：
+```csharp
+MotionDll.VirtualMode  = true;   // 运动控制虚拟模式：屏蔽对运动控制卡的硬件读写
+MotionDll.ConvVitMode  = true;   // 流线虚拟模式：仿真载具自动流入、到位、流出
+```
+
+##### 4.2 脱机空跑业务代码模式（分类化处理）
+
+虚拟模式下没有真实传感器 / 轴到位 / 扫码结果触发，因此工站 `AutoRun()` 要按**"实际运行分支 ↔ 脱机空跑分支"**做分类：
+
+```text
+流线步序 → 等待处理  →  自定状态 = "等待装配"
+                               │
+                  ┌────────────┴────────────┐
+                  │                         │
+           （实际运行分支）           （脱机空跑分支）
+        调 CCD / 扫码 / 伺服移动         Thread.Sleep(仿真节拍)
+        调气缸 / 真空 / 读 IO             填默认 OK 的数据
+                  │                         │
+                  └────────────┬────────────┘
+                               ▼
+           if (MotionDll.VirtualMode && MotionDll.ConvVitMode)
+                 跳过硬件反馈等待，步序直接推进到"处理完成"
+                               │
+                               ▼
+                 自定状态 = "装配完成" → 载具放行 → 载具流出到下一站
+                                                                 ↓
+                                                          下一站重复上述循环
+```
+
+脱机分支示例代码骨架：
+```csharp
+if (MotionDll.VirtualMode && MotionDll.ConvVitMode)
+{
+    // 1) 模拟本工站典型节拍耗时
+    int ctMs = ParD[参数I.本工站CT_ms].I() > 0 ? ParD[参数I.本工站CT_ms].I() : 2000;
+    Thread.Sleep(ctMs);
+
+    // 2) 填"正常完成"的默认值（让后续流线 / MES / 数据追溯继续流转）
+    StaInfo.Barcode      = "VIRTUAL_" + DateTime.Now.ToString("HHmmssfff");
+    StaInfo.CCD_OffsetX  = 0.0;
+    StaInfo.CCD_OffsetY  = 0.0;
+    StaInfo.CCD_OffsetR  = 0.0;
+    StaInfo.AssembleOK   = true;
+    StaInfo.InspectNG    = false;
+
+    // 3) 推进步序 / 流线自定状态
+    mFunction.SetStep(ref StaInfo, (int)步序.完成);
+}
+```
+
+##### 4.3 脱机空跑验收清单（建议至少连续 20 个循环）
+
+- **模式切换**：选择脱机空跑 → 保存 → 点整机复位，所有站点 `AllHomeOK` 通过，背景变黄进入 WAITRUN；
+- **Ready 前置检查**：再次点击"运行" → 所有工站 Ready 全通过，状态栏各站进入 RUN 状态；
+- **流线仿真**：`ConvStatus` 上有载具图标按节拍逐段流动，CT 统计（平均 / 当前 / 最大）正常累计；
+- **稳定性**：连续跑 ≥ 20 循环无死锁、无崩溃、无 `TasksInteraction` 信号量卡住，软干涉区无错误碰撞报警；
+- **日志 / 数据追溯**：所有工站日志按 TaskID 正确落盘，步序级异常可追溯；MES / CSV / DB 追溯记录正常写入虚拟数据。
+
+---
+
+
 
 ## 7. ZCM968SOP 控件与方法说明
 

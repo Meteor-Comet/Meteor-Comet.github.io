@@ -71,31 +71,19 @@ for (const heading of filteredHeadings) {
         const hasChildren = group.children.length > 0;
         return (
             <div class="toc-group-wrapper flex flex-col w-full mb-1">
-                <div class="flex items-center justify-between w-full">
-                    <a href={`#${group.parent.slug}`}
-                       data-idx={group.parentIndex}
-                       class="px-2 flex gap-2 relative transition w-full min-h-8 rounded-lg items-center hover:bg-[var(--toc-btn-hover)] active:bg-[var(--toc-btn-active)] py-1.5"
-                    >
-                        <div class="transition w-5 h-5 shrink-0 rounded-lg text-xs flex items-center justify-center font-bold bg-[var(--toc-badge-bg)] text-[var(--btn-content)]">
-                            {group.badgeNum}
-                        </div>
-                        <div class="transition text-sm font-medium text-75 truncate">
-                            {removeTailingHash(group.parent.text)}
-                        </div>
-                    </a>
-                    {hasChildren && (
-                        <button type="button"
-                                aria-label="Toggle section"
-                                class="toc-toggle-btn p-1 ml-1 rounded-md text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-[var(--toc-btn-hover)] transition-all shrink-0"
-                        >
-                            <svg class="w-3.5 h-3.5 transform transition-transform duration-200 icon-chevron rotate-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
-                    )}
-                </div>
+                <a href={`#${group.parent.slug}`}
+                   data-idx={group.parentIndex}
+                   class="px-2 flex gap-2 relative transition w-full min-h-8 rounded-lg items-center hover:bg-[var(--toc-btn-hover)] active:bg-[var(--toc-btn-active)] py-1.5"
+                >
+                    <div class="transition w-5 h-5 shrink-0 rounded-lg text-xs flex items-center justify-center font-bold bg-[var(--toc-badge-bg)] text-[var(--btn-content)]">
+                        {group.badgeNum}
+                    </div>
+                    <div class="transition text-sm font-medium text-75 truncate">
+                        {removeTailingHash(group.parent.text)}
+                    </div>
+                </a>
                 {hasChildren && (
-                    <div class="toc-children flex flex-col pl-3 border-l-2 border-neutral-200/80 dark:border-neutral-700/80 ml-4.5 my-1 gap-0.5 transition-all duration-300 overflow-hidden">
+                    <div class="toc-children flex flex-col pl-3 border-l-2 border-neutral-200/80 dark:border-neutral-700/80 ml-4.5 my-1 gap-0.5">
                         {group.children.map((child) => (
                             <a href={`#${child.heading.slug}`}
                                data-idx={child.index}
@@ -162,13 +150,6 @@ class TableOfContents extends HTMLElement {
         while (i >= 0 && this.active[i]) {
             if (this.tocEntries[i]) {
                 this.tocEntries[i].classList.add(this.visibleClass);
-                // Ensure parent .toc-children is visible if an active item is inside it
-                const childrenContainer = this.tocEntries[i].closest('.toc-children');
-                if (childrenContainer && childrenContainer.classList.contains('hidden')) {
-                    childrenContainer.classList.remove('hidden');
-                    const chevron = childrenContainer.parentElement?.querySelector('.icon-chevron');
-                    if (chevron) chevron.classList.add('rotate-180');
-                }
             }
             min = Math.min(min, i);
             max = Math.max(max, i);
@@ -259,49 +240,6 @@ class TableOfContents extends HTMLElement {
         }
     };
 
-    setupCollapsibleToggles() {
-        const toggleBtns = this.querySelectorAll<HTMLButtonElement>('.toc-toggle-btn');
-        toggleBtns.forEach((btn) => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const groupWrapper = btn.closest('.toc-group-wrapper');
-                const childrenContainer = groupWrapper?.querySelector('.toc-children');
-                const chevron = btn.querySelector('.icon-chevron');
-                if (childrenContainer) {
-                    childrenContainer.classList.toggle('hidden');
-                    if (chevron) {
-                        chevron.classList.toggle('rotate-180');
-                    }
-                }
-            });
-        });
-
-        // Global toggle button support if present in sidebar
-        const globalBtn = document.getElementById('toc-global-toggle');
-        if (globalBtn) {
-            let allCollapsed = false;
-            globalBtn.addEventListener('click', () => {
-                allCollapsed = !allCollapsed;
-                const childrenContainers = this.querySelectorAll('.toc-children');
-                const chevrons = this.querySelectorAll('.icon-chevron');
-                childrenContainers.forEach((container) => {
-                    if (allCollapsed) {
-                        container.classList.add('hidden');
-                    } else {
-                        container.classList.remove('hidden');
-                    }
-                });
-                chevrons.forEach((chevron) => {
-                    if (allCollapsed) {
-                        chevron.classList.remove('rotate-180');
-                    } else {
-                        chevron.classList.add('rotate-180');
-                    }
-                });
-            });
-        }
-    }
-
     isInRange(value: number, min: number, max: number) {
         return min < value && value < max;
     }
@@ -319,7 +257,6 @@ class TableOfContents extends HTMLElement {
 
     init() {
         this.tocEl = document.getElementById("toc-inner-wrapper");
-        this.setupCollapsibleToggles();
 
         if (!this.tocEl) return;
 

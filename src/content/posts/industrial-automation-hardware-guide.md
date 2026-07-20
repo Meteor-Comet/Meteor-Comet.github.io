@@ -1,8 +1,8 @@
-﻿---
+---
 title: 工业自动化硬件大全
 published: 2026-07-06
 description: 工控机、总线拓扑、电机驱动、IO传感器、配盘走线与整机电气BOM一站式硬件参考手册
-image: /images/post-bg-alitrip.jpg
+image: /images/industrial-automation-hardware-guide.jpg
 category: 工业控制
 tags:
   - 工业控制

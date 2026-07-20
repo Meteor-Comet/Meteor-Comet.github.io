@@ -174,8 +174,7 @@ class TableOfContents extends HTMLElement {
 
     scrollToActiveHeading = () => {
         if (this.anchorNavTarget || !this.tocEl) return;
-        const activeHeading =
-            document.querySelectorAll<HTMLDivElement>(`#toc .${this.visibleClass}`);
+        const activeHeading = this.querySelectorAll<HTMLAnchorElement>(`a.${this.visibleClass}`);
         if (!activeHeading.length) return;
 
         const topmost = activeHeading[0];
@@ -256,7 +255,7 @@ class TableOfContents extends HTMLElement {
     }
 
     init() {
-        this.tocEl = document.getElementById("toc-inner-wrapper");
+        this.tocEl = this.closest('#toc-inner-wrapper') || this.closest('.overflow-y-auto') || this.parentElement;
 
         if (!this.tocEl) return;
 
@@ -264,7 +263,7 @@ class TableOfContents extends HTMLElement {
             capture: true,
         });
 
-        this.activeIndicator = document.getElementById("active-indicator");
+        this.activeIndicator = this.querySelector("#active-indicator");
 
         this.tocEntries = Array.from(
             this.querySelectorAll<HTMLAnchorElement>("a[href^='#']")

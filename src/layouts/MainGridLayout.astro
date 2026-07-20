@@ -66,12 +66,12 @@ const hasHeadings = headings && headings.length > 0;
 <div class="absolute w-full z-30 pointer-events-none" style={`top: ${mainPanelTop}`}>
     <div class:list={[
         "relative mx-auto pointer-events-auto transition-all duration-500",
-        hasHeadings ? "max-w-[var(--page-width)] xl:max-w-[88rem]" : "max-w-[var(--page-width)]"
+        hasHeadings ? "max-w-[var(--page-width)] lg:max-w-[88rem]" : "max-w-[var(--page-width)]"
     ]}>
         <div id="main-grid" class:list={[
             "transition duration-700 w-full left-0 right-0 grid mx-auto gap-4 px-0 md:px-4",
             hasHeadings
-                ? "grid-cols-1 lg:grid-cols-[17.5rem_1fr] xl:grid-cols-[17.5rem_1fr_16.5rem]"
+                ? "grid-cols-1 lg:grid-cols-[17.5rem_1fr_16.5rem]"
                 : "grid-cols-1 lg:grid-cols-[17.5rem_1fr]"
         ]}>
             <!-- Banner image credit -->
@@ -100,9 +100,9 @@ const hasHeadings = headings && headings.length > 0;
                 </div>
             </main>
 
-            <!-- Right TOC Sidebar (xl screens: integrated 3rd column card) -->
+            <!-- Right TOC Sidebar (lg screens: integrated 3rd column card) -->
             {siteConfig.toc.enable && hasHeadings && (
-                <div class="hidden xl:block col-span-1 onload-animation" style="animation-delay: 200ms">
+                <div class="hidden lg:block col-span-1 onload-animation" style="animation-delay: 200ms">
                     <div id="toc-inner-wrapper" class="sticky top-20 card-base p-4 shadow-sm border border-black/5 dark:border-white/10 max-h-[calc(100vh-6rem)] overflow-y-auto hide-scrollbar">
                         <div class="font-bold text-sm text-neutral-900 dark:text-neutral-100 pb-2 mb-2 border-b border-neutral-200/60 dark:border-neutral-700/60 flex items-center gap-2">
                             <span class="w-2.5 h-2.5 rounded-full bg-[var(--primary)]"></span>

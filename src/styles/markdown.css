@@ -120,5 +120,15 @@
         overflow-x: auto;
         margin: 1em 0;
     }
+
+    details.in-post-toc-card {
+        summary {
+            list-style: none;
+            &::-webkit-details-marker {
+                display: none;
+            }
+        }
+    }
     
 }
+

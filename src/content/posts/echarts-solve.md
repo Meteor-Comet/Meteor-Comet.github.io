@@ -10,6 +10,19 @@ tags:
 draft: false
 ---
 
+<details open class="in-post-toc-card border border-neutral-200/80 dark:border-neutral-700/80 rounded-xl p-4 my-4 bg-neutral-50/50 dark:bg-neutral-800/30">
+<summary class="font-bold text-base cursor-pointer select-none text-neutral-800 dark:text-neutral-200 flex items-center justify-between outline-none">
+<span>📑 本文目录（点击收起 / 展开）</span>
+</summary>
+
+<div class="max-h-72 overflow-y-auto mt-3 pt-2 border-t border-neutral-200/60 dark:border-neutral-700/60 hide-scrollbar">
+
+
+
+</div>
+</details>
+
+
 ## 目录
 
   - [问题场景描述：在利用pyecharts库进行数据可视化学习过程中，遇到了在Jupyter Lab环境中执行bar.render_notebook()后图形未能正常显示的问题。](#问题场景描述在利用pyecharts库进行数据可视化学习过程中遇到了在jupyter-lab环境中执行barrendernotebook后图形未能正常显示的问题)

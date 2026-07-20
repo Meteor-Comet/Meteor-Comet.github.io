@@ -38,7 +38,6 @@ A static blog template built with [Astro](https://astro.build) and [Tailwind CSS
 ### 3. 🐛 编译与样式问题修复 (CSS & Build Fixes)
 - **Vite/PostCSS 构建修复**：在 `markdown.css` 中直接内联 `.btn-regular-dark` 类定义，解决生产环境 `pnpm build` 时提示类缺失导致的 Vite CSS 构建错误。
 - **外部链接增强**：标准化 PDF 下载与 SOP 指南表格外链的 `target="_blank"` 属性。
-- **回到顶端按钮位置修复**：修正 `BackToTop.astro` 中 transform 逻辑错误，正常状态改为 `translateX(0) + right: 2rem`，隐藏时才滑出屏幕右侧，确保按钮固定显示在视口右下角。
 
 ---
 

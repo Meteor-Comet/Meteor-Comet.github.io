@@ -27,7 +27,7 @@ export const siteConfig: SiteConfig = {
   },
   toc: {
     enable: true,
-    depth: 3,
+    depth: 2,
   },
   favicon: [
     // 可在此添加自定义 favicon

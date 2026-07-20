@@ -50,7 +50,7 @@ export const navBarConfig: NavBarConfig = {
 export const profileConfig: ProfileConfig = {
   avatar: '/images/avatar-wanfeng.png',
   name: 'Comet',
-  bio: '风|鸟|花|月',
+  bio: '花鳥風月',
   links: [
     {
       name: 'GitHub',

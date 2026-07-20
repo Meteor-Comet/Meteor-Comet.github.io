@@ -125,6 +125,9 @@ draft: false
 
 ### 1.1 工控机（IPC）概述与选型
 
+![工控机 (IPC)](/images/in-post/electrical-components/control-ipc.png)
+
+
 **选型核心指标：**
 
 | 指标 | 建议 | 说明 |
@@ -159,6 +162,9 @@ draft: false
 
 ### 1.3 工控机周边设备
 
+![工业显示器与触摸屏 HMI](/images/in-post/electrical-components/hmi-touchscreen.png)
+
+
 | 设备 | 用途 |
 |------|------|
 | **工业显示器** | 触摸屏 HMI，建议 IP65 前面板 |
@@ -168,6 +174,9 @@ draft: false
 | **串口服务器** | RS232/485 设备转以太网（老式仪表） |
 
 ### 1.4 运动控制卡 — 固高（脉冲型 vs 总线型）
+
+![固高运动控制卡](/images/in-post/electrical-components/control-motion-card.png)
+
 
 运动控制卡分为两类，核心区别在于**控制卡与驱动器之间的通信方式**（详见下文第二章对比）。
 
@@ -202,6 +211,9 @@ draft: false
 | 典型型号 | 固高 GTS-800 系列 |
 
 ### 1.5 PLC 扩展模块 — 汇川系列
+
+![PLC 主机与扩展模块](/images/in-post/electrical-components/control-plc.png)
+
 
 汇川 PLC 扩展模块挂载在下位机 PLC 上，实现工站级安全联锁、气缸动作顺序与模拟量采集，由 PLC 扫描周期保障强实时性。
 
@@ -1133,6 +1145,9 @@ pMove.AbsMove(轴, 100mm)
 
 ### 5.3 本地 IO 扩展模块 — 固高 HCB5-1616-DTD01
 
+![IO 端子扩展模块](/images/in-post/electrical-components/io-terminal-module.png)
+
+
 #### 1. 工作原理
 固高 HCB5-1616-DTD01 本地扩展 IO 模块挂载在多轴运动控制卡的本地总线上，用于实现本地开关信号的硬件级就近采集。它提供 16 路数字输入和 16 路数字输出，有效降低主控周期的数据总线占用率。
 
@@ -1266,6 +1281,9 @@ SMC D-M9B 是两线制（2-Wire）固态磁性开关。它卡入气缸外壳的 
 
 ### 6.6 接近传感器
 
+![接近传感器](/images/in-post/electrical-components/sensor-proximity.png)
+
+
 **原理：** 电感式或电容式检测金属或介质靠近，输出开关量。
 
 | 类型 | 检测对象 | 典型距离 |
@@ -1277,17 +1295,26 @@ SMC D-M9B 是两线制（2-Wire）固态磁性开关。它卡入气缸外壳的 
 
 ### 6.7 光纤传感器
 
+![光纤传感器与放大器](/images/in-post/electrical-components/sensor-fiber.png)
+
+
 **原理：** 光纤探头将光引至狭小空间，放大器单元处理反射/透过光强变化。
 
 **优势：** 探头可弯曲、耐高温，适合狭窄工位与强电磁干扰区。
 
 ### 6.8 压力传感器
 
+![压力传感器与数显压力表](/images/in-post/electrical-components/sensor-pressure.png)
+
+
 **原理：** 压阻/应变片将气压或液压转换为 4~20 mA 或 0~10 V 模拟量，或开关量（数字压力开关）。
 
 **应用：** 真空吸附确认、气源监测、点胶压力闭环。真空一体阀常集成数字压力表反馈。
 
 ### 6.9 温度传感器
+
+![温度传感器与温控模块](/images/in-post/electrical-components/sensor-temperature.png)
+
 
 | 类型 | 特点 | 应用 |
 |------|------|------|
@@ -1296,6 +1323,9 @@ SMC D-M9B 是两线制（2-Wire）固态磁性开关。它卡入气缸外壳的 
 | NTC 热敏电阻 | 成本低 | 柜内散热监控 |
 
 ### 6.10 编码器
+
+![增量/绝对值旋转编码器](/images/in-post/electrical-components/sensor-encoder.png)
+
 
 编码器是闭环运动的反馈核心（详见第三章 3.1 基础知识）。
 
@@ -1370,6 +1400,9 @@ SMC D-M9B 是两线制（2-Wire）固态磁性开关。它卡入气缸外壳的 
 
 ### 8.3 气缸
 
+![气动气缸执行机构](/images/in-post/electrical-components/actuator-cylinder.png)
+
+
 气缸由阀岛或远程 IO 的 DO 驱动，磁性开关反馈伸/缩回到位。选型关注缸径、行程、安装形式与缓冲方式。
 ## 九、机架与配盘相关
 
@@ -1386,6 +1419,9 @@ SMC D-M9B 是两线制（2-Wire）固态磁性开关。它卡入气缸外壳的 
 
 ### 9.2 电门开关 / 急停按钮 / 按钮开关
 
+![急停按钮与电门开关](/images/in-post/electrical-components/emergency-stop-button.png)
+
+
 | 元件 | 要求 |
 |------|------|
 | **电源总开关** | 带锁或挂牌，切断主回路 |
@@ -1395,6 +1431,9 @@ SMC D-M9B 是两线制（2-Wire）固态磁性开关。它卡入气缸外壳的 
 急停回路必须**硬接线**经安全继电器，不可仅由软件处理。
 
 ### 9.3 三色灯 / 日光灯 / 指示灯
+
+![三色警示灯与蜂鸣器](/images/in-post/electrical-components/buzzer-stack-light.png)
+
 
 **三色灯（塔灯）：** 黄=待机/待料，绿=自动运行，红=故障；可选蜂鸣器。
 
@@ -1460,6 +1499,9 @@ SMC D-M9B 是两线制（2-Wire）固态磁性开关。它卡入气缸外壳的 
 
 ### 10.3 时间继电器 / 安全继电器 / 电磁继电器
 
+![固态继电器 (SSR)](/images/in-post/electrical-components/control-ssr.png)
+
+
 | 类型 | 用途 |
 |------|------|
 | **时间继电器** | 星三角启动延时、吹气延时、报警闪烁 |
@@ -1476,6 +1518,9 @@ SMC D-M9B 是两线制（2-Wire）固态磁性开关。它卡入气缸外壳的 
 - **滤波保险端子：** 开关电源输出后级，滤波 + 过流保护一体化
 
 ### 10.5 交流接触器
+
+![交流接触器](/images/in-post/electrical-components/control-contactor.png)
+
 
 用于电机主回路或大功率加热/风机启停，由继电器或 PLC DO 驱动线圈。
 

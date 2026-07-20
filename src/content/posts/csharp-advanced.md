@@ -10,6 +10,14 @@ tags:
 draft: false
 ---
 
+<details open class="in-post-toc-card">
+<summary>📑 本文目录（点击收起 / 展开）</summary>
+
+
+
+</details>
+
+
 ## 目录
 
   - [C# 异步编程 (async/await) 状态机转换图](#c-异步编程-asyncawait-状态机转换图)

@@ -19,6 +19,14 @@ draft: false
 ---
 
 
+<details open class="in-post-toc-card">
+<summary>📑 本文目录（点击收起 / 展开）</summary>
+
+
+
+</details>
+
+
 ## 目录
 
   - [工业串口与 Modbus RTU / TCP 架构图](#工业串口与-modbus-rtu--tcp-架构图)

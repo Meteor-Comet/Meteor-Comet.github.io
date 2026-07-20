@@ -13,6 +13,14 @@ draft: false
 # pyecharts示例图
 
 
+<details open class="in-post-toc-card">
+<summary>📑 本文目录（点击收起 / 展开）</summary>
+
+
+
+</details>
+
+
 ## 目录
 
 - [渲染图片文件方法](#渲染图片文件方法)

@@ -21,6 +21,14 @@ HDC主要有三部分组成
 3. `hdc daemon`：daemon部署于OpenHarmony设备端作为守护进程按需运行，负责处理来自client端请求。
 
 
+<details open class="in-post-toc-card">
+<summary>📑 本文目录（点击收起 / 展开）</summary>
+
+
+
+</details>
+
+
 ## 目录
 
 - [HDC安装](#hdc安装)

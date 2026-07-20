@@ -10,6 +10,14 @@ tags:
 draft: false
 ---
 
+<details open class="in-post-toc-card">
+<summary>📑 本文目录（点击收起 / 展开）</summary>
+
+
+
+</details>
+
+
 ## 目录
 
 - [新设备设置](#新设备设置)

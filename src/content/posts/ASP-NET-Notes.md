@@ -21,6 +21,14 @@ draft: false
 ---
 
 
+<details open class="in-post-toc-card">
+<summary>📑 本文目录（点击收起 / 展开）</summary>
+
+
+
+</details>
+
+
 ## 目录
 
 - [一、 架构基石：启动引导、DI 与管道流转](#一-架构基石启动引导di-与管道流转)

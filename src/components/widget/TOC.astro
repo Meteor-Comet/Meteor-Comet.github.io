@@ -141,34 +141,44 @@ class TableOfContents extends HTMLElement {
     };
 
     toggleActiveHeading = () => {
-        let i = this.active.length - 1;
-        let min = this.active.length - 1, max = -1;
-        while (i >= 0 && !this.active[i]) {
-            if (this.tocEntries[i]) this.tocEntries[i].classList.remove(this.visibleClass);
-            i--;
-        }
-        while (i >= 0 && this.active[i]) {
-            if (this.tocEntries[i]) {
-                this.tocEntries[i].classList.add(this.visibleClass);
+        let activeIdx = -1;
+        for (let i = 0; i < this.active.length; i++) {
+            if (this.active[i]) {
+                activeIdx = i;
+                break;
             }
-            min = Math.min(min, i);
-            max = Math.max(max, i);
-            i--;
         }
-        while (i >= 0) {
-            if (this.tocEntries[i]) this.tocEntries[i].classList.remove(this.visibleClass);
-            i--;
+
+        if (activeIdx === -1 && this.tocEntries.length > 0) {
+            for (let i = 0; i < this.sections.length; i++) {
+                if (this.sections[i]) {
+                    let rect = this.sections[i].getBoundingClientRect();
+                    if (rect.top <= 140) {
+                        activeIdx = i;
+                    }
+                }
+            }
         }
-        if (min > max) {
+
+        for (let i = 0; i < this.tocEntries.length; i++) {
+            if (this.tocEntries[i]) {
+                if (i === activeIdx) {
+                    this.tocEntries[i].classList.add(this.visibleClass);
+                } else {
+                    this.tocEntries[i].classList.remove(this.visibleClass);
+                }
+            }
+        }
+
+        if (activeIdx === -1 || !this.tocEntries[activeIdx]) {
             this.activeIndicator?.setAttribute("style", `opacity: 0`);
         } else {
             let parentOffset = this.tocEl?.getBoundingClientRect().top || 0;
             let scrollOffset = this.tocEl?.scrollTop || 0;
-            if (this.tocEntries[min] && this.tocEntries[max]) {
-                let top = this.tocEntries[min].getBoundingClientRect().top - parentOffset + scrollOffset;
-                let bottom = this.tocEntries[max].getBoundingClientRect().bottom - parentOffset + scrollOffset;
-                this.activeIndicator?.setAttribute("style", `top: ${top}px; height: ${bottom - top}px`);
-            }
+            let entryRect = this.tocEntries[activeIdx].getBoundingClientRect();
+            let top = entryRect.top - parentOffset + scrollOffset;
+            let height = entryRect.height;
+            this.activeIndicator?.setAttribute("style", `opacity: 1; top: ${top}px; height: ${height}px`);
         }
     };
 

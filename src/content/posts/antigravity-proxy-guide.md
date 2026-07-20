@@ -13,6 +13,14 @@ draft: false
 # Google Antigravity 代理指南
 
 
+<details open class="in-post-toc-card">
+<summary>📑 本文目录（点击收起 / 展开）</summary>
+
+
+
+</details>
+
+
 ## 目录
 
 - [前言](#前言)

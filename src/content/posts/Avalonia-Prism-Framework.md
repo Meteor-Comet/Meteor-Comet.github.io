@@ -22,6 +22,14 @@ draft: false
 ---
 
 
+<details open class="in-post-toc-card">
+<summary>📑 本文目录（点击收起 / 展开）</summary>
+
+
+
+</details>
+
+
 ## 目录
 
 - [一、 为什么 Avalonia 官方原生拥抱 ReactiveUI？](#一-为什么-avalonia-官方原生拥抱-reactiveui)

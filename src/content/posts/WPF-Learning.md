@@ -13,6 +13,14 @@ draft: false
 # WPF 全面指南
 
 
+<details open class="in-post-toc-card">
+<summary>📑 本文目录（点击收起 / 展开）</summary>
+
+
+
+</details>
+
+
 ## 目录
 
   - [WPF MVVM 架构数据流向图](#wpf-mvvm-架构数据流向图)

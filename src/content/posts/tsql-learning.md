@@ -19,6 +19,14 @@ draft: false
 ---
 
 
+<details open class="in-post-toc-card">
+<summary>📑 本文目录（点击收起 / 展开）</summary>
+
+
+
+</details>
+
+
 ## 目录
 
 - [1. 深入理解 SQL Server 与 T-SQL 体系架构](#1-深入理解-sql-server-与-t-sql-体系架构)

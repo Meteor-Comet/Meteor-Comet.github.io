@@ -23,6 +23,14 @@ draft: false
 ---
 
 
+<details open class="in-post-toc-card">
+<summary>📑 本文目录（点击收起 / 展开）</summary>
+
+
+
+</details>
+
+
 ## 目录
 
 - [1. 慢查询日志（Slow Query Log）](#1-慢查询日志slow-query-log)

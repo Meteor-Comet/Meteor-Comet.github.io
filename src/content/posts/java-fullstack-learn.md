@@ -13,6 +13,14 @@ draft: false
 # JavaSE学习日志
 
 
+<details open class="in-post-toc-card">
+<summary>📑 本文目录（点击收起 / 展开）</summary>
+
+
+
+</details>
+
+
 ## 目录
 
   - [学习目标](#学习目标)

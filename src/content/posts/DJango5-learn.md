@@ -10,6 +10,14 @@ tags:
 draft: false
 ---
 
+<details open class="in-post-toc-card">
+<summary>📑 本文目录（点击收起 / 展开）</summary>
+
+
+
+</details>
+
+
 ## 目录
 
 - [Django5介绍及安装](#django5介绍及安装)

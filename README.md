@@ -27,12 +27,18 @@ A static blog template built with [Astro](https://astro.build) and [Tailwind CSS
 
 本项目在原 [Fuwari](https://github.com/saicaca/fuwari) 框架基础上进行了多项核心组件优化与功能扩展：
 
-### 1. 📊 Mermaid 动态图表渲染支持
+### 1. 📑 文首可折叠目录卡片 (`in-post-toc-card`)
+- **全站文章批量植入**：为所有含 `## 目录` 的文章文首自动包裹可折叠目录卡片。
+- **默认展开 + 限高滚动**：卡片默认展开，内容超过 280px 时启用内部平滑滚动，不撑开首屏。
+- **一键收起/展开**：点击「📑 本文目录（点击收起 / 展开）」标题栏即可折叠，使用浏览器原生 `<details>/<summary>`，零 JavaScript 依赖，兼容所有浏览器。
+
+### 2. 📊 Mermaid 动态图表渲染支持
 - 引入并在 CSS 与 Markdown 渲染管线中完美支持 Mermaid 架构图、流程图、时序图与状态机渲染。
 
-### 2. 🐛 编译与样式问题修复 (CSS & Build Fixes)
+### 3. 🐛 编译与样式问题修复 (CSS & Build Fixes)
 - **Vite/PostCSS 构建修复**：在 `markdown.css` 中直接内联 `.btn-regular-dark` 类定义，解决生产环境 `pnpm build` 时提示类缺失导致的 Vite CSS 构建错误。
 - **外部链接增强**：标准化 PDF 下载与 SOP 指南表格外链的 `target="_blank"` 属性。
+- **回到顶端按钮位置修复**：修正 `BackToTop.astro` 中 transform 逻辑错误，正常状态改为 `translateX(0) + right: 2rem`，隐藏时才滑出屏幕右侧，确保按钮固定显示在视口右下角。
 
 ---
 

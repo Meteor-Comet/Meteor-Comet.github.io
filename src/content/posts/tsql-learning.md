@@ -12,24 +12,64 @@ draft: false
 
 # SQL Server 与 T-SQL 深度学习笔记与实战记录
 
+
+
+
+
+
+
+
+
 无论你是刚刚接触数据库的新手，还是想要系统复习 T-SQL 及高级特性（如：复杂联表、窗口函数、存储过程调优、事务全隔离级别并发、游标细节、各类锁机制等）的开发者，这份学习笔记都能为你提供一条从入门到骨灰级的清晰路径。全篇几乎囊括了所有后端研发必考必用的核心知识点。
 
 ## 万字高阶目录
+
+---
+
+
+## 目录
+
 - [1. 深入理解 SQL Server 与 T-SQL 体系架构](#1-深入理解-sql-server-与-t-sql-体系架构)
+  - [1.1 什么是 SQL Server 和 T-SQL？](#11-什么是-sql-server-和-t-sql)
+  - [1.2 系统数据库简介](#12-系统数据库简介)
 - [2. DDL 进阶：数据库、表设计与 6 大精密约束](#2-ddl-进阶数据库表设计与-6-大精密约束)
+  - [2.1 数据库的高级创建方式](#21-数据库的高级创建方式)
+  - [2.2 表的 6 大核弹级约束 (Constraints)的设计](#22-表的-6-大核弹级约束-constraints的设计)
+  - [2.3 修改现存结构的利器 (ALTER)](#23-修改现存结构的利器-alter)
 - [3. DML 深度实战：CRUD 与 高级数据操纵](#3-dml-深度实战crud-与-高级数据操纵)
+  - [3.1 猛烈的数据充填：Insert 的所有形态](#31-猛烈的数据充填insert-的所有形态)
+  - [3.2 冷酷的抹杀：Delete 与 Truncate](#32-冷酷的抹杀delete-与-truncate)
+  - [3.3 精心雕琢的更新：Update](#33-精心雕琢的更新update)
 - [4. DQL 王者：复杂查询、关联、子查询与窗口函数](#4-dql-王者复杂查询关联子查询与窗口函数)
-- [5. T-SQL 编程精髓：变量、控制流、内置函数与游标](#5-t-sql-编程精髓变量控制流内置函数与游标-cursor)
+  - [4.1 基础查询、条件、模糊匹配与重命名](#41-基础查询条件模糊匹配与重命名)
+  - [4.2 聚合的分水岭：GROUP BY 与 HAVING](#42-聚合的分水岭group-by-与-having)
+  - [4.3 表与表的交织：JOIN（连接）家族全覆盖](#43-表与表的交织join连接家族全覆盖)
+  - [4.4 子查询、CTE 与 分析利器: 窗口函数 (Window Functions)](#44-子查询cte-与-分析利器-窗口函数-window-functions)
+- [5. T-SQL 编程精髓：变量、控制流、内置函数与游标 (Cursor)](#5-t-sql-编程精髓变量控制流内置函数与游标-cursor)
+  - [5.1 批处理与内置标量函数](#51-批处理与内置标量函数)
+  - [5.2 流程控制：IF-ELSE, WHILE 与 CASE 分流机制](#52-流程控制if-else-while-与-case-分流机制)
+  - [5.3 在错误中涅槃：TRY...CATCH](#53-在错误中涅槃trycatch)
+  - [5.4 性能毒药还是神级救火兵？游标 (Cursor) 完全解析](#54-性能毒药还是神级救火兵游标-cursor-完全解析)
 - [6. 模块化封装：视图 (View) 与 自定义函数 (UDF)](#6-模块化封装视图-view-与-自定义函数-udf)
+  - [6.1 视图 (View) 的美学](#61-视图-view-的美学)
+  - [6.2 用户自定义函数 (UDF: User Defined Function) 深度解密](#62-用户自定义函数-udf-user-defined-function-深度解密)
 - [7. 性能核心：存储过程 (Stored Procedure) 与动态 SQL](#7-性能核心存储过程-stored-procedure-与动态-sql)
 - [8. 数据库的心脏：事务 (Transaction) 与 4大隔离级别(锁)](#8-数据库的心脏事务-transaction-与-4大隔离级别锁)
 - [9. 隐形看门狗：触发器 (Trigger) 深度剖析](#9-隐形看门狗触发器-trigger-深度剖析)
 - [10. 极致调优：索引 (Index) 的聚簇本质与执行计划调优](#10-极致调优索引-index-的聚簇本质与执行计划调优)
+  - [10.1 聚集决定此生的物理身躯 (Clustered Index)](#101-聚集决定此生的物理身躯-clustered-index)
+  - [10.2 后天辅挂的额外地图旁支 (Non-Clustered Index 非聚集索引)](#102-后天辅挂的额外地图旁支-non-clustered-index-非聚集索引)
+  - [10.3 “覆盖索引术” (Covering Index) (防 Lookup 原大表回表绝杀技)](#103-覆盖索引术-covering-index-防-lookup-原大表回表绝杀技)
 - [11. 高阶查询艺术：CTE 递归、PIVOT 行列转换与 CROSS/OUTER APPLY](#11-高阶查询艺术cte-递归pivot-行列转换与-crossouter-apply)
-- [12. 高阶数据操纵：MERGE（Upsert）与临时表/表变量体系](#12-高阶数据操纵mergeupsert与临时表表变量体系)
+  - [11.1 无限套娃：递归 CTE (Recursive CTE)](#111-无限套娃递归-cte-recursive-cte)
+  - [11.2 PIVOT 与 UNPIVOT：数据透视表行列魔术](#112-pivot-与-unpivot数据透视表行列魔术)
+  - [11.3 APPLY 算子：CROSS APPLY 与 OUTER APPLY](#113-apply-算子cross-apply-与-outer-apply)
+- [12. 高阶数据操纵：MERGE（Upsert）与 临时表/表变量体系](#12-高阶数据操纵mergeupsert与-临时表表变量体系)
+  - [12.1 MERGE 语句：处理 Upsert 操作（有则更新，无则插入）](#121-merge-语句处理-upsert-操作有则更新无则插入)
+  - [12.2 #Temp 临时表 vs @Table 表变量：生命周期的抉择](#122-temp-临时表-vs-table-表变量生命周期的抉择)
 - [13. 极客防身术：随心所欲的动态 SQL 与执行提示 (Query Hints)](#13-极客防身术随心所欲的动态-sql-与执行提示-query-hints)
+  - [13.1 掌控优化器大脑：查询提示 Query Hints](#131-掌控优化器大脑查询提示-query-hints)
 
----
 
 ## 1. 深入理解 SQL Server 与 T-SQL 体系架构
 
@@ -723,7 +763,7 @@ ON Employee (Email ASC, DeptId DESC);
 ```
 
 
-### 10.3 “覆盖索引术” (Covering Index) (防 Lookup 原大表回表绝杀技) 
+### 10.3 “覆盖索引术” (Covering Index) (防 Lookup 原大表回表绝杀技)
 假如有个 API，它经常查邮箱只求一并带出它的电话。但由于我只建了一个只包含单独邮件这一条树分支的小日记表索引。上面提到我要去翻那本原体大书（去发费极度高昂磁盘消耗利用 `Key Lookup` 去原表查出附加电话字段）。
 如果能够建立的时候**只把电话这一字段强行也顺便复印在每个邮箱小日记索引项的结尾不就能免回原表大抽查了吗！**。这种专门克制回表带附属随从的小技巧，被称为**包含列 (INCLUDE)** 加持覆盖。
 

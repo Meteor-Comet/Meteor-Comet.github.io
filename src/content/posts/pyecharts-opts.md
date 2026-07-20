@@ -10,6 +10,13 @@ tags:
 draft: false
 ---
 
+## 目录
+
+- [pyecharts配置项](#pyecharts配置项)
+  - [全局配置项](#全局配置项)
+  - [系列配置项](#系列配置项)
+
+
 ## pyecharts配置项
 ```python
 from pyecharts.globals import CurrentConfig, NotebookType

@@ -12,25 +12,134 @@ draft: false
 
 # WPF 全面指南
 
+
 ## 目录
 
+  - [WPF MVVM 架构数据流向图](#wpf-mvvm-架构数据流向图)
 - [1. WPF概述](#1-wpf概述)
+  - [1.1 什么是WPF](#11-什么是wpf)
+  - [1.2 WPF的体系结构](#12-wpf的体系结构)
+  - [1.3 WPF与WinForms的区别](#13-wpf与winforms的区别)
 - [2. XAML基础](#2-xaml基础)
+  - [2.1 XAML简介](#21-xaml简介)
+  - [2.2 XAML元素与属性](#22-xaml元素与属性)
+  - [2.3 对象与属性初始化](#23-对象与属性初始化)
+  - [2.4 XAML命名空间](#24-xaml命名空间)
 - [3. WPF布局系统](#3-wpf布局系统)
+  - [3.1 布局面板概览](#31-布局面板概览)
+  - [3.2 Grid布局](#32-grid布局)
+  - [3.3 StackPanel与WrapPanel](#33-stackpanel与wrappanel)
+  - [3.4 DockPanel与Canvas](#34-dockpanel与canvas)
+  - [3.5 布局最佳实践](#35-布局最佳实践)
+  - [3.6 布局相关附加属性总览（Attached Properties）](#36-布局相关附加属性总览attached-properties)
+  - [3.7 常用布局对比清单](#37-常用布局对比清单)
 - [4. WPF控件详解](#4-wpf控件详解)
+  - [4.1 常用控件概览](#41-常用控件概览)
+  - [4.2 内容控件（ContentControl）](#42-内容控件contentcontrol)
+  - [4.3 ItemsControl及其派生类](#43-itemscontrol及其派生类)
+  - [4.4 输入控件与验证](#44-输入控件与验证)
+  - [4.5 命令绑定](#45-命令绑定)
+  - [4.6 控件继承层次与通用属性总表](#46-控件继承层次与通用属性总表)
+  - [4.7 常用控件速查表（用途 + 关键属性）](#47-常用控件速查表用途-关键属性)
 - [5. WPF 核心骨架：依赖属性与附加属性详解](#5-wpf-核心骨架依赖属性与附加属性详解)
+  - [5.1 依赖属性 (Dependency Property) 的运行机制](#51-依赖属性-dependency-property-的运行机制)
+  - [5.2 附加属性 (Attached Property)](#52-附加属性-attached-property)
 - [6. WPF 的脉络：路由事件系统 (Routed Events)](#6-wpf-的脉络路由事件系统-routed-events)
+  - [6.1 路由事件三大走向阵营](#61-路由事件三大走向阵营)
+  - [6.2 在复杂场景处理路由事件的完美范例](#62-在复杂场景处理路由事件的完美范例)
 - [7. 数据绑定（Data Binding）](#7-数据绑定data-binding)
+  - [7.1 绑定基础](#71-绑定基础)
+  - [7.2 Binding的关键属性](#72-binding的关键属性)
+  - [7.3 绑定模式（Mode）](#73-绑定模式mode)
+  - [7.4 值转换器（ValueConverter）](#74-值转换器valueconverter)
+  - [7.5 集合绑定与ObservableCollection](#75-集合绑定与observablecollection)
+  - [7.6 绑定源的查找顺序与 DataContext 传递](#76-绑定源的查找顺序与-datacontext-传递)
+  - [7.7 ElementName 与 RelativeSource](#77-elementname-与-relativesource)
+  - [7.8 MultiBinding 与 PriorityBinding](#78-multibinding-与-prioritybinding)
+  - [7.9 Binding 常用参数组合清单](#79-binding-常用参数组合清单)
 - [8. MVVM设计模式](#8-mvvm设计模式)
+  - [8.1 MVVM的基本概念](#81-mvvm的基本概念)
+  - [8.2 ViewModel的职责](#82-viewmodel的职责)
+  - [8.3 INotifyPropertyChanged接口](#83-inotifypropertychanged接口)
+  - [8.4 命令（ICommand）实现](#84-命令icommand实现)
+  - [8.5 MVVM示例](#85-mvvm示例)
+  - [8.6 MVVM 工程结构推荐](#86-mvvm-工程结构推荐)
+  - [8.7 MVVM 中的异步命令与长耗时操作](#87-mvvm-中的异步命令与长耗时操作)
+  - [8.8 MVVM 中的验证与错误提示](#88-mvvm-中的验证与错误提示)
+  - [8.9 MVVM 单元测试要点](#89-mvvm-单元测试要点)
 - [9. 样式与模板](#9-样式与模板)
+  - [9.1 样式（Style）基础](#91-样式style基础)
+  - [9.2 触发器（Trigger）](#92-触发器trigger)
+  - [9.3 控件模板（ControlTemplate）](#93-控件模板controltemplate)
+  - [9.4 数据模板（DataTemplate）](#94-数据模板datatemplate)
+  - [9.5 资源（Resource）与资源字典](#95-资源resource与资源字典)
+  - [9.6 TemplateBinding 与 RelativeSource TemplatedParent](#96-templatebinding-与-relativesource-templatedparent)
+  - [9.7 ItemsControl 模板体系：ItemTemplate、ItemsPanel、ItemContainerStyle](#97-itemscontrol-模板体系itemtemplateitemspanelitemcontainerstyle)
+  - [9.8 VisualStateManager 与控件状态](#98-visualstatemanager-与控件状态)
 - [10. 动画与图形](#10-动画与图形)
+  - [10.1 动画基础](#101-动画基础)
+  - [10.2 DoubleAnimation与ColorAnimation](#102-doubleanimation与coloranimation)
+  - [10.3 Storyboard详解](#103-storyboard详解)
+  - [10.4 绘图与形状](#104-绘图与形状)
 - [11. 路由事件与命令系统](#11-路由事件与命令系统)
+  - [11.1 路由事件的机制](#111-路由事件的机制)
+  - [11.2 冒泡与隧道事件](#112-冒泡与隧道事件)
+  - [11.3 命令（Command）机制](#113-命令command机制)
+  - [11.4 自定义命令](#114-自定义命令)
 - [12. WPF性能优化与最佳实践](#12-wpf性能优化与最佳实践)
+  - [12.1 资源管理优化](#121-资源管理优化)
+  - [12.2 虚拟化与延迟加载](#122-虚拟化与延迟加载)
+  - [12.3 绑定性能优化](#123-绑定性能优化)
+  - [12.4 UI线程与异步操作](#124-ui线程与异步操作)
+  - [12.5 性能监控与调试](#125-性能监控与调试)
 - [13. MVVM模式进阶与常用框架](#13-mvvm模式进阶与常用框架)
+  - [13.1 课外阅读推荐与架构演进](#131-课外阅读推荐与架构演进)
+  - [13.2 INotifyPropertyChanged 与 ICommand 核心原理解析](#132-inotifypropertychanged-与-icommand-核心原理解析)
+  - [13.3 WPF 中三大重要的 MVVM 框架评测](#133-wpf-中三大重要的-mvvm-框架评测)
 - [14. CommunityToolkit.Mvvm 框架详解](#14-communitytoolkitmvvm-框架详解)
+  - [14.1 什么是 CommunityToolkit.Mvvm？](#141-什么是-communitytoolkitmvvm)
+  - [14.2 工具包中的核心骨架对象](#142-工具包中的核心骨架对象)
+  - [14.3 项目实战：标准使用三步曲](#143-项目实战标准使用三步曲)
+  - [14.4 优雅架构：视图模型定位器（ViewModelLocator）的封装与扩展](#144-优雅架构视图模型定位器viewmodellocator的封装与扩展)
+  - [14.5 核心工具：源生成器（Source Generators）深度剖析](#145-核心工具源生成器source-generators深度剖析)
+  - [14.6 信使机制（Messenger）：打通组件任督二脉](#146-信使机制messenger打通组件任督二脉)
+  - [14.7 架构进阶：依赖注入（DI）与多窗口自动注册的最佳实践](#147-架构进阶依赖注入di与多窗口自动注册的最佳实践)
+  - [14.8 现代 WPF 配置管理：appsettings.json 的深度使用](#148-现代-wpf-配置管理appsettingsjson-的深度使用)
 - [15. 轻量级国产 ORM 神器：SqlSugar 详细使用指南](#15-轻量级国产-orm-神器sqlsugar-详细使用指南)
+  - [17.1 引入 SqlSugar 与基础对象映射 (DbFirst/CodeFirst)](#171-引入-sqlsugar-与基础对象映射-dbfirstcodefirst)
+  - [17.2 进阶操作：结合依赖注入 (DI) 在 WPF 中的应用](#172-进阶操作结合依赖注入-di-在-wpf-中的应用)
+  - [17.3 经典 CRUD（增删改查）语法实战](#173-经典-crud增删改查语法实战)
 - [16. 全球性能第一的微型 ORM：Dapper 全场景 API 使用大全](#16-全球性能第一的微型-ormdapper-全场景-api-使用大全)
+  - [16.1 核心 API 全家桶解析 (Query / Execute 家族)](#161-核心-api-全家桶解析-query--execute-家族)
+  - [16.2 进阶用法：让 Dapper 与传统 ORM 并驾齐驱](#162-进阶用法让-dapper-与传统-orm-并驾齐驱)
+  - [16.3 与 WPF 及现代依赖注入 (DI) 的彻底融合](#163-与-wpf-及现代依赖注入-di-的彻底融合)
+  - [16.4 SqlSugar vs Dapper 的使用抉择总结](#164-sqlsugar-vs-dapper-的使用抉择总结)
 - [17. WPF 现代 UI 控件库详解：HandyControl 全场景实战](#17-wpf-现代-ui-控件库详解handycontrol-全场景实战)
+  - [17.1 引入与全局配置初始化](#171-引入与全局配置初始化)
+  - [17.2 基础输入控件的彻底进化 (按钮与输入框)](#172-基础输入控件的彻底进化-按钮与输入框)
+  - [17.3 进阶视觉/布局组件](#173-进阶视觉布局组件)
+  - [17.4 灵魂功能：Growl (全局极简屏显通知)](#174-灵魂功能growl-全局极简屏显通知)
+  - [17.5 现代弹窗系统 (Dialog)](#175-现代弹窗系统-dialog)
+  - [17.6 将 HandyControl 收为己有的总结](#176-将-handycontrol-收为己有的总结)
+
+
+### WPF MVVM 架构数据流向图
+
+```mermaid
+graph LR
+    subgraph View 视图
+        XAML[XAML 界面 UI]
+    end
+    subgraph ViewModel 视图模型
+        VM[ViewModel: INotifyPropertyChanged / Commands]
+    end
+    subgraph Model 模型
+        M[Data Model & Business Logic]
+    end
+
+    XAML <-->|DataBinding / Command Binding| VM
+    VM <-->|Notification & Data Processing| M
+```
 
 ## 1. WPF概述
 

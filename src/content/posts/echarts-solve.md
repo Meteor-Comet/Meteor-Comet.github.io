@@ -10,6 +10,12 @@ tags:
 draft: false
 ---
 
+## 目录
+
+  - [问题场景描述：在利用pyecharts库进行数据可视化学习过程中，遇到了在Jupyter Lab环境中执行bar.render_notebook()后图形未能正常显示的问题。](#问题场景描述在利用pyecharts库进行数据可视化学习过程中遇到了在jupyter-lab环境中执行barrendernotebook后图形未能正常显示的问题)
+  - [问题解决策略：](#问题解决策略)
+
+
 ### 问题场景描述：在利用pyecharts库进行数据可视化学习过程中，遇到了在Jupyter Lab环境中执行bar.render_notebook()后图形未能正常显示的问题。
 ```python
 from pyecharts.charts import Bar

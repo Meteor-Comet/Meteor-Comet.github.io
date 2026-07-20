@@ -12,18 +12,54 @@ draft: false
 
 # 主要内容：WPF Prism框架
 
+
+
+
+
+
+
+
+---
+
+
 ## 目录
 
 - [1. Prism框架概念与核心内容](#1-prism框架概念与核心内容)
+  - [1.1 Prism框架概念](#11-prism框架概念)
+  - [1.2 Prism核心内容](#12-prism核心内容)
+  - [1.3 Prism和其它MVVM框架对比](#13-prism和其它mvvm框架对比)
 - [2. Prism框架启动与 App.xaml.cs 核心注册详解](#2-prism框架启动与-appxamlcs-核心注册详解)
+  - [2.1 改造原生的 App.xaml](#21-改造原生的-appxaml)
+  - [2.2 App.xaml.cs 核心引导程序：CreateShell 与 RegisterTypes](#22-appxamlcs-核心引导程序createshell-与-registertypes)
+  - [2.3 进阶实战：在主窗体弹出前阻塞显示登录窗体](#23-进阶实战在主窗体弹出前阻塞显示登录窗体)
 - [3. Prism的命名约定、定位器与基础 MVVM](#3-prism的命名约定定位器与基础-mvvm)
+  - [3.1 约定优于配置 (Convention over Configuration)](#31-约定优于配置-convention-over-configuration)
+  - [3.2 视图模型定位器 (ViewModelLocator)](#32-视图模型定位器-viewmodellocator)
+  - [3.3 属性绑定 (BindableBase)](#33-属性绑定-bindablebase)
+  - [3.4 命令注入 (DelegateCommand)](#34-命令注入-delegatecommand)
 - [4. 区域管理器 (RegionManager) 与区域适配器](#4-区域管理器-regionmanager-与区域适配器)
+  - [4.1 区域 (Region) 概念](#41-区域-region-概念)
+  - [4.2 如何定义区域？](#42-如何定义区域)
+  - [4.3 区域适配器 (RegionAdapter)](#43-区域适配器-regionadapter)
+  - [4.4 视图注入 (View Injection)](#44-视图注入-view-injection)
 - [5. 导航功能（跳转、传参、日志、守卫）](#5-导航功能跳转传参日志守卫)
+  - [5.1 如何执行导航？](#51-如何执行导航)
+  - [5.2 导航传参 NavigationParameters & INavigationAware 接口](#52-导航传参-navigationparameters--inavigationaware-接口)
+  - [5.3 导航守卫（确认机制） IConfirmNavigationRequest](#53-导航守卫确认机制-iconfirmnavigationrequest)
+  - [5.4 导航日志/历史记录 IRegionNavigationJournal](#54-导航日志历史记录-iregionnavigationjournal)
 - [6. 事件聚合器 (EventAggregator)](#6-事件聚合器-eventaggregator)
+  - [6.1 定义事件载体](#61-定义事件载体)
+  - [6.2 订阅事件（接收方）](#62-订阅事件接收方)
+  - [6.3 发布事件（发送方）](#63-发布事件发送方)
 - [7. 对话框服务 (DialogService)](#7-对话框服务-dialogservice)
+  - [7.1 创建和注册对话框 View 和 ViewModel](#71-创建和注册对话框-view-和-viewmodel)
+  - [7.2 在 ViewModel 中实现 IDialogAware](#72-在-viewmodel-中实现-idialogaware)
+  - [7.3 调用/弹出对话框](#73-调用弹出对话框)
 - [8. 模块化开发 (Modularity)](#8-模块化开发-modularity)
+  - [8.1 定义一个模块 (Module)](#81-定义一个模块-module)
+  - [8.2 在宿主程序配置加载哪些模块 (ModuleCatalog)](#82-在宿主程序配置加载哪些模块-modulecatalog)
+  - [最终总结](#最终总结)
 
----
 
 ## 1. Prism框架概念与核心内容
 
@@ -343,7 +379,7 @@ public class StackPanelRegionAdapter : RegionAdapterBase<StackPanel>
 ```
 写完后，**必须回到 `App.xaml.cs` 中的 `ConfigureRegionAdapterMappings` 方法里将其注册**（见本文 2.2 节代码），至此，你才能安全地在 `StackPanel` 上使用 `RegionName`。
 
-### 4.4 视图注入 (View Injection) 
+### 4.4 视图注入 (View Injection)
 在 ViewModel 中，能够通过 IOC 容器拿到 `IRegionManager`，它管理着所有的区域坑位。
 
 **如何向区域中静态注册页面？**
@@ -560,7 +596,7 @@ protected override void RegisterTypes(IContainerRegistry containerRegistry)
 }
 ```
 
-### 7.2 在 ViewModel 中实现 `IDialogAware` 
+### 7.2 在 ViewModel 中实现 `IDialogAware`
 这是提供给弹层对话框专用的接口。
 
 ```csharp

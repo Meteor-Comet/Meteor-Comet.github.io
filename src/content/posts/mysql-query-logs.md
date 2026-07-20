@@ -10,41 +10,61 @@ tags:
 draft: false
 ---
 
-## 目录
+
+
+
+
+
+
+
 
 1. [慢查询日志（Slow Query Log）](#1-慢查询日志slow-query-log)
-   - [1.1 配置参数](#11-配置参数)
-   - [1.2 持久化配置（my.cnf）](#12-持久化配置mycnf)
-   - [1.3 日志格式解读](#13-日志格式解读)
-   - [1.4 mysqldumpslow 分析工具](#14-mysqldumpslow-分析工具)
 2. [SHOW PROFILES 执行剖析](#2-show-profiles-执行剖析)
-   - [2.1 启用与查看](#21-启用与查看)
-   - [2.2 SHOW PROFILE 详细分析](#22-show-profile-详细分析)
 3. [EXPLAIN 执行计划](#3-explain-执行计划)
-   - [3.1 基本语法](#31-基本语法)
-   - [3.2 核心字段详解](#32-核心字段详解)
-   - [3.3 type 访问类型一览](#33-type-访问类型一览)
-   - [3.4 Extra 字段说明](#34-extra-字段说明)
-   - [3.5 EXPLAIN ANALYZE（MySQL 8.0+）](#35-explain-analyzemysql-80)
 4. [日志类型总览](#4-日志类型总览)
-   - [4.1 通用查询日志](#41-通用查询日志)
-   - [4.2 错误日志](#42-错误日志)
-   - [4.3 二进制日志（Binlog）](#43-二进制日志binlog)
 5. [系统状态与 Performance Schema](#5-系统状态与-performance-schema)
-   - [5.1 SHOW STATUS 关键指标](#51-show-status-关键指标)
-   - [5.2 Performance Schema 常用查询](#52-performance-schema-常用查询)
-   - [5.3 information_schema 表统计](#53-information_schema-表统计)
 6. [查询优化实战](#6-查询优化实战)
-   - [6.1 慢 JOIN 查询优化](#61-慢-join-查询优化)
-   - [6.2 复合索引命中](#62-复合索引命中)
-   - [6.3 IN 子查询转 JOIN](#63-in-子查询转-join)
 7. [日志管理与维护](#7-日志管理与维护)
-   - [7.1 日志轮转（logrotate）](#71-日志轮转logrotate)
-   - [7.2 日志清理](#72-日志清理)
 8. [性能问题诊断流程](#8-性能问题诊断流程)
 9. [最佳实践速查](#9-最佳实践速查)
 
 ---
+
+
+## 目录
+
+- [1. 慢查询日志（Slow Query Log）](#1-慢查询日志slow-query-log)
+  - [1.1 配置参数](#11-配置参数)
+  - [1.2 持久化配置（my.cnf）](#12-持久化配置mycnf)
+  - [1.3 日志格式解读](#13-日志格式解读)
+  - [1.4 mysqldumpslow 分析工具](#14-mysqldumpslow-分析工具)
+- [2. SHOW PROFILES 执行剖析](#2-show-profiles-执行剖析)
+  - [2.1 启用与查看](#21-启用与查看)
+  - [2.2 SHOW PROFILE 详细分析](#22-show-profile-详细分析)
+- [3. EXPLAIN 执行计划](#3-explain-执行计划)
+  - [3.1 基本语法](#31-基本语法)
+  - [3.2 核心字段详解](#32-核心字段详解)
+  - [3.3 type 访问类型一览](#33-type-访问类型一览)
+  - [3.4 Extra 字段说明](#34-extra-字段说明)
+  - [3.5 EXPLAIN ANALYZE（MySQL 8.0+）](#35-explain-analyzemysql-80)
+- [4. 日志类型总览](#4-日志类型总览)
+  - [4.1 通用查询日志](#41-通用查询日志)
+  - [4.2 错误日志](#42-错误日志)
+  - [4.3 二进制日志（Binlog）](#43-二进制日志binlog)
+- [5. 系统状态与 Performance Schema](#5-系统状态与-performance-schema)
+  - [5.1 SHOW STATUS 关键指标](#51-show-status-关键指标)
+  - [5.2 Performance Schema 常用查询](#52-performance-schema-常用查询)
+  - [5.3 information_schema 表统计](#53-informationschema-表统计)
+- [6. 查询优化实战](#6-查询优化实战)
+  - [6.1 慢 JOIN 查询优化](#61-慢-join-查询优化)
+  - [6.2 复合索引命中](#62-复合索引命中)
+  - [6.3 IN 子查询转 JOIN](#63-in-子查询转-join)
+- [7. 日志管理与维护](#7-日志管理与维护)
+  - [7.1 日志轮转（logrotate）](#71-日志轮转logrotate)
+  - [7.2 日志清理](#72-日志清理)
+- [8. 性能问题诊断流程](#8-性能问题诊断流程)
+- [9. 最佳实践速查](#9-最佳实践速查)
+
 
 ## 1. 慢查询日志（Slow Query Log）
 

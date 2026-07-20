@@ -10,6 +10,51 @@ tags:
 draft: false
 ---
 
+## 目录
+
+- [学习目标](#学习目标)
+- [学习计划](#学习计划)
+  - [SSH 密钥认证与 GitHub Git 提交工作流](#ssh-密钥认证与-github-git-提交工作流)
+- [1. SSH密钥基础知识](#1-ssh密钥基础知识)
+  - [1.1 SSH密钥的作用](#11-ssh密钥的作用)
+  - [1.2 SSH密钥的工作原理](#12-ssh密钥的工作原理)
+  - [1.3 SSH连接的优势](#13-ssh连接的优势)
+- [2. 生成SSH密钥对](#2-生成ssh密钥对)
+  - [2.1 检查现有SSH密钥](#21-检查现有ssh密钥)
+  - [2.2 生成新的SSH密钥](#22-生成新的ssh密钥)
+  - [2.3 启动SSH代理](#23-启动ssh代理)
+- [3. 配置GitHub SSH密钥](#3-配置github-ssh密钥)
+  - [3.1 复制公钥内容](#31-复制公钥内容)
+  - [3.2 在GitHub中添加SSH密钥](#32-在github中添加ssh密钥)
+  - [3.3 验证SSH密钥添加](#33-验证ssh密钥添加)
+- [4. 测试SSH连接](#4-测试ssh连接)
+  - [4.1 测试连接状态](#41-测试连接状态)
+  - [4.2 检查SSH配置](#42-检查ssh配置)
+  - [4.3 配置SSH配置文件](#43-配置ssh配置文件)
+- [5. 配置Git使用SSH](#5-配置git使用ssh)
+  - [5.1 配置Git用户信息](#51-配置git用户信息)
+  - [5.2 克隆仓库使用SSH](#52-克隆仓库使用ssh)
+  - [5.3 修改现有仓库的远程URL](#53-修改现有仓库的远程url)
+  - [5.4 测试Git操作](#54-测试git操作)
+- [6. 常见问题和解决方案](#6-常见问题和解决方案)
+  - [6.1 问题1：SSH密钥权限错误](#61-问题1ssh密钥权限错误)
+  - [6.2 问题2：SSH代理未启动](#62-问题2ssh代理未启动)
+  - [6.3 问题3：多个SSH密钥](#63-问题3多个ssh密钥)
+  - [6.4 问题4：连接超时](#64-问题4连接超时)
+  - [6.5 问题5：密钥被拒绝](#65-问题5密钥被拒绝)
+- [7. 高级配置和技巧](#7-高级配置和技巧)
+  - [7.1 配置SSH密钥密码短语](#71-配置ssh密钥密码短语)
+  - [7.2 使用SSH配置文件管理多个账户](#72-使用ssh配置文件管理多个账户)
+  - [7.3 自动化SSH密钥管理](#73-自动化ssh密钥管理)
+  - [7.4 使用SSH密钥进行部署](#74-使用ssh密钥进行部署)
+- [8. 总结](#8-总结)
+  - [8.1 关键要点](#81-关键要点)
+  - [8.2 操作流程总结](#82-操作流程总结)
+  - [8.3 最佳实践](#83-最佳实践)
+  - [8.4 学习收获](#84-学习收获)
+  - [8.5 注意事项](#85-注意事项)
+
+
 ## 学习目标
 
 - 了解SSH密钥的工作原理
@@ -27,6 +72,22 @@ draft: false
 6. **常见问题和解决方案**
 
 ---
+
+
+
+### SSH 密钥认证与 GitHub Git 提交工作流
+
+```mermaid
+graph LR
+    subgraph 本地开发环境 Local Machine
+        Work[工作区 Working Directory] -->|git add| Index[暂存区 Staging Index]
+        Index -->|git commit| LocalRepo[本地仓库 Local Repo]
+        LocalRepo -->|SSH Ed25519 Key| SSH[SSH 代理 id_ed25519]
+    end
+    subgraph 远程服务端 Remote Server
+        SSH -->|Port 22/443| GitHub[GitHub 远程仓库]
+    end
+```
 
 ## 1. SSH密钥基础知识
 
@@ -176,10 +237,10 @@ nano ~/.ssh/config
 
 # 添加以下内容：
 # Host github.com
-#     HostName github.com
-#     User git
-#     IdentityFile ~/.ssh/id_rsa
-#     IdentitiesOnly yes
+# HostName github.com
+# User git
+# IdentityFile ~/.ssh/id_rsa
+# IdentitiesOnly yes
 ```
 
 ---
@@ -244,7 +305,7 @@ git push origin main
 # Writing objects: 100% (3/3), 300 bytes | 300.00 KiB/s, done.
 # Total 3 (delta 0), reused 0 (delta 0), pack-reused 0
 # To github.com:username/repository.git
-#    abc1234..def5678  main -> main
+# abc1234..def5678  main -> main
 
 # 测试拉取
 git pull origin main
@@ -284,16 +345,16 @@ nano ~/.ssh/config
 
 # 添加多个密钥配置
 # Host github.com
-#     HostName github.com
-#     User git
-#     IdentityFile ~/.ssh/id_rsa_github
-#     IdentitiesOnly yes
+# HostName github.com
+# User git
+# IdentityFile ~/.ssh/id_rsa_github
+# IdentitiesOnly yes
 # 
 # Host gitlab.com
-#     HostName gitlab.com
-#     User git
-#     IdentityFile ~/.ssh/id_rsa_gitlab
-#     IdentitiesOnly yes
+# HostName gitlab.com
+# User git
+# IdentityFile ~/.ssh/id_rsa_gitlab
+# IdentitiesOnly yes
 ```
 
 ### 6.4 问题4：连接超时
@@ -309,9 +370,9 @@ ping github.com
 # 使用代理（如果需要）
 # 在SSH配置中添加代理设置
 # Host github.com
-#     HostName github.com
-#     User git
-#     ProxyCommand nc -X connect -x proxy.example.com:8080 %h %p
+# HostName github.com
+# User git
+# ProxyCommand nc -X connect -x proxy.example.com:8080 %h %p
 ```
 
 ### 6.5 问题5：密钥被拒绝
@@ -350,16 +411,16 @@ nano ~/.ssh/config
 
 # 配置多个GitHub账户
 # Host github-personal
-#     HostName github.com
-#     User git
-#     IdentityFile ~/.ssh/id_rsa_personal
-#     IdentitiesOnly yes
+# HostName github.com
+# User git
+# IdentityFile ~/.ssh/id_rsa_personal
+# IdentitiesOnly yes
 # 
 # Host github-work
-#     HostName github.com
-#     User git
-#     IdentityFile ~/.ssh/id_rsa_work
-#     IdentitiesOnly yes
+# HostName github.com
+# User git
+# IdentityFile ~/.ssh/id_rsa_work
+# IdentitiesOnly yes
 
 # 使用不同账户克隆仓库
 git clone git@github-personal:username/repository.git

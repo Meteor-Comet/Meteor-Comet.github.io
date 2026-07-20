@@ -12,21 +12,35 @@ draft: false
 
 # ASP.NET Core 企业级 Web API 深度全景指南
 
+
+
+
+
+
+
+
+
 在现代工业物联网（IIoT）与企业级应用中，ASP.NET Core 凭借其卓越的性能与灵活的架构，已成为构建“服务端大脑”的首选。本文将作为一份高密度的技术参考手册，从启动基石到底层通信，全方位解析 Web API 的核心机制与生产实践。
 
 ---
 
 ### 文章目录
 
+
+---
+
+
+## 目录
+
 - [一、 架构基石：启动引导、DI 与管道流转](#一-架构基石启动引导di-与管道流转)
-  - [1.1 启动生命周期：Builder 与 App 的职责分界](#11-启动生命周期builder-与-app-的职责分界)
+  - [ASP.NET Core 中间件管道执行流程](#aspnet-core-中间件管道执行流程)
+- [1.1 启动生命周期：Builder 与 App 的职责分界](#11-启动生命周期builder-与-app-的职责分界)
   - [1.2 注入之魂 (DI)：生命周期与单例捕获问题](#12-注入之魂-di生命周期与单例捕获问题)
   - [1.3 执行链条：中间件 (Middleware) 与 过滤器 (Filter) 的终极对比](#13-执行链条中间件-middleware-与-过滤器-filter-的终极对比)
 - [二、 返回值全景大辞典：IActionResult 与 IResult 深度参考](#二-返回值全景大辞典iactionresult-与-iresult-深度参考)
-  - [2.1 成功系列 (Success - 2xx)](#21-成功系列-success---2xx)
-  - [2.2 客户端错误系列 (Client Error - 4xx)](#22-客户端错误系列-client-error---4xx)
-  - [2.3 服务器错误系列 (Server Error - 5xx)](#23-服务器错误系列-server-error---5xx)
-  - [2.4 特殊资源处理：重定向、流式文件与物理路径](#24-特殊资源处理重定向流式文件与物理路径)
+  - [2.1 成功系列 (Success - 2xx)](#21-成功系列-success--2xx)
+  - [2.2 客户端错误系列 (Client Error - 4xx)](#22-客户端错误系列-client-error--4xx)
+  - [2.3 服务器错误系列 (Server Error - 5xx)](#23-服务器错误系列-server-error--5xx)
 - [三、 路由与终点映射：Minimal API 与 Controller 深度实战](#三-路由与终点映射minimal-api-与-controller-深度实战)
   - [3.1 路由约束：分发层的“逻辑熔断器”](#31-路由约束分发层的逻辑熔断器)
   - [3.2 Controller 属性路由 (Attribute Routing)](#32-controller-属性路由-attribute-routing)
@@ -40,14 +54,27 @@ draft: false
   - [6.1 生命周期：HttpClientFactory 资源池化](#61-生命周期httpclientfactory-资源池化)
   - [6.2 谓词请求矩阵：GET, POST, PUT, DELETE, PATCH](#62-谓词请求矩阵get-post-put-delete-patch)
   - [6.3 核心引擎：SendAsync 与 HttpRequestMessage 手动构造](#63-核心引擎sendasync-与-httprequestmessage-手动构造)
-  - [6.4 内容载体：HttpContent 字典 (JSON, Multipart, Stream)](#64-内容载体httpcontent-字典-json-multipart-stream)
+  - [6.4 内容载体：HttpContent 深度解析 (JSON, Multipart, Stream)](#64-内容载体httpcontent-深度解析-json-multipart-stream)
   - [6.5 弹性控制：CancellationToken 与 CompletionOption 内存优化](#65-弹性控制cancellationtoken-与-completionoption-内存优化)
 
----
 
 ## 一、 架构基石：启动引导、DI 与管道流转
 
-### 1.1 启动生命周期：Builder 与 App 的职责分界
+#
+
+### ASP.NET Core 中间件管道执行流程
+
+```mermaid
+graph LR
+    Req[HTTP Request] --> M1[Middleware 1 (Exception Handling)]
+    M1 --> M2[Middleware 2 (Authentication / Authorization)]
+    M2 --> M3[Middleware 3 (Routing & Controllers)]
+    M3 --> Res[HTTP Response]
+    Res -->|Backwards| M2
+    M2 -->|Backwards| M1
+```
+
+## 1.1 启动生命周期：Builder 与 App 的职责分界
 ASP.NET Core 通过 `WebApplicationBuilder` 实现了配置与管道的严格解耦：
 
 ```csharp

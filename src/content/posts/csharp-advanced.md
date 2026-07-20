@@ -12,120 +12,137 @@ draft: false
 
 ## 目录
 
-1. [C#泛型详解](#generics-detail)
-   - [泛型的基本概念](#generics-concept)
-   - [泛型类与泛型接口](#generics-class-interface)
-   - [泛型方法](#generics-method)
-   - [泛型约束](#generics-constraints)
-   - [泛型委托](#generics-delegate)
-   - [协变与逆变](#generics-variance)
-   - [泛型的性能优势](#generics-performance)
-   - [泛型的应用场景](#generics-scenarios)
-2. [C#委托与Lambda表达式进阶](#delegates-lambda-advanced)
-   - [匿名函数与Lambda表达式](#anonymous-function-lambda)
-   - [Func委托详解](#func-delegate-advanced)
-   - [Action委托详解](#action-delegate-advanced)
-   - [Predicate委托详解](#predicate-delegate-advanced)
-   - [委托链与事件](#delegate-chain-event)
-   - [表达式树](#expression-trees)
-3. [C# LINQ详解](#linq-detail)
-   - [LINQ的基本概念](#linq-concept)
-   - [LINQ查询语法](#linq-query-syntax)
-   - [LINQ方法语法](#linq-method-syntax)
-   - [标准查询操作符](#standard-query-operators)
-   - [LINQ to Objects](#linq-to-objects)
-   - [LINQ to SQL](#linq-to-sql)
-   - [LINQ to XML](#linq-to-xml)
-   - [LINQ性能优化](#linq-performance)
-   - [LINQ应用场景](#linq-scenarios)
-4. [C# ORM框架详解](#orm-frameworks)
-   - [ADO.NET基础](#ado-net-basics)
-   - [ADO.NET连接管理](#ado-net-connection)
-   - [ADO.NET命令执行](#ado-net-commands)
-   - [ADO.NET数据读取](#ado-net-data-reader)
-   - [ADO.NET参数化查询](#ado-net-parameters)
-   - [ADO.NET事务处理](#ado-net-transactions)
-   - [ADO.NET存储过程](#ado-net-stored-procedures)
-   - [Entity Framework 6基础](#ef6-basics)
-   - [DbContext详解](#dbcontext-detail)
-   - [DbSet详解](#dbset-detail)
-   - [实体配置](#entity-configuration)
-   - [关系配置](#relationship-configuration)
-   - [数据查询](#ef6-querying)
-   - [数据修改](#ef6-modifying)
-   - [变更跟踪](#change-tracking)
-   - [并发控制](#concurrency-control)
-   - [迁移（Migrations）](#migrations)
-   - [性能优化](#ef6-performance)
-   - [高级特性](#ef6-advanced)
-5. [C#设计模式详解](#design-patterns)
-   - [单例模式](#singleton-pattern)
-   - [工厂模式](#factory-pattern)
-   - [观察者模式](#observer-pattern)
-   - [策略模式](#strategy-pattern)
-   - [适配器模式](#adapter-pattern)
-   - [装饰器模式](#decorator-pattern)
-   - [依赖注入模式](#dependency-injection-pattern)
-6. [C#通信编程详解](#communication-programming)
-   - [TCP/IP通信基础](#tcp-ip-basics)
-   - [Socket编程](#socket-programming)
-   - [TcpClient与TcpListener](#tcpclient-tcplistener)
-   - [UdpClient编程](#udpclient-programming)
-   - [HTTP通信](#http-communication)
-   - [WebSocket通信](#websocket-communication)
-   - [命名管道通信](#named-pipes)
-   - [WCF通信](#wcf-communication)
-   - [gRPC通信](#grpc-communication)
-   - [消息队列](#message-queues)
-   - [上位机串口通信](#serial-communication)
-7. [C#特性（Attributes）详解](#attributes-detail)
-   - [特性的基本概念](#attributes-concept)
-   - [特性的定义与使用](#attributes-usage)
-   - [常见内置特性](#common-attributes)
-   - [自定义特性](#custom-attributes)
-   - [特性的反射访问](#attributes-reflection)
-   - [特性的应用场景](#attributes-scenarios)
-7. [C#反射（Reflection）详解](#reflection-detail)
-   - [反射的基本概念](#reflection-concept)
-   - [Type类型详解](#type-class)
-   - [程序集（Assembly）操作](#assembly-operations)
-   - [类型成员访问](#type-members)
-   - [动态创建对象](#dynamic-object-creation)
-   - [方法调用与属性访问](#method-property-access)
-   - [泛型类型的反射](#generic-reflection)
-   - [反射的性能优化](#reflection-performance)
-   - [反射的应用场景](#reflection-scenarios)
-8. [C#异步编程详解](#async-programming)
-   - [异步编程基础](#async-basics)
-   - [async/await关键字](#async-await)
-   - [Task与Task\<T>](#task-types)
-   - [异步方法最佳实践](#async-best-practices)
-   - [异步编程与WinForm集成](#async-winform)
-9. [C#文件操作与流处理](#file-stream)
-   - [文件操作基础](#file-basics)
-   - [流（Stream）概述](#stream-overview)
-   - [FileStream文件流](#filestream)
-   - [StreamReader和StreamWriter](#stream-reader-writer)
-   - [MemoryStream内存流](#memorystream)
-   - [文件操作与WinForm集成](#file-winform)
-10. [C#多线程编程详解](#multithreading)
-   - [多线程基础概念](#multithreading-basics)
-   - [Thread类详解](#thread-class)
-   - [ThreadPool线程池](#threadpool)
-   - [线程同步机制](#thread-synchronization)
-   - [线程安全集合](#thread-safe-collections)
-   - [并行编程（Parallel类）](#parallel-programming)
-   - [任务并行库（TPL）](#task-parallel-library)
-   - [线程间通信](#thread-communication)
-   - [死锁与竞态条件](#deadlock-race-condition)
-   - [多线程最佳实践](#multithreading-best-practices)
+  - [C# 异步编程 (async/await) 状态机转换图](#c-异步编程-asyncawait-状态机转换图)
+- [C#泛型详解](#c泛型详解)
+  - [泛型的基本概念](#泛型的基本概念)
+  - [泛型类与泛型接口](#泛型类与泛型接口)
+  - [泛型方法](#泛型方法)
+  - [泛型约束](#泛型约束)
+  - [泛型委托](#泛型委托)
+  - [协变与逆变](#协变与逆变)
+  - [泛型的性能优势](#泛型的性能优势)
+  - [泛型的应用场景](#泛型的应用场景)
+- [总结](#总结)
+- [C#委托与Lambda表达式进阶](#c委托与lambda表达式进阶)
+  - [匿名函数与Lambda表达式](#匿名函数与lambda表达式)
+  - [Func委托详解](#func委托详解)
+  - [Action委托详解](#action委托详解)
+  - [Predicate委托详解](#predicate委托详解)
+  - [委托链与事件](#委托链与事件)
+  - [表达式树](#表达式树)
+- [C# LINQ详解](#c-linq详解)
+  - [LINQ的基本概念](#linq的基本概念)
+  - [LINQ查询语法](#linq查询语法)
+  - [LINQ方法语法](#linq方法语法)
+  - [标准查询操作符](#标准查询操作符)
+  - [LINQ to Objects](#linq-to-objects)
+  - [LINQ to SQL](#linq-to-sql)
+  - [LINQ to XML](#linq-to-xml)
+  - [LINQ性能优化](#linq性能优化)
+  - [LINQ应用场景](#linq应用场景)
+- [C# ORM框架详解](#c-orm框架详解)
+  - [ADO.NET基础](#adonet基础)
+  - [ADO.NET连接管理](#adonet连接管理)
+  - [ADO.NET命令执行](#adonet命令执行)
+  - [ADO.NET数据读取](#adonet数据读取)
+  - [ADO.NET参数化查询](#adonet参数化查询)
+  - [ADO.NET事务处理](#adonet事务处理)
+  - [ADO.NET存储过程](#adonet存储过程)
+  - [Entity Framework 6基础](#entity-framework-6基础)
+  - [DbContext详解](#dbcontext详解)
+  - [DbSet详解](#dbset详解)
+  - [实体配置](#实体配置)
+  - [关系配置](#关系配置)
+  - [数据查询](#数据查询)
+  - [数据修改](#数据修改)
+  - [变更跟踪](#变更跟踪)
+  - [并发控制](#并发控制)
+  - [迁移（Migrations）](#迁移migrations)
+  - [性能优化](#性能优化)
+  - [高级特性](#高级特性)
+- [C#设计模式详解](#c设计模式详解)
+  - [单例模式](#单例模式)
+  - [工厂模式](#工厂模式)
+  - [观察者模式](#观察者模式)
+  - [策略模式](#策略模式)
+  - [适配器模式](#适配器模式)
+  - [装饰器模式](#装饰器模式)
+  - [依赖注入模式](#依赖注入模式)
+- [C#通信编程详解](#c通信编程详解)
+  - [TCP/IP通信基础](#tcpip通信基础)
+  - [Socket编程](#socket编程)
+  - [TcpClient与TcpListener](#tcpclient与tcplistener)
+  - [UdpClient编程](#udpclient编程)
+  - [HTTP通信](#http通信)
+  - [WebSocket通信](#websocket通信)
+  - [命名管道通信](#命名管道通信)
+  - [WCF通信](#wcf通信)
+  - [gRPC通信](#grpc通信)
+  - [消息队列](#消息队列)
+- [通信编程总结](#通信编程总结)
+  - [上位机串口通信](#上位机串口通信)
+- [C#特性（Attributes）详解](#c特性attributes详解)
+  - [特性的基本概念](#特性的基本概念)
+  - [特性的定义与使用](#特性的定义与使用)
+  - [常见内置特性](#常见内置特性)
+  - [自定义特性](#自定义特性)
+  - [特性的反射访问](#特性的反射访问)
+  - [特性的应用场景](#特性的应用场景)
+- [C#反射（Reflection）详解](#c反射reflection详解)
+  - [反射的基本概念](#反射的基本概念)
+  - [Type类型详解](#type类型详解)
+  - [程序集（Assembly）操作](#程序集assembly操作)
+  - [类型成员访问](#类型成员访问)
+  - [动态创建对象](#动态创建对象)
+  - [方法调用与属性访问](#方法调用与属性访问)
+  - [泛型类型的反射](#泛型类型的反射)
+  - [反射的性能优化](#反射的性能优化)
+  - [反射的应用场景](#反射的应用场景)
+- [C#异步编程详解](#c异步编程详解)
+  - [异步编程基础](#异步编程基础)
+  - [async/await关键字](#asyncawait关键字)
+  - [Task与Task\](#task与task)
+  - [异步方法最佳实践](#异步方法最佳实践)
+  - [异步编程与WinForm集成](#异步编程与winform集成)
+- [C#文件操作与流处理](#c文件操作与流处理)
+  - [文件操作基础](#文件操作基础)
+  - [流（Stream）概述](#流stream概述)
+  - [FileStream文件流](#filestream文件流)
+  - [StreamReader和StreamWriter](#streamreader和streamwriter)
+  - [MemoryStream内存流](#memorystream内存流)
+  - [文件操作与WinForm集成](#文件操作与winform集成)
+- [C#多线程编程详解](#c多线程编程详解)
+  - [多线程基础概念](#多线程基础概念)
+  - [Thread类详解](#thread类详解)
+  - [ThreadPool线程池](#threadpool线程池)
+  - [线程同步机制](#线程同步机制)
+  - [线程安全集合](#线程安全集合)
+  - [并行编程（Parallel类）](#并行编程parallel类)
+  - [任务并行库（TPL）](#任务并行库tpl)
+  - [线程间通信](#线程间通信)
+  - [死锁与竞态条件](#死锁与竞态条件)
+  - [多线程最佳实践](#多线程最佳实践)
+- [总结](#总结)
 
 
-## <a id="generics-detail"></a>C#泛型详解
+### C# 异步编程 (async/await) 状态机转换图
+
+```mermaid
+stateDiagram-v2
+    [*] --> Start: 调用 async 方法
+    Start --> Running: 同步执行代码直到第一个 await
+    Running --> AwaitTask: 遇到未完成的 Task
+    AwaitTask --> Yield: 挂起当前方法，返回 Task 给调用方
+    Yield --> Resumed: Task 完成，控制权交还给线程池/UI线程 (SynchronizationContext)
+    Resumed --> Completed: 继续执行剩余代码
+    Completed --> [*]
+```
+
+## C#泛型详解
 
 泛型是C#中一项强大的特性，它允许在编写代码时不指定具体类型，而是在使用时再指定类型参数。泛型提供了类型安全、代码重用和性能优化等好处，是现代C#开发中不可或缺的一部分。
 
-### <a id="generics-concept"></a>泛型的基本概念
+### 泛型的基本概念
 
 泛型的核心思想是"参数化类型"，即把类型作为参数传递给类、接口、方法等。通过泛型，可以创建适用于多种数据类型的可重用组件，同时保持类型安全。
 
@@ -159,7 +176,7 @@ class GenericClass<T>
 3. **性能优化**：减少了装箱和拆箱操作，提高了性能
 4. **可读性**：代码更加清晰，类型意图明确
 
-### <a id="generics-class-interface"></a>泛型类与泛型接口
+### 泛型类与泛型接口
 
 泛型类和泛型接口是C#中最常用的泛型形式，它们允许在定义时指定类型参数，在实例化时提供具体类型。
 
@@ -272,7 +289,7 @@ public class User
 }
 ```
 
-### <a id="generics-method"></a>泛型方法
+### 泛型方法
 
 泛型方法是在方法级别定义类型参数的方法，它可以是泛型类的成员，也可以是普通类的成员。
 
@@ -331,7 +348,7 @@ genericMethods.Print(10);
 genericMethods.Print("Hello");
 ```
 
-### <a id="generics-constraints"></a>泛型约束
+### 泛型约束
 
 泛型约束允许限制泛型类型参数可以接受的类型，增加了泛型代码的安全性和功能性。C#提供了多种类型的泛型约束：
 
@@ -395,7 +412,7 @@ person.Age = 30;
 example.Process(42); // Processing value: 42
 ```
 
-### <a id="generics-delegate"></a>泛型委托
+### 泛型委托
 
 泛型委托允许定义可以处理不同类型参数的委托，提高了委托的灵活性和重用性。
 
@@ -480,7 +497,7 @@ subscriber.Subscribe(stringPublisher);
 stringPublisher.Publish("Hello"); // 输出: Publishing: Hello  Received: Hello, Type: String
 ```
 
-### <a id="generics-variance"></a>协变与逆变
+### 协变与逆变
 
 协变和逆变是C# 4.0引入的特性，它们允许在一定条件下将泛型类型参数的派生类型赋值给基类型，或基类型赋值给派生类型。
 
@@ -565,7 +582,7 @@ stringAction("Hello"); // Hello
 | 协变 | `out` | 返回类型 | `IEnumerable<out T>` |
 | 逆变 | `in` | 参数类型 | `Action<in T>` |
 
-### <a id="generics-performance"></a>泛型的性能优势
+### 泛型的性能优势
 
 泛型提供了显著的性能优势，主要体现在以下几个方面：
 
@@ -593,7 +610,7 @@ int value2 = list[0]; // 直接获取int
    - 一套泛型代码可以适用于多种数据类型
    - 减少了重复代码，提高了代码维护性
 
-### <a id="generics-scenarios"></a>泛型的应用场景
+### 泛型的应用场景
 
 泛型在C#开发中有广泛的应用场景，以下是一些常见的例子：
 
@@ -621,11 +638,11 @@ int value2 = list[0]; // 直接获取int
 
 泛型是C#中一项强大的特性，它提供了类型安全、代码重用和性能优化等好处。通过泛型类、泛型接口、泛型方法和泛型委托，可以创建适用于多种数据类型的可重用组件。泛型约束、协变和逆变等高级特性进一步增强了泛型的灵活性和功能性。
 
-## <a id="delegates-lambda-advanced"></a>C#委托与Lambda表达式进阶
+## C#委托与Lambda表达式进阶
 
 委托和Lambda表达式是C#中支持函数式编程的核心特性。它们允许将方法作为参数传递、创建匿名函数以及实现回调机制。在现代C#开发中，这些特性被广泛应用于LINQ、异步编程和事件处理等场景。
 
-### <a id="anonymous-function-lambda"></a>匿名函数与Lambda表达式
+### 匿名函数与Lambda表达式
 
 匿名函数是没有名称的函数，它们可以作为参数传递给其他方法或存储在变量中。在C#中，匿名函数可以通过两种方式实现：传统的`delegate`语法和更简洁的Lambda表达式语法。
 
@@ -691,7 +708,7 @@ Func<int, int, bool> isGreater = (a, b) => a > b; // 多个参数
 | 目标类型 | 必须是委托类型 | 可以是委托类型或表达式树类型 |
 | 可读性 | 较低 | 较高 |
 
-### <a id="func-delegate-advanced"></a>Func委托详解
+### Func委托详解
 
 `Func`是C#中预定义的泛型委托，用于表示具有返回值的方法。`Func`委托可以接受0到16个输入参数，并始终有一个返回类型（最后一个类型参数）。
 
@@ -747,7 +764,7 @@ var processor = GetProcessor(true);
 int result = processor(5); // 结果为15
 ```
 
-### <a id="action-delegate-advanced"></a>Action委托详解
+### Action委托详解
 
 `Action`是C#中预定义的泛型委托，用于表示没有返回值（void）的方法。`Action`委托可以接受0到16个输入参数。
 
@@ -809,7 +826,7 @@ Action<string> process = s =>
 process("有效输入");
 ```
 
-### <a id="predicate-delegate-advanced"></a>Predicate委托详解
+### Predicate委托详解
 
 `Predicate`是C#中预定义的泛型委托，专门用于表示返回bool值的方法，通常用于条件判断。`Predicate`委托只接受一个输入参数，并始终返回bool类型。
 
@@ -872,7 +889,7 @@ List<int> numbers = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 List<int> filtered = numbers.FindAll(isEvenAndGreaterThan5);
 ```
 
-### <a id="delegate-chain-event"></a>委托链与事件
+### 委托链与事件
 
 委托链允许将多个委托实例组合在一起，形成一个委托列表。当调用这个委托链时，列表中的所有委托都会被依次调用。事件是基于委托的一种特殊机制，它允许对象在发生特定事件时通知其他对象。
 
@@ -1472,7 +1489,7 @@ public class User
 
 通过理解委托和事件的高级特性和最佳实践，可以编写出更加灵活、可维护和高性能的事件驱动代码。事件驱动编程是现代C#开发的核心模式之一，广泛应用于UI开发、分布式系统和异步编程等领域。
 
-### <a id="expression-trees"></a>表达式树
+### 表达式树
 
 表达式树是一种表示代码结构的数据结构，它允许在运行时检查、修改和执行代码。Lambda表达式可以隐式转换为表达式树，这使得LINQ to SQL、Entity Framework等ORM框架能够将C#代码转换为SQL查询。
 
@@ -1526,11 +1543,11 @@ using (var context = new MyDbContext())
 }
 ```
 
-## <a id="linq-detail"></a>C# LINQ详解
+## C# LINQ详解
 
 LINQ（Language Integrated Query，语言集成查询）是C#中的强大查询功能，它提供了一种统一的语法来查询各种数据源（集合、数据库、XML等）。LINQ将查询语法直接集成到C#语言中，使得数据查询变得简洁、类型安全和易于维护。
 
-### <a id="linq-concept"></a>LINQ的基本概念
+### LINQ的基本概念
 
 #### 什么是LINQ？
 
@@ -1564,7 +1581,7 @@ var query2 = products
     .Select(p => p.Name);
 ```
 
-### <a id="linq-query-syntax"></a>LINQ查询语法
+### LINQ查询语法
 
 查询语法使用类似SQL的关键字，更加直观和易读。
 
@@ -1651,7 +1668,7 @@ var query11 = from p in products
               select new { Category = categoryGroup.Key, Count = categoryGroup.Count() };
 ```
 
-### <a id="linq-method-syntax"></a>LINQ方法语法
+### LINQ方法语法
 
 方法语法使用扩展方法和Lambda表达式，更加灵活和功能强大。
 
@@ -1748,7 +1765,7 @@ Dictionary<string, List<Product>> categoryDict = products
     .ToDictionary(g => g.Key, g => g.ToList());
 ```
 
-### <a id="standard-query-operators"></a>标准查询操作符
+### 标准查询操作符
 
 #### 筛选操作符（Filtering）
 
@@ -1982,7 +1999,7 @@ IEnumerable<object> mixed = new List<object> { 1, "hello", 2, "world" };
 IEnumerable<int> numbers = mixed.OfType<int>(); // {1, 2}
 ```
 
-### <a id="linq-to-objects"></a>LINQ to Objects
+### LINQ to Objects
 
 LINQ to Objects用于查询内存中的集合（如List、Array等）。
 
@@ -2046,7 +2063,7 @@ var uniqueNames = products
     .ToList();
 ```
 
-### <a id="linq-to-sql"></a>LINQ to SQL
+### LINQ to SQL
 
 LINQ to SQL用于查询SQL Server数据库。
 
@@ -2116,7 +2133,7 @@ using (var context = new ApplicationDbContext())
 }
 ```
 
-### <a id="linq-to-xml"></a>LINQ to XML
+### LINQ to XML
 
 LINQ to XML用于查询和操作XML文档。
 
@@ -2178,7 +2195,7 @@ xml.Descendants("Product")
     .Remove();
 ```
 
-### <a id="linq-performance"></a>LINQ性能优化
+### LINQ性能优化
 
 #### 延迟执行（Deferred Execution）
 
@@ -2263,7 +2280,7 @@ var names2 = namesAndPrices.Select(x => x.Name);
 var prices2 = namesAndPrices.Select(x => x.Price);
 ```
 
-### <a id="linq-scenarios"></a>LINQ应用场景
+### LINQ应用场景
 
 #### 1. 数据筛选和排序
 
@@ -2388,11 +2405,11 @@ public List<DailySales> GetDailySales(List<Order> orders)
 
 LINQ是C#中强大的查询工具，它提供了一种统一、类型安全、声明式的方式来查询各种数据源。通过合理使用LINQ，可以编写出简洁、易读、高效的数据处理代码。
 
-## <a id="orm-frameworks"></a>C# ORM框架详解
+## C# ORM框架详解
 
 ORM（Object-Relational Mapping，对象关系映射）是一种编程技术，用于在面向对象编程语言和关系数据库之间建立映射关系。在C#中，从基础的ADO.NET到现代的Entity Framework，提供了多种数据访问方式。本章将从ADO.NET基础开始，逐步介绍Entity Framework 6的完整功能。
 
-### <a id="ado-net-basics"></a>ADO.NET基础
+### ADO.NET基础
 
 ADO.NET是.NET Framework中用于访问数据库的核心技术，它提供了直接访问数据库的能力，是其他ORM框架的基础。
 
@@ -2424,7 +2441,7 @@ using System.Data.Common;             // 通用数据访问类
 using System.Data.SqlTypes;           // SQL Server数据类型
 ```
 
-### <a id="ado-net-connection"></a>ADO.NET连接管理
+### ADO.NET连接管理
 
 #### SqlConnection类
 
@@ -2567,7 +2584,7 @@ SqlConnection.ClearPool(connection);
 SqlConnection.ClearAllPools(); // 清空所有连接池
 ```
 
-### <a id="ado-net-commands"></a>ADO.NET命令执行
+### ADO.NET命令执行
 
 #### SqlCommand类
 
@@ -2662,7 +2679,7 @@ using (SqlConnection connection = new SqlConnection(connectionString))
 }
 ```
 
-### <a id="ado-net-data-reader"></a>ADO.NET数据读取
+### ADO.NET数据读取
 
 #### SqlDataReader类
 
@@ -2792,7 +2809,7 @@ using (SqlConnection connection = new SqlConnection(connectionString))
 }
 ```
 
-### <a id="ado-net-parameters"></a>ADO.NET参数化查询
+### ADO.NET参数化查询
 
 参数化查询是防止SQL注入攻击的最佳实践，同时提高查询性能。
 
@@ -2990,7 +3007,7 @@ public int DeleteUser(int userId)
 }
 ```
 
-### <a id="ado-net-transactions"></a>ADO.NET事务处理
+### ADO.NET事务处理
 
 事务确保数据库操作的原子性、一致性、隔离性和持久性（ACID特性）。
 
@@ -3115,7 +3132,7 @@ using (SqlConnection connection = new SqlConnection(connectionString))
 }
 ```
 
-### <a id="ado-net-stored-procedures"></a>ADO.NET存储过程
+### ADO.NET存储过程
 
 存储过程是预编译的SQL代码，可以提高性能、安全性和代码重用性。
 
@@ -3318,7 +3335,7 @@ public void UpdateUsersWithAdapter(DataTable dataTable)
 }
 ```
 
-### <a id="ef6-basics"></a>Entity Framework 6基础
+### Entity Framework 6基础
 
 Entity Framework 6（EF6）是Microsoft开发的ORM框架，它允许开发者使用面向对象的方式操作数据库，而无需编写大量的SQL代码。
 
@@ -3998,7 +4015,7 @@ using (var context = new MyDbContext())
 }
 ```
 
-### <a id="dbcontext-detail"></a>DbContext详解
+### DbContext详解
 
 `DbContext`是Entity Framework的核心类，它代表与数据库的会话，负责跟踪实体变化、管理连接和执行数据库操作。
 
@@ -4186,7 +4203,7 @@ public class MyDbContext : DbContext
 }
 ```
 
-### <a id="dbset-detail"></a>DbSet详解
+### DbSet详解
 
 `DbSet<T>`表示数据库中的表，提供了查询、添加、更新、删除等操作。
 
@@ -4347,7 +4364,7 @@ using (var context = new MyDbContext())
 }
 ```
 
-### <a id="entity-configuration"></a>实体配置
+### 实体配置
 
 Entity Framework提供了两种方式来配置实体：Data Annotations（数据注解）和Fluent API（流式API）。
 
@@ -5182,7 +5199,7 @@ protected override void OnModelCreating(DbModelBuilder modelBuilder)
 }
 ```
 
-### <a id="relationship-configuration"></a>关系配置
+### 关系配置
 
 Entity Framework支持三种关系类型：一对一、一对多、多对多。
 
@@ -5563,7 +5580,7 @@ public void DeleteUser(int userId)
 // END
 ```
 
-### <a id="ef6-querying"></a>数据查询
+### 数据查询
 
 Entity Framework支持多种查询方式：LINQ to Entities、原始SQL、存储过程等。
 
@@ -5802,7 +5819,7 @@ using (var context = new MyDbContext())
 }
 ```
 
-### <a id="ef6-modifying"></a>数据修改
+### 数据修改
 
 Entity Framework提供了多种方式来添加、更新和删除数据。
 
@@ -5951,7 +5968,7 @@ using (var context = new MyDbContext())
 }
 ```
 
-### <a id="change-tracking"></a>变更跟踪
+### 变更跟踪
 
 Entity Framework自动跟踪实体的状态变化，这是实现更新和删除的基础。
 
@@ -6069,7 +6086,7 @@ using (var context = new MyDbContext())
 }
 ```
 
-### <a id="concurrency-control"></a>并发控制
+### 并发控制
 
 Entity Framework提供了多种并发控制机制来处理多用户同时修改数据的情况。
 
@@ -6171,7 +6188,7 @@ using (var context = new MyDbContext())
 }
 ```
 
-### <a id="migrations"></a>迁移（Migrations）
+### 迁移（Migrations）
 
 迁移是Entity Framework的数据库版本控制系统，用于管理数据库架构的变更。
 
@@ -6265,7 +6282,7 @@ PM> Update-Database -TargetMigration PreviousMigrationName
 PM> Update-Database -TargetMigration 0
 ```
 
-### <a id="ef6-performance"></a>性能优化
+### 性能优化
 
 Entity Framework提供了多种性能优化技巧来提高查询和操作效率。
 
@@ -6351,7 +6368,7 @@ using (var context = new MyDbContext())
 }
 ```
 
-### <a id="ef6-advanced"></a>高级特性
+### 高级特性
 
 #### 数据库初始化策略
 
@@ -6425,11 +6442,11 @@ using (var context = new MyDbContext())
 
 Entity Framework 6提供了强大的ORM功能，从基础的ADO.NET到高级的EF6特性，涵盖了数据访问的各个方面。通过合理使用这些特性，可以大大提高开发效率和代码质量。
 
-## <a id="design-patterns"></a>C#设计模式详解
+## C#设计模式详解
 
 设计模式是软件工程中经过验证的解决方案，用于解决常见的设计问题。它们提供了一套最佳实践，帮助开发者构建可维护、可扩展和可重用的软件系统。在C#中，设计模式被广泛应用于各种类型的应用程序开发。
 
-### <a id="singleton-pattern"></a>单例模式
+### 单例模式
 
 单例模式是一种创建型设计模式，它确保一个类只有一个实例，并提供一个全局访问点来获取这个实例。单例模式在需要控制资源访问、协调系统行为或提供全局状态管理时非常有用。
 
@@ -6605,7 +6622,7 @@ public sealed class InnerClassSingleton
 5. **考虑线程安全**：确保在多线程环境下的正确性
 6. **实现IDisposable**：如果单例持有非托管资源，应实现`IDisposable`接口
 
-### <a id="factory-pattern"></a>工厂模式
+### 工厂模式
 
 工厂模式是一种创建型设计模式，它提供了一种创建对象的最佳方式，将对象的创建与使用分离。工厂模式包括简单工厂、工厂方法和抽象工厂三种形式。
 
@@ -6838,7 +6855,7 @@ public void TestAbstractFactory()
 }
 ```
 
-### <a id="observer-pattern"></a>观察者模式
+### 观察者模式
 
 观察者模式（发布-订阅模式）定义了对象间的一种一对多依赖关系，当一个对象状态发生变化时，所有依赖它的对象都会得到通知并自动更新。
 
@@ -6925,7 +6942,7 @@ public void TestObserver()
 }
 ```
 
-### <a id="strategy-pattern"></a>策略模式
+### 策略模式
 
 策略模式定义了一系列算法，并将每个算法封装起来，使它们可以相互替换。策略模式让算法独立于使用它的客户而变化。
 
@@ -6998,7 +7015,7 @@ public void TestStrategy()
 }
 ```
 
-### <a id="adapter-pattern"></a>适配器模式
+### 适配器模式
 
 适配器模式将一个类的接口转换成客户希望的另外一个接口，使得原本由于接口不兼容而不能一起工作的那些类可以一起工作。
 
@@ -7057,7 +7074,7 @@ public void TestAdapter()
 }
 ```
 
-### <a id="decorator-pattern"></a>装饰器模式
+### 装饰器模式
 
 装饰器模式动态地给一个对象添加一些额外的职责，就增加功能来说，装饰器模式比生成子类更为灵活。
 
@@ -7129,7 +7146,7 @@ public void TestDecorator()
 }
 ```
 
-### <a id="dependency-injection-pattern"></a>依赖注入模式
+### 依赖注入模式
 
 依赖注入模式是一种实现控制反转（IoC）的设计模式，它允许对象在运行时接收依赖关系，而不是在编译时硬编码。
 
@@ -7207,11 +7224,11 @@ public void TestDependencyInjection()
 }
 ```
 
-## <a id="communication-programming"></a>C#通信编程详解
+## C#通信编程详解
 
 通信编程是C#开发中的重要组成部分，它涉及不同系统之间的数据交换和通信。C#提供了多种通信方式，包括TCP/IP、HTTP、WebSocket、命名管道等。本章将详细介绍C#中的各种通信编程技术。
 
-### <a id="tcp-ip-basics"></a>TCP/IP通信基础
+### TCP/IP通信基础
 
 TCP/IP是Internet的基础协议，它提供了可靠的、面向连接的通信机制。在C#中，可以通过Socket编程或高级封装类（如TcpClient、TcpListener）来实现TCP/IP通信。
 
@@ -7233,7 +7250,7 @@ TCP/IP协议栈由四层组成：
 | 数据大小 | 无限制 | 有限制（通常小于65535字节） |
 | 适用场景 | 文件传输、网页浏览等 | 实时通信、视频流等 |
 
-### <a id="socket-programming"></a>Socket编程
+### Socket编程
 
 Socket是TCP/IP通信的基础，它提供了低级别的网络通信API。通过Socket编程，可以实现复杂的网络通信逻辑。
 
@@ -7366,7 +7383,7 @@ public class TcpSocketClient
 // TcpSocketClient.Start();
 ```
 
-### <a id="tcpclient-tcplistener"></a>TcpClient与TcpListener
+### TcpClient与TcpListener
 
 TcpClient和TcpListener是Socket的高级封装，它们简化了TCP通信的开发过程。
 
@@ -7484,7 +7501,7 @@ public class TcpClientExample
 // await TcpClientExample.StartAsync();
 ```
 
-### <a id="udpclient-programming"></a>UdpClient编程
+### UdpClient编程
 
 UdpClient是UDP通信的高级封装，它简化了UDP套接字的使用。
 
@@ -7573,7 +7590,7 @@ public class UdpClientExample
 // await UdpClientExample.StartAsync();
 ```
 
-### <a id="http-communication"></a>HTTP通信
+### HTTP通信
 
 HTTP是Web通信的基础协议，C#提供了多种方式来实现HTTP通信，包括HttpClient、HttpWebRequest等。
 
@@ -7689,7 +7706,7 @@ public class HttpClientExample
 // await HttpClientExample.DeleteAsync();
 ```
 
-### <a id="websocket-communication"></a>WebSocket通信
+### WebSocket通信
 
 WebSocket提供了全双工的通信方式，允许服务器主动向客户端推送数据。C#中可以使用ClientWebSocket和WebSocket类来实现WebSocket通信。
 
@@ -7790,7 +7807,7 @@ public class WebSocketClientExample
 // await WebSocketClientExample.StartAsync();
 ```
 
-### <a id="named-pipes"></a>命名管道通信
+### 命名管道通信
 
 命名管道是Windows操作系统提供的一种进程间通信机制，它允许同一台计算机上的不同进程或不同计算机上的进程进行通信。
 
@@ -7893,7 +7910,7 @@ public class NamedPipeClientExample
 // await NamedPipeClientExample.StartAsync();
 ```
 
-### <a id="wcf-communication"></a>WCF通信
+### WCF通信
 
 WCF（Windows Communication Foundation）是.NET框架中的一种通信技术，它提供了统一的编程模型，用于构建面向服务的应用程序。
 
@@ -8022,7 +8039,7 @@ public class WcfClientExample
 }
 ```
 
-### <a id="grpc-communication"></a>gRPC通信
+### gRPC通信
 
 gRPC是一种高性能、开源的远程过程调用（RPC）框架，它基于HTTP/2协议，使用Protocol Buffers作为序列化机制。
 
@@ -8214,7 +8231,7 @@ public class GrpcClientExample
 // GrpcClientExample.Start();
 ```
 
-### <a id="message-queues"></a>消息队列
+### 消息队列
 
 消息队列是一种异步通信机制，它允许应用程序之间通过消息进行通信，而不需要直接调用彼此。常见的消息队列系统包括RabbitMQ、Azure Service Bus、Apache Kafka等。
 
@@ -8302,7 +8319,7 @@ C#提供了丰富的通信编程API，从低级别的Socket编程到高级别的
 
 选择合适的通信方式需要考虑多种因素，包括性能要求、可靠性要求、跨平台需求、开发复杂度等。在实际开发中，应根据具体项目需求选择最适合的通信技术。
 
-### <a id="serial-communication"></a>上位机串口通信
+### 上位机串口通信
 
 串口通信是上位机与下位机（如单片机、PLC等）之间常用的通信方式。C#通过`System.IO.Ports.SerialPort`类提供了完整的串口通信支持。
 
@@ -8654,11 +8671,11 @@ public partial class SerialMonitorForm : Form
 
 串口通信是上位机与下位机通信的重要方式，掌握C#中的串口通信编程，对于开发工业控制、嵌入式系统等应用具有重要意义。
 
-## <a id="attributes-detail"></a>C#特性（Attributes）详解
+## C#特性（Attributes）详解
 
 特性（Attributes）是C#中的元数据机制，它允许为程序元素（类、方法、属性等）添加声明性信息。特性可以在运行时通过反射访问，广泛应用于序列化、ORM、依赖注入、单元测试等场景。
 
-### <a id="attributes-concept"></a>特性的基本概念
+### 特性的基本概念
 
 #### 什么是特性？
 
@@ -8681,7 +8698,7 @@ public class Person
 3. **运行时访问**：通过反射可以获取特性信息
 4. **框架支持**：许多框架（如ASP.NET、Entity Framework）依赖特性来配置行为
 
-### <a id="attributes-usage"></a>特性的定义与使用
+### 特性的定义与使用
 
 #### 特性的语法
 
@@ -8740,7 +8757,7 @@ public void Method([In] int parameter) { }
 public bool GetValue() { return true; }
 ```
 
-### <a id="common-attributes"></a>常见内置特性
+### 常见内置特性
 
 #### 序列化相关特性
 
@@ -8887,7 +8904,7 @@ public static extern int MessageBox(
     uint type);
 ```
 
-### <a id="custom-attributes"></a>自定义特性
+### 自定义特性
 
 #### 创建自定义特性
 
@@ -9002,7 +9019,7 @@ public class UserService
 }
 ```
 
-### <a id="attributes-reflection"></a>特性的反射访问
+### 特性的反射访问
 
 #### 获取特性
 
@@ -9277,7 +9294,7 @@ public static class AttributeProcessor
 }
 ```
 
-### <a id="attributes-scenarios"></a>特性的应用场景
+### 特性的应用场景
 
 #### 1. 数据序列化
 
@@ -9430,11 +9447,11 @@ public class OrderService
 
 特性是C#中强大的元数据机制，它使得代码更加声明式、可配置，并且为框架提供了丰富的扩展点。通过合理使用特性，可以构建更加灵活和可维护的应用程序。
 
-## <a id="reflection-detail"></a>C#反射（Reflection）详解
+## C#反射（Reflection）详解
 
 反射（Reflection）是C#中强大的运行时类型检查和操作机制。它允许在运行时获取类型信息、创建对象实例、调用方法和访问属性，而无需在编译时知道这些类型。反射广泛应用于序列化、ORM框架、依赖注入、代码生成等场景。
 
-### <a id="reflection-concept"></a>反射的基本概念
+### 反射的基本概念
 
 #### 什么是反射？
 
@@ -9465,7 +9482,7 @@ public class OrderService
 - 使用表达式树编译
 - 避免在频繁调用的代码中使用反射
 
-### <a id="type-class"></a>Type类型详解
+### Type类型详解
 
 `Type`类是反射的核心，它表示类型声明（类、接口、数组等）。
 
@@ -9612,7 +9629,7 @@ ConstructorInfo constructor = type.GetConstructor(new Type[] { typeof(string), t
 | `IgnoreReturn` | 用于InvokeMember，指示忽略方法的返回值 | 调用方法但不关心返回结果 |
 | `DoNotWrapExceptions` | 用于InvokeMember，指示不要将异常包装在TargetInvocationException中 | 直接抛出原始异常 |
 
-### <a id="assembly-operations"></a>程序集（Assembly）操作
+### 程序集（Assembly）操作
 
 程序集是.NET中代码部署和版本控制的基本单位。
 
@@ -9677,7 +9694,7 @@ using (Stream stream = assembly.GetManifestResourceStream("MyNamespace.resource.
 }
 ```
 
-### <a id="type-members"></a>类型成员访问
+### 类型成员访问
 
 #### 属性（Property）访问
 
@@ -9889,7 +9906,7 @@ ConstructorInfo privateConstructor = type.GetConstructor(
 Person person4 = (Person)privateConstructor.Invoke(new object[] { 30 });
 ```
 
-### <a id="dynamic-object-creation"></a>动态创建对象
+### 动态创建对象
 
 #### 使用Activator创建对象
 
@@ -9953,7 +9970,7 @@ Func<Person> factory = ObjectFactory.CreateFactory<Person>();
 Person person = factory(); // 性能接近 new Person()
 ```
 
-### <a id="method-property-access"></a>方法调用与属性访问
+### 方法调用与属性访问
 
 #### 性能优化的方法调用
 
@@ -10009,7 +10026,7 @@ setter(person, "李四");
 string value = getter(person);
 ```
 
-### <a id="generic-reflection"></a>泛型类型的反射
+### 泛型类型的反射
 
 #### 处理泛型类型
 
@@ -10056,7 +10073,7 @@ Console.WriteLine($"是泛型定义: {type.IsGenericTypeDefinition}"); // False
 Console.WriteLine($"泛型参数: {string.Join(", ", type.GetGenericArguments().Select(t => t.Name))}");
 ```
 
-### <a id="reflection-performance"></a>反射的性能优化
+### 反射的性能优化
 
 #### 缓存反射结果
 
@@ -10109,7 +10126,7 @@ public static Func<T, TResult> GetCachedGetter<T, TResult>(PropertyInfo property
 }
 ```
 
-### <a id="reflection-scenarios"></a>反射的应用场景
+### 反射的应用场景
 
 #### 1. 对象映射（Object Mapper）
 
@@ -10240,11 +10257,11 @@ public static class SimpleSerializer
 
 反射是C#中强大的运行时类型操作机制，它使得程序能够动态地处理类型、创建对象和调用方法。虽然反射有一定的性能开销，但在框架开发、插件系统、序列化等场景中，反射是不可或缺的工具。通过合理使用缓存和委托，可以在保持灵活性的同时提高性能。
 
-## <a id="async-programming"></a>C#异步编程详解
+## C#异步编程详解
 
 异步编程是C#中处理耗时操作（如I/O操作、网络请求等）的重要技术。通过异步编程，可以在等待耗时操作完成的同时，不阻塞主线程，从而提高应用程序的响应性和性能。在现代C#开发中，`async/await`关键字使得异步编程变得简单而优雅。
 
-### <a id="async-basics"></a>异步编程基础
+### 异步编程基础
 
 #### 为什么需要异步编程？
 
@@ -10273,7 +10290,7 @@ private async void LoadFileAsync()
 3. **Task和Task\<T>**：表示异步操作的返回类型
 4. **异步状态机**：编译器将异步方法转换为状态机
 
-### <a id="async-await"></a>async/await关键字
+### async/await关键字
 
 #### async关键字
 
@@ -10344,7 +10361,7 @@ public async Task ProcessDataAsync()
 }
 ```
 
-### <a id="task-types"></a>Task与Task\<T>
+### Task与Task\<T>
 
 #### Task类型
 
@@ -10416,7 +10433,7 @@ Task<string> completedTask = Task.FromResult("已完成");
 string result = await completedTask;
 ```
 
-### <a id="async-best-practices"></a>异步方法最佳实践
+### 异步方法最佳实践
 
 #### 1. 避免async void
 
@@ -11126,7 +11143,7 @@ int GetTaskId(Task task)
 
 通过理解异步异常的传播机制和正确的处理方式，可以编写更加健壮、可靠的异步代码，避免隐藏的bug和难以调试的问题。
 
-### <a id="async-winform"></a>异步编程与WinForm集成
+### 异步编程与WinForm集成
 
 在WinForm应用程序中，异步编程特别重要，可以保持UI响应性。
 
@@ -11311,11 +11328,11 @@ public class User
 }
 ```
 
-## <a id="file-stream"></a>C#文件操作与流处理
+## C#文件操作与流处理
 
 文件操作和流处理是C#中处理数据输入输出的核心功能。通过流（Stream），可以高效地读写文件、处理网络数据、操作内存数据等。
 
-### <a id="file-basics"></a>文件操作基础
+### 文件操作基础
 
 #### File类
 
@@ -11406,7 +11423,7 @@ string[] directories = Directory.GetDirectories("Folder");
 Directory.Delete("Folder", recursive: true);
 ```
 
-### <a id="stream-overview"></a>流（Stream）概述
+### 流（Stream）概述
 
 流是C#中处理数据输入输出的抽象基类，提供了统一的接口来处理不同类型的数据源（文件、内存、网络等）。
 
@@ -11439,7 +11456,7 @@ void Flush();                                        // 刷新缓冲区
 void Close();                                        // 关闭流
 ```
 
-### <a id="filestream"></a>FileStream文件流
+### FileStream文件流
 
 `FileStream`用于读写文件，提供了对文件的底层访问。
 
@@ -11503,7 +11520,7 @@ public async Task<string> ReadFileAsync(string filePath)
 }
 ```
 
-### <a id="stream-reader-writer"></a>StreamReader和StreamWriter
+### StreamReader和StreamWriter
 
 `StreamReader`和`StreamWriter`提供了对文本文件的便捷读写操作。
 
@@ -11602,7 +11619,7 @@ public async Task WriteLinesAsync(string filePath, IEnumerable<string> lines)
 }
 ```
 
-### <a id="memorystream"></a>MemoryStream内存流
+### MemoryStream内存流
 
 `MemoryStream`用于在内存中操作数据，不需要实际文件。
 
@@ -11640,7 +11657,7 @@ using (MemoryStream ms = new MemoryStream())
 }
 ```
 
-### <a id="file-winform"></a>文件操作与WinForm集成
+### 文件操作与WinForm集成
 
 在WinForm应用程序中，文件操作通常与用户界面交互，需要异步处理以保持UI响应性。
 
@@ -11936,11 +11953,11 @@ public partial class FileCopyForm : Form
 }
 ```
 
-## <a id="multithreading"></a>C#多线程编程详解
+## C#多线程编程详解
 
 多线程编程是C#中实现并发执行的核心技术。通过多线程，可以让程序同时执行多个任务，充分利用多核CPU资源，提高程序性能。本章将深入讲解C#中的多线程编程，包括线程创建、同步、通信等各个方面。
 
-### <a id="multithreading-basics"></a>多线程基础概念
+### 多线程基础概念
 
 #### 什么是线程？
 
@@ -11964,7 +11981,7 @@ public partial class FileCopyForm : Form
 3. **竞态条件**：执行顺序不确定导致的结果不一致
 4. **性能开销**：线程创建、切换、同步的开销
 
-### <a id="thread-class"></a>Thread类详解
+### Thread类详解
 
 `Thread`类是C#中创建和管理线程的基础类。
 
@@ -12189,7 +12206,7 @@ thread2.Join();
 Console.WriteLine($"主线程的值: {threadStaticValue}");
 ```
 
-### <a id="threadpool"></a>ThreadPool线程池
+### ThreadPool线程池
 
 线程池是.NET提供的线程管理机制，可以重用线程，减少线程创建和销毁的开销。
 
@@ -12264,7 +12281,7 @@ ThreadPool.SetMaxThreads(100, 100);
 | 控制能力 | 完全控制 | 有限控制 |
 | 性能开销 | 较大 | 较小 |
 
-### <a id="thread-synchronization"></a>线程同步机制
+### 线程同步机制
 
 当多个线程访问共享资源时，需要使用同步机制确保线程安全。
 
@@ -12732,7 +12749,7 @@ long result = Interlocked.Read(ref longValue);
 - 无死锁风险：不涉及锁
 - 适合简单操作：递增、递减、交换等
 
-### <a id="thread-safe-collections"></a>线程安全集合
+### 线程安全集合
 
 .NET提供了线程安全的集合类，可以在多线程环境中安全使用。
 
@@ -12881,7 +12898,7 @@ producer.Join();
 consumer.Join();
 ```
 
-### <a id="parallel-programming"></a>并行编程（Parallel类）
+### 并行编程（Parallel类）
 
 `Parallel`类提供了简单的并行循环和并行执行方法。
 
@@ -13039,7 +13056,7 @@ catch (OperationCanceledException)
 }
 ```
 
-### <a id="task-parallel-library"></a>任务并行库（TPL）
+### 任务并行库（TPL）
 
 TPL（Task Parallel Library）是.NET推荐的并行编程方式，比直接使用Thread更高级。
 
@@ -13181,7 +13198,7 @@ int result = await completedTask;
 Console.WriteLine($"第一个完成的任务结果: {result}");
 ```
 
-### <a id="thread-communication"></a>线程间通信
+### 线程间通信
 
 线程间需要协调和通信时，可以使用多种机制。
 
@@ -13286,7 +13303,7 @@ Thread.Sleep(5000);
 barrier.Dispose();
 ```
 
-### <a id="deadlock-race-condition"></a>死锁与竞态条件
+### 死锁与竞态条件
 
 #### 死锁（Deadlock）
 
@@ -13411,7 +13428,7 @@ void SafeIncrement(string key)
 }
 ```
 
-### <a id="multithreading-best-practices"></a>多线程最佳实践
+### 多线程最佳实践
 
 #### 1. 优先使用Task而不是Thread
 

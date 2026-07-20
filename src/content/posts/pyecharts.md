@@ -12,6 +12,37 @@ draft: false
 
 # pyecharts示例图
 
+
+## 目录
+
+- [渲染图片文件方法](#渲染图片文件方法)
+- [柱状图](#柱状图)
+- [饼图](#饼图)
+- [玫瑰图](#玫瑰图)
+- [柱形图](#柱形图)
+- [执行JS代码](#执行js代码)
+- [堆叠柱状图](#堆叠柱状图)
+- [条形图](#条形图)
+- [直方图](#直方图)
+- [单系列柱子之间的间距](#单系列柱子之间的间距)
+- [JsCode自定义柱颜色](#jscode自定义柱颜色)
+- [象形柱状图](#象形柱状图)
+- [雷达图](#雷达图)
+- [折线图](#折线图)
+- [面积图](#面积图)
+- [堆叠面积图](#堆叠面积图)
+- [散点图](#散点图)
+- [涟漪散点图](#涟漪散点图)
+- [热力图](#热力图)
+- [日历图](#日历图)
+- [箱型图](#箱型图)
+- [词云图](#词云图)
+- [漏斗图](#漏斗图)
+- [极坐标图](#极坐标图)
+- [水球图](#水球图)
+- [桑基图](#桑基图)
+
+
 ## 渲染图片文件方法
 ```python
 from pyecharts.render import make_snapshot
@@ -844,9 +875,9 @@ from pyecharts.charts import WordCloud
 
 ```python
 # wordcloud = (
-#     WordCloud()
-#     .add("", data_pair = words, word_size_range=[6,60],textstyle_opts=opts.TextStyleOpts(font_family='Microsoft YaHei',font_weight='bold'))
-#     .set_global_opts(title_opts=opts.TitleOpts(title="《政府工作报告（2021）》新词",title_textstyle_opts = opts.TextStyleOpts(font_size = 25,color="midnightblue")))
+# WordCloud()
+# .add("", data_pair = words, word_size_range=[6,60],textstyle_opts=opts.TextStyleOpts(font_family='Microsoft YaHei',font_weight='bold'))
+# .set_global_opts(title_opts=opts.TitleOpts(title="《政府工作报告（2021）》新词",title_textstyle_opts = opts.TextStyleOpts(font_size = 25,color="midnightblue")))
 # )
 # wordcloud.render_notebook()
 ```
@@ -1025,9 +1056,9 @@ from pyecharts.charts import Liquid
 
 ```python
 # c =(
-#     Liquid()
-#     .add('',[0.2,0.7]) #0.7水百分之七十，0.2显示数值
-#     .set_global_opts(title_opts=opts.TitleOpts(title='水球图'))
+# Liquid()
+# .add('',[0.2,0.7]) #0.7水百分之七十，0.2显示数值
+# .set_global_opts(title_opts=opts.TitleOpts(title='水球图'))
 # )
 # c.render_notebook()
 ```

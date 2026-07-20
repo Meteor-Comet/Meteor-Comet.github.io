@@ -18,15 +18,6 @@ draft: false
 
 ---
 
-
-<details open class="in-post-toc-card">
-<summary>📑 本文目录（点击收起 / 展开）</summary>
-
-
-
-</details>
-
-
 ## 目录
 
 - [1. 深入理解 SQL Server 与 T-SQL 体系架构](#1-深入理解-sql-server-与-t-sql-体系架构)
@@ -69,7 +60,6 @@ draft: false
   - [12.2 #Temp 临时表 vs @Table 表变量：生命周期的抉择](#122-temp-临时表-vs-table-表变量生命周期的抉择)
 - [13. 极客防身术：随心所欲的动态 SQL 与执行提示 (Query Hints)](#13-极客防身术随心所欲的动态-sql-与执行提示-query-hints)
   - [13.1 掌控优化器大脑：查询提示 Query Hints](#131-掌控优化器大脑查询提示-query-hints)
-
 
 ## 1. 深入理解 SQL Server 与 T-SQL 体系架构
 

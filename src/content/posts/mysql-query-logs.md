@@ -22,15 +22,6 @@ draft: false
 
 ---
 
-
-<details open class="in-post-toc-card">
-<summary>📑 本文目录（点击收起 / 展开）</summary>
-
-
-
-</details>
-
-
 ## 目录
 
 - [1. 慢查询日志（Slow Query Log）](#1-慢查询日志slow-query-log)
@@ -64,7 +55,6 @@ draft: false
   - [7.2 日志清理](#72-日志清理)
 - [8. 性能问题诊断流程](#8-性能问题诊断流程)
 - [9. 最佳实践速查](#9-最佳实践速查)
-
 
 ## 1. 慢查询日志（Slow Query Log）
 

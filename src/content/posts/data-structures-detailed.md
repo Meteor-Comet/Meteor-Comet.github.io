@@ -10,14 +10,6 @@ tags:
 draft: false
 ---
 
-<details open class="in-post-toc-card">
-<summary>📑 本文目录（点击收起 / 展开）</summary>
-
-
-
-</details>
-
-
 ## 目录
 
 - [学习目标](#学习目标)
@@ -63,7 +55,6 @@ draft: false
   - [核心要点](#核心要点)
   - [学习建议](#学习建议)
 - [参考资料](#参考资料)
-
 
 ## 学习目标
 - 理解各种基本数据结构的概念和特点

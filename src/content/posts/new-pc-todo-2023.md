@@ -10,14 +10,6 @@ tags:
 draft: false
 ---
 
-<details open class="in-post-toc-card">
-<summary>📑 本文目录（点击收起 / 展开）</summary>
-
-
-
-</details>
-
-
 ## 目录
 
 - [新设备设置](#新设备设置)
@@ -26,7 +18,6 @@ draft: false
   - [二、单独更改AppData的默认存储路径](#二单独更改appdata的默认存储路径)
   - [三、可选：更改ProgramData默认路径](#三可选更改programdata默认路径)
 - [目录](#目录)
-
 
 ## 新设备设置
 

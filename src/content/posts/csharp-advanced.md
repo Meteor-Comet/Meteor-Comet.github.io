@@ -10,14 +10,6 @@ tags:
 draft: false
 ---
 
-<details open class="in-post-toc-card">
-<summary>📑 本文目录（点击收起 / 展开）</summary>
-
-
-
-</details>
-
-
 ## 目录
 
   - [C# 异步编程 (async/await) 状态机转换图](#c-异步编程-asyncawait-状态机转换图)
@@ -131,7 +123,6 @@ draft: false
   - [死锁与竞态条件](#死锁与竞态条件)
   - [多线程最佳实践](#多线程最佳实践)
 - [总结](#总结)
-
 
 ### C# 异步编程 (async/await) 状态机转换图
 

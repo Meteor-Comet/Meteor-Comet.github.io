@@ -12,15 +12,6 @@ draft: false
 
 # Java常用API学习日志
 
-
-<details open class="in-post-toc-card">
-<summary>📑 本文目录（点击收起 / 展开）</summary>
-
-
-
-</details>
-
-
 ## 目录
 
 - [Java常用API学习](#java常用api学习)
@@ -29,7 +20,6 @@ draft: false
   - [学习内容](#学习内容)
   - [学习总结](#学习总结)
   - [今日学习心得](#今日学习心得)
-
 
 ## Java常用API学习
 

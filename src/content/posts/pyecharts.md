@@ -12,15 +12,6 @@ draft: false
 
 # pyecharts示例图
 
-
-<details open class="in-post-toc-card">
-<summary>📑 本文目录（点击收起 / 展开）</summary>
-
-
-
-</details>
-
-
 ## 目录
 
 - [渲染图片文件方法](#渲染图片文件方法)
@@ -49,7 +40,6 @@ draft: false
 - [极坐标图](#极坐标图)
 - [水球图](#水球图)
 - [桑基图](#桑基图)
-
 
 ## 渲染图片文件方法
 ```python

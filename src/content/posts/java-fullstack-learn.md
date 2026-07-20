@@ -12,15 +12,6 @@ draft: false
 
 # JavaSE学习日志
 
-
-<details open class="in-post-toc-card">
-<summary>📑 本文目录（点击收起 / 展开）</summary>
-
-
-
-</details>
-
-
 ## 目录
 
   - [学习目标](#学习目标)
@@ -217,7 +208,6 @@ draft: false
   - [18. final 关键词的作用与用法](#18-final-关键词的作用与用法)
   - [19. Java 常量（Constant）的定义与使用](#19-java-常量constant的定义与使用)
   - [20. Java 字符串（String）是否不可变及原理](#20-java-字符串string是否不可变及原理)
-
 
 ### 学习目标
 - 夯实Java基础，掌握面向对象编程思想

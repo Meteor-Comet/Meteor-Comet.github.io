@@ -12,15 +12,6 @@ draft: false
 
 # WPF 全面指南
 
-
-<details open class="in-post-toc-card">
-<summary>📑 本文目录（点击收起 / 展开）</summary>
-
-
-
-</details>
-
-
 ## 目录
 
   - [WPF MVVM 架构数据流向图](#wpf-mvvm-架构数据流向图)
@@ -129,7 +120,6 @@ draft: false
   - [17.4 灵魂功能：Growl (全局极简屏显通知)](#174-灵魂功能growl-全局极简屏显通知)
   - [17.5 现代弹窗系统 (Dialog)](#175-现代弹窗系统-dialog)
   - [17.6 将 HandyControl 收为己有的总结](#176-将-handycontrol-收为己有的总结)
-
 
 ### WPF MVVM 架构数据流向图
 

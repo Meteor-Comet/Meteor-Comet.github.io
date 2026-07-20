@@ -10,14 +10,6 @@ tags:
 draft: false
 ---
 
-<details open class="in-post-toc-card">
-<summary>📑 本文目录（点击收起 / 展开）</summary>
-
-
-
-</details>
-
-
 ## 目录
 
 - [学习目标](#学习目标)
@@ -71,7 +63,6 @@ draft: false
   - [9.3 最佳实践](#93-最佳实践)
   - [9.4 学习收获](#94-学习收获)
   - [9.5 注意事项](#95-注意事项)
-
 
 ## 学习目标
 

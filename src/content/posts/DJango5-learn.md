@@ -10,14 +10,6 @@ tags:
 draft: false
 ---
 
-<details open class="in-post-toc-card">
-<summary>📑 本文目录（点击收起 / 展开）</summary>
-
-
-
-</details>
-
-
 ## 目录
 
 - [Django5介绍及安装](#django5介绍及安装)
@@ -81,7 +73,6 @@ draft: false
   - [用户修改密码实现](#用户修改密码实现)
   - [用户注销实现](#用户注销实现)
 - [Django5内置其他高级功能](#django5内置其他高级功能)
-
 
 ## Django5介绍及安装
 

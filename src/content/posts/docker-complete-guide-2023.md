@@ -10,14 +10,6 @@ tags:
 draft: false
 ---
 
-<details open class="in-post-toc-card">
-<summary>📑 本文目录（点击收起 / 展开）</summary>
-
-
-
-</details>
-
-
 ## 目录
 
   - [Docker 核心架构与资源隔离模型](#docker-核心架构与资源隔离模型)
@@ -64,7 +56,6 @@ draft: false
   - [12.1 Docker Swarm集群](#121-docker-swarm集群)
   - [12.2 私有镜像仓库](#122-私有镜像仓库)
 - [参考资料](#参考资料)
-
 
 ### Docker 核心架构与资源隔离模型
 

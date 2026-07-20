@@ -19,17 +19,6 @@ draft: false
 
 ---
 
----
-
-
-<details open class="in-post-toc-card">
-<summary>📑 本文目录（点击收起 / 展开）</summary>
-
-
-
-</details>
-
-
 ## 目录
 
 - [一、 为什么 Avalonia 官方原生拥抱 ReactiveUI？](#一-为什么-avalonia-官方原生拥抱-reactiveui)
@@ -48,7 +37,6 @@ draft: false
   - [3.6 事件聚合器 (EventAggregator) 的极致运用](#36-事件聚合器-eventaggregator-的极致运用)
   - [3.7 进阶架构解耦：模块化应用树 (Modularity)](#37-进阶架构解耦模块化应用树-modularity)
 - [四、 总结：从轻量跨平台到重工业巨构的进阶法则](#四-总结从轻量跨平台到重工业巨构的进阶法则)
-
 
 ## 一、 为什么 Avalonia 官方原生拥抱 ReactiveUI？
 

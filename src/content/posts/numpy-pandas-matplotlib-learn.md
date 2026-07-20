@@ -10,14 +10,6 @@ tags:
 draft: false
 ---
 
-<details open class="in-post-toc-card">
-<summary>📑 本文目录（点击收起 / 展开）</summary>
-
-
-
-</details>
-
-
 ## 目录
 
 - [学习目标](#学习目标)
@@ -64,7 +56,6 @@ draft: false
   - [NumPy 输出](#numpy-输出)
   - [Pandas 输出](#pandas-输出)
   - [Matplotlib 输出](#matplotlib-输出)
-
 
 ## 学习目标
 - 掌握NumPy数组操作和数学计算

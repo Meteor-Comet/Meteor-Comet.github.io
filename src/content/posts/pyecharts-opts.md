@@ -10,20 +10,11 @@ tags:
 draft: false
 ---
 
-<details open class="in-post-toc-card">
-<summary>📑 本文目录（点击收起 / 展开）</summary>
-
-
-
-</details>
-
-
 ## 目录
 
 - [pyecharts配置项](#pyecharts配置项)
   - [全局配置项](#全局配置项)
   - [系列配置项](#系列配置项)
-
 
 ## pyecharts配置项
 ```python

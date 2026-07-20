@@ -10,14 +10,6 @@ tags:
 draft: false
 ---
 
-<details open class="in-post-toc-card">
-<summary>📑 本文目录（点击收起 / 展开）</summary>
-
-
-
-</details>
-
-
 ## 目录
 
 - [学习目标](#学习目标)
@@ -51,7 +43,6 @@ draft: false
   - [5.5 数据库对象管理](#55-数据库对象管理)
 - [总结](#总结)
 - [参考资料](#参考资料)
-
 
 ## 学习目标
 - 掌握MySQL视图的创建、使用和管理

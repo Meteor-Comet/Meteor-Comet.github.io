@@ -12,15 +12,6 @@ draft: false
 
 # Google Antigravity 代理指南
 
-
-<details open class="in-post-toc-card">
-<summary>📑 本文目录（点击收起 / 展开）</summary>
-
-
-
-</details>
-
-
 ## 目录
 
 - [前言](#前言)
@@ -46,7 +37,6 @@ draft: false
 - [附录：推荐节点配置](#附录推荐节点配置)
 - [注意事项](#注意事项)
 - [参考资料](#参考资料)
-
 
 ## 前言
 

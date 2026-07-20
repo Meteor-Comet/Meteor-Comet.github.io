@@ -14,15 +14,6 @@ draft: false
 
 ---
 
-
-<details open class="in-post-toc-card">
-<summary>📑 本文目录（点击收起 / 展开）</summary>
-
-
-
-</details>
-
-
 ## 目录
 
 - [1. Prism框架概念与核心内容](#1-prism框架概念与核心内容)
@@ -60,7 +51,6 @@ draft: false
   - [8.1 定义一个模块 (Module)](#81-定义一个模块-module)
   - [8.2 在宿主程序配置加载哪些模块 (ModuleCatalog)](#82-在宿主程序配置加载哪些模块-modulecatalog)
   - [最终总结](#最终总结)
-
 
 ## 1. Prism框架概念与核心内容
 

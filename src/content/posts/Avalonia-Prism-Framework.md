@@ -12,13 +12,6 @@ draft: false
 
 # Avalonia 全景指南：ReactiveUI精讲与Prism企业级架构深度扩展
 
-
-
-
-
-
-
-
 本文将提供一份超越官方基础文档的“万字级长文”实战解析。
 我们将把跨平台明星框架 **Avalonia UI** 的核心驱动引擎分为两部分进行极致拆解：
 第一部分，深入剖析 Avalonia 官方首推的响应式 MVVM 框架 **ReactiveUI** 的所有核心 API 及在复杂前端场景中的应用；
@@ -27,19 +20,6 @@ draft: false
 ---
 
 ---
-
-
-<details open class="in-post-toc-card border border-neutral-200/80 dark:border-neutral-700/80 rounded-xl p-4 my-4 bg-neutral-50/50 dark:bg-neutral-800/30">
-<summary class="font-bold text-base cursor-pointer select-none text-neutral-800 dark:text-neutral-200 flex items-center justify-between outline-none">
-<span>📑 本文目录（点击收起 / 展开）</span>
-</summary>
-
-<div class="max-h-72 overflow-y-auto mt-3 pt-2 border-t border-neutral-200/60 dark:border-neutral-700/60 hide-scrollbar">
-
-
-
-</div>
-</details>
 
 
 ## 目录

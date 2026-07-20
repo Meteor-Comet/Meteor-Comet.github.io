@@ -13,19 +13,6 @@ draft: false
 # pyecharts示例图
 
 
-<details open class="in-post-toc-card border border-neutral-200/80 dark:border-neutral-700/80 rounded-xl p-4 my-4 bg-neutral-50/50 dark:bg-neutral-800/30">
-<summary class="font-bold text-base cursor-pointer select-none text-neutral-800 dark:text-neutral-200 flex items-center justify-between outline-none">
-<span>📑 本文目录（点击收起 / 展开）</span>
-</summary>
-
-<div class="max-h-72 overflow-y-auto mt-3 pt-2 border-t border-neutral-200/60 dark:border-neutral-700/60 hide-scrollbar">
-
-
-
-</div>
-</details>
-
-
 ## 目录
 
 - [渲染图片文件方法](#渲染图片文件方法)
@@ -75,7 +62,6 @@ from pyecharts.globals import CurrentConfig, NotebookType
 CurrentConfig.NOTEBOOK_TYPE = NotebookType.JUPYTER_LAB
 ```
 
-
 ```python
 from pyecharts.charts import Bar
 bar = Bar()
@@ -90,9 +76,7 @@ bar.render_notebook()
 
 ![img1](/images/in-post/post_pyecharts/bar.png)
 
-
 ## 饼图
-
 
 ```python
 from pyecharts.charts import Pie
@@ -100,13 +84,9 @@ import pyecharts.options as opts
 from pyecharts.faker import Faker 
 ```
 
-
 ```python
 list(zip(Faker.choose(),Faker.values()))
 ```
-
-
-
 
     [('河马', 139),
      ('蟒蛇', 41),
@@ -115,9 +95,6 @@ list(zip(Faker.choose(),Faker.values()))
      ('兔子', 80),
      ('熊猫', 47),
      ('狮子', 147)]
-
-
-
 
 ```python
 c = Pie()
@@ -145,19 +122,12 @@ c.render_notebook()
 
 ## 玫瑰图
 
-
 ```python
 v = Faker.choose()
 v
 ```
 
-
-
-
     ['河马', '蟒蛇', '老虎', '大象', '兔子', '熊猫', '狮子']
-
-
-
 
 ```python
 c = (
@@ -186,11 +156,9 @@ c.render_notebook()
 
 ## 柱形图
 
-
 ```python
 from pyecharts.charts import Bar
 ```
-
 
 ```python
 c=(
@@ -228,14 +196,11 @@ c.render_notebook()
 
 ![img6](/images/in-post/post_pyecharts/bar_3.png)
 
-
 ## 执行JS代码
-
 
 ```python
 from pyecharts.commons.utils import JsCode
 ```
-
 
 ```python
 c=(
@@ -266,9 +231,7 @@ c.render_notebook()
 
 ![img7](/images/in-post/post_pyecharts/js.png)
 
-
 ## 堆叠柱状图
-
 
 ```python
 c=(
@@ -297,9 +260,7 @@ c.render_notebook()
 ```
 ![img8](/images/in-post/post_pyecharts/stack_bar.png)
 
-
 ## 条形图
-
 
 ```python
 c=(
@@ -324,7 +285,6 @@ c.render_notebook()
 
 不同系列柱子之间的距离
 
-
 ```python
 c=(
     Bar()
@@ -341,9 +301,7 @@ c.render_notebook()
 
 ![img10](/images/in-post/post_pyecharts/bar_5.png)
 
-
 ## 单系列柱子之间的间距
-
 
 ```python
 c=(
@@ -360,9 +318,7 @@ c.render_notebook()
 
 ![img11](/images/in-post/post_pyecharts/bar_6.png)
 
-
 ## JsCode自定义柱颜色
-
 
 ```python
 color_func="""
@@ -406,12 +362,10 @@ c.render_notebook()
 
 ## 象形柱状图
 
-
 ```python
 from pyecharts.charts import PictorialBar
 from pyecharts.globals import SymbolType
 ```
-
 
 ```python
 location = ['山西','四川','西藏','北京','上海','内蒙古','云南','黑龙江','广东','福建']
@@ -448,17 +402,14 @@ c.render_notebook()
 
 ## 雷达图
 
-
 ```python
 from pyecharts.charts import Radar
 ```
-
 
 ```python
 v1 = [[4300,10000,28000,35000,50000,19000]]
 v2 = [[5000,14000,28000,31000,42000,21000]]
 ```
-
 
 ```python
 c=(
@@ -485,14 +436,11 @@ c.render_notebook()
 ```
 ![img14](/images/in-post/post_pyecharts/radar.png)
 
-
 ## 折线图
-
 
 ```python
 from pyecharts.charts import Line
 ```
-
 
 ```python
 c=(
@@ -523,7 +471,6 @@ c.render_notebook()
 ```
 
 ![img15](/images/in-post/post_pyecharts/line.png)
-
 
 ```python
 c=(
@@ -572,9 +519,7 @@ c.render_notebook()
 ```
 ![img16](/images/in-post/post_pyecharts/line_2.png)
 
-
 ## 面积图
-
 
 ```python
 c=(
@@ -596,9 +541,7 @@ c.render_notebook()
 ```
 ![img17](/images/in-post/post_pyecharts/line_3.png)
 
-
 ## 堆叠面积图
-
 
 ```python
 c=(
@@ -642,14 +585,11 @@ c.render_notebook()
 
 ![img18](/images/in-post/post_pyecharts/line_4.png)
 
-
 ## 散点图
-
 
 ```python
 from pyecharts.charts import Scatter
 ```
-
 
 ```python
 data=[
@@ -667,11 +607,9 @@ data=[
 ]
 ```
 
-
 ```python
 data.sort(key=lambda x: x[0])
 ```
-
 
 ```python
 x_data = [d[0] for d in data]
@@ -679,14 +617,9 @@ y_data = [d[1] for d in data]
 display(x_data,y_data)
 ```
 
-
     [4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0]
 
-
-
     [4.26, 5.68, 7.24, 4.82, 6.95, 8.81, 8.04, 8.33, 10.84, 7.58, 9.96]
-
-
 
 ```python
 c=(
@@ -713,16 +646,12 @@ c.render_notebook()
 
 ![img19](/images/in-post/post_pyecharts/scatter.png)
 
-
-
 ## 涟漪散点图
-
 
 ```python
 from pyecharts.charts import EffectScatter
 from pyecharts.globals import SymbolType
 ```
-
 
 ```python
 c=(
@@ -751,11 +680,9 @@ from pyecharts.charts import HeatMap
 import random
 ```
 
-
 ```python
 value = [[i,j,random.randint(0,100)] for i in range(24) for j in range(7)]
 ```
-
 
 ```python
 c=(
@@ -773,51 +700,34 @@ c.render_notebook()
 
 ![img21](/images/in-post/post_pyecharts/heat.png)
 
-
 ## 日历图
-
 
 ```python
 from pyecharts.charts import Calendar
 import datetime
 ```
 
-
 ```python
 begin = datetime.date(2023,1,1)
 end = datetime.date(2024,1,1)
 ```
 
-
 ```python
 (end-begin).days
 ```
 
-
-
-
     365
-
-
-
 
 ```python
 data = [[str(begin+datetime.timedelta(days=i)),random.randint(1000,25000)] 
         for i in range((end-begin).days)]
 ```
 
-
 ```python
 data[0],data[-1]
 ```
 
-
-
-
     (['2023-01-01', 4652], ['2023-12-31', 15378])
-
-
-
 
 ```python
 c = (
@@ -848,11 +758,9 @@ c.render_notebook()
 ```
 ![img22](/images/in-post/post_pyecharts/calendar.png)
 
-
 ```python
 from pyecharts.charts import Boxplot
 ```
-
 
 ```python
 v1 = [
@@ -867,7 +775,6 @@ v2 = [
 
 ## 箱型图
 
-
 ```python
 c=Boxplot()
 c.add_xaxis(['demo1','demo2'])
@@ -877,14 +784,11 @@ c.render_notebook()
 ```
 ![img23](/images/in-post/post_pyecharts/box.png)
 
-
 ## 词云图
-
 
 ```python
 from pyecharts.charts import WordCloud
 ```
-
 
 ```python
 # wordcloud = (
@@ -897,18 +801,13 @@ from pyecharts.charts import WordCloud
 
 ## 漏斗图
 
-
 ```python
 from pyecharts.charts import Funnel
 ```
 
-
 ```python
 [list(i) for i in zip(Faker.choose(),Faker.values())]
 ```
-
-
-
 
     [['小米', 22],
      ['三星', 81],
@@ -917,9 +816,6 @@ from pyecharts.charts import Funnel
      ['魅族', 55],
      ['VIVO', 124],
      ['OPPO', 40]]
-
-
-
 
 ```python
 c=(
@@ -933,16 +829,12 @@ c.render_notebook()
 ```
 ![img24](/images/in-post/post_pyecharts/funnel.png)
 
-
-
-
 ```python
 x_data=['访问','点击','咨询','加购','下单']
 y_data=[100,80,60,40,20]
 
 data=[[x_data[i],y_data[i]] for i in range(len(x_data))]
 ```
-
 
 ```python
 c=(
@@ -971,19 +863,15 @@ c.render_notebook()
 ```
 ![img25](/images/in-post/post_pyecharts/funnel_2.png)
 
-
 ## 极坐标图
-
 
 ```python
 from pyecharts.charts import Polar
 ```
 
-
 ```python
 data=[(i,random.randint(1,100)) for i in range(100)] 
 ```
-
 
 ```python
 c=(
@@ -1011,7 +899,6 @@ c.render_notebook()
 
 ![img26](/images/in-post/post_pyecharts/polar.png)
 
-
 ```python
 c=(
     Polar()
@@ -1031,7 +918,6 @@ c.render_notebook()
 ```
 
 ![img27](/images/in-post/post_pyecharts/polar_2.png)
-
 
 ```python
 c=(
@@ -1061,11 +947,9 @@ c.render_notebook()
 
 ## 水球图
 
-
 ```python
 from pyecharts.charts import Liquid
 ```
-
 
 ```python
 # c =(
@@ -1078,11 +962,9 @@ from pyecharts.charts import Liquid
 
 ## 桑基图
 
-
 ```python
 from pyecharts.charts import Sankey
 ```
-
 
 ```python
 nodes = [
@@ -1103,7 +985,6 @@ links=[
     {'source':'c6','target':'c7','value':60},
 ]
 ```
-
 
 ```python
 c=(

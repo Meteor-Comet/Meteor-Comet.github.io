@@ -12,32 +12,11 @@ draft: false
 
 # 工业控制核心：S7.Net 与固高/雷赛运动控制卡全景实战
 
-
-
-
-
-
-
-
-
 在现代上位机开发（无论是老牌的 WinForm 还是现代化的 WPF）中，工控软件工程师往往需要面对两大类核心硬件：**PLC（可编程逻辑控制器，主要管逻辑与低速IO）** 与 **运动控制卡（主要管伺服电机的高速、高精度位移）**。
 
 本文将摒弃空洞的理论，直接切入核心：为你全景展现如何通过 C# 与 西门子 PLC（借助 S7netplus）、固高科技 (Googol) 控制卡、雷赛智能 (Leadshine) 控制卡进行深度通讯与控制。每一段代码、每一个 API 我们都会掰开揉碎地讲解其参数含义与使用流程。
 
 ---
-
-
-<details open class="in-post-toc-card border border-neutral-200/80 dark:border-neutral-700/80 rounded-xl p-4 my-4 bg-neutral-50/50 dark:bg-neutral-800/30">
-<summary class="font-bold text-base cursor-pointer select-none text-neutral-800 dark:text-neutral-200 flex items-center justify-between outline-none">
-<span>📑 本文目录（点击收起 / 展开）</span>
-</summary>
-
-<div class="max-h-72 overflow-y-auto mt-3 pt-2 border-t border-neutral-200/60 dark:border-neutral-700/60 hide-scrollbar">
-
-
-
-</div>
-</details>
 
 
 ## 目录

@@ -12,35 +12,13 @@ draft: false
 
 # ASP.NET Core 企业级 Web API 深度全景指南
 
-
-
-
-
-
-
-
-
 在现代工业物联网（IIoT）与企业级应用中，ASP.NET Core 凭借其卓越的性能与灵活的架构，已成为构建“服务端大脑”的首选。本文将作为一份高密度的技术参考手册，从启动基石到底层通信，全方位解析 Web API 的核心机制与生产实践。
 
 ---
 
 ### 文章目录
 
-
 ---
-
-
-<details open class="in-post-toc-card border border-neutral-200/80 dark:border-neutral-700/80 rounded-xl p-4 my-4 bg-neutral-50/50 dark:bg-neutral-800/30">
-<summary class="font-bold text-base cursor-pointer select-none text-neutral-800 dark:text-neutral-200 flex items-center justify-between outline-none">
-<span>📑 本文目录（点击收起 / 展开）</span>
-</summary>
-
-<div class="max-h-72 overflow-y-auto mt-3 pt-2 border-t border-neutral-200/60 dark:border-neutral-700/60 hide-scrollbar">
-
-
-
-</div>
-</details>
 
 
 ## 目录

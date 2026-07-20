@@ -12,31 +12,11 @@ draft: false
 
 # 工业级通信全栈指南：从串口硬件报文到 TCP Socket 高并发架构
 
-
-
-
-
-
-
-
 在现代上位机软件（如基于 C#/WPF/Avalonia/WinForm 的设备网关或智控总控终端）开发体系中，工业互联往往是研发实战架构的重中之重。开发者不仅需要与最底层的电气硬件（如单片机、PLC、各类传感器等）通过**本地串口通信（如 RS-232 / RS-485）**进行原始数据交换，更要在系统升维后，构建出能承托成千上万节点交互的 **TCP Socket 广域网传输引擎集群**。
 
 许多高级应用架构师虽然能够搭建出完善的前端框架，但在对接底层物理总线和网络基建时，面对“高低位重组、Hex与ASCII解析、CRC校验”乃至高并发环境下的“半开TCP连接、通信粘包、非线程安全集合修改错位”等底层情况时，可能仍会遇到不小的挑战。本文将从串行通信与位运算的基础原点切入，跨越 `NModbus4` 通信中间件的业务模型，最终结合 ISO 七层参考模型引入并下探企业级的 C# 异步 TCP/IP Socket 并发编程原理及注意事项。
 
 ---
-
-
-<details open class="in-post-toc-card border border-neutral-200/80 dark:border-neutral-700/80 rounded-xl p-4 my-4 bg-neutral-50/50 dark:bg-neutral-800/30">
-<summary class="font-bold text-base cursor-pointer select-none text-neutral-800 dark:text-neutral-200 flex items-center justify-between outline-none">
-<span>📑 本文目录（点击收起 / 展开）</span>
-</summary>
-
-<div class="max-h-72 overflow-y-auto mt-3 pt-2 border-t border-neutral-200/60 dark:border-neutral-700/60 hide-scrollbar">
-
-
-
-</div>
-</details>
 
 
 ## 目录
@@ -345,7 +325,7 @@ public static class CrcTool
 
     /// <summary>
     /// 核心方法：为数据帧生成并追加双字节通信校验码
-    /// </summary>
+    /// 
     public static byte[] AppendCrc16(byte[] frameWithoutCrc)
     {
         // 步骤1：初始化寄存器缓冲值（Modbus 约定为 0xFFFF）
@@ -2499,7 +2479,6 @@ udp.Send(data, data.Length);
 ---
 
 ### 总结
-
 
 *   **入门级**：会写 `Connect`、`Send`、`Receive`，知道用 `byte[]` 互传数据通信。
 *   **进阶级（以往的水平）**：知道判断 `Receive` 为 0 时为正常断开情况，知道用 `try-catch` 捕获异常反馈信息，知道利用分割符（如 `\n`）简单处理粘包情境。

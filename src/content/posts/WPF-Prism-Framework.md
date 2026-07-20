@@ -12,27 +12,7 @@ draft: false
 
 # 主要内容：WPF Prism框架
 
-
-
-
-
-
-
-
 ---
-
-
-<details open class="in-post-toc-card border border-neutral-200/80 dark:border-neutral-700/80 rounded-xl p-4 my-4 bg-neutral-50/50 dark:bg-neutral-800/30">
-<summary class="font-bold text-base cursor-pointer select-none text-neutral-800 dark:text-neutral-200 flex items-center justify-between outline-none">
-<span>📑 本文目录（点击收起 / 展开）</span>
-</summary>
-
-<div class="max-h-72 overflow-y-auto mt-3 pt-2 border-t border-neutral-200/60 dark:border-neutral-700/60 hide-scrollbar">
-
-
-
-</div>
-</details>
 
 
 ## 目录
@@ -132,7 +112,7 @@ namespace MyPrismApp
     {
         /// <summary>
         /// 1. 指定应用程序的启动主窗体 (Shell)
-        /// </summary>
+        /// 
         protected override Window CreateShell()
         {
             // 绝对不能用 new MainWindow()！
@@ -143,7 +123,7 @@ namespace MyPrismApp
         /// <summary>
         /// 2. 核心注册方法：在此处统一注册所有业务服务、导航页面和弹窗。
         /// 这是 Prism 实现强解耦的核心，也是各模块互通的基础。
-        /// </summary>
+        /// 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
             // ==============================================
@@ -182,7 +162,7 @@ namespace MyPrismApp
         
         /// <summary>
         /// 3. (可选) 注册/覆盖区域适配器
-        /// </summary>
+        /// 
         protected override void ConfigureRegionAdapterMappings(RegionAdapterMappings regionAdapterMappings)
         {
             base.ConfigureRegionAdapterMappings(regionAdapterMappings);
@@ -192,7 +172,7 @@ namespace MyPrismApp
 
         /// <summary>
         /// 4. (可选) 配置模块化目录 (详情见第8章)
-        /// </summary>
+        /// 
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)
         {
             base.ConfigureModuleCatalog(moduleCatalog);
@@ -219,7 +199,7 @@ public partial class App : PrismApplication
 
     /// <summary>
     /// 拦截壳窗体的初始化过程，执行前置的条件弹窗逻辑（如：登录验证）
-    /// </summary>
+    /// 
     protected override void InitializeShell(Window shell)
     {
         // 此时 CreateShell() 已经执行，但主窗体 shell 还没有被真正 Show() 出来。
@@ -245,7 +225,7 @@ public partial class App : PrismApplication
     /// <summary>
     /// 在容器初始化完毕、且主窗体 Shell 显示之后触发。
     /// 常用来做初始化完成后的首次默认路由跳转。
-    /// </summary>
+    /// 
     protected override void OnInitialized()
     {
         base.OnInitialized();

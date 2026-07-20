@@ -12,19 +12,6 @@ draft: false
 > **免责声明**：本文章内容仅用于个人学习、技术交流与笔记归档使用。
 
 
-<details open class="in-post-toc-card border border-neutral-200/80 dark:border-neutral-700/80 rounded-xl p-4 my-4 bg-neutral-50/50 dark:bg-neutral-800/30">
-<summary class="font-bold text-base cursor-pointer select-none text-neutral-800 dark:text-neutral-200 flex items-center justify-between outline-none">
-<span>📑 本文目录（点击收起 / 展开）</span>
-</summary>
-
-<div class="max-h-72 overflow-y-auto mt-3 pt-2 border-t border-neutral-200/60 dark:border-neutral-700/60 hide-scrollbar">
-
-
-
-</div>
-</details>
-
-
 ## 目录
 
 - [1. 软件框架设计概述](#1-软件框架设计概述)
@@ -1034,7 +1021,6 @@ case (int)步序.等相机数据:
   > * **`CCD光源稳定延时`** (`UserPar.CCD光源稳定延时` / 默认 `1000ms`，上限 `3000ms`, 下限 `0ms`)
   > * **`电批吸料稳定延时`** (`UserPar.电批吸料稳定延时` / 默认 `200ms`，上限 `1000ms`, 下限 `50ms`)
   > 通过上述延时参数的上下限管控（例如：电批吸料稳定延时限制最低 `50ms` 以保证吸附稳定），既保证了机构响应拍率，又实现了防呆保护。
-
 
 * **`mFunction.GetTickCount()`**：
   * **功能**：获取高精度自系统启动以来的毫秒时间戳（Tick 数值），主要用于超时计算。
@@ -2300,7 +2286,6 @@ BoTech 框架在多工站流线型设备开发中，采用了流水线段（Conv
    * **工站唤醒与交付**：工站自身的 `AutoRun()` 状态机在检测到位信号和 `"WAITING_FOR_ASSEMBLY"` 后，将状态机切入工作流程，将 `CustStatus` 设为 `"工作中"` 或 `"处理中"`。工作完成后，工站将 `CustStatus` 修改为 `"ASSEMBLY_COMPLETED"`（装配完成/工作完毕）。
    * **流出与放行**：流水线状态机捕获到 `"ASSEMBLY_COMPLETED"` 后，自动执行降顶升、缩阻挡动作，并开启滚筒电机将产品放行输送至下一段。
 
-
 #### 6.5.1 流线气缸的去代码化与参数化配置实现
 
 在 BoTech 框架中，流水线段的阻挡气缸、顶升气缸等气缸控制，在具体的工站任务中完全实现了**去代码化**。工位任务不需要直接编写操作气缸的代码（如直接调用 `DoSet` 或 `DoReset`），而是将这些控制完全委托给**后台流水线状态机**，并通过 Excel 参数文件进行物理通道的映射绑定。
@@ -2493,7 +2478,6 @@ sequenceDiagram
     Note over Master: 重置定位气缸，进入等下游放行步骤
 ```
 
-
 ### 6.7 典型工序异常处理与故障模拟设计（以扫码与打螺丝为例）
 
 在大型工控系统中，**异步网络通信与高风险执行单元（如相机纠偏、电批拧紧）是异常和报警最高发的区域**。为了保证整机连调的流畅性，并对生产制造中的各项 NG（不良）流程进行验证，BoTech 框架推荐采用**通讯与逻辑解耦、全局仿真注入与全面异常隔离**的设计模式。
@@ -2584,9 +2568,7 @@ mGlobal.mDoReset(电批破真空信号); // 关闭吹气
 3. **动作执行与移动 Try-Catch**：
    伺服轴移动（包含 XY 轴纠偏坐标转换相加）动作，均应封装在带有 `try-catch` 保护的 `安全移动至`（`SafeMoveTo`）方法内。如果 Z 轴未在安全高度、硬件限位触发或计算溢出，软件会捕获异常并返回 `false` 以终止后续动作，确保设备人身安全。
 
-
 ---
-
 
 ### 6.8 脱机空跑（虚拟仿真）实现 SOP
 
@@ -2823,8 +2805,6 @@ if (MotionDll.VirtualMode && MotionDll.ConvVitMode)
 
 ---
 
-
-
 ## 7. ZCM968SOP 控件与方法说明
 
 > 本章内容来自 ZCM968SOP 原文，详细说明各 UI 控件的配置与使用方法。
@@ -2841,7 +2821,6 @@ if (MotionDll.VirtualMode && MotionDll.ConvVitMode)
 > **提示**：点击「在线阅读」可直接在浏览器中打开 PDF，支持全文搜索。如需下载，在 PDF 查看器中右键另存即可。
 
 ---
-
 
 ## 8. Setup_Load.cs 程序启动初始化
 
@@ -3543,6 +3522,5 @@ if (WaitDi(InNo.流线1到位信号, 1))
 | `mMove` | `AbsMove`, `AbsMoveAndDone` | 多轴运动 |
 | `mDoDi` | `WaitDone`, `WaitDi` | IO 等待 |
 | `mSend` | `WaitDone`, `GetData` | 通讯收发 |
-
 
 ---

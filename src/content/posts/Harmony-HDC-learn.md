@@ -21,19 +21,6 @@ HDC主要有三部分组成
 3. `hdc daemon`：daemon部署于OpenHarmony设备端作为守护进程按需运行，负责处理来自client端请求。
 
 
-<details open class="in-post-toc-card border border-neutral-200/80 dark:border-neutral-700/80 rounded-xl p-4 my-4 bg-neutral-50/50 dark:bg-neutral-800/30">
-<summary class="font-bold text-base cursor-pointer select-none text-neutral-800 dark:text-neutral-200 flex items-center justify-between outline-none">
-<span>📑 本文目录（点击收起 / 展开）</span>
-</summary>
-
-<div class="max-h-72 overflow-y-auto mt-3 pt-2 border-t border-neutral-200/60 dark:border-neutral-700/60 hide-scrollbar">
-
-
-
-</div>
-</details>
-
-
 ## 目录
 
 - [HDC安装](#hdc安装)
@@ -143,8 +130,6 @@ HDC主要有三部分组成
     > DevEco Studio下载：%HM_SDK_HOME%\版本号\toolchains
   
 
-
-
 ## 目录
 
 - [HDC安装](#hdc安装)
@@ -232,8 +217,6 @@ HDC主要有三部分组成
 ```
 hdc -v
 ```
-
-
 
 也可以自行编译安装：参考鸿蒙官方gitee文档
 
@@ -386,9 +369,7 @@ x86_64
 ```
 $ hdc shell hidumper -s RenderService -a screen
 
-
 -------------------------------[ability]-------------------------------
-
 
 ----------------------------------RenderService----------------------------------
 -- ScreenInfo
@@ -448,7 +429,6 @@ $ hdc shell hidumper -s BatteryService -a -i
 
 -------------------------------[ability]-------------------------------
 
-
 ----------------------------------BatteryService----------------------------------
 Current time: 2024-10-30 20:32:06.695
 capacity: 100
@@ -474,7 +454,6 @@ chargeType: 0
 $ hdc shell hidumper -s DisplayManagerService -a -a
 
 -------------------------------[ability]-------------------------------
-
 
 ----------------------------------DisplayManagerService----------------------------------
 -------------- DMS FREEZED PID LIST  --------------
@@ -557,7 +536,6 @@ DefaultDeviceRotationOffset   270
 $ hdc shell hidumper -s DisplayManagerService -a -a
 
 -------------------------------[ability]-------------------------------
-
 
 ----------------------------------DisplayManagerService----------------------------------
 -------------- DMS FREEZED PID LIST  --------------
@@ -648,7 +626,6 @@ $ hdc shell hidumper -s PowerManagerService -a -s
 
 -------------------------------[ability]-------------------------------
 
-
 ----------------------------------PowerManagerService----------------------------------
 POWER STATE DUMP:
 Current State: DIM  Reason: 1  Time: 2929230
@@ -711,7 +688,6 @@ $ hdc shell hidumper -s NetConnManager
 
 -------------------------------[ability]-------------------------------
 
-
 ----------------------------------NetConnManager----------------------------------
 Net connect Info:
         SupplierId: 1003
@@ -736,7 +712,6 @@ Dns result Info:
 $ hdc shell hidumper -s WifiDevice
 
 -------------------------------[ability]-------------------------------
-
 
 ----------------------------------WifiDevice----------------------------------
 WiFi active state: activated
@@ -1207,7 +1182,6 @@ $ hdc shell uitest screenCap
 // 默认存储路径：/data/local/tmp，文件名：时间戳 + .png。
 ScreenCap saved to /data/local/tmp/screenCap_757158519.png
 
-
 $ hdc shell uitest screenCap -p /data/local/tmp/1.png
 // 指定存储路径和文件名。
 ScreenCap saved to /data/local/tmp/1.png
@@ -1218,7 +1192,6 @@ ScreenCap saved to /data/local/tmp/1.png
 ```
 $ hdc shell snapshot_display -f /data/local/tmp/2.jpeg
 // 截图完成后可以通过 hdc file recv 命令导入到本地
-
 
 process: display 0: width 1260, height 2720
 snapshot: pixel format is: 3
@@ -1527,7 +1500,6 @@ Querying logs options:
 The first layer options can't be used in combination, ILLEGAL expamples:
     hilog -S -s; hilog -w start -r; hilog -p on -k on -b D
 
-
 Domain description:
   Log type "core" & "init" are used for OS subsystems, the range is [0xd000000,  0xd0fffff]
   Log type "app" is used for applications, the range is [0x0,  0xffff]
@@ -1535,7 +1507,6 @@ Domain description:
   So if user wants to use -D option to filter OS logs, user should add 0xD0 as prefix to the printed domain:
   Exapmle: hilog -D 0xD0xxxxx
   The xxxxx is the domain string printed in logs.
-
 
 Dictionary description:
 -d <path>, --dictionary=<path>
@@ -1547,7 +1518,6 @@ Dictionary description:
 
 ```
 $ hdc file recv data/log/hilog/ ./
-
 
 FileTransfer finish, Size:18754808, File count = 42, time:646ms rate:29032.21kB/s
 ```
@@ -1641,7 +1611,6 @@ $ hdc shell hidumper -s RenderService
 
 -------------------------------[ability]-------------------------------
 
-
 ----------------------------------RenderService----------------------------------
 ------Graphic2D--RenderSerice ------
 Usage:
@@ -1676,7 +1645,6 @@ $ hdc shell hidumper -s RenderService -a screen
 
 -------------------------------[ability]-------------------------------
 
-
 ----------------------------------RenderService----------------------------------
 -- ScreenInfo
 screen[0]: id=0, powerstatus=POWER_STATUS_ON, backlight=1, screenType=EXTERNAL_TYPE, render size: 1260x2720, physical screen resolution: 1260x2720, isvirtual=false, skipFrameInterval_:
@@ -1702,7 +1670,6 @@ $ hidumper -s RenderService -a "composer fps"
 #不知道为什么都是零
 
 -------------------------------[ability]-------------------------------
-
 
 ----------------------------------RenderService----------------------------------
 
@@ -1732,7 +1699,6 @@ The fps of screen [Id:0] is:
 $ hdc shell hidumper -s DisplayManagerService
 
 -------------------------------[ability]-------------------------------
-
 
 ----------------------------------DisplayManagerService----------------------------------
 -------------- DMS FREEZED PID LIST  --------------
@@ -1772,7 +1738,6 @@ $ hdc shell hidumper -s PowerManagerService
 
 -------------------------------[ability]-------------------------------
 
-
 ----------------------------------PowerManagerService----------------------------------
 Power manager dump options:
   [-h] [-runninglock]
@@ -1798,7 +1763,6 @@ $ hdc shell hidumper -s BatteryService
 
 -------------------------------[ability]-------------------------------
 
-
 ----------------------------------BatteryService----------------------------------
 Usage:
       -h: dump help
@@ -1818,7 +1782,6 @@ $ hdc shell hidumper -s BatteryService -a -i
 $ hdc shell hidumper -s NetConnManager
 
 -------------------------------[ability]-------------------------------
-
 
 ----------------------------------NetConnManager----------------------------------
 Net connect Info:

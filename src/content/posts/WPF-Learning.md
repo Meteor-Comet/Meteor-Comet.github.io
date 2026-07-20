@@ -13,19 +13,6 @@ draft: false
 # WPF 全面指南
 
 
-<details open class="in-post-toc-card border border-neutral-200/80 dark:border-neutral-700/80 rounded-xl p-4 my-4 bg-neutral-50/50 dark:bg-neutral-800/30">
-<summary class="font-bold text-base cursor-pointer select-none text-neutral-800 dark:text-neutral-200 flex items-center justify-between outline-none">
-<span>📑 本文目录（点击收起 / 展开）</span>
-</summary>
-
-<div class="max-h-72 overflow-y-auto mt-3 pt-2 border-t border-neutral-200/60 dark:border-neutral-700/60 hide-scrollbar">
-
-
-
-</div>
-</details>
-
-
 ## 目录
 
   - [WPF MVVM 架构数据流向图](#wpf-mvvm-架构数据流向图)
@@ -2722,7 +2709,7 @@ namespace WpfApp1.Utils;
 /// <summary>
 /// 窗口注册器，用于在 MVVM 架构中管理 ViewModel 和 View(Window) 的映射关系，并提供打开窗口的方法。
 /// 配合 Microsoft.Extensions.DependencyInjection (DI) 容器结合使用。
-/// </summary>
+/// 
 public class WindowRegister
 {
     private static IServiceProvider _serviceProvider;
@@ -2731,7 +2718,7 @@ public class WindowRegister
 
     /// <summary>
     /// ① 自动扫描装配：通过反射扫描所有标有 [RegisterViewModel] 的 View，并将对应的 VM和视图批量丢入 DI 容器。
-    /// </summary>
+    /// 
     public static void AddWindowsFromAssembly(IServiceCollection services, Assembly assembly)
     {
         var types = assembly.GetTypes();
@@ -2760,7 +2747,7 @@ public class WindowRegister
 
     /// <summary>
     /// 初始化：在 App 启动时将全局 DI 供应商注入进来。
-    /// </summary>
+    /// 
     public static void Initialize(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
@@ -2768,7 +2755,7 @@ public class WindowRegister
 
     /// <summary>
     /// ② 核心跳转逻辑：只认 ViewModel，绝对不碰 View 实现代码，强制解耦。
-    /// </summary>
+    /// 
     public static void ShowWindow<TViewModel>()
     {
         if (_serviceProvider == null)
@@ -2803,7 +2790,7 @@ public class WindowRegister
 
     /// <summary>
     /// ③ 保驾护航的灵魂：自动内存清理 (Dispose) 防止瞬态对象堆积爆内存
-    /// </summary>
+    /// 
     private static void AttachDisposeToWindow(Window window)
     {
         window.Closed += (sender, e) =>
@@ -3202,7 +3189,6 @@ _db.Deleteable<UserEntity>().In(idsToDelete).ExecuteCommand();
 _db.Deleteable<UserEntity>().Where(it => it.Name == "Test").ExecuteCommand();
 ```
 
-
 ---
 
 ## 16. 全球性能第一的微型 ORM：Dapper 全场景 API 使用大全
@@ -3477,7 +3463,6 @@ public async Task<List<DepartmentEntity>> GetDeptsWithHugeUsers()
 }
 ```
 
-
 ### 16.3 与 WPF 及现代依赖注入 (DI) 的彻底融合
 
 在上一章的 `WPF App.xaml.cs` 构建中，我们不需要去像 EFCore 那样注册一个巨大的 `DbContext`。对于 Dapper，我们只需要把最底层的原生发动机 **`IDbConnection`** 交给容器。
@@ -3566,7 +3551,6 @@ public class UserService : IUserService
 *   所有涉及到百万级别长时耗大数据展现渲染统计表格、超复杂三十张表关联汇总的大数据报表 (`Query`)：纯手写最高效精妙的大范围 SQL，用 **Dapper** 去 `QueryMultiple` 直接闪电抽拉带走结果。
 
 把这套组合拳打在 WPF 和依赖注入系统中，这个桌面应用的框架底层就算是彻底无懈可击了。
-
 
 ---
 

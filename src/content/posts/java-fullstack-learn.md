@@ -13,19 +13,6 @@ draft: false
 # JavaSE学习日志
 
 
-<details open class="in-post-toc-card border border-neutral-200/80 dark:border-neutral-700/80 rounded-xl p-4 my-4 bg-neutral-50/50 dark:bg-neutral-800/30">
-<summary class="font-bold text-base cursor-pointer select-none text-neutral-800 dark:text-neutral-200 flex items-center justify-between outline-none">
-<span>📑 本文目录（点击收起 / 展开）</span>
-</summary>
-
-<div class="max-h-72 overflow-y-auto mt-3 pt-2 border-t border-neutral-200/60 dark:border-neutral-700/60 hide-scrollbar">
-
-
-
-</div>
-</details>
-
-
 ## 目录
 
   - [学习目标](#学习目标)
@@ -324,7 +311,6 @@ draft: false
   枚举类型。
 - **default**  
   用于switch语句的默认分支，或接口的默认方法实现。
-
 
 ## 3. Java中的字面量分类
 
@@ -5242,8 +5228,6 @@ public class Test {
 ### 31.5 多态中成员变量与成员方法的调用机制
 
 多态中成员变量和成员方法的调用行为存在重要差异，理解这些差异有助于正确使用多态特性。
-
-
 
 ### 32. 抽象类与抽象方法
 

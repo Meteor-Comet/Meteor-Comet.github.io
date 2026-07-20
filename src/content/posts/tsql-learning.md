@@ -12,32 +12,11 @@ draft: false
 
 # SQL Server 与 T-SQL 深度学习笔记与实战记录
 
-
-
-
-
-
-
-
-
 无论你是刚刚接触数据库的新手，还是想要系统复习 T-SQL 及高级特性（如：复杂联表、窗口函数、存储过程调优、事务全隔离级别并发、游标细节、各类锁机制等）的开发者，这份学习笔记都能为你提供一条从入门到骨灰级的清晰路径。全篇几乎囊括了所有后端研发必考必用的核心知识点。
 
 ## 万字高阶目录
 
 ---
-
-
-<details open class="in-post-toc-card border border-neutral-200/80 dark:border-neutral-700/80 rounded-xl p-4 my-4 bg-neutral-50/50 dark:bg-neutral-800/30">
-<summary class="font-bold text-base cursor-pointer select-none text-neutral-800 dark:text-neutral-200 flex items-center justify-between outline-none">
-<span>📑 本文目录（点击收起 / 展开）</span>
-</summary>
-
-<div class="max-h-72 overflow-y-auto mt-3 pt-2 border-t border-neutral-200/60 dark:border-neutral-700/60 hide-scrollbar">
-
-
-
-</div>
-</details>
 
 
 ## 目录
@@ -774,7 +753,6 @@ ON Employee (Email ASC, DeptId DESC);
 -- 这句话查询立马变得顺滑：
 -- SELECT * FROM Employee WHERE Email = 'jack@exp.net' AND DeptId = 5;
 ```
-
 
 ### 10.3 “覆盖索引术” (Covering Index) (防 Lookup 原大表回表绝杀技)
 假如有个 API，它经常查邮箱只求一并带出它的电话。但由于我只建了一个只包含单独邮件这一条树分支的小日记表索引。上面提到我要去翻那本原体大书（去发费极度高昂磁盘消耗利用 `Key Lookup` 去原表查出附加电话字段）。

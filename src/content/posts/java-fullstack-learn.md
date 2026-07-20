@@ -12,6 +12,13 @@ draft: false
 
 # JavaSE学习日志
 
+<details open class="in-post-toc-card border border-neutral-200/80 dark:border-neutral-700/80 rounded-xl p-4 my-4 bg-neutral-50/50 dark:bg-neutral-800/30">
+<summary class="font-bold text-base cursor-pointer select-none text-neutral-800 dark:text-neutral-200 flex items-center justify-between outline-none">
+📑 本文目录（点击收起 / 展开）
+</summary>
+
+<div class="max-h-72 overflow-y-auto mt-3 pt-2 border-t border-neutral-200/60 dark:border-neutral-700/60 hide-scrollbar">
+
 ## 目录
 
   - [学习目标](#学习目标)
@@ -208,6 +215,9 @@ draft: false
   - [18. final 关键词的作用与用法](#18-final-关键词的作用与用法)
   - [19. Java 常量（Constant）的定义与使用](#19-java-常量constant的定义与使用)
   - [20. Java 字符串（String）是否不可变及原理](#20-java-字符串string是否不可变及原理)
+
+</div>
+</details>
 
 ### 学习目标
 - 夯实Java基础，掌握面向对象编程思想

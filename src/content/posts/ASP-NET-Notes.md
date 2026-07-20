@@ -20,6 +20,13 @@ draft: false
 
 ---
 
+<details open class="in-post-toc-card border border-neutral-200/80 dark:border-neutral-700/80 rounded-xl p-4 my-4 bg-neutral-50/50 dark:bg-neutral-800/30">
+<summary class="font-bold text-base cursor-pointer select-none text-neutral-800 dark:text-neutral-200 flex items-center justify-between outline-none">
+📑 本文目录（点击收起 / 展开）
+</summary>
+
+<div class="max-h-72 overflow-y-auto mt-3 pt-2 border-t border-neutral-200/60 dark:border-neutral-700/60 hide-scrollbar">
+
 ## 目录
 
 - [一、 架构基石：启动引导、DI 与管道流转](#一-架构基石启动引导di-与管道流转)
@@ -46,6 +53,9 @@ draft: false
   - [6.3 核心引擎：SendAsync 与 HttpRequestMessage 手动构造](#63-核心引擎sendasync-与-httprequestmessage-手动构造)
   - [6.4 内容载体：HttpContent 深度解析 (JSON, Multipart, Stream)](#64-内容载体httpcontent-深度解析-json-multipart-stream)
   - [6.5 弹性控制：CancellationToken 与 CompletionOption 内存优化](#65-弹性控制cancellationtoken-与-completionoption-内存优化)
+
+</div>
+</details>
 
 ## 一、 架构基石：启动引导、DI 与管道流转
 

@@ -19,6 +19,13 @@ draft: false
 
 ---
 
+<details open class="in-post-toc-card border border-neutral-200/80 dark:border-neutral-700/80 rounded-xl p-4 my-4 bg-neutral-50/50 dark:bg-neutral-800/30">
+<summary class="font-bold text-base cursor-pointer select-none text-neutral-800 dark:text-neutral-200 flex items-center justify-between outline-none">
+📑 本文目录（点击收起 / 展开）
+</summary>
+
+<div class="max-h-72 overflow-y-auto mt-3 pt-2 border-t border-neutral-200/60 dark:border-neutral-700/60 hide-scrollbar">
+
 ## 目录
 
 - [一、工控机与核心控制系统](#一工控机与核心控制系统)
@@ -107,6 +114,9 @@ draft: false
   - [12.6 附录：接线BOM详解（线材/电源/继电器/IO补充）](#126-附录接线bom详解线材电源继电器io补充)
   - [12.7 线材分类选型与 BOM 对应关系（7 类法）](#127-线材分类选型与-bom-对应关系7-类法)
 - [十三、附录：整机电气 BOM 速查表](#十三附录整机电气-bom-速查表)
+
+</div>
+</details>
 
 ## 一、工控机与核心控制系统
 

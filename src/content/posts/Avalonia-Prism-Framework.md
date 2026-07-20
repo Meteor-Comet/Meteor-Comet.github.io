@@ -19,6 +19,13 @@ draft: false
 
 ---
 
+<details open class="in-post-toc-card border border-neutral-200/80 dark:border-neutral-700/80 rounded-xl p-4 my-4 bg-neutral-50/50 dark:bg-neutral-800/30">
+<summary class="font-bold text-base cursor-pointer select-none text-neutral-800 dark:text-neutral-200 flex items-center justify-between outline-none">
+📑 本文目录（点击收起 / 展开）
+</summary>
+
+<div class="max-h-72 overflow-y-auto mt-3 pt-2 border-t border-neutral-200/60 dark:border-neutral-700/60 hide-scrollbar">
+
 ## 目录
 
 - [一、 为什么 Avalonia 官方原生拥抱 ReactiveUI？](#一-为什么-avalonia-官方原生拥抱-reactiveui)
@@ -37,6 +44,9 @@ draft: false
   - [3.6 事件聚合器 (EventAggregator) 的极致运用](#36-事件聚合器-eventaggregator-的极致运用)
   - [3.7 进阶架构解耦：模块化应用树 (Modularity)](#37-进阶架构解耦模块化应用树-modularity)
 - [四、 总结：从轻量跨平台到重工业巨构的进阶法则](#四-总结从轻量跨平台到重工业巨构的进阶法则)
+
+</div>
+</details>
 
 ## 一、 为什么 Avalonia 官方原生拥抱 ReactiveUI？
 

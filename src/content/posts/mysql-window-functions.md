@@ -10,6 +10,13 @@ tags:
 draft: false
 ---
 
+<details open class="in-post-toc-card border border-neutral-200/80 dark:border-neutral-700/80 rounded-xl p-4 my-4 bg-neutral-50/50 dark:bg-neutral-800/30">
+<summary class="font-bold text-base cursor-pointer select-none text-neutral-800 dark:text-neutral-200 flex items-center justify-between outline-none">
+📑 本文目录（点击收起 / 展开）
+</summary>
+
+<div class="max-h-72 overflow-y-auto mt-3 pt-2 border-t border-neutral-200/60 dark:border-neutral-700/60 hide-scrollbar">
+
 ## 目录
 
 - [学习目标](#学习目标)
@@ -37,6 +44,9 @@ draft: false
 - [7. 注意事项与性能优化](#7-注意事项与性能优化)
 - [8. 练习题与扩展](#8-练习题与扩展)
 - [总结](#总结)
+
+</div>
+</details>
 
 ## 学习目标
 - 掌握窗口函数的语法与使用场景

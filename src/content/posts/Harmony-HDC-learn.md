@@ -20,6 +20,13 @@ HDC主要有三部分组成
 2. `hdc server`：作为后台进程也运行于电脑上，server管理client和设备端daemon之间通信包括连接的复用、数据通信包的收发，以及个别本地命令的直接处理。
 3. `hdc daemon`：daemon部署于OpenHarmony设备端作为守护进程按需运行，负责处理来自client端请求。
 
+<details open class="in-post-toc-card border border-neutral-200/80 dark:border-neutral-700/80 rounded-xl p-4 my-4 bg-neutral-50/50 dark:bg-neutral-800/30">
+<summary class="font-bold text-base cursor-pointer select-none text-neutral-800 dark:text-neutral-200 flex items-center justify-between outline-none">
+📑 本文目录（点击收起 / 展开）
+</summary>
+
+<div class="max-h-72 overflow-y-auto mt-3 pt-2 border-t border-neutral-200/60 dark:border-neutral-700/60 hide-scrollbar">
+
 ## 目录
 
 - [HDC安装](#hdc安装)
@@ -102,6 +109,9 @@ HDC主要有三部分组成
 - [Instrument Test](#instrument-test)
 - [性能工具](#性能工具)
 - [参考链接](#参考链接)
+
+</div>
+</details>
 
 ## HDC安装
 

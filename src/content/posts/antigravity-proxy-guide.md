@@ -12,6 +12,13 @@ draft: false
 
 # Google Antigravity 代理指南
 
+<details open class="in-post-toc-card border border-neutral-200/80 dark:border-neutral-700/80 rounded-xl p-4 my-4 bg-neutral-50/50 dark:bg-neutral-800/30">
+<summary class="font-bold text-base cursor-pointer select-none text-neutral-800 dark:text-neutral-200 flex items-center justify-between outline-none">
+📑 本文目录（点击收起 / 展开）
+</summary>
+
+<div class="max-h-72 overflow-y-auto mt-3 pt-2 border-t border-neutral-200/60 dark:border-neutral-700/60 hide-scrollbar">
+
 ## 目录
 
 - [前言](#前言)
@@ -37,6 +44,9 @@ draft: false
 - [附录：推荐节点配置](#附录推荐节点配置)
 - [注意事项](#注意事项)
 - [参考资料](#参考资料)
+
+</div>
+</details>
 
 ## 前言
 

@@ -10,6 +10,13 @@ tags:
 draft: false
 ---
 
+<details open class="in-post-toc-card border border-neutral-200/80 dark:border-neutral-700/80 rounded-xl p-4 my-4 bg-neutral-50/50 dark:bg-neutral-800/30">
+<summary class="font-bold text-base cursor-pointer select-none text-neutral-800 dark:text-neutral-200 flex items-center justify-between outline-none">
+📑 本文目录（点击收起 / 展开）
+</summary>
+
+<div class="max-h-72 overflow-y-auto mt-3 pt-2 border-t border-neutral-200/60 dark:border-neutral-700/60 hide-scrollbar">
+
 ## 目录
 
   - [C# 异步编程 (async/await) 状态机转换图](#c-异步编程-asyncawait-状态机转换图)
@@ -123,6 +130,9 @@ draft: false
   - [死锁与竞态条件](#死锁与竞态条件)
   - [多线程最佳实践](#多线程最佳实践)
 - [总结](#总结)
+
+</div>
+</details>
 
 ### C# 异步编程 (async/await) 状态机转换图
 

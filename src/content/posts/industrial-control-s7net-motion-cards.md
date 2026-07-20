@@ -18,6 +18,13 @@ draft: false
 
 ---
 
+<details open class="in-post-toc-card border border-neutral-200/80 dark:border-neutral-700/80 rounded-xl p-4 my-4 bg-neutral-50/50 dark:bg-neutral-800/30">
+<summary class="font-bold text-base cursor-pointer select-none text-neutral-800 dark:text-neutral-200 flex items-center justify-between outline-none">
+📑 本文目录（点击收起 / 展开）
+</summary>
+
+<div class="max-h-72 overflow-y-auto mt-3 pt-2 border-t border-neutral-200/60 dark:border-neutral-700/60 hide-scrollbar">
+
 ## 目录
 
   - [上位机与西门子 PLC 通信架构](#上位机与西门子-plc-通信架构)
@@ -40,6 +47,9 @@ draft: false
   - [4.3 选型决策：什么场景用雷赛，什么场景用固高](#43-选型决策什么场景用雷赛什么场景用固高)
   - [4.4 混合使用的工程实践](#44-混合使用的工程实践)
 - [5. 总结：写给 C# 上位机开发者的"血泪箴言"与最容易踩的坑](#5-总结写给-c-上位机开发者的血泪箴言与最容易踩的坑)
+
+</div>
+</details>
 
 ### 上位机与西门子 PLC 通信架构
 

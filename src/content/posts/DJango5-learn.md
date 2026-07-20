@@ -10,6 +10,13 @@ tags:
 draft: false
 ---
 
+<details open class="in-post-toc-card border border-neutral-200/80 dark:border-neutral-700/80 rounded-xl p-4 my-4 bg-neutral-50/50 dark:bg-neutral-800/30">
+<summary class="font-bold text-base cursor-pointer select-none text-neutral-800 dark:text-neutral-200 flex items-center justify-between outline-none">
+📑 本文目录（点击收起 / 展开）
+</summary>
+
+<div class="max-h-72 overflow-y-auto mt-3 pt-2 border-t border-neutral-200/60 dark:border-neutral-700/60 hide-scrollbar">
+
 ## 目录
 
 - [Django5介绍及安装](#django5介绍及安装)
@@ -73,6 +80,9 @@ draft: false
   - [用户修改密码实现](#用户修改密码实现)
   - [用户注销实现](#用户注销实现)
 - [Django5内置其他高级功能](#django5内置其他高级功能)
+
+</div>
+</details>
 
 ## Django5介绍及安装
 

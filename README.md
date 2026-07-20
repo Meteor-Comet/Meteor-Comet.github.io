@@ -45,10 +45,6 @@ A static blog template built with [Astro](https://astro.build) and [Tailwind CSS
 - **Vite/PostCSS 构建修复**：在 `markdown.css` 中直接内联 `.btn-regular-dark` 类定义，解决生产环境 `pnpm build` 时提示类缺失导致的 Vite CSS 构建错误。
 - **外部链接增强**：标准化 PDF 下载与 SOP 指南表格外链的 `target="_blank"` 属性。
 
-### 5. 🎨 个人配置与标语定制 (`src/config.ts`)
-- 个人简介标语更新为 `花鳥風月`。
-- 配置站点名称、Avatar 头像、Banner 渐变背景及社交链接。
-
 ---
 
 ## 🚀 Getting Started

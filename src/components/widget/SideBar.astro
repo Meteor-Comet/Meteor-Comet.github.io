@@ -3,6 +3,8 @@ import type { MarkdownHeading } from "astro";
 import Categories from "./Categories.astro";
 import Profile from "./Profile.astro";
 import Tag from "./Tags.astro";
+import TOC from "./TOC.astro";
+import { siteConfig } from "../../config";
 
 interface Props {
 	class?: string;
@@ -10,6 +12,8 @@ interface Props {
 }
 
 const className = Astro.props.class;
+const { headings = [] } = Astro.props;
+const hasHeadings = headings && headings.length > 0;
 ---
 <div id="sidebar" class:list={[className, "w-full"]}>
     <div class="flex flex-col w-full gap-4 mb-4">
@@ -18,5 +22,15 @@ const className = Astro.props.class;
     <div id="sidebar-sticky" class="transition-all duration-700 flex flex-col w-full gap-4 top-4 sticky top-4">
         <Categories class="onload-animation" style="animation-delay: 150ms"></Categories>
         <Tag class="onload-animation" style="animation-delay: 200ms"></Tag>
+        {siteConfig.toc.enable && hasHeadings && (
+            <div class="card-base p-4 onload-animation" style="animation-delay: 250ms">
+                <div class="font-bold text-lg text-neutral-900 dark:text-neutral-100 mb-2 flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-[var(--primary)]"></span>
+                    文章目录
+                </div>
+                <TOC headings={headings}></TOC>
+            </div>
+        )}
     </div>
 </div>
+

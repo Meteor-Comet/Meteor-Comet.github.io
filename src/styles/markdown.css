@@ -121,6 +121,14 @@
         margin: 1em 0;
     }
 
+    /* Hide legacy markdown in-body TOC heading and list */
+    #目录,
+    #目录 + ul,
+    h2#目录,
+    h2#目录 + ul {
+        display: none !important;
+    }
+
     details.in-post-toc-card {
         summary {
             list-style: none;

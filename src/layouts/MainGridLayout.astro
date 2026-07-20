@@ -109,9 +109,19 @@ const mainPanelTop = siteConfig.banner.enable
         {siteConfig.toc.enable && <div id="toc-wrapper" class:list={["hidden lg:block transition absolute top-0 -right-[var(--toc-width)] w-[var(--toc-width)] items-center",
             {"toc-hide": siteConfig.banner.enable}]}
         >
-            <div id="toc-inner-wrapper" class="fixed top-14 w-[var(--toc-width)] h-[calc(100vh_-_20rem)] overflow-y-scroll overflow-x-hidden hide-scrollbar">
-                <div id="toc" class="w-full h-full transition-swup-fade ">
-                    <div class="h-8 w-full"></div>
+            <div id="toc-inner-wrapper" class="fixed top-14 w-[var(--toc-width)] h-[calc(100vh_-_16rem)] overflow-y-scroll overflow-x-hidden hide-scrollbar">
+                <div id="toc" class="w-full h-full transition-swup-fade">
+                    {headings && headings.length > 0 && (
+                        <div class="flex items-center justify-between px-2 pt-3 pb-2 mb-1 border-b border-neutral-200/50 dark:border-neutral-700/50">
+                            <div class="font-bold text-sm text-neutral-800 dark:text-neutral-200 flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-[var(--primary)]"></span>
+                                文章目录
+                            </div>
+                            <button id="toc-global-toggle" type="button" class="text-xs text-neutral-400 hover:text-[var(--primary)] transition px-1.5 py-0.5 rounded hover:bg-[var(--toc-btn-hover)]">
+                                折叠/展开
+                            </button>
+                        </div>
+                    )}
                     <TOC headings={headings}></TOC>
                     <div class="h-8 w-full"></div>
                 </div>

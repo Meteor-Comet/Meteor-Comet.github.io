@@ -24,7 +24,6 @@ for (const heading of filteredHeadings) {
 }
 
 const className = Astro.props.class;
-const isPostsRoute = Astro.url.pathname.startsWith(url("/posts/"));
 
 const removeTailingHash = (text: string) => {
 	let lastIndexOfHash = text.lastIndexOf("#");
@@ -65,7 +64,6 @@ for (const heading of filteredHeadings) {
 }
 ---
 
-{isPostsRoute && (
 <table-of-contents class:list={[className, "group flex flex-col gap-1 w-full relative"]}>
     {groups.map((group) => {
         const hasChildren = group.children.length > 0;
@@ -102,7 +100,6 @@ for (const heading of filteredHeadings) {
     })}
     <div id="active-indicator" style="opacity: 0" class:list={[{'hidden': filteredHeadings.length == 0}, "-z-10 absolute bg-[var(--toc-btn-hover)] left-0 right-0 rounded-xl transition-all group-hover:bg-transparent border-2 border-[var(--toc-btn-hover)] group-hover:border-[var(--toc-btn-active)] border-dashed"]}></div>
 </table-of-contents>
-)}
 
 <script>
 class TableOfContents extends HTMLElement {
@@ -141,44 +138,34 @@ class TableOfContents extends HTMLElement {
     };
 
     toggleActiveHeading = () => {
-        let activeIdx = -1;
-        for (let i = 0; i < this.active.length; i++) {
-            if (this.active[i]) {
-                activeIdx = i;
-                break;
-            }
+        let i = this.active.length - 1;
+        let min = this.active.length - 1, max = -1;
+        while (i >= 0 && !this.active[i]) {
+            if (this.tocEntries[i]) this.tocEntries[i].classList.remove(this.visibleClass);
+            i--;
         }
-
-        if (activeIdx === -1 && this.tocEntries.length > 0) {
-            for (let i = 0; i < this.sections.length; i++) {
-                if (this.sections[i]) {
-                    let rect = this.sections[i].getBoundingClientRect();
-                    if (rect.top <= 140) {
-                        activeIdx = i;
-                    }
-                }
-            }
-        }
-
-        for (let i = 0; i < this.tocEntries.length; i++) {
+        while (i >= 0 && this.active[i]) {
             if (this.tocEntries[i]) {
-                if (i === activeIdx) {
-                    this.tocEntries[i].classList.add(this.visibleClass);
-                } else {
-                    this.tocEntries[i].classList.remove(this.visibleClass);
-                }
+                this.tocEntries[i].classList.add(this.visibleClass);
             }
+            min = Math.min(min, i);
+            max = Math.max(max, i);
+            i--;
         }
-
-        if (activeIdx === -1 || !this.tocEntries[activeIdx]) {
+        while (i >= 0) {
+            if (this.tocEntries[i]) this.tocEntries[i].classList.remove(this.visibleClass);
+            i--;
+        }
+        if (min > max) {
             this.activeIndicator?.setAttribute("style", `opacity: 0`);
         } else {
             let parentOffset = this.tocEl?.getBoundingClientRect().top || 0;
             let scrollOffset = this.tocEl?.scrollTop || 0;
-            let entryRect = this.tocEntries[activeIdx].getBoundingClientRect();
-            let top = entryRect.top - parentOffset + scrollOffset;
-            let height = entryRect.height;
-            this.activeIndicator?.setAttribute("style", `opacity: 1; top: ${top}px; height: ${height}px`);
+            if (this.tocEntries[min] && this.tocEntries[max]) {
+                let top = this.tocEntries[min].getBoundingClientRect().top - parentOffset + scrollOffset;
+                let bottom = this.tocEntries[max].getBoundingClientRect().bottom - parentOffset + scrollOffset;
+                this.activeIndicator?.setAttribute("style", `top: ${top}px; height: ${bottom - top}px`);
+            }
         }
     };
 
@@ -281,6 +268,7 @@ class TableOfContents extends HTMLElement {
 
         if (this.tocEntries.length === 0) return;
 
+        this.headingIdxMap.clear();
         this.sections = new Array(this.tocEntries.length);
         this.headings = new Array(this.tocEntries.length);
         for (let i = 0; i < this.tocEntries.length; i++) {

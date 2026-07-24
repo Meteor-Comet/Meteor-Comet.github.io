@@ -2,7 +2,7 @@
 title: 运动控制卡技术详解：从芯片架构、算法到多轴闭环实战
 published: 2026-07-24
 description: 运动控制卡（DSP+FPGA）硬件架构、脉冲与 EtherCAT 总线拓扑、S型加减速与前瞻算法、PSO 飞拍与工业应用全景拆解
-image: /images/motion-control-card-guide.jpg
+image: ""
 category: 工业控制
 tags:
   - 运动控制
@@ -32,8 +32,6 @@ draft: false
 ---
 
 ## 2. 运动控制卡的硬件架构全景拆解
-
-![系统架构图](/images/motion-control-arch-cn.jpg)
 
 ### 2.1 主控芯片组合：DSP + FPGA + MCU 黄金三核
 
@@ -82,8 +80,6 @@ draft: false
 ---
 
 ## 4. 运动控制核心算法详解
-
-![加减速曲线对比图](/images/velocity-profile-chart-cn.jpg)
 
 ### 4.1 速度规划算法
 

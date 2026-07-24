@@ -52,6 +52,7 @@ draft: false
   - [4.14 mFunction.State 系统状态枚举](#414-mfunctionstate-系统状态枚举)
   - [4.15 WorkShare 辅助方法](#415-workshare-辅助方法)
   - [4.16 API 速查表（WorkShare 子对象）](#416-api-速查表workshare-子对象)
+  - [4.17 GTMultiAxialMotion 多轴直线插补与协同 API](#417-gtmultiaxialmotion-多轴直线插补与协同-api)
 - [5. 传送带 Conveyor 系统](#5-传送带-conveyor-系统)
   - [5.1 核心设计理念](#51-核心设计理念)
   - [5.2 Conveyor.xml 配置文件](#52-conveyorxml-配置文件)
@@ -424,13 +425,13 @@ double down = mParList[(short)UserPar.RobotSpeed].LimitDown;
 
 在 Check Tab 中配置的布尔开关（`FuncChk`）直接参与 `Tasks` 中的时序控制。典型的屏蔽策略如下：
 
-#### 2.7.1 扫码功能屏蔽 (`Enable_scanning_code` 索引 102)
+#### 2.7.1 扫码功能屏蔽 (`启用扫码` 索引 100)
 在入料扫码站中，若未勾选此功能，则不触发扫码指令，程序自动跳过等待结果状态。
 ```csharp
 case (int)步序.等到位信号:
     if (mGlobal.ReadDi_Bool(InNo.流线1到位信号))
     {
-        if (mParList[(int)FuncChk.Enable_scanning_code].CheckSts)
+        if (mGlobal.FuncCheck(FuncChk.启用扫码)) // 或 mParList[(int)FuncChk.启用扫码].CheckSts
         {
             SetStep(ref StaInfo, (int)步序.电机停扫码, true); // 正常走扫码流程
         }
@@ -443,12 +444,12 @@ case (int)步序.等到位信号:
     break;
 ```
 
-#### 2.7.2 机械手关闭屏蔽 (`Block_leftRobot` 索引 116 / `Block_rightRobot` 索引 117)
-在机械手基类的 `AutoRun()` 起始位置进行拦截。若被屏蔽，则将所有输出复位，当检测到工作启动交互信号后，立刻返回工作完成标志，既不发生任何物理运动，也不阻塞流水线生产。
+#### 2.7.2 机械手关闭屏蔽 (`屏蔽左轴` / `屏蔽右轴`)
+在机械手基类的 `AutoRun()` 起始位置进行拦截。若被屏蔽（如 `mGlobal.FuncCheck(FuncChk.屏蔽左轴)`），则将所有输出复位，当检测到工作启动交互信号后，立刻返回工作完成标志，既不发生任何物理运动，也不阻塞流水线生产。
 ```csharp
 public override void AutoRun()
 {
-    if (是否屏蔽) // 从 Block_leftRobot 或 Block_rightRobot 的 CheckSts 获取
+    if (是否屏蔽) // 从 mGlobal.FuncCheck(FuncChk.屏蔽左轴) 或 FuncChk.屏蔽右轴 获取
     {
         // 1. 安全复位所有物理 DO 输出
         mGlobal.mDoReset(CCD光源触发信号);
@@ -469,13 +470,13 @@ public override void AutoRun()
 }
 ```
 
-#### 2.7.3 相机跳步逻辑 (`Enable_CCD` 索引 104 - 启用相机功能)
+#### 2.7.3 相机跳步逻辑 (`启用左轴相机` / `启用右轴相机` - 启用相机功能)
 用于屏蔽视觉定位，直接以零偏差移至打螺丝点。
 ```csharp
 case (int)步序.等待启动信号:
     if (GetTasksInteraction(启动触发标志, false) == true)
     {
-        if (是否启用相机) // 由 Enable_CCD 启用相机复选框控制
+        if (是否启用相机) // 由 mGlobal.FuncCheck(FuncChk.启用左轴相机) 状态控制
         {
             SetStep(ref StaInfo, (int)步序.移至拍照位置, true);
         }
@@ -1289,18 +1290,6 @@ bool pMove.Pause
 this.pMove.Pause = false;
 ```
 
-#### Pause
-
-```csharp
-bool pMove.Pause
-```
-
-暂停标志。设为 `true` 暂停运动，`false` 恢复。在 `Homing()` 中通常设为 `false`：
-
-```csharp
-this.pMove.Pause = false;
-```
-
 ---
 
 ### 4.4 sMove — 单轴运动（非阻塞）
@@ -1512,18 +1501,6 @@ mSend.WaitDone(
 mSend.WaitDone(
     (int)TCPIP_Port.扫描, 1, “ReadCode”, 1, “ReadCode,OK,”, 5000, true, false
 );
-```
-
-#### mAction
-
-```csharp
-event Action<string, string> mSend.mAction
-```
-
-错误回调事件。在 `Initialize()` 中注册：
-
-```csharp
-mSend.mAction += Err;
 ```
 
 #### mAction
@@ -1781,6 +1758,78 @@ double[] GetPosData(ValueType StaId, ValueType PosIndex)
 | `MotionDll.StopMove(axis, speed)` | 停止轴 | ❌ |
 | `MotionDll.ZSPD(axisId)` | 到位检查 | ❌ |
 | `MotionDll.GetEncMm(axisIndex)` | 读取编码器位置 | ❌ |
+
+---
+
+### 4.17 GTMultiAxialMotion 多轴直线插补与协同 API
+
+在点胶、焊接、轨迹涂胶或双轴多轴同步联动等工业应用场景中，针对轨迹精度要求较高的多轴动作，BoTech 框架在 `4.Assist/8.GTMultiAxialMotion.cs` 中提供了高层封装类 `GTMultiAxialMotion`。它在底层基于固高 (Googol) 控制卡的坐标系映照 (`GTN_SetCrdMapBase`) 与插补指令 (`GTN_LnXY` / `GTN_LnXYZ` / `GTN_LnXYZA`) 实现了多维空间的直线插补与主从轴跟随功能。
+
+#### 4.17.1 AxisPoints 轴点位封装结构
+
+在调用直线插补与轨迹运动方法前，需要先为参与插补的每一个物理/逻辑轴实例化 `AxisPoints` 对象。
+
+* **构造函数原型**：
+  ```csharp
+  public AxisPoints(int axisId, double[] points, double encMm)
+  ```
+* **核心属性说明**：
+  * **`AxisId`**：参与插补的轴编号（如强转 `(int)mAxis.右X`）。
+  * **`Points`**：该轴要依次经过的目标轨迹坐标数组 `double[]`。
+  * **`CurEncMm`**：当前编码器物理位置（单位 mm，一般传入 `MotionDll.GetEncMm(axisId)`）。
+  * **`PPM`** (Pulses Per Millimeter)：根据 `AxisIndex` 自动换算的**每毫米脉冲数**。
+    $$\text{PPM} = \frac{\text{每圈脉冲数} \times \text{齿轮比}}{\text{导程}}$$
+  * **`CurrentPulse`**：高频获取的轴硬件实时脉冲计数值。
+
+#### 4.17.2 多维直线插补 API
+
+##### 1. 二维平面直线插补 (`Line2D`)
+* **原型**：`public static bool Line2D(AxisPoints axis1, AxisPoints axis2, double speed)`
+* **说明**：传入基础轴 `axis1`（其轴号须小于 `axis2`）和目标轴 `axis2`，底层自动配置坐标系映射并按 `speed` 速度合成二维平面直线运动。
+
+##### 2. 三维空间直线插补 (`Line3D`)
+* **原型**：`public static bool Line3D(AxisPoints axis1, AxisPoints axis2, AxisPoints axis3, double speed)`
+* **说明**：控制 3 个轴在 XYZ 三维空间内沿指定多段点位进行高精度的合成直线运动。
+
+##### 3. 四维多轴直线插补 (`Line4D`)
+* **原型**：`public static bool Line4D(AxisPoints axis1, AxisPoints axis2, AxisPoints axis3, AxisPoints axis4, double speed)`
+* **说明**：控制 4 个轴同步执行空间四维直线插补轨迹。
+
+##### 代码调用示例：
+```csharp
+// 1. 构造 X 轴与 Y 轴的多段插补轨迹点位数组
+double[] xPath = new double[] { 100.0, 150.0, 200.0 };
+double[] yPath = new double[] { 50.0,  120.0, 180.0 };
+
+// 2. 实例化 AxisPoints 包装对象（获取当前编码器反馈值）
+AxisPoints pX = new AxisPoints((int)mAxis.右X, xPath, MotionDll.GetEncMm((int)mAxis.右X));
+AxisPoints pY = new AxisPoints((int)mAxis.右Y, yPath, MotionDll.GetEncMm((int)mAxis.右Y));
+
+// 3. 启动二维直线插补运动，插补合成速度设定为 80.0 mm/s
+bool isSuccess = GTMultiAxialMotion.Line2D(pX, pY, 80.0);
+if (isSuccess)
+{
+    AddLog("二维直线插补轨迹运行完成！", LogsType.Auto, StaInfo.StepIdx, true);
+}
+else
+{
+    AddLog("直线插补报错或被中断！", LogsType.ErrorCode, StaInfo.StepIdx, true);
+}
+```
+
+#### 4.17.3 主从轴跟随与电子齿轮协同 API
+
+##### 1. Follow 模式轨迹跟随 (`FollowAxisSetup`)
+* **原型**：`public static bool FollowAxisSetup(int axisidMaster, double masterSegmentStart, double masterSegmentEnd, int axisidSlave, double slaveSegmentStart, double slaveSegmentEnd)`
+* **说明**：配置从轴 `axisidSlave` 跟随主轴 `axisidMaster` 进行轨迹 Follow 模式跟随，在给定起止区间内建立运动同步。
+
+##### 2. 电子齿轮比例协同 (`GearAxisSetup`)
+* **原型**：`public static bool GearAxisSetup(int axisidMaster, double masterSegmentStart, double masterSegmentEnd, int axisidSlave, double slaveSegmentStart, double slaveSegmentEnd)`
+* **说明**：通过主轴与从轴的位移差值自动计算电子齿轮比，使从轴在双向/正向运动中保持比例联动。
+
+##### 3. 停止从轴跟随 (`SlaveStop`)
+* **原型**：`public static bool SlaveStop(int axisidSlave)`
+* **说明**：安全终止并切断从轴的 Follow/Gear 跟随状态。
 
 ---
 
@@ -3568,5 +3617,17 @@ if (WaitDi(InNo.流线1到位信号, 1))
 | `mMove` | `AbsMove`, `AbsMoveAndDone` | 多轴运动 |
 | `mDoDi` | `WaitDone`, `WaitDi` | IO 等待 |
 | `mSend` | `WaitDone`, `GetData` | 通讯收发 |
+
+### GTMultiAxialMotion
+
+| 方法 | 说明 |
+|------|------|
+| `AxisPoints(axisId, points[], encMm)` | 轴点位插补包装类 |
+| `Line2D(axis1, axis2, speed)` | 二维直线插补 |
+| `Line3D(axis1, axis2, axis3, speed)` | 三维直线插补 |
+| `Line4D(axis1, axis2, axis3, axis4, speed)` | 四维直线插补 |
+| `FollowAxisSetup(...)` | Follow 模式轨迹跟随设置 |
+| `GearAxisSetup(...)` | 电子齿轮比例协同设置 |
+| `SlaveStop(slaveAxisId)` | 停止从轴跟随运动 |
 
 ---

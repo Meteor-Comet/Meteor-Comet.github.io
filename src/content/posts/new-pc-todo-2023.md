@@ -94,7 +94,7 @@ Google Chrome 的用户配置、插件与缓存默认堆积在 `C:\Users\用户�
 4. **验证状态**：
    控制台提示 `为 C:\Users\...\Chrome <<===>> D:\Google\Chrome 创建的联接` 即可。此时 C 盘目录下会生成一个带有快捷方式图标的文件夹，实际空间全部在 D 盘。
 
-### 3.4 通用迁移公式
+### 3.4 通用单软件迁移公式
 此方法适用于任何将大量缓存保存在 AppData 的软件（如微信数据、JetBrains 缓存、VS Code 扩展等）：
 
 ```cmd
@@ -103,6 +103,34 @@ Google Chrome 的用户配置、插件与缓存默认堆积在 `C:\Users\用户�
 :: 3. 以管理员身份运行 CMD 执行：
 mklink /J "C:\Users\用户名\AppData\Local\软件名" "D:\SoftwareData\软件名"
 ```
+
+### 3.5 进阶方案：一劳永逸整体迁移整套 AppData / 用户数据目录
+
+如果觉得单款软件依次迁移太繁琐，想**一次性把所有软件的配置文件、微信/QQ聊天记录、软件插件与缓存全部搬离 C 盘**，可以通过整体迁移 AppData 目录来实现。
+
+#### 为什么不推荐直接改注册表 ProfileImagePath？
+直接在注册表中把 `C:\Users\用户名` 全盘改到 D 盘，容易在 Windows 10/11 进行大版本更新（如 22H2 升 23H2）或新建用户时导致登录死循环或权限丢失。
+
+#### 最稳妥的整套 AppData 零风险迁移步骤：
+
+1. **新建备用管理员账号（避免文件被当前登录账号锁定）**：
+   - 打开“设置” ➔ “账户” ➔ “其他用户”，新建一个临时本地管理员账号（如 `AdminTemp`）并登录该账号。
+
+2. **移动整套 AppData 的三个核心子文件夹**：
+   - 打开 `C:\Users\您的原用户名\AppData\` 目录（需勾选显示隐藏文件）。
+   - 在 D 盘创建目标目录，如 `D:\UserData\AppData\`。
+   - 将原账号下的 **`Local`**、**`Roaming`**、**`LocalLow`** 三个文件夹直接剪切（Ctrl+X）粘贴到 `D:\UserData\AppData\` 目录下。
+
+3. **创建整套 AppData 目录联接**：
+   - 以管理员身份运行 CMD，依次执行以下命令：
+     ```cmd
+     mklink /J "C:\Users\您的原用户名\AppData\Local" "D:\UserData\AppData\Local"
+     mklink /J "C:\Users\您的原用户名\AppData\Roaming" "D:\UserData\AppData\Roaming"
+     mklink /J "C:\Users\您的原用户名\AppData\LocalLow" "D:\UserData\AppData\LocalLow"
+     ```
+
+4. **切回原主账号**：
+   - 注销临时账号，重新登录您的原主账号。此时 C 盘将瞬间释放 20GB ~ 100GB+ 空间，且后续安装的所有软件配置与缓存都会透明写入 D 盘！
 
 ---
 

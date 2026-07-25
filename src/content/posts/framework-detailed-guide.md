@@ -29,6 +29,8 @@ draft: false
   - [2.5 HMI UI 诊断监控与 I/O 硬件的交互联系](#25-hmi-ui-诊断监控与-io-硬件的交互联系)
   - [2.6 输入限制与合法性校验逻辑](#26-输入限制与合法性校验逻辑)
   - [2.7 功能使能复选框在业务代码中的跳步与屏蔽机制](#27-功能使能复选框在业务代码中的跳步与屏蔽机制)
+  - [2.8 控制板卡 I/O 读取物理结构与底层 P/Invoke 驱动](#28-控制板卡-io-读取物理结构与底层-pinvoke-驱动)
+  - [2.9 系统 5 大运行模式与多层控制原理](#29-系统-5-大运行模式与多层控制原理)
 - [3. 核心与运动控制 API](#3-核心与运动控制-api)
   - [3.1 运动控制类 (Motion Control)](#31-运动控制类-motion-control)
   - [3.2 系统、超时与日志 (System/Utility/Logs)](#32-系统超时与日志-systemutilitylogs)
@@ -42,17 +44,13 @@ draft: false
   - [4.3 pMove — 位置运动](#43-pmove--位置运动)
   - [4.4 sMove — 单轴运动（非阻塞）](#44-smove--单轴运动非阻塞)
   - [4.5 mMove — 多轴运动（非阻塞）](#45-mmove--多轴运动非阻塞)
-  - [4.6 mDoDi — 数字IO等待](#46-mdodi--数字io等待)
-  - [4.7 mDoDiS — 简化版数字IO](#47-mdodis--简化版数字io)
-  - [4.8 mSend — TCP 发送等待](#48-msend--tcp-发送等待)
-  - [4.9 mPulseOut — 脉冲输出](#49-mpulseout--脉冲输出)
-  - [4.11 mDialog — 对话框](#411-mdialog--对话框)
-  - [4.12 mDicValue — 等待字典](#412-mdicvalue--等待字典)
-  - [4.13 MotionDll 底层 API](#413-motiondll-底层-api)
-  - [4.14 mFunction.State 系统状态枚举](#414-mfunctionstate-系统状态枚举)
-  - [4.15 WorkShare 辅助方法](#415-workshare-辅助方法)
-  - [4.16 API 速查表（WorkShare 子对象）](#416-api-速查表workshare-子对象)
-  - [4.17 GTMultiAxialMotion 多轴直线插补与协同 API](#417-gtmultiaxialmotion-多轴直线插补与协同-api)
+  - [4.6 mDoDi / mDoDiS — 数字 IO 等待与简化版](#46-mdodi--mdodis--数字-io-等待与简化版)
+  - [4.7 mSend — TCP 发送等待](#47-msend--tcp-发送等待)
+  - [4.8 mPulseOut — 脉冲输出](#48-mpulseout--脉冲输出)
+  - [4.9 MotionDll 底层 API](#49-motiondll-底层-api)
+  - [4.10 mFunction.State 系统状态枚举](#410-mfunctionstate-系统状态枚举)
+  - [4.11 WorkShare 辅助方法](#411-workshare-辅助方法)
+  - [4.12 GTMultiAxialMotion 多轴直线插补与协同 API](#412-gtmultiaxialmotion-多轴直线插补与协同-api)
 - [5. 传送带 Conveyor 系统](#5-传送带-conveyor-系统)
   - [5.1 核心设计理念](#51-核心设计理念)
   - [5.2 Conveyor.xml 配置文件](#52-conveyorxml-配置文件)
@@ -60,7 +58,7 @@ draft: false
   - [5.4 ConvEvent 用户可编程事件（A0.Conveyors.cs）](#54-convevent-用户可编程事件a0conveyorscs)
   - [5.5 完整数据流示例](#55-完整数据流示例)
   - [5.6 Conveyor.xml 与 InNo/OutNo 的映射关系](#56-conveyorxml-与-innooutno-的映射关系)
-  - [5.7 标准开发模式 vs 当前项目](#57-标准开发模式-vs-当前项目)
+  - [5.7 标准流线开发流程与代管机制](#57-标准流线开发流程与代管机制)
   - [5.8 CurStnStatus 完整状态列表](#58-curstnstatus-完整状态列表)
   - [5.9 ConveyorData 运行时属性](#59-conveyordata-运行时属性)
   - [5.10 常见问题](#510-常见问题)
@@ -86,15 +84,11 @@ draft: false
   - [10.1 Zcm.Dialog — 对话框类](#101-zcmdialog--对话框类)
   - [10.2 Zcm.DoAndDi — IO 操作类](#102-zcmdoanddi--io-操作类)
   - [10.3 Zcm.LanguageHelper — 语言切换](#103-zcmlanguagehelper--语言切换)
-- [11. 核心 API 常见问题与技巧](#11-核心-api-常见问题与技巧)
-  - [11.1 TasksInteraction 跨线程通信详解](#111-tasksinteraction-跨线程通信详解)
-  - [11.2 mSend.WaitDone 通信详解](#112-msendwaitdone-通信详解)
-  - [11.3 MainConvId 详解](#113-mainconvid-详解)
-  - [11.4 TipsDiglogForm 弹框详解](#114-tipsdiglogform-弹框详解)
-  - [11.5 mDoDiWaitDone 详解](#115-mdodiwaitdone-详解)
-  - [11.6 mFunction.OverTime 超时判断](#116-mfunctionovertime-超时判断)
-  - [11.7 机械轴屏蔽模式详解](#117-机械轴屏蔽模式详解)
-  - [11.8 扫码使能检查重复的原因](#118-扫码使能检查重复的原因)
+- [11. 核心 API 常见技巧与 FAQ](#11-核心-api-常见技巧与-faq)
+  - [11.1 MainConvId 详解](#111-mainconvid-详解)
+  - [11.2 TipsDiglogForm 弹框详解](#112-tipsdiglogform-弹框详解)
+  - [11.3 扫码/视觉复选框使能检查防呆设计](#113-扫码视觉复选框使能检查防呆设计)
+  - [11.4 核心 API 快速导航表](#114-核心-api-快速导航表)
 - [12. API 速查表](#12-api-速查表)
   - [Motion & mFunction](#motion--mfunction)
   - [MotionDll](#motiondll)
@@ -491,6 +485,123 @@ case (int)步序.等待启动信号:
     }
     break;
 ```
+
+---
+
+### 2.8 控制板卡 I/O 读取物理结构与底层 P/Invoke 驱动
+
+在工业自动化控制中，I/O（数字量输入 DI / 数字量输出 DO）是软件感知物理世界传感器与驱动电磁阀的核心通道。BoTech 框架在物理硬件、板卡驱动到 C# 逻辑层实现了 5 层分层映射架构。
+
+```
+ [ 1. 现场传感器 ]     磁簧开关 / 光电开关 (DC 24V 信号)
+        │
+        ▼ 24V 强电线路
+ [ 2. 端子板接线排 ]   端子板螺丝接线位 (Breakout Terminal Board)
+        │
+        ▼ 24V 电流流过内部 LED
+ [ 3. 光耦隔离芯片 ]   ★ 核心防线：光电转换，2500V 物理高压隔离 (Optocoupler)
+        │
+        ▼ 转换输出 3.3V / 5V 弱电信号
+ [ 4. RC 滤波防抖 ]    电容电阻滤波，去除机械触点抖动与电磁杂波
+        │
+        ▼ 3.3V 电平输入
+ [ 5. 板载 FPGA 芯片 ] 引脚电平改变 ──► 输入寄存器 Bit 位从 0 翻转为 1 (Flip-Flop)
+        │
+        ▼ PCIe 金手指总线传输 (MMIO 内存映射)
+ [ 6. 工控机内存 ]     工控机 RAM 物理地址 ──► CPU 驱动 (gtn.sys) ──► C# 读取
+```
+
+#### 2.8.1 I/O 读写 5 层架构拆解
+
+1. **第 1 层：C# 逻辑代码层**
+   开发人员在工站中无需关心引脚接在哪个物理端子排上，直接使用强类型枚举调用：
+   * **读取输入 (DI)**：`mGlobal.ReadDi_Bool(InNo.流线1到位信号)`
+   * **写入输出 (DO)**：`mGlobal.mDoSet(OutNo.流线1阻挡气缸)`（高电平/伸出）、`mGlobal.mDoReset(...)`（低电平/缩回）
+
+2. **第 2 层：软硬件映射转换层 (`ParInput.xml` / `ParOutput.xml`)**
+   系统在启动时读取 XML 配置文件到 `mFunction.m_Input[]` 内存结构中。每一个逻辑索引对应唯一的物理卡号、引脚号及常开/常闭极性：
+   ```xml
+   <!-- ParInput.xml 映射节点结构示例 -->
+   <mInput>
+     <Index>74</Index>          <!-- 对应 InNo.流线1到位信号 = 74 -->
+     <CardNum>1</CardNum>        <!-- 映射到第 1 张控制卡/扩展板卡 -->
+     <PinNum>8</PinNum>          <!-- 板卡上的物理 Pin 8 引脚 -->
+     <IsInverse>0</IsInverse>    <!-- 取反标志：0=常开(NO)，1=常闭(NC) -->
+     <RemarkCn>流线1到位信号</RemarkCn>
+   </mInput>
+   ```
+
+3. **第 3 层：C# P/Invoke 跨语言驱动调用**
+   控制卡厂商（如固高 GTS/GTN）提供用 C/C++ 编写的原生驱动动态库 `gtn.dll`。C# 通过 P/Invoke (`[DllImport]`) 特性引入底层函数，将托管调用传递给非托管 C++ 库：
+   ```csharp
+   public static class GenFunction
+   {
+       // 引入厂商原生 DLL API
+       [DllImport("gtn.dll", EntryPoint = "GTN_GetDiPin", CallingConvention = CallingConvention.StdCall)]
+       public static extern short GTN_GetDiPin(short cardNum, short pinNum, out int pValue);
+
+       [DllImport("gtn.dll", EntryPoint = "GTN_SetDoBit", CallingConvention = CallingConvention.StdCall)]
+       public static extern short GTN_SetDoBit(short cardNum, short doType, short pinNum, short value);
+   }
+   ```
+
+4. **第 4 层：`MotionDll` API 逻辑取反与仿真断路**
+   `MotionDll.ReadDi()` 接收到逻辑索引后，查表获取物理卡号和引脚，调用厂商 `GTN_GetDiPin` 读取硬件寄存器状态，并结合 `IsInverse` 进行软逻辑翻转：
+   ```csharp
+   public static int ReadDi(short index)
+   {
+       if (VirtualMode) return 1; // 脱机仿真拦截：直接返回 1
+       var io = m_Input[index];
+       GenFunction.GTN_GetDiPin((short)io.CardNum, (short)io.PinNum, out int rawBit);
+       return (io.IsInverse == 1) ? (rawBit == 0 ? 1 : 0) : rawBit;
+   }
+   ```
+
+5. **第 5 层：硬件物理与电路层（光耦隔离防烧毁）**
+   * **24V 电气隔离防护**：板卡内部设计有光耦隔离芯片（如 PC817）。工业现场传感器（24V）触发时电流流过光耦内部 LED 发光，内部光敏三极管受光导通输出 3.3V 弱电信号。**光电转换实现了 2500V 物理电气隔离**，彻底防止现场强电、静电烧毁控制卡及电脑主板。
+   * **RC 滤波防抖**：通过电阻电容滤波电路平滑滤除机械开关触点闭合瞬间产生的几十微秒抖动毛刺。
+   * **FPGA 引脚锁存**：稳定电平接入板载 FPGA/DSP 芯片的 GPIO 引脚，内部 D 触发器将状态锁存在输入寄存器 Bit 位中。
+   * **PCIe 总线映射**：板卡 PCIe 接口通过 MMIO (Memory-Mapped I/O) 将 FPGA 寄存器直接映射到工控机物理 RAM 中，供 CPU 驱动读写。
+
+---
+
+### 2.9 系统 5 大运行模式与多层控制原理
+
+在实际生产与调试中，整机运行模式由 XML 参数 `UserPar.Machine_runMode` 持久化控制，并通过 `mGlobal` 提供高层判定。
+
+#### 2.9.1 5 大运行模式定义
+
+| 模式名称 | `Machine_runMode` 对应值 | 物理板卡/轴 | 传送带/气缸 | 物理物料/传感器 | 相机扫码/MES上报 |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| **1. 真实生产模式** | `"ProductionMode"` | ✅ 真实运行 | ✅ 真实运行 | ✅ 真实产品 | ✅ 严格校验与上报 |
+| **2. 脱机仿真模式** | `"OffLine_VirtualRun"` | ❌ 虚拟仿真 | ❌ 虚拟仿真 | ❌ 无物料 | ❌ 自动跳过 |
+| **3. 无料演示模式** | `"DryRunMode"` | ✅ 真实运行 | ✅ 真实运行 | ❌ 软件模拟信号 | ❌ 屏蔽校验 |
+| **4. 带载具空跑模式** | `"VirtualRunWithCarrier"` | ✅ 真实运行 | ✅ 真实载具循环 | ❌ 仅有载具无工件 | ❌ 屏蔽校验 |
+| **5. 直通过料模式** | `"FlowLineMode"` | ❌ 机械轴不动作 | ✅ 电机转动/气缸缩回 | ✅/❌ 仅物理穿过 | ❌ 不作停留与加工 |
+
+#### 2.9.2 模式的三层配合控制原理
+
+框架并非单纯依赖某一处代码，而是通过 **3 个层次** 的配合实现模式控制：
+
+1. **业务状态机层 (Task 级 `if` 拦截)**
+   工站 Task 在 `AutoRun()` 中通过 `if (mGlobal.xxx)` 进行条件判断，控制步序跳转或模拟注入假条码（例如空跑模式下生成 `VIRTUAL_SN_8888` 传入 `ConveyorData`）。
+
+2. **硬件抽象层 (`MotionDll` 底层 API 断路)**
+   当系统设置为脱机模式时，`Setup_Load.cs` 会将 `MotionDll.VirtualMode` 设为 `true`。底层所有的 `MotionAbsMoveAndDone`、`ZSPD` 到位检测和 `ReadDi` 内部第一行均为：
+   ```csharp
+   if (MotionDll.VirtualMode) return true;
+   ```
+   无需上层 Task 编写繁琐的条件判断，底层 API 自动瞬间返回 `true`，防止无硬件时超时死锁。
+
+3. **传送带框架层 (`nConveyor` / `A0.Conveyors.cs` 旁路)**
+   在 `FlowLineMode` 模式下，传送带框架直接跳过工站业务处理（`CustStatus == "WAITING_FOR_ASSEMBLY"`），滚筒电机保持旋转，阻挡气缸不上升，载具直接快速穿过。
+
+#### 2.9.3 载具数据模型与状态流动 (`ConveyorData`)
+
+内存中 `mFunction.ConveyorData[lineId]` 为每个工位段维护着载具状态：
+* **`ProdPres`**：载具存在状态（`"HAS"` / `"无"`）。
+* **`CustStatus`**：工站间握手状态（`"WAITING_FOR_ASSEMBLY"` $\rightarrow$ `"WORKING"` $\rightarrow$ `"ASSEMBLY_COMPLETED"` $\rightarrow$ `""`）。
+* **跨站传递 `Data_Change`**：载具移动时，`A0.Conveyors.cs` 自动将前站的条码与测试数据复制给后站的 `ConveyorData[NextID]`，确保数据流与物理载具同步流转。
 
 ---
 
@@ -1328,6 +1439,11 @@ mMove.AbsMove(short[] axisIndexes, double[] positions, double[] speeds)
 **类型：** `DoAndDi`
 **用途：** 设置输出并等待输入条件（阻塞方法）
 
+### 4.6 mDoDi / mDoDiS — 数字 IO 等待与简化版
+
+**类型：** `DoAndDi` / `DoAndDiS`  
+**用途：** 控制输出点（如电磁阀气缸）置位/复位，并同步阻塞等待输入点（如到位传感器）达到预期电平。`mDoDiS` 是 `mDoDi` 的简化版包装类，接口与功能完全兼容。
+
 #### WaitDone（设置输出 + 等待输入）— 7参数版
 
 ```csharp
@@ -1351,8 +1467,6 @@ mDoDi.WaitDone(
 | `DelayTime` | short | 到位后延时（ms） |
 | `TimeOut` | short | 超时（ms），**-1=无限等待** |
 | `Pop_up_message` | bool | 超时是否弹框提示 |
-
-**阻塞方法**，先设置输出，然后等待输入达到期望状态。
 
 **使用示例：**
 
@@ -1387,71 +1501,27 @@ mDoDi.WaitDone(
 **使用示例：**
 
 ```csharp
-// 等待信号消失
+// 等待物料感应信号消失
 mDoDi.WaitDone(
     InNo.搬运层料盘有无感应, 0,    // 等待信号消失
     10, 5000, true                  // 延时10ms，超时5秒
 );
 ```
 
-#### mAction
+#### mAction（错误回调事件）
 
 ```csharp
 event Action<string, string> mDoDi.mAction
 ```
 
 错误回调事件。当 `WaitDone` 超时时触发。在 `Initialize()` 中注册：
-
 ```csharp
 mDoDi.mAction += Err;
 ```
 
 ---
 
-### 4.7 mDoDiS — 简化版数字IO
-
-**类型：** `DoAndDiS`
-**用途：** 简化的 IO 控制，支持输出脉冲和批量操作
-
-#### WaitDone — 7参数版（设置输出 + 等待输入）
-
-```csharp
-mDoDiS.WaitDone(
-    ValueType OutNum,       // 输出点序号
-    short nState,           // 输出点目标状态：1=ON, 0=OFF
-    ValueType InNum,        // 输入点序号
-    short nState1,          // 输入点目标状态：1=ON, 0=OFF
-    short DelayTime,        // 到位后延时(ms)
-    short TimeOut,          // 超时(ms)
-    bool Pop_up_message     // 超时是否弹框
-)
-```
-
-功能与 `mDoDi.WaitDone` 7参数版相同。
-
-#### WaitDone — 4参数版（仅等待输入）
-
-```csharp
-mDoDiS.WaitDone(
-    ValueType InNum,        // 输入点序号
-    short nState1,          // 输入点目标状态：1=ON, 0=OFF
-    short DelayTime,        // 到位后延时(ms)
-    short TimeOut,          // 超时(ms)
-    bool Pop_up_message     // 超时是否弹框
-)
-```
-
-#### mAction
-
-```csharp
-event Action<string, string> mDoDiS.mAction
-```
-
-错误回调事件，用法同 `mDoDi.mAction`。
-
----
-
-### 4.8 mSend — TCP 发送等待
+### 4.7 mSend — TCP 发送等待
 
 **类型：** `DataSend`
 **用途：** 发送 TCP/串口数据并等待响应（阻塞方法）
@@ -1547,21 +1617,7 @@ mPulseOut.Send(OutNo.蜂鸣器, 1, 100);
 
 ---
 
-### 4.11 mDialog — 对话框
-
-**类型：** `Dialog`
-**用途：** 在工位线程中弹出对话框
-
----
-
-### 4.12 mDicValue — 等待字典
-
-**类型：** `WaitDic`
-**用途：** 基于字典的条件等待
-
----
-
-### 4.13 MotionDll 底层 API
+### 4.9 MotionDll 底层 API
 
 **命名空间：** `MotionFunction`
 **类：** `static class MotionDll`
@@ -1729,26 +1785,10 @@ double[] GetPosData(ValueType StaId, ValueType PosIndex)
 
 ---
 
-### 4.16 API 速查表（WorkShare 子对象）
+> 💡 **完整 API 速查表导航**  
+> 有关 `WorkShare` 子对象、`MotionDll` 及系统的完整方法原型与速查表格，请直接参阅文章末尾的 [12. API 速查表](#12-api-速查表)。
 
-| API | 说明 | 阻塞？ |
-|-----|------|--------|
-| `mHome.WaitDone(axisId)` | 单轴回零 | ✅ |
-| `mHome.RunSts` | 回零结果 | — |
-| `dHome.WaitDone(axisIds[], speeds[])` | 多轴同时回零 | ✅ |
-| `dHome.RunSts` | 回零结果 | — |
-| `pMove.WaitDone(stationId, posIndex, ...)` | 点位移动（带Z轴安全高度） | ✅ |
-| `pMove.WaitDone(axisId, position, speed, ...)` | 直接坐标移动 | ✅ |
-| `pMove.Pause` | 暂停/恢复运动 | — |
-| `mDoDi.WaitDone(outNum, outState, inNum, inState, ...)` | 设置输出+等待输入 | ✅ |
-| `mDoDi.WaitDone(inNum, inState, ...)` | 仅等待输入 | ✅ |
-| `mDoDi.mAction += Err` | 注册错误回调 | — |
-| `mSend.WaitDone(port, sendType, data, ...)` | TCP发送+等待响应 | ✅ |
-| `mSend.mAction += Err` | 注册错误回调 | — |
-| `SetTasksInteractionTrue(id)` | 设置交互标志为 true | ❌ |
-| `SetTasksInteractionFalse(id)` | 设置交互标志为 false | ❌ |
-| `GetTasksInteraction(id, autoClear)` | 读取交互标志 | ❌ |
-| `WaitTaskInteractionTrue(id, timeout, ...)` | 等待标志变为 true | ✅ |
+---
 | `WaitAllTaskInteractionTrue(ids, timeout, ...)` | 等待所有标志为 true | ✅ |
 | `WaitAnyTaskInteractionTrue(ids, timeout, ...)` | 等待任一标志为 true | ✅ |
 | `MotionDll.ReadDi(index)` | 读取数字输入 | ❌ |
@@ -2109,25 +2149,111 @@ Conveyor.xml 中的信号编号**直接对应** `EnumName.cs` 中的 `InNo` 和 
 
 ---
 
-### 5.7 标准开发模式 vs 当前项目
+### 5.7 标准流线开发流程与代管机制
 
-#### 标准模式（推荐）
+> [!TIP]
+> **关于练习/仿真项目的架构说明**：
+> 在部分学习性质的仿真练习项目中，开发者有时会通过在 Task 代码中直接控制电机与气缸来进行底层 IO 顺序控制练习。但在**工程量产与标准项目**中，必须遵循**标准流线代管机制**：将阻挡气缸升降、滚筒电机启停及载具过站完全委托给框架底层状态机（`AutoConv`），工站 Task 仅需专注于核心工艺逻辑并通过 `CustStatus`（自定状态）进行消息同步。
 
-| 层级 | 职责 |
-|------|------|
-| **Conveyor.xml** | 配置电机IO、气缸IO、传感器IO、速度、延时、上下游关系 |
-| **A0.Conveyors.cs** | HandleCurrentStation: 设置 CustStatus 等工位完成；Start_Send/Stop_Send: 共用电机处理 |
-| **Task 代码** | 只检查 CustStatus，只做业务逻辑，不直接控制电机/气缸 |
+#### 5.7.1 框架三层代管职责架构
 
-**优点：** 框架自动处理电机启停、气缸伸缩、传感器等待、异常检测。Task 代码简洁。
+标准流水线开发模式遵循高度解耦的**分层代管职责**：
 
-#### 当前项目模式
+| 架构层级 | 配置文件 / 模块 | 核心职责 |
+| :--- | :--- | :--- |
+| **配置解耦层** | `Conveyor.xml` | 参数化配置物理 IO（电机 DO、阻挡/顶升气缸 DO/DI、到位/流入传感器 DI）、运转速度、延时参数以及流水线上下游节点关系。 |
+| **底层状态代管层** | `AutoConv.dll` / `A0.Conveyors.cs` / `A2.流线控制.cs` | 运行于高频独立扫描线程。负责轮询传感器、自动控制电机启停、自动伸缩阻挡气缸、自动完成跨站数据克隆与重置，并维护 `CustStatus` 初始推送。 |
+| **业务逻辑工站层** | `Task` 工站代码（如 `Task06_工作位`） | **绝对不直接控制流线电机和流线阻挡气缸**。仅监听 `ConveyorData[MainConvId].自定状态`，执行工站专用的治具夹紧与组装工艺（如打螺丝、扫码），完成后将状态修改为 `"装配完成"` 即可。 |
 
-| 层级 | 职责 |
-|------|------|
-| **Task 代码** | 直接控制电机、气缸、检查传感器、处理超时 |
+**标准代管模式优势**：
+- **逻辑高内聚**：Task 代码极度精简，避免了在 Task 循环中高频轮询 IO 导致的日志刷屏和 UI 卡顿。
+- **物理重构零代码变动**：修改流线电磁阀或传感器 Pin 脚时，仅需更新 `Conveyor.xml`，无需触动任何 Task 业务代码。
+- **防止机械碰撞**：阻挡气缸升降与电机延时防撞逻辑在框架底层统一锁存，避免多 Task 并发竞争导致载具撞板。
 
-**缺点：** Task 代码复杂，IO 操作在等待循环中导致日志刷屏、UI 卡死。
+---
+
+#### 5.7.2 标准流线代管协同四步法
+
+在标准螺丝机项目（如 **SPK-17**）中，流水线框架与工站 Task 之间通过 `自定状态`（即 `CustStatus`）进行“非阻塞”握手，整体生命周期包含以下四个步骤：
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Station as 工站 Task (如 Task06_工作位)
+    participant ConvFrame as 流水线框架状态机 (AutoConv)
+    participant UpStation as 上游工位 (如 Task05_扫码)
+
+    Note over ConvFrame: 1. 流入与自动拦截: 载具到位，框架自动停电机、升阻挡
+    ConvFrame->>ConvFrame: 将流线自定状态设为 "等待装配" (CustStatus="WAITING_FOR_ASSEMBLY")
+    ConvFrame->>Station: Mre.Set() 唤醒工站线程
+
+    Note over Station: 2. 握手唤醒与加工: 侦测到 Mre & 自定状态 == "等待装配"
+    Station->>Station: 开启工艺主流程，自定状态改为 "工作中"
+    Station->>Station: 执行治具夹紧 ──► 触发打螺丝/扫码 ──► 数据收存与上传
+    Station->>ConvFrame: 3. 工艺完成: 自定状态改为 "装配完成"
+
+    Note over ConvFrame: 4. 自动放行与流出: 框架捕获到 "装配完成"
+    ConvFrame->>ConvFrame: 自动降下阻挡气缸 ──► 启动滚筒电机放行载具
+    Note over ConvFrame: 载具完全流出后，自动升起阻挡，重置自定状态 = ""
+
+    Note over UpStation: 上游轮询 IsNullOrEmpty(ConveyorData[2].自定状态)
+    UpStation->>ConvFrame: 检测为 ""，确定下游空闲，放行下一片载具
+```
+
+1. **流入与自动拦截 (Inflow & Auto-Block)**：
+   载具在流线滚筒上滑动，当触发流线到位感应器时，`AutoConv` 框架状态机自动切入当站处理流程，自动伸出阻挡气缸并停止电机运转。
+2. **握手唤醒 (Handshake & Wakeup)**：
+   流线框架将当前段的自定义状态 `ConveyorData[MainConvId].自定状态` 修改为 `"等待装配"`（或英文 `"WAITING_FOR_ASSEMBLY"`），同时发送线程唤醒信号 `Mre.Set()`。
+3. **工艺加工 (Task Execution)**：
+   工站 Task 的 `AutoRun()` 接收到 `Mre` 唤醒并确认 `自定状态 == "等待装配"` 后，将状态置为 `"工作中"`，开始执行顶升盖板、夹紧治具、触发机械手打螺丝、SFC 数据上传等本站工艺。
+4. **自动放行与流出 (Auto-Release & Outflow)**：
+   工站 Task 完成所有工艺后，**仅需将 `自定状态` 更新为 `"装配完成"`**（或英文 `"ASSEMBLY_COMPLETED"`）。底层流线状态机轮询捕获到该状态后，会自动降下阻挡气缸、开启滚筒电机送走载具。当载具离开到位感应器后，框架自动恢复阻挡气缸并重置 `自定状态 = ""`，供上游判断下游空闲。
+
+---
+
+#### 5.7.3 标准工站 Task 最佳实践代码
+
+在标准模式下，工站 Task 代码非常干净，完全不直接干预流线电机的 DO 或流线阻挡气缸的 DO：
+
+```csharp
+// Task06_工作位.cs 标准流程代码片断
+public override void AutoRun()
+{
+    switch (StaInfo.步序号)
+    {
+        case (int)WorkStep.流程开始:
+            // 1. 监听流线框架推送的状态，等待被 Mre 唤醒
+            if (mFunction.流水线[MainConvId].自定状态 == "等待装配")
+            {
+                Mre.WaitOne();
+                Mre.Reset();
+                isWork = true;
+                SetStep((int)WorkStep.载具顶升上升);
+            }
+            break;
+
+        case (int)WorkStep.载具顶升上升:
+            // 仅控制本工站专属的治具/盖板气缸，非流线阻挡气缸
+            双控电磁阀(OutNo.流线2_工作位锁螺丝盖板顶升, OutNo.流线2_工作位锁螺丝盖板缩回, ...);
+            SetStep((int)WorkStep.载具夹紧);
+            break;
+
+        case (int)WorkStep.等待锁螺丝完成:
+            // ... 阻塞等待双机械轴锁螺丝完成并转移扭矩/角度数据 ...
+            SetStep((int)WorkStep.SFC数据上传);
+            break;
+
+        case (int)WorkStep.通知流线锁螺丝完成:
+            AddLog("产品工作完成流出, SN: " + SN, LogsType.Auto, StaInfo.步序号, true);
+            isWork = false;
+            
+            // 2. 仅更新自定状态为"装配完成"，底层的 AutoConv 框架收到后会自动降阻挡、开电机送走载具
+            mFunction.流水线[MainConvId].自定状态 = "装配完成";
+            SetStep((int)WorkStep.流程开始);
+            break;
+    }
+}
+```
 
 ---
 
@@ -2677,45 +2803,12 @@ mGlobal.mDoReset(电批破真空信号); // 关闭吹气
 
 ---
 
-#### 6.8.2 系统参数配置（Excel → 系统界面 → 枚举同步 三步走）
+#### 6.8.2 系统参数配置
 
-参数文件统一存放于 **`<ParameterRoot>\ParXlsx`**（`<ParameterRoot>` 为部署时指定的参数配置根目录，具体路径由 `Setup_Load.cs` / 框架配置项决定）。
-
-##### 2.1 控制卡配置（CardPar.xlsx）
-
-1. 打开 `<ParameterRoot>\ParXlsx`，找到 `CardPar.xlsx`。
-2. 按控制卡厂家 / 型号（固高 / 雷赛 / 汇川 EtherCAT 主站等）填写卡索引、控制轴数、卡类型、总线编号等字段。
-3. 启动程序后进入 **系统参数 → 卡 / IO 配置** 页面，点击"卡配置"进入子界面。
-4. 点击 **读取 Excel** 重新加载配置，核对无误后点击 **保存**；有误可在界面手动修改后点击"保存 Excel"回写文件。
-
-##### 2.2 伺服轴配置（AxisPar.xlsx）
-
-1. 打开 `<ParameterRoot>\ParXlsx`，编辑 `AxisPar.xlsx`。
-2. 按设备实际轴规划填写：轴编号、轴名称、每圈脉冲、减速比、导程、正负限位、回零模式、工作速度、加 / 减速时间、惯量参数等。
-3. 启动程序 → 系统参数 → 卡 / IO 配置 → **轴配置**。
-4. 点击 **读取 Excel** → 核对 → **保存**（或界面手动改完后"保存 Excel"回写）。
-5. 保存完成后，需在 `EnumName.cs`（或 VB 版 `名称枚举.vb`）中同步定义**轴枚举**。要求：**枚举序号 ↔ Excel 轴编号必须严格一一对应**，后续代码通过枚举名引用轴。
-
-##### 2.3 数字 I / O 映射配置（Input.xlsx / Output.xlsx）
-
-1. 打开 `<ParameterRoot>\ParXlsx`，编辑 `Input.xlsx`（输入）与 `Output.xlsx`（输出）。
-2. 根据《设备 IO 分配表》逐行填写 IO 编号、信号名称、所属工站、类型（NPN / PNP）、是否常闭、默认电平、注释说明等字段。
-3. 启动程序 → 系统参数 → 卡 / IO 配置 → **IO 配置**。
-4. 点击 **读取 Excel** → 核对 → **保存**（界面可手动改后"保存 Excel"回写）。
-5. 保存完成后，在 `EnumName.cs` 同步定义**输入枚举**与**输出枚举**，要求同 2.2：枚举序号 ↔ Excel 编号严格一一对应。
-
-##### 2.4 系统参数配置（ParList.xlsx / SysPar.xlsx）
-
-1. 打开 `<ParameterRoot>\ParXlsx`，编辑 `ParList.xlsx`。
-2. 按参数分类填写。类型约定：`D`=Double 浮点、`I`=Int 整型、`B`=Bool 布尔、`A`=下拉选择项、`S`=String 字符串；并指定默认值、上下限、单位、所属参数页。
-3. 启动程序 → 系统参数 → **参数配置 / 变量配置**。
-4. 点击 **读取 Excel** → 核对 → **保存**。
-5. 保存完成后在 `EnumName.cs` 同步**参数枚举**（序号 ↔ Excel 序号一致）。
-
-##### 2.5 流线参数（ParList.xlsx 流线分组）
-
-1. 在 `ParList.xlsx` 中新增流线分类参数块：段数、每段站号、节拍 CT 设定、顶升 / 阻挡 / 定位使能、缓存站容量等。
-2. 读取 Excel → 保存，并在 `EnumName.cs` 中同步对应的流线枚举。
+实现脱机空跑需首先确保控制卡、伺服轴、I/O 映射以及系统变量参数正确配置。具体的 Excel 参数填写、XML 转换映射与 C# 枚举（`EnumName.cs`）同步规则，请直接参考 **[第 2 章 硬件参数与系统配置](#2-硬件参数与系统配置)**：
+* 控制卡与伺服轴配置请参阅 [2.1 Excel 参数配置](#21-硬件参数与系统参数的-excel-配置-开发第一步)；
+* 数字 I/O 与系统变量映射请参阅 [2.3 XML 数据库转换映射规则](#23-excel-参数配置与-xml-数据库转换映射规则)；
+* 枚举绑定与代码映射请参阅 [2.2 C# 枚举同步 SOP](#22-c-枚举-enumnamecs-绑定关系与手动同步-sop)。
 
 ---
 
@@ -3179,186 +3272,11 @@ SystemMgr（全局单例，内存中）
 
 枚举值通过 `Convert.ToInt32(id)` 转为 int，直接作为寄存器数组的物理索引。
 
-#### 为什么不用普通 bool 变量？
-
-```csharp
-// ❌ 普通 bool — 跨线程不安全
-public static bool 右轴完成 = false;
-
-// Task02（线程A）写入
-右轴完成 = true;
-
-// Task04（线程B）读取
-if (右轴完成) { ... }  // 可能读到旧值！CPU缓存、编译器优化可能导致不可见
-```
-
-```csharp
-// ✅ TasksInteraction — 线程安全
-SetTasksInteractionTrue(TasksInteraction.右轴螺丝工作完成_标志);   // 线程安全写入
-GetTasksInteraction(TasksInteraction.右轴螺丝工作完成_标志);        // 线程安全读取
-```
-
-| 对比项 | 普通 bool | TasksInteraction |
-|--------|----------|-----------------|
-| 线程安全 | ❌ 不安全 | ✅ 有锁保护 |
-| 跨线程可见 | ❌ 可能读到旧值 | ✅ 保证最新值 |
-| 超时等待 | ❌ 需自己写循环 | ✅ 内置 Wait + 超时 + 弹框 |
-| 自动日志 | ❌ 无 | ✅ 值变化自动记录 |
-| 适用场景 | 同一线程内 | 跨线程工位间通信 |
-
-#### SetTasksInteractionTrue
-
-```csharp
-void SetTasksInteractionTrue(Enum id)
-```
-
-| 参数 | 类型 | 说明 |
-|------|------|------|
-| `id` | Enum | 标志枚举值 |
-
-把指定寄存器设为 `true`。值变化时自动写日志。
-
-```csharp
-SetTasksInteractionTrue(TasksInteraction.左轴螺丝工作完成_标志);
-// 日志：线程交互变量: 左轴螺丝工作完成_标志, set value is true
-```
-
-#### SetTasksInteractionFalse
-
-```csharp
-void SetTasksInteractionFalse(Enum id)
-```
-
-把指定寄存器设为 `false`。
-
-#### GetTasksInteraction
-
-```csharp
-bool? GetTasksInteraction(Enum id, bool isAutoClear = false)
-```
-
-| 参数 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `id` | Enum | — | 标志枚举值 |
-| `isAutoClear` | bool | `false` | 读取后是否自动清空 |
-
-返回 `null`（未设置）、`true` 或 `false`。
-
-```csharp
-// 读取但不清空
-bool? result = GetTasksInteraction(TasksInteraction.右轴完成_标志, false);
-
-// 读取后自动清空（一次性信号）
-bool? result = GetTasksInteraction(TasksInteraction.右轴完成_标志, true);
-```
-
-#### WaitTaskInteractionTrue
-
-```csharp
-bool WaitTaskInteractionTrue(Enum id, int nTimeOut = -1, bool bTimeOutShowDialog = true, bool isAutoClear = false)
-```
-
-| 参数 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `id` | Enum | — | 标志枚举值 |
-| `nTimeOut` | int | `-1` | 超时(ms)，**-1=永远等待** |
-| `bTimeOutShowDialog` | bool | `true` | 超时是否弹框 |
-| `isAutoClear` | bool | `false` | 成功后是否自动清空 |
-
-**阻塞方法**，每 10ms 检查一次。暂停时计时器停止。
-
-```csharp
-bool ok = WaitTaskInteractionTrue(
-    TasksInteraction.左轴螺丝工作完成_标志,
-    5000,    // 5秒超时
-    true,    // 超时弹框
-    true     // 成功后自动清空
-);
-```
-
-#### WaitAllTaskInteractionTrue
-
-```csharp
-bool WaitAllTaskInteractionTrue(Enum[] ids, int nTimeOut = -1, bool bTimeOutShowDialog = true, bool isAutoClear = false)
-```
-
-等待所有标志**同时**为 true。
-
-```csharp
-bool ok = WaitAllTaskInteractionTrue(
-    new Enum[] {
-        TasksInteraction.右轴螺丝工作完成_标志,
-        TasksInteraction.左轴螺丝工作完成_标志
-    },
-    5000, true, false
-);
-```
-
-#### WaitAnyTaskInteractionTrue
-
-```csharp
-bool WaitAnyTaskInteractionTrue(Enum[] ids, out Enum[] completes, int nTimeOut = -1, bool bTimeOutShowDialog = true, bool isAutoClear = false)
-```
-
-等待**任一**标志为 true。`completes` 输出满足条件的标志。
+## 11. 核心 API 常见技巧与 FAQ
 
 ---
 
-### 11.2 mSend.WaitDone 通信详解
-
-```csharp
-bool mSend.WaitDone(int mPortIndex, int sendType, string SendData, int recvType, string recvStr, int nTimeOut, bool bTimeOutShowDialog, bool nShowLog)
-```
-
-| # | 参数 | 类型 | 说明 |
-|---|------|------|------|
-| 1 | `mPortIndex` | int | 端口号（`TCPIP_Port` 枚举或串口编号） |
-| 2 | `sendType` | int | **0=字节发送, 1=字符串发送** |
-| 3 | `SendData` | string | 发送的数据 |
-| 4 | `recvType` | int | **0=字节接收, 1=字符串接收** |
-| 5 | `recvStr` | string | 匹配字符串（空=接收任何响应） |
-| 6 | `nTimeOut` | int | 超时(ms)，**-1=无限等待** |
-| 7 | `bTimeOutShowDialog` | bool | 超时是否弹框 |
-| 8 | `nShowLog` | bool | 是否显示日志 |
-
-#### recvStr 匹配规则
-
-框架对接收到的数据做 **前缀匹配（StartsWith）**：
-
-```csharp
-// 接收到的数据
-string receivedData = "ReadCode,OK,SN12345678";
-
-// 匹配检查
-receivedData.StartsWith("ReadCode,OK,")  // ✅ 匹配成功
-```
-
-| recvStr 值 | 行为 |
-|------------|------|
-| `""` (空) | 接收任何响应都算成功 |
-| `"ReadCode,OK,"` | 响应必须以这个字符串开头才算成功 |
-
-不匹配的数据会被忽略，继续等下一条响应，直到超时。
-
-#### 使用示例
-
-```csharp
-// 扫码枪通信
-bool ok = mSend.WaitDone(
-    (int)TCPIP_Port.扫描,  // 端口
-    1,                       // 字符串发送
-    "ReadCode",              // 发送数据
-    0,                       // 字节接收
-    "",                      // 接收任何响应
-    5000,                    // 超时5秒
-    true,                    // 超时弹框
-    false                    // 不显示日志
-);
-```
-
----
-
-### 11.3 MainConvId 详解
+### 11.1 MainConvId 详解
 
 `MainConvId` 是基类 `WorkShare` 的属性，在 `Initialize()` 中通过 `BindConv()` 设置：
 
@@ -3388,7 +3306,7 @@ mFunction.ConveyorData[1].StartTime
 
 ---
 
-### 11.4 TipsDiglogForm 弹框详解
+### 11.2 TipsDiglogForm 弹框详解
 
 ```csharp
 AlarmCenter.XAlarmRecord.Instance.TipsDiglogForm(
@@ -3421,114 +3339,40 @@ if (AlarmCenter.XAlarmRecord.Instance.TipsDiglogForm(
 
 ---
 
-### 11.5 mDoDiWaitDone 详解
+### 11.3 扫码/视觉复选框使能检查防呆设计
+
+在 `AutoRun` 状态机处理扫码或相机对位前，必须通过 `mGlobal.FuncCheck(FuncChk.xxx)` 对功能使能复选框进行防御性检查：
 
 ```csharp
-mDoDi.WaitDone(outNum, outState, inNum, inState, delayTime, timeout, popUpMessage)
-```
-
-| # | 参数 | 类型 | 说明 |
-|---|------|------|------|
-| 1 | `outNum` | ValueType | 输出端口号（`OutNo` 枚举） |
-| 2 | `outState` | short | 输出状态：**1=ON, 0=OFF** |
-| 3 | `inNum` | ValueType | 输入端口号（`InNo` 枚举） |
-| 4 | `inState` | short | 期望输入状态：**1=ON, 0=OFF** |
-| 5 | `delayTime` | short | 到位后延时(ms) |
-| 6 | `timeout` | short | 超时(ms)，**-1=无限等待** |
-| 7 | `popUpMessage` | bool | 超时是否弹框 |
-
-**阻塞方法**，先设置输出，然后等待输入达到期望状态。
-
-```csharp
-// 气缸伸出，等伸出信号
-mDoDiWaitDone(OutNo.流线1阻挡气缸, 1, InNo.流线1阻挡伸出信号, 1, 10, 3000, true);
-
-// 气缸缩回，等缩回信号
-mDoDiWaitDone(OutNo.流线1阻挡气缸, 0, InNo.流线1阻挡缩回信号, 1, 10, 3000, true);
-```
-
-**注意：** `mDoDiWaitDone` 是阻塞方法，在 AutoRun 中使用会导致线程阻塞。仅在 Homing 或非循环步骤中使用。AutoRun 中用 `mDoSet` + 下一步 `ReadDi_Bool` 替代。
-
----
-
-### 11.6 mFunction.OverTime 超时判断
-
-```csharp
-bool mFunction.OverTime(long StartTime, int SleepTime)
-```
-
-| 参数 | 类型 | 说明 |
-|------|------|------|
-| `StartTime` | long | 起始时间戳（`GetTickCount()` 获取） |
-| `SleepTime` | int | 超时时间(ms) |
-
-**非阻塞方法**，判断从 `StartTime` 开始是否已超过 `SleepTime` 毫秒。
-
-```csharp
-// 记录起点
-mFunction.ConveyorData[MainConvId].StartTime = mFunction.GetTickCount();
-
-// 后续步骤中检查（每10ms检查一次）
-if (mFunction.OverTime(mFunction.ConveyorData[MainConvId].StartTime, 5000))
-{
-    // 5秒超时
-}
-```
-
-**替代 Thread.Sleep 的非阻塞写法：**
-
-```csharp
-// ❌ 阻塞
-Thread.Sleep(3000);
-
-// ✅ 非阻塞
-StartTime = GetTickCount();
-// ... 下一步 ...
-if (OverTime(StartTime, 3000)) { /* 3秒到了 */ }
-```
-
----
-
-### 11.7 机械轴屏蔽模式详解
-
-```csharp
-if (是否屏蔽)
-{
-    已持料 = false;
-    mGlobal.mDoReset(CCD光源触发信号);
-    mGlobal.mDoReset(电批吸真空信号);
-    mGlobal.mDoReset(电批破真空信号);
-    mGlobal.mDoReset(电批启动信号);
-
-    if (GetTasksInteraction(启动触发标志, false) == true)
+case (int)步序.检查使能并扫码:
+    if (mGlobal.FuncCheck(FuncChk.启用扫码) && !mGlobal.FlowLineMode)
     {
-        SetTasksInteractionTrue(完成标志);  // 直接回复"完成"
+        SetStep(ref StaInfo, (int)步序.触发扫码, true);
     }
-    SetStep(ref StaInfo, (int)步序.等待启动信号, false);
-    return;  // 不执行后面的 switch
-}
+    else
+    {
+        AddLog("扫码功能被禁用或处于过料模式，跳过扫码", LogsType.Barcode, StaInfo.StepIdx, true);
+        SetStep(ref StaInfo, (int)步序.关光源放行, true); // 防呆跳步
+    }
+    break;
 ```
-
-**执行流程：**
-
-```
-屏蔽状态（每10ms）：
-    清除所有输出 → 收到启动信号？→ 直接回复"完成"
-    → SetStep(等待启动信号) → return（不执行switch）
-
-取消屏蔽后：
-    是否屏蔽=false → 不进if块 → 执行switch
-    → StepIdx 已经是"等待启动信号" → 等产品到位 → 正常工作
-```
-
-**为什么 SetStep(等待启动信号)？** 确保取消屏蔽后，轴从"等产品到位"这个安全状态开始，而不是从"拧紧到一半"或"移动中"继续。
 
 ---
 
-### 11.8 扫码使能检查重复的原因
+### 11.4 核心 API 快速导航表
 
-```csharp
-// Step10: 检查到位信号
+为避免篇幅冗余，常见核心 API 的详细原理与最佳实践代码分布在以下对应章节中：
+
+| 核心 API / 技术主题 | 详细原理与代码示例导航链接 |
+| :--- | :--- |
+| **`TasksInteraction` 跨线程协同握手** | 详见 **[3.5.3 TasksInteraction 状态详解与使用指南](#353-tasksinteraction-状态详解与使用指南)** |
+| **`mSend.WaitDone` TCP/串口网络收发** | 详见 **[3.4.3 TCP 双向应答最佳实践示例](#343-tcp-双向应答最佳实践示例最推荐模式)** |
+| **`mDoDi.WaitDone` 气缸/IO动作等待** | 详见 **[4.6 mDoDi / mDoDiS — 数字 IO 等待与简化版](#46-mdodi--mdodis--数字-io-等待与简化版)** |
+| **`mFunction.OverTime` 非阻塞超时判定** | 详见 **[3.2.2 mFunction.OverTime 超时处理](#322-mfunctionovertime)** |
+| **机械轴屏蔽模式 (`是否屏蔽`)** | 详见 **[2.7.2 机械手关闭屏蔽机制](#272-机械手关闭屏蔽-block_leftrobot--block_rightrobot)** |
+| **系统 5 大运行模式与脱机仿真** | 详见 **[2.9 系统 5 大运行模式与多层控制原理](#29-系统-5-大运行模式与多层控制原理)** |
+
+---
 if (mGlobal.ReadDi_Bool(InNo.流线1到位信号))
 {
     // 产品已经在位（机器重启场景）

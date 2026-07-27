@@ -77,9 +77,7 @@ draft: false
   - [执行流程](#执行流程)
   - [初始化顺序重要性](#初始化顺序重要性)
 - [9. 机械臂基类开发最佳实践](#9-机械臂基类开发最佳实践)
-  - [9.1 线程安全的安全移动方法设计 (SafeMoveTo)](#91-线程安全的安全移动方法设计-safemoveto)
-  - [9.2 框架底层原生运动控制 API 详解](#92-框架底层原生运动控制-api-详解)
-  - [9.3 为什么封装 SafeMoveTo 自定义安全移动函数](#93-为什么封装-safemoveto-自定义安全移动函数)
+  - [9.1 框架底层原生运动控制 API 详解](#91-框架底层原生运动控制-api-详解)
 - [10. 辅助类 API](#10-辅助类-api)
   - [10.1 Zcm.Dialog — 对话框类](#101-zcmdialog--对话框类)
   - [10.2 Zcm.DoAndDi — IO 操作类](#102-zcmdoanddi--io-操作类)
@@ -995,8 +993,8 @@ case (int)步序.等相机数据:
       // 1. 申请进入组装干涉区 1
       EnterInterferenceZone(InterferenceZone.Assembly_Interference_Zone1);
       
-      // 2. 申请成功后，安全移动至电批下压工作点
-      bool arWork = SafeMoveTo(示教电批执行位置, 电批点位索引, 0.0, 纠偏X, 纠偏Y, 纠偏R, 15000);
+      // 2. 申请成功后，移动至电批下压工作点
+      bool arWork = pMove.WaitDone((int)StaInfo.StaId, 电批点位索引, true, 0.0, 10, 15000);
       if (arWork)
       {
           SetStep(ref StaInfo, (int)步序.启动拧紧, true);
@@ -1011,7 +1009,7 @@ case (int)步序.等相机数据:
 
   case (int)步序.安全返回:
       // 3. 抬起 Z 轴，机械臂完全退出干涉空域后，释放占用
-      if (SafeMoveTo(示教待机位置, 待机点位索引, 0.0, 0.0, 0.0, 0.0, 15000))
+      if (pMove.WaitDone((int)StaInfo.StaId, 待机点位索引, true, 0.0, 10, 15000))
       {
           ExitInterferenceZone(InterferenceZone.Assembly_Interference_Zone1);
           SetTasksInteractionTrue(完成标志);
@@ -3046,69 +3044,13 @@ me_Initial()
 
 ## 9. 机械臂基类开发最佳实践
 
-在多轴模组（如 X/Y/Z 三轴直角坐标机械臂）开发中，若在运行状态下频繁调用 `pMove.WaitDone()` 或 `mDoDi` 进行手动轮询，容易产生以下问题：
-1. 工站内由于气缸动作、相机响应和轴动作互相穿插，会导致流程代码冗长、嵌套复杂。
-2. 缺乏安全防呆：如果在 X/Y 轴大行程移动时 Z 轴未处于安全高度，极易引发机械碰撞。
+在多轴模组（如 X/Y/Z 三轴直角坐标机械臂）开发中，框架底层的 `Zcm.Moving` 类（即工站中的 `pMove` 对象）提供了完整的运动控制 API。在开发机械轴任务时，应当根据不同的使用场景（如：常规点位对位、离线对位、带纠偏偏置对位等）灵活选择使用。
 
-### 9.1 线程安全的安全移动方法设计 (`SafeMoveTo`)
+### 9.1 框架底层原生运动控制 API 详解
 
-在 `Task_机械轴基类` 中，封装了专为三轴机械手设计的 `SafeMoveTo` 方法，能够确保 XY 动作在大行程定位时 Z 轴处于安全高度之上：
+在框架底层的 `Zcm.Moving` 类（即工站中的 `pMove` 对象）中，提供了若干套底层的阻塞或非阻塞运动控制 API。
 
-```csharp
-protected bool SafeMoveTo(ValueType stationId, int pointIdx, double safeZ = 0.0, double offsetX = 0.0, double offsetY = 0.0, double offsetR = 0.0, int timeout = 15000)
-{
-    try
-    {
-        // 1. 从本地数据库获取目标点位坐标信息
-        PosInfo targetPos = GetPosInfo(stationId, pointIdx);
-        double targetX = targetPos.X + offsetX;
-        double targetY = targetPos.Y + offsetY;
-
-        AddLog($"[SafeMove] XY轴定位目标: X={targetX:F3}, Y={targetY:F3}", LogsType.Auto, StaInfo.StepIdx, false);
-
-        // 2. 先安全抬起 Z 轴到 safeZ (例如 0.0)
-        if (!MotionAbsMoveAndDone(轴Z, safeZ, -1, timeout))
-        {
-            AddLog("Z轴上升至安全高度超时！", LogsType.Auto, StaInfo.StepIdx, true);
-            return false;
-        }
-
-        // 3. 异步并发移动 X, Y 轴，大幅缩短移动用时
-        MotionAbsMove(轴X, targetX, -1);
-        MotionAbsMove(轴Y, targetY, -1);
-
-        // 4. 同步阻塞等待 X, Y 轴均到达目标坐标
-        bool xyDone = MotionWaitMoveDone(new int[] { 轴X, 轴Y }, new double[] { targetX, targetY }, timeout);
-        if (!xyDone)
-        {
-            AddLog("XY轴平移移动超时！", LogsType.Auto, StaInfo.StepIdx, true);
-            return false;
-        }
-
-        // 5. 确保 XY 轴就位后，Z 轴下降至目标执行高度
-        if (!MotionAbsMoveAndDone(轴Z, targetPos.Z, -1, timeout))
-        {
-            AddLog("Z轴下降至目标坐标超时！", LogsType.Auto, StaInfo.StepIdx, true);
-            return false;
-        }
-
-        AddLog("[SafeMove] 已平稳到达目标点位", LogsType.Auto, StaInfo.StepIdx, false);
-        return true;
-    }
-    catch (Exception ex)
-    {
-        AddLog($"[SafeMove] 捕获异常: {ex.Message}", LogsType.Auto, StaInfo.StepIdx, true);
-        return false;
-    }
-}
-```
-通过调用 `SafeMoveTo`，可以将原本需要 5至6 个步骤 of 轴控制时序合并为单一步骤调用，极大简化了自动流程的开发，提升了代码的健壮性。
-
-### 9.2 框架底层原生运动控制 API 详解
-
-在框架底层的 `Zcm.Moving` 类（即工站中的 `pMove` 对象）中，提供了若干套底层的阻塞或非阻塞的运动控制 API。我们在开发高阶机械轴任务时，应当根据不同的使用场景（如：常规点位对位、离线对位、带纠偏偏置对位等）灵活选择使用。
-
-#### 9.2.1 原生阻塞型运动 API (`WaitDone`)
+#### 9.1.1 原生阻塞型运动 API (`WaitDone`)
 `WaitDone` 系列方法会同步阻塞当前工站线程，直到轴运动就位或检测到运动超时报警。
 
 1. **多轴示教点联动（带 Z 轴安全高度）**
@@ -3126,13 +3068,13 @@ protected bool SafeMoveTo(ValueType stationId, int pointIdx, double safeZ = 0.0,
        double LowSpeedLiftSpeed = 0.0
    )
    ```
-   * **使用场景**：从当前位置安全移动 to 另一个示教点（例如：从取料位置移动至拍照位置）。
+   * **使用场景**：从当前位置安全移动至另一个示教点（例如：从取料位置移动至拍照位置）。
    * **运行逻辑**：
      1. 若 `MultiAxisSync` 为 `true`，且 `ZLiftHeight`（安全抬升高度）设置合理（如 0.0），Z 轴会首先快速上升至 `ZLiftHeight`；
      2. X, Y 等平面轴联动，同步移至目标示教点的 XY 坐标；
      3. 待 XY 轴完全就位后，Z 轴再次下降至该示教点的目标 Z 轴坐标就位。
    * **优点**：单行调用，自带防碰撞和 Z 轴优先抬高逻辑。
-   * **局限**：**不支持实时坐标偏置参数（如相机纠偏的 OffsetX/OffsetY）**。
+   * **局限**：不支持实时坐标偏置参数（如相机纠偏的 OffsetX/OffsetY）。
 
 2. **逻辑单轴绝对运动**
    ```csharp
@@ -3141,25 +3083,14 @@ protected bool SafeMoveTo(ValueType stationId, int pointIdx, double safeZ = 0.0,
    * **使用场景**：在知道某个单轴目标坐标时单独移动该轴（例如：Z 轴单独回零后的安全抬升）。
    * **运行逻辑**：控制 `AxisNum` 指定的轴以 `Speed`（通常传 -1 使用参数配置速度）移动至 `TargetPos`，并最多等待 `MaxWaitTime` 毫秒就位。
 
-#### 9.2.2 原生非阻塞型运动 API (`StaXYMove` 系列)
-如果您需要在示教点的基础坐标上增加相机的对位偏置，且希望自行控制多轴联动的时序，可以使用 `StaXYMove` 等异步控制 API。
+#### 9.1.2 原生非阻塞型运动 API (`StaXYMove` 系列)
+如果您需要在示教点的基础坐标上增加相机的对位偏置，且希望自行控制多轴联动的时序，可以使用 `StaXYMove` 等控制 API。
 * **双轴平移异步偏置运动**：
   `public bool StaXYMove(ValueType StaID, ValueType PosIndex, double Vel, double OffsetX, double OffsetY)`
 * **三轴联移异步偏置运动**：
   `public bool StaXYRMove(ValueType StaID, ValueType PosIndex, double Vel, double OffsetX, double OffsetY, double OffsetR)`
   > [!NOTE]
   > 这些方法仅负责异步下发 XY(R) 轴的定位指令并叠加偏置，并不会自动执行 Z 轴防撞抬起，也不会同步阻塞等待轴到位。
-
----
-
-### 9.3 为什么封装 `SafeMoveTo` 自定义安全移动函数
-
-如 5.2 节所述，底层的 `pMove.WaitDone` 存在设计上的“互斥性”：
-1. **多轴示教点联动 `WaitDone`** 能够安全自动地处理 Z 轴升降，但**不支持纠偏偏移量**；
-2. **非阻塞的 `StaXYRMove`** 支持纠偏偏移量，但**不支持安全 Z 轴防撞和到位检测**；
-3. **单轴 `WaitDone`** 支持纠偏坐标，但需要连续编写 4 步同步时序，流程非常繁琐。
-
-为了合并这一缺陷，我们在 `Task_机械轴基类` 中封装了 `SafeMoveTo` 方法。它将”Z轴安全上升 -> XY轴纠偏联移（支持 Offset） -> Z轴下降到位”的 4 步过程，通过单行代码进行了底层安全封装，既避免了 XY 轴在大行程移动时撞击治具，又简化了自动流程的实现。
 
 ---
 

@@ -7,7 +7,7 @@ category: C#
 tags:
   - 工业控制
   - 运动控制
-draft: false
+draft: true
 ---
 
 # 工业控制与上位机开发：PLC 通讯 (S7.Net) 与运动控制卡 (固高/雷赛) 架构与 API 实战

@@ -8,7 +8,7 @@ tags:
   - 运动控制
   - 工业自动化
   - C#
-draft: false
+draft: true
 ---
 
 # 运动控制卡底层原理与多轴控制工程实战

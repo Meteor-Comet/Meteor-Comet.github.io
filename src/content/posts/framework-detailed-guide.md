@@ -37,6 +37,7 @@ draft: false
   - [3.3 文件读写 (File Operations)](#33-文件读写-file-operations)
   - [3.4 网口与串口通讯 (Communications)](#34-网口与串口通讯-communications)
   - [3.5 软交互信号量与干涉区防撞 (Synchronization & Concurrency)](#35-软交互信号量与干涉区防撞-synchronization--concurrency)
+    - [3.5.4 跨工站 ManualResetEvent 双向握手模式](#354-跨工站-manualresetevent-双向握手模式)
   - [3.6 mFunction 核心工具类与系统状态变量说明](#36-mfunction-核心工具类与系统状态变量说明)
 - [4. WorkShare 子对象 API](#4-workshare-子对象-api)
   - [4.1 mHome — 单轴回零](#41-mhome--单轴回零)
@@ -1111,6 +1112,127 @@ case (int)步序.等相机数据:
 | **`组装允许机械手_标志`** | 组装螺丝主工站（载具到位夹紧） | 左机械轴、右机械轴 | 广播启动信号，通知左右两个打螺丝轴同步脱离等待步序，前往吸取螺丝并拧紧。 |
 | **`右轴螺丝工作完成_标志`** | 右机械轴（拧紧完毕且回退安全原点） | 组装螺丝主工站 | 反馈右轴动作结束。主工站轮询此标志，确信右轴已完全退出工作干涉区。 |
 | **`左轴螺丝工作完成_标志`** | 左机械轴（拧紧完毕且回退安全原点） | 组装螺丝主工站 | 反馈左轴动作结束。主工站轮询此标志，确信左轴已完全退出工作干涉区。 |
+
+#### 3.5.4 跨工站 ManualResetEvent 双向握手模式
+
+> [!TIP]
+> 与 `TasksInteraction` 的轮询式布尔标志不同，`ManualResetEvent`（MRE）是操作系统级线程信号量，调用 `WaitOne()` 会将工站线程**直接挂起休眠**，CPU 占用率降为 0。这使其特别适合「工站 A 完成后通知工站 B」这类需要对方阻塞等待的精准点对点场景。
+
+在标准螺丝机项目（如 **SPK-17**）中，`Task06_工作位` 与 `Task01_锁螺丝1` / `Task02_锁螺丝2` 三个工站之间，完全通过 **双向跨工站 `ManualResetEvent`** 进行协同握手，没有使用任何 `TasksInteraction` 软标志位。
+
+##### 1. 握手架构：三个工站的双向信号链
+
+```
+流线框架(AutoConv)              Task06_工作位                Task01_锁螺丝1    Task02_锁螺丝2
+     │                              │                            │                 │
+     │  自定状态="等待装配"           │                            │                 │
+     │  Task06.Mre.Set() ──────────→│ ① Mre.WaitOne()
+     │                              │   Mre.Reset()
+     │                              │   顶升气缸 → 载具夹紧
+     │                              │
+     │                              │ Task01.Mre.Set() ─────────→│ ② Mre.WaitOne()
+     │                              │ Task02.Mre.Set() ──────────│─────────────────→ Mre.WaitOne()
+     │                              │                            │ 拍照→取螺丝→锁紧  │ 拍照→取螺丝→锁紧
+     │                              │ ③ WaitScrew1.WaitOne()    │                 │
+     │                              │                            │ WaitScrew1.Set()→│
+     │                              │   WaitScrew2.WaitOne()     │                 │ WaitScrew2.Set()→
+     │                              │   收集扭矩数据
+     │                              │   自定状态="装配完成"
+     │←─────────────────────────────│
+     │  自动放行载具流出
+```
+
+##### 2. 三个关键代码节点
+
+**① 流线框架 → Task06：载具到位唤醒**
+
+Task06 在 `流程开始` 步序中先检查 `自定状态`，再执行 `Mre.WaitOne()` 挂起等待流线框架唤醒：
+
+```csharp
+// Task06_工作位.cs — 流程开始步序
+case (int)WorkStep.流程开始:
+    if (mFunction.流水线[(int)LineId.工作流线].自定状态 == "等待装配")
+    {
+        Mre.WaitOne();   // 挂起，等流线框架发 Set() 信号
+        Mre.Reset();     // 醒来后立即复位，防止信号残留
+        SetStep((int)WorkStep.载具顶升上升);
+    }
+    break;
+```
+
+**② Task06 → Task01/02：并发启动双电批**
+
+载具夹紧定位后，Task06 在 `通知开始锁螺丝` 步序中同时 `Set()` 两台电批的 `Mre`，令它们**真正并发**运行，互不阻塞：
+
+```csharp
+// Task06_工作位.cs — 通知开始锁螺丝步序
+case (int)WorkStep.通知开始锁螺丝:
+    Task01_锁螺丝1.Instance.Mre.Set();  // 唤醒左电批线程
+    Task02_锁螺丝2.Instance.Mre.Set();  // 唤醒右电批线程（两者立即并发）
+    SetStep((int)WorkStep.等待锁螺丝完成);
+    break;
+```
+
+Task01/02 在 `等待物料到位` 步序中各自挂起等待：
+
+```csharp
+// TaskBase_锁螺丝.cs — 等待物料到位步序
+case (int)WorkStep.等待物料到位:
+    if (isWork == false && ScrewIndex == 0)
+    {
+        Mre.WaitOne();   // 等 Task06 的 Set() 信号
+        Mre.Reset();
+    }
+    isWork = true;
+    SetStep((int)WorkStep.去拍螺丝孔);
+    break;
+```
+
+**③ Task01/02 → Task06：完成回调通知**
+
+Task01/02 完成全部锁螺丝后，分别 `Set()` Task06 上对应的 `ManualResetEvent` 字段：
+
+```csharp
+// TaskBase_锁螺丝.cs — 通知锁螺丝完成步序
+case (int)WorkStep.通知锁螺丝完成:
+    if (task_Id == (int)Task_ID.Task01_锁螺丝1)
+        Task06_工作位.Instance.WaitScrew1.Set();  // Task01 完成 → 通知 Task06
+    else
+        Task06_工作位.Instance.WaitScrew2.Set();  // Task02 完成 → 通知 Task06
+    isWork = false;
+    SetStep((int)WorkStep.流程开始);
+    break;
+```
+
+Task06 在 `等待锁螺丝完成` 步序中**顺序阻塞**等待两台电批全部汇报完成：
+
+```csharp
+// Task06_工作位.cs — 等待锁螺丝完成步序
+// Task06 字段定义：
+public ManualResetEvent WaitScrew1 = new ManualResetEvent(false);
+public ManualResetEvent WaitScrew2 = new ManualResetEvent(false);
+
+case (int)WorkStep.等待锁螺丝完成:
+    WaitScrew1.WaitOne();   // 阻塞直到 Task01 Set()
+    WaitScrew1.Reset();
+    WaitScrew2.WaitOne();   // 阻塞直到 Task02 Set()
+    WaitScrew2.Reset();
+    // 两台电批全部完成，开始收集扭矩数据
+    Task01_锁螺丝1.Instance.GetScrewTourqeData();
+    Task02_锁螺丝2.Instance.GetScrewTourqeData();
+    SetStep((int)WorkStep.CT计算);
+    break;
+```
+
+##### 3. 与 TasksInteraction 的对比
+
+| 对比维度 | `TasksInteraction`（软标志轮询） | 跨工站 `ManualResetEvent` 双向握手 |
+| :--- | :--- | :--- |
+| **线程挂起** | ❌ 轮询循环，CPU 持续占用 | ✅ `WaitOne()` 真正挂起，CPU 占用为 0 |
+| **实时性** | 受框架扫描周期影响（通常 10ms） | ✅ `Set()` 后对方线程立即唤醒，无延迟 |
+| **代码耦合** | 较松散，通过全局枚举间接通信 | 直接引用对方 `Instance` 字段 |
+| **适用场景** | 一对多广播、带轮询超时判定的复杂状态机 | 精准点对点、并发启动后汇合等待 |
+| **调试可见性** | 框架自动 `AddLog` 打印状态变更 | 需自行在 `Set()`/`WaitOne()` 处添加日志 |
 
 ---
 

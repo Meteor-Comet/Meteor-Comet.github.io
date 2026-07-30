@@ -3,7 +3,7 @@ title: 新电脑开箱必看：Windows 10/11 系统优化、软件隔离与 C �
 published: 2023-12-23
 updated: 2026-07-25
 description: 涵盖新机初始化设置、OptimizerDuck 系统优化工具实战指南、软件与 AppData/Chrome 零风险 C 盘数据迁移（mklink /J 目录联接）全过程
-image: ""
+image: /images/new-pc-todo-2023.jpg
 category: 学习记录
 tags:
   - 系统设置

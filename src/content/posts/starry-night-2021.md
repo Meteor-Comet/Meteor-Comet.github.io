@@ -1,5 +1,5 @@
 ---
-title: 向往波特尔 1 级的夜空
+title: 星
 published: 2021-09-13
 description: 记录一下21年夏天拍摄的星空
 image: /images/starry-night-2021.jpg

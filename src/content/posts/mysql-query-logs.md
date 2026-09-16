@@ -52,7 +52,7 @@ draft: false
 - [5. 系统状态与 Performance Schema](#5-系统状态与-performance-schema)
   - [5.1 SHOW STATUS 关键指标](#51-show-status-关键指标)
   - [5.2 Performance Schema 常用查询](#52-performance-schema-常用查询)
-  - [5.3 information_schema 表统计](#53-informationschema-表统计)
+  - [5.3 information_schema 表统计](#53-information_schema-表统计)
 - [6. 查询优化实战](#6-查询优化实战)
   - [6.1 慢 JOIN 查询优化](#61-慢-join-查询优化)
   - [6.2 复合索引命中](#62-复合索引命中)

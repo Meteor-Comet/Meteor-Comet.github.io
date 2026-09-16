@@ -19,13 +19,16 @@ draft: false
 
 ## 目录
 
-  - [问题场景描述：在利用pyecharts库进行数据可视化学习过程中，遇到了在Jupyter Lab环境中执行bar.render_notebook()后图形未能正常显示的问题。](#问题场景描述在利用pyecharts库进行数据可视化学习过程中遇到了在jupyter-lab环境中执行barrendernotebook后图形未能正常显示的问题)
-  - [问题解决策略：](#问题解决策略)
+- [1. 问题场景描述](#1-问题场景描述)
+- [2. 问题解决策略](#2-问题解决策略)
 
 </div>
 </details>
 
-### 问题场景描述：在利用pyecharts库进行数据可视化学习过程中，遇到了在Jupyter Lab环境中执行bar.render_notebook()后图形未能正常显示的问题。
+### 1. 问题场景描述
+
+在利用 pyecharts 库进行数据可视化学习过程中，遇到了在 Jupyter Lab 环境中执行 `bar.render_notebook()` 后图形未能正常显示的问题。
+
 ```python
 from pyecharts.charts import Bar
 bar = Bar()
@@ -34,16 +37,21 @@ bar.add_yaxis('商家',[5, 20, 36, 10, 75, 90])
 bar.render_notebook()
 ```
 
-### 问题解决策略：
+### 2. 问题解决策略
 
-经过查阅<a href="https://pyecharts.org/#/zh-cn/notebook?id=jupyter-lab" target="_blank">官方文档</a>发现问题源于Jupyter Lab特有的渲染机制，需按以下步骤进行调整：
+经过查阅 [官方文档](https://pyecharts.org/#/zh-cn/notebook?id=jupyter-lab) 发现问题源于 Jupyter Lab 特有的渲染机制，需按以下步骤进行调整：
+
 #### 1. 在顶部声明 Notebook 类型，必须在引入 pyecharts.charts 等模块前声明
 ```python
 from pyecharts.globals import CurrentConfig, NotebookType
 CurrentConfig.NOTEBOOK_TYPE = NotebookType.JUPYTER_LAB
 ```
-#### 2. 在第一次渲染的时候调用 load_javascript() 会预先加载基本 JavaScript 文件到 Notebook 中。如若后面其他图形渲染不出来，则请开发者尝试再次调用，因为 load_javascript 只会预先加载最基本的 js 引用。而主题、地图等 js 文件需要再次按需加载。
-#### 3. load_javascript() 和 render_notebook() 方法需要在不同的 cell 中调用，这是 Notebook 的内联机制，其实本质上我们是返回了带有 _html_, _javascript_ 对象的 class。notebook 会自动去调用这些方法。
+
+#### 2. 在第一次渲染的时候调用 load_javascript()
+会预先加载基本 JavaScript 文件到 Notebook 中。如若后面其他图形渲染不出来，则请开发者尝试再次调用，因为 `load_javascript` 只会预先加载最基本的 js 引用。而主题、地图等 js 文件需要再次按需加载。
+
+#### 3. load_javascript() 和 render_notebook() 方法需要在不同的 cell 中调用
+这是 Notebook 的内联机制，其实本质上我们是返回了带有 `_html_`, `_javascript_` 对象的 class。notebook 会自动去调用这些方法。
 ```python
 from pyecharts.charts import Bar
 bar = Bar()

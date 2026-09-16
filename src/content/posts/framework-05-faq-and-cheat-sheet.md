@@ -25,8 +25,8 @@ seriesOrder: 5
 ## 目录
 
 - [7. ZCM968SOP 控件与方法说明](#7-zcm968sop-控件与方法说明)
-  - [📄 控件说明书下载](#控件说明书下载)
-- [8. Setup_Load.cs 程序启动初始化](#8-setuploadcs-程序启动初始化)
+  - [控件说明书下载](#控件说明书下载)
+- [8. Setup_Load.cs 程序启动初始化](#8-setup_loadcs-程序启动初始化)
   - [执行流程](#执行流程)
   - [初始化顺序重要性](#初始化顺序重要性)
 - [9. 机械臂基类开发最佳实践](#9-机械臂基类开发最佳实践)
@@ -59,7 +59,7 @@ seriesOrder: 5
 > 本章内容来自 ZCM968SOP 原文，详细说明各 UI 控件的配置与使用方法。
 > 完整控件截图与参数说明请查阅以下官方 PDF 说明书：
 
-### 📄 控件说明书下载
+### 控件说明书下载
 
 | 文档名称 | 说明 | 操作 |
 |----------|------|------|
@@ -376,13 +376,13 @@ if (mDoDi.WaitDi(InNo.流线1到位信号, 1))
 
 | 核心 API / 技术主题 | 详细原理与代码示例导航链接 |
 | :--- | :--- |
-| **`TasksInteraction` 跨线程协同握手** | 详见 **[3.5.3 TasksInteraction 状态详解与使用指南](#353-tasksinteraction-状态详解与使用指南)** |
-| **`mSend.WaitDone` TCP/串口网络收发** | 详见 **[3.4.3 TCP 双向应答最佳实践示例](#343-tcp-双向应答最佳实践示例最推荐模式)** 与 **[6.7.4 工业级 CCD 视觉扫码与拍照通信标准开发 SOP](#674-工业级-ccd-视觉扫码scan与拍照photo通信标准开发-sop)** |
-| **`mDoDi.WaitDone` 气缸/IO动作等待** | 详见 **[4.6 mDoDi / mDoDiS — 数字 IO 等待与简化版](#46-mdodi--mdodis--数字-io-等待与简化版)** |
-| **`mFunction.OverTime` 非阻塞超时判定** | 详见 **[3.2.2 mFunction.OverTime 超时处理](#322-mfunctionovertime)** 与 **[6.4 超时计时器重置与防虚警防呆逻辑](#64-超时计时器重置与防虚警防呆逻辑)** |
-| **流水线死锁排查与拓扑配置** | 详见 **[5.11 传送带死锁排查 SOP 与三大致命根因剖析](#511-传送带死锁排查-sop-与三大致命根因剖析)** |
-| **机械轴屏蔽模式 (`是否屏蔽`)** | 详见 **[2.7.2 机械手关闭屏蔽机制](#272-机械手关闭屏蔽-block_leftrobot--block_rightrobot)** |
-| **系统 5 大运行模式与脱机仿真** | 详见 **[2.9 系统 5 大运行模式与多层控制原理](#29-系统-5-大运行模式与多层控制原理)** 与 **[6.8 脱机空跑（虚拟仿真）实现 SOP](#68-脱机空跑虚拟仿真实现-sop)** |
+| **`TasksInteraction` 跨线程协同握手** | 详见 **[3.5.3 TasksInteraction 软交互信号量状态详解与使用指南](/posts/framework-02-motion-and-workshare-api/#353-tasksinteraction-软交互信号量状态详解与使用指南)** |
+| **`mSend.WaitDone` TCP/串口网络收发** | 详见 **[3.4.3 TCP 双向应答最佳实践示例](/posts/framework-02-motion-and-workshare-api/#343-tcp-双向应答最佳实践示例最推荐模式)** 与 **[6.7.4 工业级 CCD 视觉扫码与拍照通信标准开发 SOP](/posts/framework-04-task-sop-and-concurrency/#674-工业级-ccd-视觉扫码scan与拍照photo通信标准开发-sop)** |
+| **`mDoDi.WaitDone` 气缸/IO动作等待** | 详见 **[4.6 mDoDi / mDoDiS — 数字 IO 等待与简化版](/posts/framework-02-motion-and-workshare-api/#46-mdodi--mdodis--数字-io-等待与简化版)** |
+| **`mFunction.OverTime` 非阻塞超时判定** | 详见 **[3.2.2 mFunction.OverTime 超时处理](/posts/framework-02-motion-and-workshare-api/#322-mfunctionovertime)** 与 **[6.4 超时计时器重置与防虚警防呆逻辑](/posts/framework-04-task-sop-and-concurrency/#64-超时计时器重置与防虚警防呆逻辑)** |
+| **流水线死锁排查与拓扑配置** | 详见 **[5.11 传送带死锁排查 SOP 与三大致命根因剖析](/posts/framework-03-conveyor-system/#511-传送带死锁排查-sop-与三大致命根因剖析)** |
+| **机械轴屏蔽模式 (`是否屏蔽`)** | 详见 **[2.7.2 机械手关闭屏蔽机制](/posts/framework-01-architecture-and-hardware/#272-机械手关闭屏蔽-屏蔽左轴--屏蔽右轴)** |
+| **系统 5 大运行模式与脱机仿真** | 详见 **[2.9 系统 5 大运行模式与多层控制原理](/posts/framework-01-architecture-and-hardware/#29-系统-5-大运行模式与多层控制原理)** 与 **[6.8 脱机空跑（虚拟仿真）实现 SOP](/posts/framework-04-task-sop-and-concurrency/#68-脱机空跑虚拟仿真实现-sop)** |
 
 ---
 

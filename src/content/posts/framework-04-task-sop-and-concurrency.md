@@ -613,10 +613,10 @@ public static bool 解析拍照数据(string rawData, out string detailMsg)
 
 #### 6.8.2 系统参数配置
 
-实现脱机空跑需首先确保控制卡、伺服轴、I/O 映射以及系统变量参数正确配置。具体的 Excel 参数填写、XML 转换映射与 C# 枚举（`EnumName.cs`）同步规则，请直接参考 **[第 2 章 硬件参数与系统配置](#2-硬件参数与系统配置)**：
-* 控制卡与伺服轴配置请参阅 [2.1 Excel 参数配置](#21-硬件参数与系统参数的-excel-配置-开发第一步)；
-* 数字 I/O 与系统变量映射请参阅 [2.3 XML 数据库转换映射规则](#23-excel-参数配置与-xml-数据库转换映射规则)；
-* 枚举绑定与代码映射请参阅 [2.2 C# 枚举同步 SOP](#22-c-枚举-enumnamecs-绑定关系与手动同步-sop)。
+实现脱机空跑需首先确保控制卡、伺服轴、I/O 映射以及系统变量参数正确配置。具体的 Excel 参数填写、XML 转换映射与 C# 枚举（`EnumName.cs`）同步规则，请直接参考 **[第 2 章 硬件参数与系统配置](/posts/framework-01-architecture-and-hardware/#2-硬件参数与系统配置)**：
+* 控制卡与伺服轴配置请参阅 [2.1 Excel 参数配置](/posts/framework-01-architecture-and-hardware/#21-硬件参数与系统参数的-excel-配置-开发第一步)；
+* 数字 I/O 与系统变量映射请参阅 [2.3 XML 数据库转换映射规则](/posts/framework-01-architecture-and-hardware/#23-excel-参数配置与-xml-数据库转换映射规则)；
+* 枚举绑定与代码映射请参阅 [2.2 C# 枚举同步 SOP](/posts/framework-01-architecture-and-hardware/#22-c-枚举-enumnamecs-绑定关系与手动同步-sop)。
 
 ---
 

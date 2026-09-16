@@ -2,6 +2,8 @@
 import path from "node:path";
 import License from "@components/misc/License.astro";
 import Markdown from "@components/misc/Markdown.astro";
+import SeriesBanner from "@components/misc/SeriesBanner.astro";
+import SeriesNav from "@components/misc/SeriesNav.astro";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
@@ -18,13 +20,39 @@ export async function getStaticPaths() {
 	const blogEntries = await getSortedPosts();
 	return blogEntries.map((entry) => ({
 		params: { slug: entry.slug },
-		props: { entry },
+		props: { entry, allPosts: blogEntries },
 	}));
 }
 
-const { entry } = Astro.props;
-const { Content, headings } = await entry.render();
+const { entry, allPosts: propPosts } = Astro.props;
+const allPosts = propPosts || (await getSortedPosts());
 
+const seriesName = entry.data.series;
+let seriesPosts: typeof allPosts = [];
+let currentSeriesIndex = -1;
+let prevSeriesPost: (typeof allPosts)[0] | null = null;
+let nextSeriesPost: (typeof allPosts)[0] | null = null;
+
+if (seriesName) {
+	seriesPosts = allPosts
+		.filter((p) => p.data.series === seriesName && (import.meta.env.PROD ? p.data.draft !== true : true))
+		.sort((a, b) => {
+			const orderA = a.data.seriesOrder ?? a.data.series_order ?? 999;
+			const orderB = b.data.seriesOrder ?? b.data.series_order ?? 999;
+			if (orderA !== orderB) return orderA - orderB;
+			return new Date(a.data.published).getTime() - new Date(b.data.published).getTime();
+		});
+
+	currentSeriesIndex = seriesPosts.findIndex((p) => p.slug === entry.slug);
+	if (currentSeriesIndex > 0) {
+		prevSeriesPost = seriesPosts[currentSeriesIndex - 1];
+	}
+	if (currentSeriesIndex >= 0 && currentSeriesIndex < seriesPosts.length - 1) {
+		nextSeriesPost = seriesPosts[currentSeriesIndex + 1];
+	}
+}
+
+const { Content, headings } = await entry.render();
 const { remarkPluginFrontmatter } = await entry.render();
 
 const jsonLd = {
@@ -106,9 +134,23 @@ const disqus_url = "https://meteor-comet.github.io/posts/" + entry.slug + "/";
             }
 
 
+            {seriesName && seriesPosts.length > 0 && (
+                <SeriesBanner series={seriesName} seriesPosts={seriesPosts} currentSlug={entry.slug} />
+            )}
+
             <Markdown class="mb-6 markdown-content onload-animation">
                 <Content />
             </Markdown>
+
+            {seriesName && seriesPosts.length > 0 && (
+                <SeriesNav
+                    series={seriesName}
+                    prevPost={prevSeriesPost}
+                    nextPost={nextSeriesPost}
+                    currentIndex={currentSeriesIndex}
+                    totalCount={seriesPosts.length}
+                />
+            )}
 
             {licenseConfig.enable && <License title={entry.data.title} slug={entry.slug} pubDate={entry.data.published} class="mb-6 rounded-xl license-container onload-animation"></License>}
 

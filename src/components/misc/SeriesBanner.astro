@@ -1,0 +1,84 @@
+---
+import { Icon } from "astro-icon/components";
+import { getPostUrlBySlug } from "../../utils/url-utils";
+
+interface Props {
+	series: string;
+	seriesPosts: {
+		slug: string;
+		data: {
+			title: string;
+			seriesOrder?: number;
+			series_order?: number;
+		};
+	}[];
+	currentSlug: string;
+}
+
+const { series, seriesPosts, currentSlug } = Astro.props;
+const currentIndex = seriesPosts.findIndex((p) => p.slug === currentSlug);
+const currentOrder = currentIndex >= 0 ? currentIndex + 1 : 1;
+const totalCount = seriesPosts.length;
+---
+
+<div class="my-6 rounded-2xl p-4 md:p-5 bg-gradient-to-r from-[var(--primary)]/10 via-[var(--primary)]/5 to-transparent border border-[var(--primary)]/20 transition">
+    <div class="flex items-start md:items-center justify-between gap-3 flex-col md:flex-row">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-[var(--primary)]/15 text-[var(--primary)] flex items-center justify-center shrink-0">
+                <Icon name="material-symbols:menu-book-rounded" class="text-2xl" />
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold px-2 py-0.5 rounded-md bg-[var(--primary)] text-white dark:text-black">
+                        专栏系列
+                    </span>
+                    <span class="text-xs font-medium text-black/50 dark:text-white/50">
+                        第 {currentOrder} / {totalCount} 篇
+                    </span>
+                </div>
+                <div class="text-base md:text-lg font-bold text-black/90 dark:text-white/90 mt-0.5">
+                    {series}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Collapsible Series Table of Contents -->
+    <details class="group mt-3 pt-3 border-t border-[var(--primary)]/15">
+        <summary class="cursor-pointer text-sm font-medium text-[var(--primary)] hover:opacity-80 flex items-center justify-between select-none py-1">
+            <span class="flex items-center gap-1.5">
+                <Icon name="material-symbols:format-list-numbered-rounded" class="text-base" />
+                <span>展开查看专栏完整目录（共 {totalCount} 篇）</span>
+            </span>
+            <Icon name="material-symbols:expand-more-rounded" class="text-xl transition-transform duration-200 group-open:rotate-180" />
+        </summary>
+        <div class="mt-2.5 space-y-1.5 pt-1">
+            {seriesPosts.map((p, idx) => {
+                const isCurrent = p.slug === currentSlug;
+                const orderNum = idx + 1;
+                return isCurrent ? (
+                    <div class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-[var(--primary)]/15 text-[var(--primary)] font-bold text-sm">
+                        <span class="w-6 h-6 rounded-md bg-[var(--primary)] text-white dark:text-black text-xs flex items-center justify-center shrink-0">
+                            {orderNum}
+                        </span>
+                        <span class="truncate flex-1">{p.data.title}</span>
+                        <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-[var(--primary)]/20 shrink-0">
+                            当前阅读
+                        </span>
+                    </div>
+                ) : (
+                    <a
+                        href={getPostUrlBySlug(p.slug)}
+                        class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 text-black/75 dark:text-white/75 hover:text-[var(--primary)] dark:hover:text-[var(--primary)] transition text-sm group/item"
+                    >
+                        <span class="w-6 h-6 rounded-md bg-black/5 dark:bg-white/10 text-black/60 dark:text-white/60 text-xs flex items-center justify-center shrink-0 group-hover/item:bg-[var(--primary)]/20 group-hover/item:text-[var(--primary)] transition">
+                            {orderNum}
+                        </span>
+                        <span class="truncate flex-1">{p.data.title}</span>
+                        <Icon name="material-symbols:chevron-right-rounded" class="text-base opacity-0 group-hover/item:opacity-100 transition shrink-0" />
+                    </a>
+                );
+            })}
+        </div>
+    </details>
+</div>

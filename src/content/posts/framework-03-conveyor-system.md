@@ -29,6 +29,14 @@ seriesOrder: 3
   - [5.2 Conveyor.xml 配置文件](#52-conveyorxml-配置文件)
   - [5.3 nConveyor 状态机（框架内部）](#53-nconveyor-状态机框架内部)
   - [5.4 ConvEvent 用户可编程事件（A0.Conveyors.cs）](#54-convevent-用户可编程事件a0conveyorscs)
+    - [5.4.1 双线程握手时序全景图](#541-双线程握手时序全景图)
+    - [5.4.2 模块 1：流线初始化与 PLC 交互配置 (ConvLoad)](#542-模块-1流线初始化与-plc-交互配置-convload)
+    - [5.4.3 模块 2：流线事件分发中枢 (ConvRun)](#543-模块-2流线事件分发中枢-convrun)
+    - [5.4.4 模块 3：当站业务处理与工站握手 (HandleCurrentStation)](#544-模块-3当站业务处理与工站握手-handlecurrentstation)
+    - [5.4.5 模块 4：流线间数据传递与双缓冲清理 (Data_Change)](#545-模块-4流线间数据传递与双缓冲清理-data_change)
+    - [5.4.6 模块 5：多工位共享马达与起停调速驱动 (Start_Send / Stop_Send)](#546-模块-5多工位共享马达与起停调速驱动-start_send--stop_send)
+    - [5.4.7 模块 6：五大工业输送异常闭环处理](#547-模块-6五大工业输送异常闭环处理)
+    - [5.4.8 流线架构总结与技术讲解要点](#548-流线架构总结与技术讲解要点)
   - [5.5 完整数据流示例](#55-完整数据流示例)
   - [5.6 Conveyor.xml 与 InNo/OutNo 的映射关系](#56-conveyorxml-与-innooutno-的映射关系)
   - [5.7 标准流线开发流程与代管机制](#57-标准流线开发流程与代管机制)
@@ -222,77 +230,351 @@ StepIdx=160  LoopCheck            计算CT，回到10
 
 ### 5.4 ConvEvent 用户可编程事件（A0.Conveyors.cs）
 
-`ConvEvent` 是用户可编程的事件处理器。当 `nConveyor` 状态机的状态发生变化时，通过 `mEvent` 委托调用 `ConvRun()`。
+在 BZProject / BoTech 这类标准化工业控制框架中，**流水线物料调度线程**与**工站加工线程**高度解耦。输送线是一个独立的线程循环，工站也是一个独立的线程循环，两者不直接互相强耦合调用，而是通过 `CustStatus`（自定义业务状态字）和 `SubStepIdx`（流线当站子步序）进行“生产者-消费者”异步握手。
 
-#### ConvRun 主调度器
+一份生产环境级别的标准流线控制文件（如 `A0.Conveyors.cs`）涵盖以下 **六大标准模块**：
+
+```
+A0.Conveyors.cs 标准架构
+├── 模块 1：流线初始化与外部 PLC 对接 (nConvEvent.ConvLoad)
+├── 模块 2：流线事件分发中枢 (ConvEvent.ConvRun)
+├── 模块 3：当站业务处理与双线程握手 (ConvEvent.HandleCurrentStation)
+├── 模块 4：流线间数据传递与双缓冲清理 (ConvEvent.Data_Change)
+├── 模块 5：多工位共享马达与起停调速驱动 (Start_Send / Stop_Send / Reduce_Speed)
+└── 模块 6：五大工业输送异常闭环处理 (ObstacleRetract / FlowOut / FlowIn 等)
+```
+
+---
+
+#### 5.4.1 双线程握手时序全景图
+
+当载具在流水线上运动并被气缸拦截时，流线状态机与工站任务线程按照以下标准时序进行无锁状态驱动闭环：
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Engine as AutoConv 底层状态机
+    participant Conv as A0.Conveyors (HandleCurrentStation)
+    participant Task as 5_Tasks (Task01/02 AutoRun)
+
+    Note over Engine: 载具被阻挡气缸拦截，到位光电触发
+    Engine->>Conv: 状态切为 CURRENT_STATION_PROCESSING<br/>触发回调 HandleCurrentStation(StaNum)
+    
+    rect rgb(240, 248, 255)
+    Note over Conv: SubStepIdx == 10 (初次到达)
+    Conv->>Conv: ConveyorData[StaNum].CustStatus = "WAITING_FOR_ASSEMBLY"<br/>ConveyorData[StaNum].SubStepIdx = 20
+    Conv-->>Engine: return false (未完成，流线阻挡继续抬起保持拦截)
+    end
+
+    rect rgb(255, 250, 240)
+    Note over Task: Task01 处于 Step 20 等待
+    Task->>Task: 监听到 CustStatus == "WAITING_FOR_ASSEMBLY"
+    Task->>Task: 顶升定位 -> 扫码 -> CCD 拍照多点检测 -> 顶降完成
+    Task->>Conv: ConveyorData[StaNum].CustStatus = "ASSEMBLY_COMPLETED"
+    end
+
+    rect rgb(240, 255, 240)
+    Note over Conv: 流线线程高速轮询 HandleCurrentStation(StaNum)<br/>此时 SubStepIdx == 20
+    Conv->>Conv: 监听到 CustStatus == "ASSEMBLY_COMPLETED"
+    Conv->>Conv: SubStepIdx = 0 (重置子步序)
+    Conv-->>Engine: return true (当站做工完成！)
+    end
+
+    Note over Engine: 接收到 true，流线自动降阻挡、启马达、送载具出站
+```
+
+---
+
+#### 5.4.2 模块 1：流线初始化与 PLC 交互配置 (ConvLoad)
+
+负责流水线实体的分配、事件委托挂载，以及与上游机台、下游机台的 PLC 标签或工业 I/O 握手信号绑定：
+
+```csharp
+public static void ConvLoad(int[] ConvIndex, WkManager.TaskRunType RunMode)
+{
+    WkManager.ConvRunType = RunMode;
+    WkManager.mConvList.Clear();
+    
+    // 实例化每一个流线工位对象
+    for (int i = 0; i < ConvIndex.Length; i++)
+    {
+        int id = ConvIndex[i];
+        zConveyor[id] = new nConveyor((short)id);
+        ConvEvent[id] = new ConvEvent();
+        WkManager.mConvList.Add(zConveyor[id]);
+        
+        // 关键：将流线事件循环挂接至具体的处理方法
+        zConveyor[id].mEvent += ConvEvent[id].ConvRun;
+        zConveyor[id].ConvData = mConvData[id];
+        zConveyor[id].mConvData_BackUp = mConvDatatemp[id];
+        sLin_Logs[id] = new LogsHelper.cLogs("sLine_" + id, id);
+    }
+
+    // 绑定前机/后机对接信号 (Ethernet/IP 标签 或 IO 点)
+    zConveyor[对接前机内流线编号].IO_In_关闭主动要料_CloseRequestSignal = true;
+    zConveyor[对接前机内流线编号].From前机_上主流线有料 += From前机_内主流线有料;
+    zConveyor[对接前机内流线编号].To前机_上主流线要料 += To前机_内主流线要料;
+    
+    zConveyor[对接后机内流线编号].To后机_上主流线有料 += To后机_内主流线有料;
+    zConveyor[对接后机内流线编号].From后机_上主流线要料 += From后机_内主流线要料;
+}
+```
+
+---
+
+#### 5.4.3 模块 2：流线事件分发中枢 (ConvRun)
+
+底层引擎 `AutoConv` 内部是一个通用的生命周期状态驱动器，通过状态字符串驱动不同的节点。`ConvRun` 负责把底层引擎事件分发到具体的业务方法上：
 
 ```csharp
 public void ConvRun(short ConvID)
 {
-    if (CurStnStatus == "PRODUCT_ARRIVED")              → Data_Change()
-    if (CurStnStatus == "CURRENT_STATION_PROCESSING")   → HandleCurrentStation()
-    if (CurStnStatus == "CARRIER_RELOAD")               → ReLoadCarrier()
-    if (CurStnStatus == "START_TRANSFER")               → Start_Send()
-    if (CurStnStatus == "STOP_TRANSFER")                → Stop_Send()
-    if (CurStnStatus == "START_DECELERATING")           → Reduce_Speed()
-    if (CurStnStatus == "ObstacleRetract_ERROR")        → 异常弹框
-    if (CurStnStatus == "ObstacleLifting_ERROR")        → 异常弹框
-    if (CurStnStatus == "FLOWOUT_ERROR")                → 异常弹框
-    if (CurStnStatus == "RECEIVING_ERROR")              → 异常弹框
-    if (CurStnStatus == "FlowIn_ERROR")                 → 异常弹框
+    // 1. 载具刚到位：触发流线间数据交换
+    if (mFunction.ConveyorData[ConvID].CurStnStatus == "PRODUCT_ARRIVED")
+    {
+        if (Data_Change(ConvID)) 
+            mFunction.ConveyorData[ConvID].CurStnStatus = "SWAP_COMPLETED";
+    }
+
+    // 2. 当站做工处理：触发 HandleCurrentStation
+    if (mFunction.ConveyorData[ConvID].CurStnStatus == "CURRENT_STATION_PROCESSING")
+    {
+        if (HandleCurrentStation(ConvID))
+        {
+            if (mFunction.ConveyorData[ConvID].CurStnStatus != "RESTART")
+                mFunction.ConveyorData[ConvID].CurStnStatus = "PROCESSING_COMPLETED";
+        }
+    }
+
+    // 3. 载具重载：适用于机械手把载具取走，做完工再放回流水线的场景
+    if (mFunction.ConveyorData[ConvID].CurStnStatus == "CARRIER_RELOAD")
+    {
+        if (ReLoadCarrier_载具重载(ConvID))
+            mFunction.ConveyorData[ConvID].CurStnStatus = "RELOAD_COMPLETED";
+    }
+
+    // 4. 马达启停与调速
+    if (mFunction.ConveyorData[ConvID].CurStnStatus == "START_TRANSFER") Start_Send(ConvID);
+    if (mFunction.ConveyorData[ConvID].CurStnStatus == "STOP_TRANSFER") Stop_Send(ConvID);
+    if (mFunction.ConveyorData[ConvID].CurStnStatus == "START_DECELERATING") Reduce_Speed(ConvID);
+
+    // 5. 异常拦截与报警提示处理 (阻挡缩回/伸出异常、流出/流入/接收异常)
+    if (mFunction.ConveyorData[ConvID].CurStnStatus == "ObstacleRetract_ERROR")
+    {
+        HandleObstacleError(ConvID);
+    }
 }
 ```
 
-#### HandleCurrentStation — 当站处理（核心）
+---
 
-连接传送带框架和 Task 代码的桥梁：
+#### 5.4.4 模块 3：当站业务处理与工站握手 (HandleCurrentStation)
+
+`HandleCurrentStation(int StaNum)` 是整个流线最核心的业务逻辑入口，连接流水线状态机与具体加工工站任务（`Task`）。
+
+##### 1. 标准实现代码原型
 
 ```csharp
 public static bool HandleCurrentStation(int StaNum)
 {
+    // 1. 暂停保护：设备暂停时，流线状态不向前推进
+    if (mFunction.SysState == mFunction.State.PAUSE)
+        return false;
+
+    // 2. 脱机/仿真/空跑模式下的容错与自动推进
+    if (mGlobal.OffLine_VirtualRunMode || VirtualMode)
+    {
+        return HandleCurrentStation_Virtual(StaNum);
+    }
+
+    // 3. 实体机台按工位编号分别处理
     switch (StaNum)
     {
-        case 1:  // 传送带1
-            if (SubStepIdx == 10)
+        case 1:   // 工位1：入口/清洁位（无复杂装配，直接放行）
+            if (mFunction.ConveyorData[StaNum].SubStepIdx == 10)
             {
-                ConvData.Clear();                              // 清空旧数据
-                CustStatus = "WAITING_FOR_ASSEMBLY";           // ← 通知工位
-                SubStepIdx = 20;
+                nConvEvent.zConveyor[StaNum].ConvData.Clear();
+                mFunction.ConveyorData[StaNum].SubStepIdx = 20;
             }
-            if (CustStatus == "ASSEMBLY_COMPLETED")            // ← 工位完成
+            return true;  // 直接放行流向下游
+
+        case 2:   // 工位2：上 CCD 检测工位（与 Task01 配合）
+            // 子步骤 10：载具初次到位，向工站发送“开始做工”通知
+            if (mFunction.ConveyorData[StaNum].SubStepIdx == 10)
             {
-                return true;                                   // 告诉框架：可以流走
+                mFunction.ConveyorData[StaNum].CustStatus = "WAITING_FOR_ASSEMBLY";
+                mFunction.ConveyorData[StaNum].SubStepIdx = 20;
+            }
+            
+            // 子步骤 20：持续等待工站做工完毕
+            if (mFunction.ConveyorData[StaNum].CustStatus == "ASSEMBLY_COMPLETED")
+            {
+                mFunction.ConveyorData[StaNum].SubStepIdx = 0; // 清空子步序
+                return true;  // 返回 true 代表本站结束，流线后台自动降阻挡放行！
+            }
+
+            // 防呆容错：如果工站未处于运行态，超时后自动放行，避免整线锁死
+            if (Task01_上CCD检测站.Instance.State != State.RUNNING &&
+                mFunction.OverTime(AutoConv.AutoConv.StartTimer[StaNum], 1000))
+            {
+                mFunction.ConveyorData[StaNum].SubStepIdx = 0;
+                return true;
             }
             break;
+
+        case 3:   // 工位3：搬运机械手取放料位（与 Task02 配合）
+            if (mFunction.ConveyorData[StaNum].SubStepIdx == 10)
+            {
+                mFunction.ConveyorData[StaNum].CustStatus = "WAITING_FOR_ASSEMBLY";
+                mFunction.ConveyorData[StaNum].SubStepIdx = 20;
+            }
+            // 等待 Task02 机械手把载具夹取到安全高度后回写 ASSEMBLY_COMPLETED
+            if (mFunction.ConveyorData[StaNum].CustStatus == "ASSEMBLY_COMPLETED")
+            {
+                mFunction.ConveyorData[StaNum].SubStepIdx = 0;
+                return true;
+            }
+            break;
+
+        case 4:   // 工位4：回流线顶升工位（与 Task03 配合）
+            if (mFunction.ConveyorData[StaNum].SubStepIdx == 10)
+            {
+                mFunction.ConveyorData[StaNum].CustStatus = "WAITING_FOR_ASSEMBLY";
+                mFunction.ConveyorData[StaNum].SubStepIdx = 20;
+            }
+            if (mFunction.ConveyorData[StaNum].CustStatus == "ASSEMBLY_COMPLETED")
+            {
+                mFunction.ConveyorData[StaNum].SubStepIdx = 0;
+                return true;
+            }
+            break;
+
+        case 5:   // 工位5：回流线出口位
+            return true;  // 直接放行还料给前机
+    }
+
+    // 未完成做工前，恒定返回 false（阻挡气缸保持升起拦截）
+    return false;
+}
+```
+
+##### 2. 核心写法关键技术点剖析
+
+*   **为什么要用 `SubStepIdx`（子步序单脉冲触发）？**
+    *   `HandleCurrentStation` 是被流线线程每隔数毫秒高速循环调用的。
+    *   如果不使用 `SubStepIdx`，每次循环都会重复执行 `CustStatus = "WAITING_FOR_ASSEMBLY"`。若工站已将其改写为其他处理中状态，流线线程便会反复强行覆盖篡改。
+    *   **标准防抖写法**：初次进入时默认 `SubStepIdx == 10`，写入一次 `"WAITING_FOR_ASSEMBLY"` 后立即自增推进到 `SubStepIdx = 20`；此后程序只在子步序 20 中静候 `"ASSEMBLY_COMPLETED"`，确保指令**只触发一次（单脉冲）**。
+*   **为什么必须返回 `false`，做完后才返回 `true`？**
+    *   在底层状态机 `AutoConv.cs` 中，只有当 `HandleCurrentStation(StaNum)` 返回 `true` 时，流线引擎才判定“本站做工结束”，随后才会启动降阻挡、开马达动作。
+    *   如果在做完工之前误返回了 `true`，**流线会立即降下阻挡气缸将物料冲走**，导致机械手抓空或在工位顶升检测时发生严重撞机事故。
+*   **防呆容错：脱机/空跑/单站暂停卡死防护（Timeout Fail-Safe）**
+    *   工业现场中，若操作员仅启动了流水线，但因调试需要单独将 `Task01` 工站置为暂停或脱机，载具将卡死在工位 2 永远等不到 `"ASSEMBLY_COMPLETED"`。
+    *   通过判断 `Task.State != State.RUNNING` 配合非阻塞超时 `mFunction.OverTime(timer, 1000)`，超时后自动放行，可彻底避免流水线死锁。
+
+---
+
+#### 5.4.5 模块 4：流线间数据传递与双缓冲清理 (Data_Change)
+
+当物料在物理皮带上由上游移动到下游工位时，物料的 SN 条码、测试数据和穴位信息必须顺流传递，且前一个工位的数据必须及时清空，防止产生“幽灵数据”残留与混淆：
+
+```csharp
+public static bool Data_Change(int StaNum)
+{
+    if (mFunction.ConveyorData[StaNum].SubStepIdx == 10)
+    {
+        // 获取上游工位编号，清空上游工位的残留数据
+        int prevStation = mFunction.ConveyorData[StaNum].PrevFLNum;
+        if (prevStation != -1 && mConvData[prevStation] != null)
+        {
+            mConvData[prevStation].Clear(); // 清除上游数据，实现严格单向流转
+        }
+        return true;  // 数据交接完成
     }
     return false;
 }
 ```
 
-#### Start_Send / Stop_Send — 电机控制
+---
+
+#### 5.4.6 模块 5：多工位共享马达与起停调速驱动 (Start_Send / Stop_Send)
+
+在自动化设备中，流水线往往不是每个工位都独立配备一台电机。通常是多工位共用一台驱动马达（例如工位 1、2、3 共用一台主流线马达，工位 4、5 共用一台回流线马达）。
+
+此时，`Stop_Send` 绝对**不能简单地执行 `Motor.Stop()`**，必须进行互锁保护：
 
 ```csharp
-// 电机启动（框架在 StepIdx=100 时调用）
-private static bool Start_Send(int ConvID) { return true; }
-
-// 电机停止（框架在 StepIdx=40/150 时调用）
-// 关键：传送带成对共用电机（1-2、3-4、5-6、7-8）
 private static bool Stop_Send(int ConvID)
 {
     switch (ConvID)
     {
-        case 1: case 2:
-            if (ConveyorData[1].MotorRun | ConveyorData[2].MotorRun)
-                return true;  // 配对还在跑，不停
-            return true;
-        case 3: case 4:
-            if (ConveyorData[3].MotorRun | ConveyorData[4].MotorRun)
+        case 1:
+        case 2:
+        case 3: 
+            // 互锁保护：只有当同一物理皮带线上的 1、2、3 号工位全部都不需要运转时，才能真正关停变频器/伺服！
+            // 如果 2 号站做完要停，但 1 号站正在送料进来，马达必须保持运转！
+            if (mFunction.ConveyorData[1].MotorRun || 
+                mFunction.ConveyorData[2].MotorRun || 
+                mFunction.ConveyorData[3].MotorRun)
+            {
                 return true;
+            }
+            // 真实硬件断电停马达
+            // mGlobal.mDoReset(OutNo.流线2工作流线正转);
+            return true;
+
+        case 4:
+        case 5:
+            if (mFunction.ConveyorData[4].MotorRun || mFunction.ConveyorData[5].MotorRun)
+            {
+                return true;
+            }
+            // mGlobal.mDoReset(OutNo.回流线工作马达正转);
             return true;
     }
     return true;
 }
 ```
+
+---
+
+#### 5.4.7 模块 6：五大工业输送异常闭环处理
+
+流水线在物理输送过程中极易出现卡料、气缸卡滞或传感器失灵。标准流线文件必须针对以下五大异常构建闭环弹窗，允许现场人员干预与重试：
+
+| 异常事件 | 触发条件 | 安全防呆机制 |
+| :--- | :--- | :--- |
+| **`ObstacleRetract_ERROR`** | 阻挡气缸缩回异常（原点磁簧无信号） | 严禁放行，防止载具高速硬撞未完全缩回的阻挡销 |
+| **`ObstacleLifting_ERROR`** | 阻挡气缸伸出异常（动点磁簧无信号） | 阻止后方载具流入，防止冲入正在做工的工位发生挤压撞机 |
+| **`FLOWOUT_ERROR`** | 放行后流出异常 | 出料光电在设定超时（如 5s）内未感应到载具离开，判定皮带打滑或中途卡板 |
+| **`RECEIVING_ERROR`** | 下游拉料接收异常 | 开启马达后，在设定超时内入料光电未感应到板子到达 |
+| **`FlowIn_ERROR`** | 前机流入异常 | 上游前机已发出料握手信号，本机入口光电却长时间未感应到物料进入 |
+
+所有异常均使用框架的标准弹窗交互实现闭环重试：
+
+```csharp
+if (AlarmCenter.XAlarmRecord.Instance.TipsDiglogForm(
+        (int)Task_ID.Machine, 
+        Task_ID.Machine.ToString(), 
+        StaNum + "工位阻挡气缸缩回异常,请检查？", 
+        "", true, "Retry", "Cancel") == AlarmCenter.mDialogResult.OK)
+{
+    return "Retry";   // 用户点重试：流线引擎重新下发气缸动作
+}
+else
+{
+    return "Cancel";  // 用户点取消：流线强行跳过该工步
+}
+```
+
+---
+
+#### 5.4.8 流线架构总结与技术讲解要点
+
+在向团队或评审讲解流水线控制文件时，建议用以下三点进行技术提炼：
+
+1. **状态驱动引擎**：流水线将物料在物理皮带上的流动划分为*流入、到位、数据交换、当站做工、放行、流出*等标准阶段，通过事件委托解耦分发。
+2. **`HandleCurrentStation` 是工站与流线的唯一契约**：流水线写入 `"WAITING_FOR_ASSEMBLY"` 唤醒装配工站，工站做完后回写 `"ASSEMBLY_COMPLETED"` 触发流线放行，实现高内聚、低耦合。
+3. **共享马达互锁与多步序防抖保障物理安全**：通过 `SubStepIdx` 避免指令重复刷写，通过多工位 `MotorRun` 联合判定防止共享马达误停卡料，并通过硬件异常重试闭环保障产线高稼动率。
 
 ---
 

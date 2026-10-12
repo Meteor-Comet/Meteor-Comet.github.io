@@ -80,7 +80,7 @@ const jsonLd = {
 
 const date_str = formatDateToYYYYMMDD(entry.data.published);
 const disqus_identifier = "/" + date_str.replace(/-/g, "/") + "/" + entry.slug;
-const disqus_url = "https://meteor-comet.github.io/posts/" + entry.slug + "/";
+const disqus_url = "https://meteor-comet.pages.dev/posts/" + entry.slug + "/";
 const isSecret = entry.data.secret === true;
 ---
 <MainGridLayout banner={entry.data.image} title={entry.data.title} description={entry.data.description} lang={entry.data.lang} setOGTypeArticle={true} headings={headings}>

@@ -29,8 +29,8 @@ import expressiveCode from 'astro-expressive-code';
 
 // https://astro.build/config
 export default defineConfig({
-	site: "https://meteor-comet-blog.pages.dev/",
-	base: "/",
+	site: process.env.SITE || "https://meteor-comet.github.io/",
+	base: process.env.BASE || "/",
 	trailingSlash: "always",
 	integrations: [
 		tailwind({

@@ -34,10 +34,22 @@ export const siteConfig: SiteConfig = {
   ],
 }
 
+export const secretConfig = {
+  name: '个人',
+  url: '/secret/',
+  password: 'admin', // 访问密码，博主可在此随时自定义修改
+  title: '个人专区',
+  description: '此区域包含博主个人私密笔记与草稿，需要密码访问。',
+}
+
 export const navBarConfig: NavBarConfig = {
   links: [
     LinkPreset.Home,
     LinkPreset.Archive,
+    {
+      name: secretConfig.name,
+      url: secretConfig.url,
+    },
     LinkPreset.About,
     {
       name: 'GitHub',

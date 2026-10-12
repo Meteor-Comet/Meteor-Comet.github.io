@@ -63,6 +63,10 @@ function processGroups(posts: Post[]) {
 	groups = groupedPostsArray;
 }
 
+$: if (sortedPosts && sortedPosts.length > 0) {
+	processGroups(sortedPosts);
+}
+
 onMount(() => {
 	const saved = localStorage.getItem(STORAGE_KEY);
 	if (saved === "true") {
@@ -76,6 +80,7 @@ function handleUnlock() {
 		isUnlocked = true;
 		errorMessage = "";
 		localStorage.setItem(STORAGE_KEY, "true");
+		processGroups(sortedPosts);
 	} else {
 		errorMessage = "密码错误，请重新输入";
 	}

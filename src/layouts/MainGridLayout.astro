@@ -66,14 +66,17 @@ const hasToc = siteConfig.toc.enable && headings.length > 0;
 <!-- Main content -->
 <div class="absolute w-full z-30 pointer-events-none" style={`top: ${mainPanelTop}`}>
     <!-- The pointer-events-none here prevent blocking the click event of the TOC -->
-    <div class="relative max-w-[var(--page-width)] mx-auto pointer-events-auto">
+    <div class:list={[
+        "relative mx-auto pointer-events-auto",
+        hasSidebar ? "max-w-[var(--page-width)]" : "w-full max-w-[94rem]"
+    ]}>
         <div id="main-grid" class:list={[
-            "transition-swup-fade duration-700 w-full left-0 right-0 mx-auto gap-4 px-0 md:px-4",
+            "transition-swup-fade duration-700 w-full left-0 right-0 mx-auto px-0 md:px-4",
             hasSidebar
-                ? "grid grid-cols-[17.5rem_auto] grid-rows-[auto_1fr_auto] lg:grid-rows-[auto]"
+                ? "grid grid-cols-[17.5rem_auto] grid-rows-[auto_1fr_auto] lg:grid-rows-[auto] gap-4"
                 : (hasToc
-                    ? "grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_18.5rem]"
-                    : "grid grid-cols-1")
+                    ? "grid grid-cols-1 xl:grid-cols-[1fr_minmax(auto,54rem)_1fr] gap-6"
+                    : "flex justify-center")
         ]}
         >
             <!-- Banner image credit -->
@@ -96,7 +99,11 @@ const hasToc = siteConfig.toc.enable && headings.length > 0;
 
             <main id="swup-container" class:list={[
                 "overflow-hidden",
-                hasSidebar ? "col-span-2 lg:col-span-1" : "col-span-1"
+                hasSidebar
+                    ? "col-span-2 lg:col-span-1"
+                    : (hasToc
+                        ? "col-span-1 xl:col-start-2 w-full max-w-[54rem] mx-auto"
+                        : "w-full max-w-[54rem] mx-auto")
             ]}>
                 <div id="content-wrapper" class="onload-animation">
                     <!-- the overflow-hidden here prevent long text break the layout-->
@@ -109,7 +116,7 @@ const hasToc = siteConfig.toc.enable && headings.length > 0;
             </main>
 
             {!hasSidebar && hasToc && (
-                <aside id="toc-sidebar" class="hidden lg:block col-span-1 w-full max-w-[18.5rem] onload-animation" style="animation-delay: 150ms">
+                <aside id="toc-sidebar" class="hidden xl:block col-span-1 xl:col-start-3 w-full max-w-[18rem] justify-self-start onload-animation" style="animation-delay: 150ms">
                     <div class="sticky top-20 flex flex-col gap-4">
                         <div class="card-base p-4">
                             <div class="flex items-center gap-2 pb-3 mb-2 border-b border-[var(--line-divider)] text-black/75 dark:text-white/75 font-bold text-sm">

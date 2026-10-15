@@ -22,6 +22,7 @@ interface Props {
 	lang?: string;
 	setOGTypeArticle?: boolean;
 	headings?: MarkdownHeading[];
+	hasSidebar?: boolean;
 }
 
 const {
@@ -31,6 +32,7 @@ const {
 	lang,
 	setOGTypeArticle,
 	headings = [],
+	hasSidebar = !setOGTypeArticle,
 } = Astro.props;
 const hasBannerCredit =
 	siteConfig.banner.enable && siteConfig.banner.credit.enable;
@@ -39,6 +41,8 @@ const hasBannerLink = !!siteConfig.banner.credit.url;
 const mainPanelTop = siteConfig.banner.enable
 	? `calc(${BANNER_HEIGHT}vh - ${MAIN_PANEL_OVERLAPS_BANNER_HEIGHT}rem)`
 	: "5.5rem";
+
+const hasToc = siteConfig.toc.enable && headings.length > 0;
 ---
 
 <Layout title={title} banner={banner} description={description} lang={lang} setOGTypeArticle={setOGTypeArticle}>
@@ -63,8 +67,14 @@ const mainPanelTop = siteConfig.banner.enable
 <div class="absolute w-full z-30 pointer-events-none" style={`top: ${mainPanelTop}`}>
     <!-- The pointer-events-none here prevent blocking the click event of the TOC -->
     <div class="relative max-w-[var(--page-width)] mx-auto pointer-events-auto">
-        <div id="main-grid" class="transition duration-700 w-full left-0 right-0 grid grid-cols-[17.5rem_auto] grid-rows-[auto_1fr_auto] lg:grid-rows-[auto]
-    mx-auto gap-4 px-0 md:px-4"
+        <div id="main-grid" class:list={[
+            "transition-swup-fade duration-700 w-full left-0 right-0 mx-auto gap-4 px-0 md:px-4",
+            hasSidebar
+                ? "grid grid-cols-[17.5rem_auto] grid-rows-[auto_1fr_auto] lg:grid-rows-[auto]"
+                : (hasToc
+                    ? "grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_18.5rem]"
+                    : "grid grid-cols-1")
+        ]}
         >
             <!-- Banner image credit -->
             {hasBannerCredit && <a href={siteConfig.banner.credit.url} id="banner-credit" target="_blank" rel="noopener" aria-label="Visit image source"
@@ -80,9 +90,14 @@ const mainPanelTop = siteConfig.banner.enable
             </a>}
 
 
-            <SideBar class="mb-4 row-start-2 row-end-3 col-span-2 lg:row-start-1 lg:row-end-2 lg:col-span-1 lg:max-w-[17.5rem] onload-animation" headings={headings}></SideBar>
+            {hasSidebar && (
+                <SideBar class="mb-4 row-start-2 row-end-3 col-span-2 lg:row-start-1 lg:row-end-2 lg:col-span-1 lg:max-w-[17.5rem] onload-animation" headings={headings}></SideBar>
+            )}
 
-            <main id="swup-container" class="transition-swup-fade col-span-2 lg:col-span-1 overflow-hidden">
+            <main id="swup-container" class:list={[
+                "overflow-hidden",
+                hasSidebar ? "col-span-2 lg:col-span-1" : "col-span-1"
+            ]}>
                 <div id="content-wrapper" class="onload-animation">
                     <!-- the overflow-hidden here prevent long text break the layout-->
                     <!-- make id different from windows.swup global property -->
@@ -93,33 +108,33 @@ const mainPanelTop = siteConfig.banner.enable
                 </div>
             </main>
 
+            {!hasSidebar && hasToc && (
+                <aside id="toc-sidebar" class="hidden lg:block col-span-1 w-full max-w-[18.5rem] onload-animation" style="animation-delay: 150ms">
+                    <div class="sticky top-20 flex flex-col gap-4">
+                        <div class="card-base p-4">
+                            <div class="flex items-center gap-2 pb-3 mb-2 border-b border-[var(--line-divider)] text-black/75 dark:text-white/75 font-bold text-sm">
+                                <Icon name="material-symbols:format-list-bulleted-rounded" class="text-lg text-[var(--primary)]" />
+                                <span>文章目录</span>
+                            </div>
+                            <div id="toc-inner-wrapper" class="max-h-[calc(100vh-14rem)] overflow-y-auto overflow-x-hidden hide-scrollbar">
+                                <div id="toc" class="w-full">
+                                    <TOC headings={headings}></TOC>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            )}
+
+            {/* Fallback hidden #toc container for Swup when TOC is not rendered */}
+            {(!hasToc || hasSidebar) && <div id="toc" class="hidden"></div>}
+
             <div class="footer col-span-2 onload-animation block lg:hidden">
                 <Footer></Footer>
             </div>
         </div>
 
         <BackToTop></BackToTop>
-    </div>
-</div>
-
-<!-- The things that should be under the banner, only the TOC for now -->
-<div class="absolute w-full z-0 hidden xl:block">
-    <div class="relative max-w-[var(--page-width)] mx-auto">
-        <!-- TOC component -->
-        {siteConfig.toc.enable && <div id="toc-wrapper" class:list={["hidden lg:block transition absolute top-0 -right-[var(--toc-width)] w-[var(--toc-width)] items-center",
-            {"toc-hide": siteConfig.banner.enable}]}
-        >
-            <div id="toc-inner-wrapper" class="fixed top-14 w-[var(--toc-width)] h-[calc(100vh_-_20rem)] overflow-y-scroll overflow-x-hidden hide-scrollbar">
-                <div id="toc" class="w-full h-full transition-swup-fade ">
-                    <div class="h-8 w-full"></div>
-                    <TOC headings={headings}></TOC>
-                    <div class="h-8 w-full"></div>
-                </div>
-            </div>
-        </div>}
-
-        <!-- #toc needs to exist for Swup to work normally -->
-        {!siteConfig.toc.enable && <div id="toc"></div>}
     </div>
 </div>
 </Layout>

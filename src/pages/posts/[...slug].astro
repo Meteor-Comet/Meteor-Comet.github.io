@@ -83,7 +83,7 @@ const disqus_identifier = "/" + date_str.replace(/-/g, "/") + "/" + entry.slug;
 const disqus_url = "https://meteor-comet.github.io/posts/" + entry.slug + "/";
 const isSecret = entry.data.secret === true;
 ---
-<MainGridLayout banner={entry.data.image} title={entry.data.title} description={entry.data.description} lang={entry.data.lang} setOGTypeArticle={true} headings={headings}>
+<MainGridLayout banner={entry.data.image} title={entry.data.title} description={entry.data.description} lang={entry.data.lang} setOGTypeArticle={true} headings={headings} hasSidebar={false}>
     <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
     {isSecret && <meta slot="head" name="robots" content="noindex, nofollow" />}
     <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative mb-4">

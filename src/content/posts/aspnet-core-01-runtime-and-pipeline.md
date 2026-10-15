@@ -1,6 +1,6 @@
 ---
 title: ASP.NET Core 企业级架构实战 (一)：运行时内核、管道模型与依赖注入深度剖析
-published: 2026-10-14
+published: 2025-01-10
 description: 深度剖析 ASP.NET Core 启动宿主模型、Kestrel 底层机制、中间件执行链路、Filter 拦截管道、MVC 底层机制与 DI 生命周期捕获陷阱。
 image: /images/ASP-NET-Notes.jpg
 category: C#

@@ -1,6 +1,6 @@
 ---
 title: ASP.NET Core 企业级架构实战 (五)：微服务弹性容错、工业 IoT、AI 集成与全栈协同
-published: 2026-10-14
+published: 2025-01-20
 description: 深度解析高并发 Polly 熔断降级与 .NET 8 RateLimiter、Docker 容器轻量瘦身、工业物联网 SignalR/Channel 高性能推流、Semantic Kernel 与 RAG 大模型落地，以及 xUnit/Vue3 全栈工程化实践。
 image: /images/ASP-NET-Notes.jpg
 category: C#

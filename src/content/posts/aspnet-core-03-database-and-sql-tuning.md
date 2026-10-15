@@ -1,6 +1,6 @@
 ---
 title: ASP.NET Core 企业级架构实战 (三)：关系型数据库设计、SQL 性能调优与 NoSQL 混合存储
-published: 2026-10-14
+published: 2025-01-15
 description: 深度剖析企业级数据库建模范式、B+Tree 索引底层原理、SQL 执行计划分析、EF Core 性能陷阱与 Dapper 双剑合璧、死锁防御及 MongoDB/Elasticsearch 混合存储实战。
 image: /images/ASP-NET-Notes.jpg
 category: C#

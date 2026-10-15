@@ -1,6 +1,6 @@
 ---
 title: ASP.NET Core 企业级架构实战 (二)：现代化 API 契约、协议演进与前后端工程化协同
-published: 2026-10-14
+published: 2025-01-12
 description: 深度解析 RESTful 规范、Swagger/OpenAPI 自动化契约工程、gRPC 与 GraphQL 通信选型、DTO 映射架构、CORS 避坑及 RFC 7807 统一错误防御。
 image: /images/ASP-NET-Notes.jpg
 category: C#

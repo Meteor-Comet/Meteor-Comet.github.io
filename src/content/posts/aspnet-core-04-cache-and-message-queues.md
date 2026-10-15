@@ -1,6 +1,6 @@
 ---
 title: ASP.NET Core 企业级架构实战 (四)：Redis 分布式缓存与 RabbitMQ 异步解耦工程落地
-published: 2026-10-14
+published: 2025-01-18
 description: 深度解析 Redis 高性能数据结构选型、缓存四大金刚防御全景（穿透/击穿/雪崩/双写一致性）、Lua 原子分布式锁，以及 RabbitMQ 拓扑、死信延迟队列、可靠性投递与消费幂等闭环。
 image: /images/ASP-NET-Notes.jpg
 category: C#

@@ -39,6 +39,16 @@ A static blog template built with [Astro](https://astro.build) and [Tailwind CSS
 - **Vite/PostCSS 构建修复**：在 `markdown.css` 中直接内联 `.btn-regular-dark` 类定义，解决生产环境 `pnpm build` 时提示类缺失导致的 Vite CSS 构建错误。
 - **外部链接增强**：标准化 PDF 下载与 SOP 指南表格外链的 `target="_blank"` 属性。
 
+### 4. 🧭 文章阅读布局重构与右侧独立伴随目录 (Post Page Layout & Centered Companion TOC)
+- **去除文章页左侧冗余信息**：进入具体文章详情页（`/posts/[...slug]`）时，自动隐藏左侧博主卡片（Profile）、分类与标签，让视觉焦点完全聚焦于文章正文；首页与分类归档列表页依然保留左侧边栏导航。
+- **文章正文中轴绝对居中**：突破原版 `75rem`（1200px）居中容器的束缚，采用三栏自适应对称网格算法（`grid-cols-[1fr_minmax(auto,54rem)_1fr]`），使黄金阅读宽度（54rem / 864px）的文章主体在全部分辨率下严格居中于屏幕视口，与顶部居中导航栏中轴线完全重合，彻底解决因侧栏占用导致的视觉重心偏位痛点。
+- **右侧专属目录伴随卡片（TOC Sidebar）**：
+  - **彻底废除原版缺陷**：原版将目录粗暴绝对定位在屏幕外侧留白处，导致在 1366px、1440px 常见屏幕下目录被压缩至不足 100px、长标题折成 4 行甚至被截断；
+  - **充裕独立的排版空间**：右侧提供专属的 `18rem`（约 288px）目录卡片，标题多行对齐（`items-start` + `mt-0.5`）、长文本自适应折行；
+  - **吸顶伴随与高亮反馈**：支持 `sticky top-20` 粘性滚动、内部自适应限高平滑滚动（`max-h` + `hide-scrollbar`）、当前激活小节加粗与主题色（`var(--primary)`）联动高亮；
+  - **锚点防遮挡**：为 Markdown 各级标题注入 `scroll-mt-20` 滚动上边距，防止点击目录锚点跳转时被顶部吸顶导航栏遮挡。
+- **Swup 无刷新页面切换深度适配**：Swup 容器配置升级为 `#main-grid`，实现从首页进入文章页、文章页返回首页或文章间跳转时，侧边栏与目录网格整体平滑淡出淡入，无任何 DOM 状态残留或错位。
+
 ---
 
 ## 🚀 Getting Started

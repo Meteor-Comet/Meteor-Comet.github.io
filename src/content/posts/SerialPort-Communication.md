@@ -7,7 +7,7 @@ category: C#
 tags:
   - 串口通信
   - 硬件编程
-draft: false
+draft: true
 ---
 
 # 工业级通信全栈指南：从串口硬件报文到 TCP Socket 高并发架构

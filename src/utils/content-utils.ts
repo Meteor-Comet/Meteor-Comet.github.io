@@ -34,6 +34,8 @@ export async function getSortedPosts() {
 export type PostForList = {
 	slug: string;
 	data: CollectionEntry<"posts">["data"];
+	words?: number;
+	minutes?: number;
 };
 export async function getSortedPostsList(): Promise<PostForList[]> {
 	const sortedFullPosts = await getRawSortedPosts();
@@ -63,10 +65,17 @@ export async function getSecretPosts() {
 export async function getSecretPostsList(): Promise<PostForList[]> {
 	const secretPosts = await getSecretPosts();
 
-	return secretPosts.map((post) => ({
-		slug: post.slug,
-		data: post.data,
-	}));
+	return Promise.all(
+		secretPosts.map(async (post) => {
+			const { remarkPluginFrontmatter } = await post.render();
+			return {
+				slug: post.slug,
+				data: post.data,
+				words: remarkPluginFrontmatter?.words,
+				minutes: remarkPluginFrontmatter?.minutes,
+			};
+		}),
+	);
 }
 
 export type Tag = {

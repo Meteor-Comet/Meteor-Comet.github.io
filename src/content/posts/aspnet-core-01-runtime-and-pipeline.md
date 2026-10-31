@@ -425,7 +425,7 @@ classDiagram
     class ServiceDescriptor {
         +Type ServiceType
         +Type? ImplementationType
-        +Func<IServiceProvider, object>? ImplementationFactory
+        +Func~IServiceProvider, object~? ImplementationFactory
         +object? ImplementationInstance
         +ServiceLifetime Lifetime
     }
